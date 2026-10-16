@@ -1,0 +1,17 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const source = fs.readFileSync(path.join(__dirname, '..', 'src', 'features', 'profile', 'utils', 'calculations.ts'), 'utf8');
+assert.match(source, /function calculateBmi/);
+assert.match(source, /function calculateBmr/);
+assert.match(source, /function calculateTdee/);
+assert.match(source, /function updateMacroPercentage/);
+assert.match(source, /Math\.max\(bmr, gender === 'female' \? 1200 : 1500\)/);
+assert.match(source, /value >= 100 && value <= 250/);
+assert.match(source, /value >= 20 && value <= 300/);
+assert.match(source, /function normalizeMacroPercentages/);
+assert.match(source, /function hasUnsafeCalorieTarget/);
+assert.match(source, /function calculateHealthProfile/);
+assert.match(source, /function calculateMacroTargets/);
+assert.match(source, /function calculateDailyCalorieGoal/);
+console.log('Phase 2 calculation source self-check passed');

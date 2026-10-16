@@ -1,0 +1,13 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const root = path.join(__dirname, '..');
+const registry = fs.readFileSync(path.join(root, 'src', 'assets', 'images', 'index.ts'), 'utf8');
+for (const key of ['mealScanBackground', 'mealScanCornerTopLeft', 'mealScanNotFound', 'barcodeScanIntro', 'barcodeScanGrid', 'barcodeScanLine']) assert.match(registry, new RegExp(key));
+const scanTypes = fs.readFileSync(path.join(root, 'src', 'features', 'nutrition', 'scanTypes.ts'), 'utf8');
+assert.match(scanTypes, /BoundingBox/);
+assert.match(scanTypes, /RecognitionResponse/);
+const source = fs.readFileSync(path.join(root, 'src', 'features', 'nutrition', 'screens', 'MealScanResultScreen.tsx'), 'utf8');
+assert.match(source, /clamp\(/);
+assert.match(source, /nutritionSnapshot/);
+console.log('Phase 4 nutrition self-check passed');

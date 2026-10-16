@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Kallo",
+    "slug": "kallo-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "scheme": "kallo",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Cho phép Kallo sử dụng camera để nhận diện món ăn và quét mã vạch."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Cho phép Kallo truy cập ảnh để nhận diện món ăn."
+        }
+      ],
+      "expo-font"
+    ],
+    "android": {
+      "package": "com.kallo.mobile"
+    },
+    "ios": {
+      "bundleIdentifier": "com.kallo.mobile"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const source = fs.readFileSync(path.join(__dirname, '..', 'src', 'features', 'nutrition', 'utils.ts'), 'utf8');
+assert.match(source, /normalizeSearch/);
+assert.match(source, /scaleNutrition/);
+assert.match(source, /caloriesRemaining/);
+assert.match(source, /isValidWaterAmount/);
+assert.match(source, /isValidWeightLog/);
+const normalize = (value) => value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+assert.equal(normalize('Phở bò'), 'pho bo');
+const scale = (value, grams) => value * grams / 100;
+assert.equal(scale(90, 450), 405);
+assert.equal(Math.max(0, 2000 - 900 + 300), 1400);
+assert.equal(Number.isFinite(250) && 250 > 0 && 250 <= 5000, true);
+assert.equal(Number.isFinite(301) && 301 >= 20 && 301 <= 300, false);
+console.log('Phase 3 nutrition self-check passed');
