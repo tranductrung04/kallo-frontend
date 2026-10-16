@@ -22,7 +22,9 @@
           "photosPermission": "Cho phép Kallo truy cập ảnh để nhận diện món ăn."
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-asset",
+      "expo-status-bar"
     ],
     "android": {
       "package": "com.kallo.mobile"
