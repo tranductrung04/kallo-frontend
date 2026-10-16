@@ -28,7 +28,7 @@ export const shadows = {
 
     // Radiant Glow: Active indicators — calorie ring, date pills, macro rings
     radiantGlow: {
-      shadowColor: 'rgba(142, 124, 255, 0.28)',
+      shadowColor: 'rgba(158, 100, 247, 0.28)',
       shadowOffset: { width: 0, height: 8 },
       shadowOpacity: 1,
       shadowRadius: 24,
@@ -37,11 +37,11 @@ export const shadows = {
 
     // Floating Button Glow: FAB (+) button
     floatingButtonGlow: {
-      shadowColor: 'rgba(142, 124, 255, 0.40)',
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 1,
-      shadowRadius: 24,
-      elevation: 10,
+      shadowColor: '#9E64F7',
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.35,
+      shadowRadius: 12,
+      elevation: 6,
     } satisfies ViewStyle,
   },
 

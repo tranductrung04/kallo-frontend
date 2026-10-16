@@ -14,11 +14,7 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function passwordError(password: string) { return password.length < 8 || !/[A-Za-z]/.test(password) || !/\d/.test(password) ? 'Mật khẩu cần ít nhất 8 ký tự, gồm chữ và số.' : undefined; }
 function AuthLayout({ children }: React.PropsWithChildren) { const theme = useTheme(); return <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={[styles.safe, { backgroundColor: theme.colors.background }]}><ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">{children}</ScrollView></KeyboardAvoidingView>; }
 
-export function WelcomeScreen({ navigation }: Props<'Welcome'>) {
-  const theme = useTheme(); const [slide, setSlide] = useState(0);
-  const slides = [{ image: images.welcome1, title: 'Ăn uống dễ dàng hơn', text: 'Ghi lại bữa ăn và hiểu cơ thể mỗi ngày.' }, { image: images.welcome2, title: 'Mục tiêu vừa sức', text: 'Theo dõi calo, nước và cân nặng theo cách của bạn.' }, { image: images.welcome3, title: 'Đồng hành cùng AI', text: 'Kallo giúp bạn xây dựng thói quen khỏe mạnh.' }]; const current = slides[slide];
-  return <AuthLayout><View style={styles.welcome}><Image source={current.image} style={styles.welcomeImage} resizeMode="contain" accessibilityLabel={current.title} /><AppText variant="title" align="center">{current.title}</AppText><AppText align="center" color={theme.colors.textMuted}>{current.text}</AppText><View style={styles.dots}>{slides.map((item, index) => <View key={item.title} style={[styles.dot, { backgroundColor: index === slide ? theme.colors.primary : theme.colors.border }]} />)}</View><AppButton label={slide === slides.length - 1 ? 'Bắt đầu' : 'Tiếp tục'} onPress={() => slide === slides.length - 1 ? navigation.navigate('Login') : setSlide((value) => value + 1)} /><AppButton label="Tôi đã có tài khoản" variant="ghost" onPress={() => navigation.navigate('Login')} /></View></AuthLayout>;
-}
+export { OnboardingCarouselScreen, OnboardingCarouselScreen as WelcomeScreen } from './OnboardingCarouselScreen';
 
 export function LoginScreen({ navigation }: Props<'Login'>) {
   const { signIn } = useAuth(); const [email, setEmail] = useState(LOCAL_DEMO_ENABLED ? LOCAL_ACCOUNT.email : ''); const [password, setPassword] = useState(LOCAL_DEMO_ENABLED ? LOCAL_ACCOUNT.password : ''); const [error, setError] = useState<string>(); const [loading, setLoading] = useState(false);

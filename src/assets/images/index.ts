@@ -1,8 +1,9 @@
 // Type-safe Phase 1 asset registry. Source files remain in res/ until npm run copy-assets.
 const imageFiles = {
   backIconMask: require('../../../res/node_modules_reactnavigation_elements_lib_module_assets_backiconmask.png'),
-  logoWhite: require('../../../res/src_assets_images_logowhite.webp'),
-  waoLogo: require('../../../res/src_assets_images_waologo.png'),
+  logoWhite: require('../../../res/src_assets_images_logowhite.png'),
+  kalloLogo: require('../../../res/src_assets_images_kallologo.png'),
+  waoLogo: require('../../../res/src_assets_images_kallologo.png'),
   avatar: require('../../../res/src_assets_images_avatar.webp'),
   emptyState: require('../../../res/src_assets_images_emptystate.webp'),
   searchNotFound: require('../../../res/src_assets_images_searchnotfound.webp'),
@@ -33,6 +34,7 @@ const imageFiles = {
   welcome1: require('../../../res/src_assets_images_onboardingv2_welcome1.webp'),
   welcome2: require('../../../res/src_assets_images_onboardingv2_welcome2.webp'),
   welcome3: require('../../../res/src_assets_images_onboardingv2_welcome3.webp'),
+  onboardingV2Bg: require('../../../res/src_assets_images_onboardingv2_bg.webp'),
   introBackground: require('../../../res/src_assets_images_introbackground.webp'),
   onboardingIntroduceBackground: require('../../../res/src_assets_images_onboarding_introducebg.webp'),
   loginBackground: require('../../../res/src_assets_images_onboarding_loginbg.webp'),

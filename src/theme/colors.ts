@@ -61,15 +61,15 @@ export const colors = {
 
   dark: {
     // Canvas & Surfaces (Nocturne Vitality)
-    canvasBase: '#12111A',
-    surfaceMid: '#1C1929',
-    surfaceHigh: '#252238',
-    surfaceBorder: '#34304E',
+    canvasBase: '#0D0B14',
+    surfaceMid: '#181524',
+    surfaceHigh: '#221D34',
+    surfaceBorder: '#322B48',
 
     // Brand Accents
-    brandPrimary: '#8E7CFF',
-    brandSecondary: '#A78BFA',
-    brandSoftTint: 'rgba(142, 124, 255, 0.15)',
+    brandPrimary: '#9E64F7',
+    brandSecondary: '#B488FC',
+    brandSoftTint: 'rgba(158, 100, 247, 0.15)',
 
     // Metabolic & Macro Semantic
     macroProtein: '#FF6B6B',
@@ -84,8 +84,8 @@ export const colors = {
 
     // Text & Foreground
     textPrimary: '#FFFFFF',
-    textSecondary: '#9E9AA7',
-    textDisabled: '#5E5970',
+    textSecondary: 'rgba(255, 255, 255, 0.72)',
+    textDisabled: 'rgba(255, 255, 255, 0.26)',
 
     // Semantic States
     error: '#ffb4ab',
@@ -94,15 +94,15 @@ export const colors = {
     onBrandPrimary: '#FFFFFF',
 
     // ── Backward-compat aliases (Phase 3: will be removed) ──────────────────
-    background: '#12111A',
-    surface: '#1C1929',
-    surfaceMuted: '#252238',
+    background: '#0D0B14',
+    surface: '#181524',
+    surfaceMuted: '#221D34',
     text: '#FFFFFF',
-    textMuted: '#9E9AA7',
-    border: '#34304E',
-    primary: '#8E7CFF',
-    primaryPressed: '#c8bfff',
-    primarySurface: 'rgba(142, 124, 255, 0.15)',
+    textMuted: 'rgba(255, 255, 255, 0.72)',
+    border: '#322B48',
+    primary: '#9E64F7',
+    primaryPressed: '#8A4FE2',
+    primarySurface: 'rgba(158, 100, 247, 0.15)',
     calorieIn: '#FF6B6B',
     calorieBurned: '#F59E0B',
     protein: '#FF6B6B',
