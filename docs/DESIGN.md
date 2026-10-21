@@ -1,101 +1,8 @@
 ---
 name: Nocturne & Daylight Vitality
-colors:
-  surface: '#13121b'
-  surface-dim: '#13121b'
-  surface-bright: '#3a3842'
-  surface-container-lowest: '#0e0d16'
-  surface-container-low: '#1c1a24'
-  surface-container: '#201e28'
-  surface-container-high: '#2a2933'
-  surface-container-highest: '#35343e'
-  on-surface: '#e5e0ee'
-  on-surface-variant: '#c9c4d6'
-  inverse-surface: '#e5e0ee'
-  inverse-on-surface: '#312f39'
-  outline: '#928e9f'
-  outline-variant: '#474553'
-  surface-tint: '#c8bfff'
-  primary: '#c8bfff'
-  on-primary: '#2d029c'
-  primary-container: '#907eff'
-  on-primary-container: '#26008b'
-  inverse-primary: '#5d48ca'
-  secondary: '#cebdff'
-  on-secondary: '#381385'
-  secondary-container: '#4f319c'
-  on-secondary-container: '#bea8ff'
-  tertiary: '#4ae176'
-  on-tertiary: '#003915'
-  tertiary-container: '#00a74b'
-  on-tertiary-container: '#003111'
-  error: '#ffb4ab'
-  on-error: '#690005'
-  error-container: '#93000a'
-  on-error-container: '#ffdad6'
-  primary-fixed: '#e5deff'
-  primary-fixed-dim: '#c8bfff'
-  on-primary-fixed: '#190064'
-  on-primary-fixed-variant: '#442cb1'
-  secondary-fixed: '#e8ddff'
-  secondary-fixed-dim: '#cebdff'
-  on-secondary-fixed: '#21005e'
-  on-secondary-fixed-variant: '#4f319c'
-  tertiary-fixed: '#6bff8f'
-  tertiary-fixed-dim: '#4ae176'
-  on-tertiary-fixed: '#002109'
-  on-tertiary-fixed-variant: '#005321'
-  background: '#13121b'
-  on-background: '#e5e0ee'
-  surface-variant: '#35343e'
-colors-light:
-  surface: '#f8f7fc'
-  surface-dim: '#dedce6'
-  surface-bright: '#ffffff'
-  surface-container-lowest: '#ffffff'
-  surface-container-low: '#f3f1f9'
-  surface-container: '#edeaf5'
-  surface-container-high: '#e7e4f0'
-  surface-container-highest: '#e1deea'
-  on-surface: '#1b1a23'
-  on-surface-variant: '#474553'
-  inverse-surface: '#312f39'
-  inverse-on-surface: '#f3effa'
-  outline: '#787584'
-  outline-variant: '#c9c4d6'
-  surface-tint: '#5d48ca'
-  primary: '#5d48ca'
-  on-primary: '#ffffff'
-  primary-container: '#e5deff'
-  on-primary-container: '#190064'
-  inverse-primary: '#c8bfff'
-  secondary: '#6548b3'
-  on-secondary: '#ffffff'
-  secondary-container: '#e8ddff'
-  on-secondary-container: '#21005e'
-  tertiary: '#006d2c'
-  on-tertiary: '#ffffff'
-  tertiary-container: '#6bff8f'
-  on-tertiary-container: '#002109'
-  error: '#ba1a1a'
-  on-error: '#ffffff'
-  error-container: '#ffdad6'
-  on-error-container: '#410002'
-  primary-fixed: '#e5deff'
-  primary-fixed-dim: '#c8bfff'
-  on-primary-fixed: '#190064'
-  on-primary-fixed-variant: '#442cb1'
-  secondary-fixed: '#e8ddff'
-  secondary-fixed-dim: '#cebdff'
-  on-secondary-fixed: '#21005e'
-  on-secondary-fixed-variant: '#4f319c'
-  tertiary-fixed: '#6bff8f'
-  tertiary-fixed-dim: '#4ae176'
-  on-tertiary-fixed: '#002109'
-  on-tertiary-fixed-variant: '#005321'
-  background: '#f8f7fc'
-  on-background: '#1b1a23'
-  surface-variant: '#e5e0ee'
+# Single source of truth for color: `semantic-tokens` below.
+# The old Material block (`colors` / `colors-light`) and the earlier hex values in the prose were removed
+# because they contradicted this set. If a Material export is needed, regenerate it from `brand-primary`.
 semantic-tokens:
   dark:
     canvas-base: '#0D0B14'
@@ -103,6 +10,7 @@ semantic-tokens:
     surface-high: '#221D34'
     surface-border: '#322B48'
     brand-primary: '#9E64F7'
+    brand-action: '#8B57E8'
     brand-secondary: '#B488FC'
     brand-soft-tint: 'rgba(158, 100, 247, 0.15)'
     macro-protein: '#FF6B6B'
@@ -112,17 +20,28 @@ semantic-tokens:
     macro-fats-strong: '#EAB308'
     quick-scanner: '#22C55E'
     vip-streak: '#F59E0B'
+    tracker-water: '#22D3EE'
+    status-warning: '#FB923C'
+    status-danger: '#FF5A5F'
+    progress-track: '#221D34'
+    tab-bar: 'rgba(20, 17, 30, 0.90)'
+    overlay: 'rgba(13, 11, 20, 0.75)'
+    glow: 'rgba(158, 100, 247, 0.28)'
+    glow-strong: 'rgba(158, 100, 247, 0.40)'
+    on-brand: '#FFFFFF'
+    on-quick-tile: '#0D0B14'
     text-primary: '#FFFFFF'
-    text-secondary: 'rgba(255, 255, 255, 0.72)'
-    text-disabled: 'rgba(255, 255, 255, 0.26)'
+    text-secondary: '#9E9AA7'
+    text-disabled: '#5E5970'
   light:
     canvas-base: '#F8F7FC'
     surface-mid: '#FFFFFF'
     surface-high: '#F1EFF9'
     surface-border: '#E4E0F0'
-    brand-primary: '#6C56F5'
-    brand-secondary: '#8B5CF6'
-    brand-soft-tint: '#EBE7FF'
+    brand-primary: '#7B4FE0'
+    brand-action: '#7B4FE0'
+    brand-secondary: '#9163EA'
+    brand-soft-tint: '#EDE5FF'
     macro-protein: '#EF4444'
     macro-protein-strong: '#DC2626'
     macro-carbs: '#2563EB'
@@ -130,6 +49,16 @@ semantic-tokens:
     macro-fats-strong: '#EAB308'
     quick-scanner: '#16A34A'
     vip-streak: '#D97706'
+    tracker-water: '#0891B2'
+    status-warning: '#C2410C'
+    status-danger: '#D92D20'
+    progress-track: '#ECE9F6'
+    tab-bar: 'rgba(255, 255, 255, 0.92)'
+    overlay: 'rgba(19, 18, 27, 0.45)'
+    glow: 'rgba(123, 79, 224, 0.24)'
+    glow-strong: 'rgba(123, 79, 224, 0.35)'
+    on-brand: '#FFFFFF'
+    on-quick-tile: '#13121B'
     text-primary: '#13121B'
     text-secondary: '#645F77'
     text-disabled: '#A6A1B8'
@@ -221,87 +150,74 @@ The design system establishes a high-performance, dual-theme (**Dark & Light Mod
   - **Dark Mode (Nocturne Vitality):** Elevated Dark Minimal with Luminous Accents and Soft Tactility.
   - **Light Mode (Daylight Vitality):** Crisp Alabaster Minimal with High-Contrast Violet Anchors and Airy Depth.
 - **Atmosphere:**
-  - **Dark Mode:** Deep indigo-black foundations (`#12111A`) paired with glowing violet anchors (`#8E7CFF`) and high-energy metabolic macro signals (protein flame coral, carb grain cobalt, fat honey gold, and vitamin amber).
-  - **Light Mode:** Soft lavender-tinted alabaster backdrops (`#F8F7FC`) paired with pure white cards (`#FFFFFF`), deep electric iris accents (`#6C56F5`), and daylight-calibrated macro indicators for effortless outdoor legibility.
+  - **Dark Mode:** Deep indigo-black foundations (`#0D0B14`) paired with glowing violet anchors (`#9E64F7`) and high-energy metabolic macro signals (protein flame coral, carb cobalt, fat honey gold, streak amber).
+  - **Light Mode:** Soft lavender-tinted alabaster backdrops (`#F8F7FC`) paired with pure white cards (`#FFFFFF`), deep violet accents (`#7B4FE0`), and daylight-calibrated macro indicators for effortless outdoor legibility.
+- **Hue consistency:** Dark and Light primaries sit at the same violet hue family (about 265–270°) so both themes read as one brand. Green is reserved for AI scanning and success states and is never the brand color.
 - **Emotional Intent:** Empowerment, clarity, and daily commitment without cognitive overwhelm or clinical austerity. Data cards recede gracefully into backdrops while functional CTAs and metric gauges surface with radiant focus across both lighting environments.
 
 ---
 
 ## Colors
 
-The palette is engineered around adaptive depth layers: dark-tier luminance tiers for effortless night readability and OLED battery efficiency, paired with a high-contrast daylight palette that avoids harsh sterile whites.
+The palette is engineered around adaptive depth layers: dark-tier luminance tiers for effortless night readability and OLED battery efficiency, paired with a high-contrast daylight palette that avoids harsh sterile whites. All values below are defined once in `semantic-tokens` in the front-matter; this section explains their roles.
 
 ### Palette Architecture
 
 #### 1. Canvas & Backgrounds
-- **Base Canvas:**
-  - **Dark Mode (`#12111A`):** Deep canvas for primary application backdrops and navigation shells.
-  - **Light Mode (`#F8F7FC`):** Soft cool-alabaster canvas that reduces eye strain and allows pure white cards to stand out naturally.
-- **Surface Mid (Level 1 Containers):**
-  - **Dark Mode (`#1C1929`):** Primary container layer for dashboards, grouped metric panels, and modals.
-  - **Light Mode (`#FFFFFF`):** Crisp pure white container surface for primary dashboard cards, meal groups, and bottom sheets.
-- **Surface High (Level 2 Elevated / Interactive Wells):**
-  - **Dark Mode (`#252238`):** Elevated card surfaces, floating actions, list items, and input wells.
-  - **Light Mode (`#F1EFF9`):** Soft lavender-gray wash for nested list items, input wells, progress tracks, and secondary pill buttons.
-- **Surface Border:**
-  - **Dark Mode (`#34304E`):** Ultra-subtle 1px boundary line for cards and dividers without heavy outline distraction.
-  - **Light Mode (`#E4E0F0`):** Crisp 1px lavender-slate hairline border that defines card geometry cleanly against light backgrounds.
+- **Base Canvas (`canvas-base`):** Dark `#0D0B14` / Light `#F8F7FC`. Primary application backdrop and navigation shell.
+- **Surface Mid (`surface-mid`, Level 1 containers):** Dark `#181524` / Light `#FFFFFF`. Dashboard cards, grouped metric panels, meal groups, modals, bottom sheets.
+- **Surface High (`surface-high`, Level 2 elevated / wells):** Dark `#221D34` / Light `#F1EFF9`. Nested list items, input wells, secondary pill buttons, floating cards.
+- **Surface Border (`surface-border`):** Dark `#322B48` / Light `#E4E0F0`. Ultra-subtle 1px boundary for cards and dividers.
+- **Progress Track (`progress-track`):** Dark `#221D34` / Light `#ECE9F6`. Unfilled part of every progress bar.
 
 #### 2. Brand Accents
-- **Electric Lavender / Deep Iris (Primary):**
-  - **Dark Mode (`#8E7CFF`):** Primary interactive accent, calorie ring highlights, active navigation icons, and key submission buttons.
-  - **Light Mode (`#6C56F5`):** Deeper, higher-contrast violet anchor ensuring WCAG AA/AAA contrast compliance against white and light surfaces.
-- **Violet Mist (Secondary):**
-  - **Dark Mode (`#A78BFA`):** Secondary highlight, auxiliary states, and selected day pill toggles.
-  - **Light Mode (`#8B5CF6`):** Vibrant mid-tone violet for gradients, active badges, and secondary visual anchors.
-- **Brand Soft Tint:**
-  - **Dark Mode (`rgba(142, 124, 255, 0.15)`):** Translucent luminous wash for selected chips and active icon containers.
-  - **Light Mode (`#EBE7FF`):** Solid pastel violet fill for selected chips, active filter tags, and subtle highlight banners.
+- **Brand Primary (`brand-primary`):** Dark `#9E64F7` / Light `#7B4FE0`. Calorie ring highlight, icon-only buttons (the floating `+`), active icons, glows, selected states.
+- **Brand Action (`brand-action`):** Dark `#8B57E8` / Light `#7B4FE0`. Background of any button that carries a **text label**, and the splash background. White text on it reaches about 4.5:1 (Dark) and 5.2:1 (Light), meeting WCAG AA. `brand-primary` (Dark) with white text is only about 3.7:1, so it must not be used behind labels.
+- **Brand Secondary (`brand-secondary`):** Dark `#B488FC` / Light `#9163EA`. Active tab label, secondary highlights, selected day pill accents, gradients.
+- **Brand Soft Tint (`brand-soft-tint`):** Dark `rgba(158, 100, 247, 0.15)` / Light `#EDE5FF`. Selected chips, active icon containers, subtle highlight banners.
 
 #### 3. Metabolic & Macro Semantic System
-- **Protein (Chất đạm):**
-  - **Dark Mode:** `#FF6B6B` / `#FF5252` (Vibrant coral red representing muscle building and protein intake).
-  - **Light Mode:** `#EF4444` / `#DC2626` (Crispcrimson-coral calibrated for high legibility on white cards).
-- **Carbohydrates (Đường bột):**
-  - **Dark Mode:** `#3B82F6` (Crisp sky cobalt signifying sustained energy and starches).
-  - **Light Mode:** `#2563EB` (Deep royal cobalt for sharp contrast against `#ECE9F6` progress tracks).
-- **Fats & Lipids (Chất béo):**
-  - **Dark Mode:** `#FBBF24` / `#EAB308` (Rich honey gold denoting essential lipids and healthy fats).
-  - **Light Mode:** `#D97706` / `#EAB308` (Warm amber-gold preventing wash-out on white backgrounds).
-- **Quick Action / Scanner:**
-  - **Dark Mode:** `#22C55E` (Energizing emerald leaf indicating fresh nutrition logging and AI dish scanning).
-  - **Light Mode:** `#16A34A` (Deep botanical green for scanner badges and positive calorie feedback).
-- **VIP / Streak:**
-  - **Dark Mode:** `#F59E0B` (Warm sunburst gradient for streak badges and premium feature upgrades).
-  - **Light Mode:** `#D97706` (Rich burnt amber for streak counters and pro tier highlights).
+Macro colors are used consistently on bars, rings, charts, and tags across the whole app. Vietnamese labels are the default in the UI.
+- **Protein (Chất đạm):** Dark `#FF6B6B` / `#FF5252` (strong) — Light `#EF4444` / `#DC2626` (strong).
+- **Carbohydrates (Đường bột):** Dark `#3B82F6` — Light `#2563EB`.
+- **Fats & Lipids (Chất béo):** Dark `#FBBF24` / `#EAB308` (strong) — Light `#D97706` / `#EAB308` (strong).
+- **Quick Action / Scanner / Success (`quick-scanner`):** Dark `#22C55E` — Light `#16A34A`. AI dish scanning, successful logging, positive calorie feedback.
+- **VIP / Streak (`vip-streak`):** Dark `#F59E0B` — Light `#D97706`. Streak badges, promo banners, premium upgrades.
+- **Water (`tracker-water`):** Dark `#22D3EE` — Light `#0891B2`. Water tracker card and hydration progress.
 
-#### 4. Text & Foreground
-- **Text Primary:**
-  - **Dark Mode:** `#FFFFFF` (100% white for titles, numerical calorie data, and primary values).
-  - **Light Mode:** `#13121B` (Deep ink-indigo for maximum typographic sharpness without harsh pure black).
-- **Text Secondary:**
-  - **Dark Mode:** `#9E9AA7` (Muted violet-gray for units, subtitles, inactive states, and descriptions).
-  - **Light Mode:** `#645F77` (Balanced slate-violet for secondary labels, timestamps, and portion metadata).
-- **Text Disabled:**
-  - **Dark Mode:** `#5E5970` (Low-contrast gray-purple for inactive fields).
-  - **Light Mode:** `#A6A1B8` (Muted cool gray for disabled inputs and placeholder states).
+#### 4. Status
+- **Warning (`status-warning`):** Dark `#FB923C` — Light `#C2410C`. Near-limit calorie notice, mild allergy notice, unsafe weight-loss rate box.
+- **Danger (`status-danger`):** Dark `#FF5A5F` — Light `#D92D20`. Calories over 100% of goal, allergen detected in a food.
+- **Rule:** Status colors sit close to the protein coral, so a status message must never rely on color alone. Always pair it with an icon (warning triangle / alert circle) and explicit text.
+
+#### 5. Text & Foreground
+- **Text Primary:** Dark `#FFFFFF` / Light `#13121B`. Titles, calorie numbers, primary values.
+- **Text Secondary:** Dark `#9E9AA7` / Light `#645F77`. Units, subtitles, inactive states, descriptions. Solid colors (not alpha) so contrast is predictable: about 6.5:1 on Dark `surface-mid`.
+- **Text Disabled:** Dark `#5E5970` / Light `#A6A1B8`. Inactive fields and placeholders.
+- **On Brand (`on-brand`):** `#FFFFFF` on `brand-action` and `brand-primary` fills.
+- **On Quick Tile (`on-quick-tile`):** Dark `#0D0B14` / Light `#13121B` for glyphs on the saturated Quick Utility tiles.
 
 ### Theme Token Reference Table
 
 | Semantic Role | Token Key | Dark Mode (Nocturne) | Light Mode (Daylight) |
 | :--- | :--- | :--- | :--- |
-| **Base Canvas** | `canvas-base` | `#12111A` | `#F8F7FC` |
-| **Primary Card Surface** | `surface-mid` | `#1C1929` | `#FFFFFF` |
-| **Nested / Elevated Surface** | `surface-high` | `#252238` | `#F1EFF9` |
-| **Subtle Border / Divider** | `surface-border` | `#34304E` | `#E4E0F0` |
-| **Primary Brand Accent** | `brand-primary` | `#8E7CFF` | `#6C56F5` |
-| **Secondary Brand Accent** | `brand-secondary` | `#A78BFA` | `#8B5CF6` |
-| **Brand Soft Wash** | `brand-soft-tint` | `rgba(142, 124, 255, 0.15)` | `#EBE7FF` |
+| **Base Canvas** | `canvas-base` | `#0D0B14` | `#F8F7FC` |
+| **Primary Card Surface** | `surface-mid` | `#181524` | `#FFFFFF` |
+| **Nested / Elevated Surface** | `surface-high` | `#221D34` | `#F1EFF9` |
+| **Subtle Border / Divider** | `surface-border` | `#322B48` | `#E4E0F0` |
+| **Progress Track** | `progress-track` | `#221D34` | `#ECE9F6` |
+| **Primary Brand Accent** | `brand-primary` | `#9E64F7` | `#7B4FE0` |
+| **Button Fill (with label)** | `brand-action` | `#8B57E8` | `#7B4FE0` |
+| **Secondary Brand Accent** | `brand-secondary` | `#B488FC` | `#9163EA` |
+| **Brand Soft Wash** | `brand-soft-tint` | `rgba(158, 100, 247, 0.15)` | `#EDE5FF` |
 | **Protein Accent** | `macro-protein` | `#FF6B6B` | `#EF4444` |
 | **Carbohydrate Accent** | `macro-carbs` | `#3B82F6` | `#2563EB` |
 | **Fats Accent** | `macro-fats` | `#FBBF24` | `#D97706` |
 | **AI Scanner / Success** | `quick-scanner` | `#22C55E` | `#16A34A` |
 | **Streak / VIP Gold** | `vip-streak` | `#F59E0B` | `#D97706` |
+| **Water** | `tracker-water` | `#22D3EE` | `#0891B2` |
+| **Warning** | `status-warning` | `#FB923C` | `#C2410C` |
+| **Danger** | `status-danger` | `#FF5A5F` | `#D92D20` |
 | **Primary Text** | `text-primary` | `#FFFFFF` | `#13121B` |
 | **Secondary Text** | `text-secondary` | `#9E9AA7` | `#645F77` |
 | **Disabled Text** | `text-disabled` | `#5E5970` | `#A6A1B8` |
@@ -310,15 +226,15 @@ The palette is engineered around adaptive depth layers: dark-tier luminance tier
 
 ## Typography
 
-The typography scale utilizes **Plus Jakarta Sans** across all levels in both Dark and Light modes to maintain exceptional clarity on high-DPI smartphone displays, crisp Vietnamese diacritical legibility, and geometric warmth in numerical readouts.
+The typography scale utilizes **Plus Jakarta Sans** across all levels in both Dark and Light modes to maintain exceptional clarity on high-DPI smartphone displays, crisp Vietnamese diacritical legibility, and geometric warmth in numerical readouts. Numeric readouts use tabular figures (`fontVariant: ['tabular-nums']`).
 
 ### Usage Hierarchy
-- **Metric Big Numbers (`data-display` — 44px / 48px / 800):** Used strictly for core calorie counts inside the circular progress dial and dashboard headers. Colored `#FFFFFF` in Dark Mode and `#13121B` in Light Mode.
+- **Metric Big Numbers (`data-display` — 44px / 48px / 800):** Used strictly for core calorie counts inside the circular progress dial and dashboard headers. Uses `text-primary`.
 - **Screen Titles (`headline-xl` — 36px, `headline-xl-mobile` — 30px / 800):** Primary onboarding headers, goal achievement summaries, and top-level tab titles.
 - **Modal & Report Headers (`headline-lg` — 26px / 700):** Deep analytics views and nutrition breakdown drawers.
-- **Section Headers (`headline-md` — 20px / 700, `headline-sm` — 17px / 600):** Ground meal groupings (Bữa sáng, Bữa trưa, Bữa tối, Ăn vặt), food log dish titles, and dashboard summaries.
+- **Section Headers (`headline-md` — 20px / 700, `headline-sm` — 17px / 600):** Meal groupings (Bữa sáng, Bữa trưa, Bữa tối, Ăn vặt), food log dish titles, and dashboard summaries.
 - **Body & Captions (`body-lg` — 16px, `body-md` — 14px, `body-sm` — 12px / 400):** Calorie breakdowns, Vietnamese dish ingredients, AI nutrition advice, and serving estimates.
-- **Labels & Micro-data (`label-lg` — 14px, `label-md` — 12px, `label-sm` — 10px / 600):** Primary button text, day chips (`T2` - `CN`), macro tags (`g protein`, `carb`, `fat`), and bottom tab bar titles.
+- **Labels & Micro-data (`label-lg` — 14px, `label-md` — 12px, `label-sm` — 10px / 600):** Primary button text, day chips (`T2` - `CN`), macro tags (`g đạm`, `carb`, `béo`), and bottom tab bar titles.
 
 ---
 
@@ -333,29 +249,29 @@ Designed specifically for mobile viewport ergonomics with native safe-area compl
   - Card interiors leverage `space-lg` (`20px`) on large stat blocks and `space-md` (`16px`) on compact meal items.
   - Tap targets adhere strictly to the `44x44pt` minimum touch area.
 - **Reflow & Breakpoints:**
-  - **Mobile Portrait (`< 600px`):** Primary single-column vertical stack with 4-button quick utility dock above the tab bar.
-  - **Large Viewports / Tablets (`>= 600px`):** Two-column modular dashboard placing calorie circle ring left and macro breakdown / meals right.
+  - **Mobile Portrait (`< 600px`):** Primary single-column vertical stack with 4-button quick utility dock above the tab bar. This is the only layout in scope for the first release.
+  - **Large Viewports / Tablets (`>= 600px`) — optional, post-MVP:** Two-column modular dashboard placing calorie ring left and macro breakdown / meals right.
 
 ---
 
 ## Elevation & Depth
 
-Visual hierarchy adapts its physical model based on the active theme: **Dark Mode** relies on progressive surface luminance and ambient colored glows, whereas **Light Mode** utilizes crisp white surface layering over an alabaster canvas paired with soft, tinted drop shadows.
+Visual hierarchy adapts its physical model based on the active theme: **Dark Mode** relies on progressive surface luminance and ambient colored glows, whereas **Light Mode** utilizes crisp white surface layering over an alabaster canvas paired with soft, tinted drop shadows. Colored glows and shadows are unreliable on Android (`elevation` is gray), so they are drawn with Skia or SVG blur rather than platform shadow props.
 
 ### Hierarchy Rules — Dark Mode (Nocturne)
-- **Base Canvas (`#12111A`):** The foundational substrate behind all content.
-- **Level 1 Containers (`#1C1929`):** Outer meal category groups and calorie summary wrapper. Surrounded by a `1px` soft border in `#34304E`.
-- **Level 2 Floating Cards (`#252238`):** Selected items, dialog drawers, nested list rows, and quick-add toolbars.
-- **Radiant Glows:** Active indicators (e.g., today's active date pill, active macro progress rings) employ a tinted ambient glow: `0px 8px 24px rgba(142, 124, 255, 0.28)`.
-- **Modals and Overlays:** 75% frosted overlay (`rgba(18, 17, 26, 0.75)`) with a `20px` Gaussian backdrop blur for dish details, camera scanning screens, and bottom sheets.
+- **Base Canvas (`#0D0B14`):** The foundational substrate behind all content.
+- **Level 1 Containers (`#181524`):** Outer meal category groups and calorie summary wrapper. Surrounded by a `1px` soft border in `#322B48`.
+- **Level 2 Floating Cards (`#221D34`):** Selected items, dialog drawers, nested list rows, and quick-add toolbars.
+- **Radiant Glows:** Active indicators (e.g., today's active date pill, active macro progress rings) employ a tinted ambient glow: `0px 8px 24px rgba(158, 100, 247, 0.28)`.
+- **Modals and Overlays:** 75% frosted overlay (`rgba(13, 11, 20, 0.75)`) with a `20px` Gaussian backdrop blur for dish details, camera scanning screens, and bottom sheets.
 
 ### Hierarchy Rules — Light Mode (Daylight)
 - **Base Canvas (`#F8F7FC`):** Cool alabaster substrate that provides gentle contrast against white cards.
 - **Level 1 Containers (`#FFFFFF`):** Primary meal category groups and calorie summary wrapper. Surrounded by a `1px` border in `#E4E0F0` and a subtle ambient shadow: `0px 4px 16px rgba(19, 18, 27, 0.04)`.
 - **Level 2 Floating Cards & Nested Wells:**
-  - **Floating Popovers / Toasts (`#FFFFFF`):** Elevated with a diffused violet-tinted shadow: `0px 8px 24px rgba(93, 72, 202, 0.08)` and `1px` border `#E4E0F0`.
+  - **Floating Popovers / Toasts (`#FFFFFF`):** Elevated with a diffused violet-tinted shadow: `0px 8px 24px rgba(123, 79, 224, 0.08)` and `1px` border `#E4E0F0`.
   - **Recessed / Nested Wells (`#F1EFF9`):** Used for inner food items, input fields, and macro slider tracks inside a white Level 1 card.
-- **Active Accent Shadows:** Active indicators (e.g., selected date pill, primary CTAs) cast a crisp brand shadow: `0px 6px 20px rgba(108, 86, 245, 0.24)`.
+- **Active Accent Shadows:** Active indicators (e.g., selected date pill, primary CTAs) cast a crisp brand shadow: `0px 6px 20px rgba(123, 79, 224, 0.24)`.
 - **Modals and Overlays:** 45% translucent ink backdrop (`rgba(19, 18, 27, 0.45)`) with a `20px` Gaussian backdrop blur.
 
 ---
@@ -374,64 +290,63 @@ The interface embraces organic, smooth curvatures aligned with standard iOS squi
 ## Components
 
 ### Buttons & CTAs
-- **Primary Action (Brand Lavender / Iris):**
-  - **Dark Mode:** Solid `#8E7CFF` or subtle gradient (`#A78BFA` to `#8E7CFF`). Text: `#FFFFFF`.
-  - **Light Mode:** Solid `#6C56F5` or subtle gradient (`#8B5CF6` to `#6C56F5`). Text: `#FFFFFF`. Shadow: `0px 6px 16px rgba(108, 86, 245, 0.25)`.
+- **Primary Action:**
+  - Fill `brand-action` (Dark `#8B57E8`, Light `#7B4FE0`), text `on-brand` `#FFFFFF`. An optional gradient may run from `brand-action` to a slightly deeper tone (Dark `#7A4AD8`, Light `#6A42C8`), never toward a lighter tone, so label contrast never drops below 4.5:1.
+  - Light Mode shadow: `0px 6px 16px rgba(123, 79, 224, 0.25)`.
   - **Dimensions & Interaction:** `label-lg`, center-aligned, height `52px` for primary screen CTAs, pill-rounded (`9999px`). Pressed state scales opacity down to `0.85` and micro-scales to `0.98`.
+  - Loading and disabled states reuse the same shape; disabled uses `surface-high` fill with `text-disabled` text.
 - **Secondary Pill Button:**
-  - **Dark Mode:** Background `#252238`, Text `#FFFFFF`, Border `1px` `#34304E`, Height `36px`.
-  - **Light Mode:** Background `#F1EFF9`, Text `#13121B`, Border `1px` `#E4E0F0`, Height `36px`.
+  - Fill `surface-high`, text `text-primary`, border `1px` `surface-border`, height `36px`.
 - **Floating Main Log Button (`+`):**
-  - High-elevation `56x56px` circular button anchored in the bottom tab bar.
-  - **Dark Mode:** Colored `#8E7CFF` with intense ambient glow `0px 8px 24px rgba(142, 124, 255, 0.40)` and `#FFFFFF` glyph.
-  - **Light Mode:** Colored `#6C56F5` with elevated shadow `0px 8px 20px rgba(108, 86, 245, 0.35)` and `#FFFFFF` glyph.
+  - High-elevation `56x56px` circular button anchored in the center of the bottom tab bar. It holds an icon only, so it uses `brand-primary` (Dark `#9E64F7`, Light `#7B4FE0`) with a `#FFFFFF` glyph.
+  - Glow: Dark `0px 8px 24px rgba(158, 100, 247, 0.40)`; Light `0px 8px 20px rgba(123, 79, 224, 0.35)`.
+
+### Calorie Ring (Dashboard)
+- Circular dial with a `data-display` calorie-remaining number centered, a small flame icon above it, and the unit label (`kcal`) below.
+- The ring is **segmented by macro color** (`macro-protein`, `macro-carbs`, `macro-fats`), each arc length proportional to that macro's share of calories consumed. The unfilled remainder uses `progress-track`. When the user has logged nothing, the whole ring shows `progress-track` with a `brand-primary` flame.
+- Stroke `12px`, round caps, animated at 60fps with Reanimated. When calories exceed 100% of goal, show a `status-danger` outer indicator **plus** an alert icon and text label.
 
 ### Quick Utility Tiles (Search, Barcode, AI Magic, Voice)
-- 4-column balanced grid dock (`16px` gutter).
-- Each button features a square-rounded shape (`16px` radius / `rounded-lg`) with theme-calibrated backgrounds:
+- 4-column balanced grid dock (`16px` gutter) above the tab bar.
+- Each button features a square-rounded shape (`16px` radius / `rounded-lg`) with theme-calibrated backgrounds. Glyph color is `on-quick-tile` in Dark; in Light, tinted tiles use the listed glyph color.
   - **Search (Tìm kiếm):**
-    - **Dark Mode:** Golden Amber (`#FBBF24`) background, `#12111A` glyph.
-    - **Light Mode:** Soft Amber tint (`#FEF3C7`) with `1px` border `#FDE68A` and `#D97706` glyph (or high-contrast solid `#FBBF24` with `#13121B` glyph).
+    - **Dark Mode:** Golden Amber (`#FBBF24`) background.
+    - **Light Mode:** Soft Amber tint (`#FEF3C7`) with `1px` border `#FDE68A` and `#D97706` glyph.
   - **Barcode (Mã vạch):**
-    - **Dark Mode:** Sky Cobalt (`#38BDF8`) background, `#12111A` glyph.
+    - **Dark Mode:** Sky (`#38BDF8`) background.
     - **Light Mode:** Soft Sky tint (`#E0F2FE`) with `1px` border `#BAE6FD` and `#0284C7` glyph.
   - **AI Scanner (Quét AI):**
-    - **Dark Mode:** Fresh Leaf Green (`#22C55E`) background, `#12111A` glyph.
+    - **Dark Mode:** Fresh Leaf Green (`#22C55E`) background.
     - **Light Mode:** Soft Emerald tint (`#DCFCE7`) with `1px` border `#BBF7D0` and `#16A34A` glyph.
   - **Voice Mic (Giọng nói):**
-    - **Dark Mode:** Coral Salmon (`#FB7185`) background, `#12111A` glyph.
+    - **Dark Mode:** Coral Salmon (`#FB7185`) background.
     - **Light Mode:** Soft Rose tint (`#FFE4E6`) with `1px` border `#FECDD3` and `#E11D48` glyph.
 
 ### Date Selector Strip
 - Horizontal scrollable row displaying days of the week (`T2` through `CN`).
-- **Default State:**
-  - **Dark Mode:** Transparent background, secondary muted text `#9E9AA7`.
-  - **Light Mode:** Transparent background, secondary slate text `#645F77`.
-- **Selected Day:**
-  - **Dark Mode:** Concentric circle or pill highlight with `#8E7CFF` background, glowing outer ring (`rgba(142, 124, 255, 0.28)`), and bold `#FFFFFF` text.
-  - **Light Mode:** Concentric circle or pill highlight with `#6C56F5` background, soft drop shadow (`0px 4px 12px rgba(108, 86, 245, 0.25)`), and bold `#FFFFFF` text.
+- **Default State:** Transparent background, `text-secondary` text.
+- **Selected Day:** Concentric circle or pill highlight filled with `brand-action`, glowing outer ring (`glow`), and bold `#FFFFFF` text. Light Mode adds a soft drop shadow `0px 4px 12px rgba(123, 79, 224, 0.25)`.
 
 ### Macro Progress Sliders
 - Grouped card housing 3 parallel columns: **Chất đạm (Protein)**, **Đường bột (Carb)**, and **Chất béo (Fat)**.
-- **Card Wrapper:**
-  - **Dark Mode:** `#1C1929` background with `1px` `#34304E` border.
-  - **Light Mode:** `#FFFFFF` background with `1px` `#E4E0F0` border and Level 1 shadow.
-- **Progress Track:**
-  - **Dark Mode:** Deep violet-slate `#252238` with `8px` height and rounded ends (`9999px`).
-  - **Light Mode:** Cool lavender-gray `#ECE9F6` with `8px` height and rounded ends (`9999px`).
-- **Thumb / Fill & Readout:**
-  - Colored in the respective theme macro tint (`macro-protein`, `macro-carbs`, `macro-fats`), annotated with current/target grams below in high-contrast bold typography (`0 / 98g`) using `#FFFFFF` (Dark) or `#13121B` (Light).
+- **Card Wrapper:** `surface-mid` background with `1px` `surface-border`; Light Mode adds the Level 1 shadow.
+- **Progress Track:** `progress-track`, `8px` height, rounded ends (`9999px`).
+- **Fill & Readout:** Fill uses the macro tint (`macro-protein`, `macro-carbs`, `macro-fats`). Current/target grams sit below in high-contrast bold typography (`0 / 98g`) using `text-primary`.
 
 ### Food Log List Items
-- **Container:**
-  - **Dark Mode:** `#252238` background with soft `1px` border `#34304E`.
-  - **Light Mode:** `#F8F7FC` (when nested inside a `#FFFFFF` meal card) or `#FFFFFF` (when placed directly on canvas) with `1px` border `#E4E0F0`.
-- **Content Layout:** Displays `48x48px` rounded food thumbnail (`rounded-md`), dish name in `headline-sm` (`#FFFFFF` Dark / `#13121B` Light), portion size in `body-sm` (`#9E9AA7` Dark / `#645F77` Light), and calories on the right in `label-lg`, with smooth tap highlight transition to edit serving.
+- **Container:** `surface-high` background with `1px` `surface-border` when nested inside a Level 1 meal card. When placed directly on the canvas, use `surface-mid` with the same border.
+- **Content Layout:** Displays `48x48px` rounded food thumbnail (`rounded-md`), dish name in `headline-sm` (`text-primary`), portion size in `body-sm` (`text-secondary`), and calories on the right in `label-lg`, with smooth tap highlight transition to edit serving.
+
+### Status Banners (Warning / Danger)
+- Full-width card, `rounded-lg`, left icon, bold title, `body-md` message.
+- Fill is the status color at 15% alpha over `surface-mid`, border `1px` in the status color, icon and title in the status color. Body text stays `text-primary`.
+- Used for: allergen detected (danger), calories over 100% of goal (danger), unsafe weight-loss rate or calorie target below BMR (warning), offline notice (warning).
 
 ### Bottom Navigation Bar
-- **Bar Container:**
-  - **Dark Mode:** `#161420` (90% opacity with backdrop blur) and `1px` top border `#252238`.
-  - **Light Mode:** `#FFFFFF` (92% opacity with backdrop blur), `1px` top border `#E4E0F0`, and subtle upward shadow `0px -4px 16px rgba(19, 18, 27, 0.04)`.
+- **Bar Container:** `tab-bar` color (Dark 90% opacity with backdrop blur; Light 92% opacity with backdrop blur) and `1px` top border `surface-border`. Light Mode adds an upward shadow `0px -4px 16px rgba(19, 18, 27, 0.04)`.
 - **Tab Items:**
-  - **Active Tab:** Icon and `label-sm` text in `#8E7CFF` (Dark) or `#6C56F5` (Light).
-  - **Inactive Tab:** Icon and `label-sm` text in `#9E9AA7` (Dark) or `#645F77` (Light).
+  - **Active Tab:** Icon and `label-sm` text in `brand-secondary` (Dark `#B488FC`) or `brand-primary` (Light `#7B4FE0`).
+  - **Inactive Tab:** Icon and `label-sm` text in `text-secondary`.
+
+### Splash & Brand Mark
+- Splash background is `brand-action` (Dark `#8B57E8`; Light uses the same Dark value so the launch screen is identical in both themes) with a white Kallo wordmark centered. The wordmark, mascot, and illustrations must be original Kallo assets, not assets taken from any reference app.
