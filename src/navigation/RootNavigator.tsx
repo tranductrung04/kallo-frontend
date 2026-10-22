@@ -20,6 +20,7 @@ import { MealPlanOverviewScreen, MealPlanWizardScreen, MealPlanDetailScreen } fr
 import { NutritionChatScreen, VoiceLogModal } from '@/features/assistant';
 import { StreakDetailModal, BadgesChallengesScreen, FriendsLeaderboardScreen } from '@/features/gamification';
 import { NotificationCenterScreen, ReminderSettingsScreen } from '@/features/system';
+import { ReportOverviewScreen } from '@/features/report/screens/ReportOverviewScreen';
 import { useTheme } from '@/theme';
 import { AppText } from '@/components/common';
 import { useAuth } from '@/features/auth/AuthProvider';
@@ -56,6 +57,7 @@ export function RootNavigator() {
       <Stack.Screen name="FriendsLeaderboard" component={FriendsLeaderboardScreen} options={{ title: 'Bảng xếp hạng bạn bè' }} />
       <Stack.Screen name="NotificationCenter" component={NotificationCenterScreen} options={{ title: 'Trung tâm thông báo' }} />
       <Stack.Screen name="ReminderSettings" component={ReminderSettingsScreen} options={{ title: 'Cài đặt nhắc nhở' }} />
+      <Stack.Screen name="ReportOverview" component={ReportOverviewScreen} options={{ title: 'Thống kê báo cáo' }} />
     </>}
   </Stack.Navigator></NavigationContainer>;
 }
