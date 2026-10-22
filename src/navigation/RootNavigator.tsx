@@ -46,7 +46,7 @@ export function RootNavigator() {
       <Stack.Screen name="ActivityTracker" component={ActivityTrackerScreen} options={{ title: 'Vận động & Thể thao' }} />
       <Stack.Screen name="HealthSync" component={HealthSyncScreen} options={{ title: 'Đồng bộ sức khỏe' }} />
       <Stack.Screen name="BodyMetric" component={BodyMetricScreen} options={{ title: 'Chỉ số eo / mông' }} />
-      <Stack.Screen name="MealPlanOverview" component={MealPlanOverviewScreen} options={{ title: 'Thực đơn AI' }} />
+      <Stack.Screen name="MealPlanOverview" component={MealPlanOverviewScreen} options={{ headerShown: false }} />
       <Stack.Screen name="MealPlanWizard" component={MealPlanWizardScreen} options={{ title: 'Tạo thực đơn AI' }} />
       <Stack.Screen name="MealPlanDetail" component={MealPlanDetailScreen} options={{ title: 'Chi tiết thực đơn' }} />
       <Stack.Screen name="NutritionChat" component={NutritionChatScreen} options={{ title: 'Trợ lý Kallo AI' }} />
