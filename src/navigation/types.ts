@@ -1,7 +1,14 @@
 import type { NavigatorScreenParams } from '@react-navigation/native';
 import type { FoodLogSource, MealSlot } from '@/features/nutrition/types';
 
-export type MainTabParamList = { Home: undefined; Diary: undefined; Scan: undefined; Report: undefined; Profile: undefined };
+export type MainTabParamList = {
+  Home: undefined;
+  Diary: undefined;
+  Scan: undefined;
+  MealPlan: undefined;
+  Profile: undefined;
+  Report?: undefined;
+};
 export type AuthStackParamList = {
   Welcome: undefined;
   Login: undefined;
@@ -36,4 +43,5 @@ export type RootStackParamList = {
   FriendsLeaderboard: undefined;
   NotificationCenter: undefined;
   ReminderSettings: undefined;
+  ReportOverview: undefined;
 };

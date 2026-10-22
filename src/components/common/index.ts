@@ -22,3 +22,5 @@ export type { DateSelectorStripProps, DateSelectorItem } from './DateSelectorStr
 export { FoodLogListItem } from './FoodLogListItem';
 export type { FoodLogListItemProps } from './FoodLogListItem';
 export { OfflineBanner } from './OfflineBanner';
+export { StatusBanner } from './StatusBanner';
+export type { StatusBannerProps, StatusBannerType } from './StatusBanner';
