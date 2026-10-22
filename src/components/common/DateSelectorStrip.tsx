@@ -57,18 +57,18 @@ export function DateSelectorStrip({
           ? [
               styles.day,
               styles.daySelected,
-              { backgroundColor: theme.colors.brandPrimary },
-              // Glow for dark / shadow for light
+              { backgroundColor: theme.colors.brandAction },
+              // Glow for dark / shadow for light per DESIGN.md L328
               isDark
                 ? {
-                    shadowColor: 'rgba(142, 124, 255, 0.28)',
+                    shadowColor: theme.colors.glow,
                     shadowOffset: { width: 0, height: 0 },
                     shadowOpacity: 1,
                     shadowRadius: 10,
                     elevation: 6,
                   }
                 : {
-                    shadowColor: 'rgba(108, 86, 245, 0.25)',
+                    shadowColor: 'rgba(123, 79, 224, 0.25)',
                     shadowOffset: { width: 0, height: 4 },
                     shadowOpacity: 1,
                     shadowRadius: 12,
