@@ -29,9 +29,10 @@ type MacroColumnProps = {
   icon: React.ReactNode;
   current: number;
   goal: number;
+  color?: string;
 };
 
-export function MacroColumn({ styles, title, icon, current, goal }: MacroColumnProps) {
+export function MacroColumn({ styles, title, icon, current, goal, color }: MacroColumnProps) {
   const { colors } = useTheme();
   // ProgressBar tự clamp 0–1; ở đây chỉ cần chặn chia cho 0
   const ratio = goal > 0 ? current / goal : 0;
@@ -41,15 +42,21 @@ export function MacroColumn({ styles, title, icon, current, goal }: MacroColumnP
     <View style={styles.macroCol}>
       <View style={styles.macroHeaderRow}>
         {icon}
-        <AppText variant="labelMd">{title}</AppText>
+        <AppText variant="labelMd" numberOfLines={1} style={styles.macroColTitle}>
+          {title}
+        </AppText>
       </View>
       <View style={styles.macroBarWrap}>
-        <ProgressBar value={ratio} height={6} color={colors.brandAction} />
+        <ProgressBar value={ratio} height={8} color={color ?? colors.brandAction} />
         <View style={[styles.macroThumb, { left: `${thumbPercent}%` }]} />
       </View>
       <View style={styles.macroValuesRow}>
-        <AppText variant="labelLg">{formatNumber(current)}</AppText>
-        <AppText variant="bodySm" color={colors.textSecondary}>/ {formatNumber(goal)}g</AppText>
+        <AppText variant="headlineSm" style={styles.macroCurrentValue}>
+          {formatNumber(current)}
+        </AppText>
+        <AppText variant="bodySm" color={colors.textSecondary} style={styles.macroGoalValue}>
+          / {formatNumber(goal)}g
+        </AppText>
       </View>
     </View>
   );
