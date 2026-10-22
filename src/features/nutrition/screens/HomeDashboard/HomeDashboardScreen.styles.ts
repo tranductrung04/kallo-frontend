@@ -50,6 +50,18 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
     mainContent: {
       paddingHorizontal: s.lg,
     },
+    topHeroContainer: {
+      backgroundColor: c.surfaceMid,
+      paddingHorizontal: s.lg,
+      paddingTop: gapMid,
+      paddingBottom: s.md,
+      borderColor: c.surfaceBorder,
+      marginBottom: gapMid,
+      ...sh.level1,
+    },
+    mainContent: {
+      paddingHorizontal: s.lg,
+    },
     pressedOpacity: {
       opacity: 0.8,
     },
@@ -106,7 +118,7 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: s.md,
+      marginBottom: gapMid,
     },
     upgradePillTop: {
       backgroundColor: '#FED065',
