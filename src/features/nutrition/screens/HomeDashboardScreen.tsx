@@ -1,7 +1,7 @@
 // ─── HomeDashboardScreen — Nocturne & Daylight Vitality ───────────────────────
 // Dùng lại component trong @/components/common (AppText, AppCard, AppButton,
 // ProgressBar, CircularProgress) và token của theme, nên tự đổi theo light ↔ dark.
-//   • Icon        → ./HomeDashboard/HomeIcons.tsx
+//   • Icon        → @/components/icons
 //   • Stylesheet  → ./HomeDashboard/HomeDashboardScreen.styles.ts (chỉ còn layout)
 //   • Khối lặp    → ./HomeDashboard/HomeWidgets.tsx (MacroColumn, ActivityGrid, WeightChart)
 //   • Helper ngày → ./HomeDashboard/dateUtils.ts
@@ -47,7 +47,7 @@ import {
   SaltIcon,
   ScaleIcon,
   SugarIcon,
-} from './HomeDashboard/HomeIcons';
+} from '@/components/icons';
 import { ActivityGrid, MacroColumn, WeightChart } from './HomeDashboard/HomeWidgets';
 
 type Props = BottomTabScreenProps<MainTabParamList, 'Home'>;
@@ -329,7 +329,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
                 <MacroColumn
                   styles={styles}
                   title="Đường bột"
-                  icon={<WheatIcon size={15} color={colors.macroCarbs} />}
+                  icon={<WheatIcon size={15} color={colors.macroCarbs} creaseColor={colors.macroCarbsStrong} />}
                   current={summary.carbs}
                   goal={carbsGoal}
                 />
@@ -347,21 +347,28 @@ export function HomeDashboardScreen({ navigation }: Props) {
                 <MacroColumn
                   styles={styles}
                   title="Muối"
-                  icon={<SaltIcon size={15} color="#FDE68A" />}
+                  icon={<SaltIcon size={15} color={colors.macroSalt} capColor={colors.onBrand} />}
                   current={saltCurrent}
                   goal={saltGoal}
                 />
                 <MacroColumn
                   styles={styles}
                   title="Đường"
-                  icon={<SugarIcon size={15} color="#38BDF8" />}
+                  icon={<SugarIcon size={15} color={colors.macroSugar} />}
                   current={sugarCurrent}
                   goal={sugarGoal}
                 />
                 <MacroColumn
                   styles={styles}
                   title="Chất xơ"
-                  icon={<FiberIcon size={15} color="#4ADE80" />}
+                  icon={
+                    <FiberIcon
+                      size={15}
+                      color={colors.macroFiber}
+                      stalkColor={colors.macroFiberSoft}
+                      creaseColor={colors.macroFiberStrong}
+                    />
+                  }
                   current={fiberCurrent}
                   goal={fiberGoal}
                 />

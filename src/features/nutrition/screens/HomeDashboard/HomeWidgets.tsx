@@ -19,7 +19,7 @@ import {
   ShuttlecockIcon,
   YogaIcon,
   type IconProps,
-} from './HomeIcons';
+} from '@/components/icons';
 
 // ─── MacroColumn ──────────────────────────────────────────────────────────────
 
