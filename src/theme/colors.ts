@@ -28,6 +28,12 @@ export const colors = {
     quickScanner: '#16A34A',
     vipStreak: '#D97706',
     trackerWater: '#0891B2',
+    trackerBurn: '#DC2626',
+    trackerWeight: '#D97706',
+
+    // Premium / Upgrade CTA
+    upgradeAccent: '#FACC15',
+    onUpgradeAccent: '#261C02',
 
     // Status Signals
     statusWarning: '#C2410C',
@@ -98,6 +104,12 @@ export const colors = {
     quickScanner: '#22C55E',
     vipStreak: '#F59E0B',
     trackerWater: '#22D3EE',
+    trackerBurn: '#F87171',
+    trackerWeight: '#FBBF24',
+
+    // Premium / Upgrade CTA
+    upgradeAccent: '#FDE047',
+    onUpgradeAccent: '#261C02',
 
     // Status Signals
     statusWarning: '#FB923C',
