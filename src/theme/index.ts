@@ -5,3 +5,4 @@ export { shadows } from './shadows';
 export { typography } from './typography';
 export type { ColorScheme, ColorTokens } from './colors';
 export type { TypographyVariant } from './typography';
+export type { Theme, ThemeContextValue } from './ThemeProvider';

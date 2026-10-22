@@ -21,13 +21,25 @@ export const colors = {
     macroProtein: '#EF4444',
     macroProteinStrong: '#DC2626',
     macroCarbs: '#2563EB',
+    macroCarbsStrong: '#1D4ED8',
     macroFats: '#D97706',
     macroFatsStrong: '#EAB308',
+    macroSalt: '#CA8A04',
+    macroSugar: '#0284C7',
+    macroFiber: '#16A34A',
+    macroFiberSoft: '#86EFAC',
+    macroFiberStrong: '#15803D',
 
     // Utility & Tracking
     quickScanner: '#16A34A',
     vipStreak: '#D97706',
     trackerWater: '#0891B2',
+    trackerBurn: '#DC2626',
+    trackerWeight: '#D97706',
+
+    // Premium / Upgrade CTA
+    upgradeAccent: '#FACC15',
+    onUpgradeAccent: '#261C02',
 
     // Status Signals
     statusWarning: '#C2410C',
@@ -68,6 +80,9 @@ export const colors = {
     protein: '#EF4444',
     carbs: '#2563EB',
     fat: '#D97706',
+    salt: '#CA8A04',
+    sugar: '#0284C7',
+    fiber: '#16A34A',
     water: '#0891B2',
     streak: '#D97706',
     warning: '#C2410C',
@@ -91,13 +106,25 @@ export const colors = {
     macroProtein: '#FF6B6B',
     macroProteinStrong: '#FF5252',
     macroCarbs: '#3B82F6',
+    macroCarbsStrong: '#1D4ED8',
     macroFats: '#FBBF24',
     macroFatsStrong: '#EAB308',
+    macroSalt: '#FDE68A',
+    macroSugar: '#38BDF8',
+    macroFiber: '#4ADE80',
+    macroFiberSoft: '#86EFAC',
+    macroFiberStrong: '#15803D',
 
     // Utility & Tracking
     quickScanner: '#22C55E',
     vipStreak: '#F59E0B',
     trackerWater: '#22D3EE',
+    trackerBurn: '#F87171',
+    trackerWeight: '#FBBF24',
+
+    // Premium / Upgrade CTA
+    upgradeAccent: '#FDE047',
+    onUpgradeAccent: '#261C02',
 
     // Status Signals
     statusWarning: '#FB923C',
@@ -138,6 +165,9 @@ export const colors = {
     protein: '#FF6B6B',
     carbs: '#3B82F6',
     fat: '#FBBF24',
+    salt: '#FDE68A',
+    sugar: '#38BDF8',
+    fiber: '#4ADE80',
     water: '#22D3EE',
     streak: '#F59E0B',
     warning: '#FB923C',
