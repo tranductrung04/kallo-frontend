@@ -37,7 +37,7 @@ export function CircularProgress({
   const circumference = 2 * Math.PI * radius;
 
   const strokeColor = color ?? theme.colors.brandPrimary;
-  const trackColor = theme.colors.surfaceHigh;
+  const trackColor = theme.colors.progressTrack;
 
   return (
     <View
@@ -85,7 +85,7 @@ export function CircularProgress({
 
 const styles = StyleSheet.create({
   center: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
   },
