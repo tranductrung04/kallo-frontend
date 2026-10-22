@@ -11,6 +11,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Animated,
+  Image,
   NativeScrollEvent,
   NativeSyntheticEvent,
   Pressable,
@@ -27,28 +28,25 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppButton, AppCard, AppText, CircularProgress, QuickUtilityGrid } from '@/components/common';
 import type { MainTabParamList, RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
+import { images } from '@/assets/images';
 import { useNutrition } from '../NutritionProvider';
 import { useActivity } from '@/features/activity';
 import { useGamification } from '@/features/gamification';
 import { formatNumber, todayKey } from '../utils';
-import { formatHeaderDate, getWeekDays } from './HomeDashboard/dateUtils';
+import { formatHeaderDate, formatWeightDate, getWeekDays } from './HomeDashboard/dateUtils';
 import { createStyles } from './HomeDashboard/HomeDashboardScreen.styles';
 import {
+  BowlFoodPlusIcon,
   CalendarIcon,
-  CloudAddIcon,
   CutleryIcon,
   DropletIcon,
-  EmptyCupIcon,
   FiberIcon,
   FlagIcon,
   FlameIcon,
-  FullCupIcon,
-  HealthConnectIcon,
   WheatIcon,
   LightningIcon,
   PlusIcon,
   SaltIcon,
-  ScaleIcon,
   SugarIcon,
 } from '@/components/icons';
 import { ActivityGrid, MacroColumn, WeightChart } from './HomeDashboard/HomeWidgets';
@@ -501,7 +499,11 @@ export function HomeDashboardScreen({ navigation }: Props) {
               onPress={() => navigation.navigate('Diary')}
               style={styles.emptyDiaryCard}
             >
-              <CloudAddIcon size={38} color={colors.textDisabled} />
+              <BowlFoodPlusIcon
+                size={40}
+                color={colors.textSecondary}
+                cutoutColor={colors.canvasBase}
+              />
               <AppText variant="bodyMd" color={colors.textSecondary}>Chưa có dữ liệu</AppText>
             </Pressable>
           </View>
@@ -522,7 +524,12 @@ export function HomeDashboardScreen({ navigation }: Props) {
               <AppText variant="labelLg">Bước chân</AppText>
               <View style={styles.healthConnectRow}>
                 <View style={styles.healthIconBox}>
-                  <HealthConnectIcon size={22} />
+                  <Image
+                    source={images.healthConnectIcon}
+                    style={styles.healthConnectImage}
+                    resizeMode="contain"
+                    accessibilityLabel="Google Health Connect"
+                  />
                 </View>
                 <AppText variant="bodySm" color={colors.textSecondary} style={styles.healthConnectText}>
                   Kết nối Google Health để tự động cập nhật
@@ -538,14 +545,17 @@ export function HomeDashboardScreen({ navigation }: Props) {
               <View style={styles.workoutTopRow}>
                 <AppText variant="labelLg">Tập luyện</AppText>
                 <View style={styles.plusCircleBtn}>
-                  <PlusIcon size={12} color={colors.onBrand} />
+                  <PlusIcon size={14} color={colors.onBrand} strokeWidth={2.5} />
                 </View>
               </View>
-              <AppText variant="bodySm" color={colors.textSecondary} style={styles.workoutEmptyText}>
-                Chưa có hoạt động...
-              </AppText>
+              <View style={styles.workoutMiddle}>
+                <AppText variant="bodySm" color={colors.textSecondary} style={styles.workoutEmptyText}>
+                  Chưa có hoạt động...
+                </AppText>
+                <View style={styles.workoutDivider} />
+              </View>
               <View style={styles.workoutBottomRow}>
-                <FlameIcon size={14} color={colors.trackerBurn} />
+                <FlameIcon size={16} color={colors.trackerBurn} />
                 <AppText variant="labelLg">{caloriesBurned}</AppText>
               </View>
             </AppCard>
@@ -554,7 +564,12 @@ export function HomeDashboardScreen({ navigation }: Props) {
           {/* ── 8. Uống nước (Water Intake) Card ─────────────────────────── */}
           <AppCard style={styles.waterCard}>
             <View style={styles.waterLeftCol}>
-              <DropletIcon size={22} color={colors.trackerWater} />
+              <Image
+                source={images.trackerDroplet}
+                style={styles.waterDropletImage}
+                resizeMode="contain"
+                accessibilityLabel="Giọt nước"
+              />
               <View style={styles.waterTextGroup}>
                 <AppText variant="labelLg">Uống nước</AppText>
                 <AppText variant="headlineSm">{summary.waterMl || 0} ml</AppText>
@@ -565,45 +580,68 @@ export function HomeDashboardScreen({ navigation }: Props) {
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Bớt 250ml nước"
-                onPress={() => {
-                  if (summary.waterMl > 0) addWater(selectedDate, -250);
-                }}
-                style={styles.waterCupBtn}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                onPress={() => addWater(selectedDate, -200)}
+                style={({ pressed }) => [styles.waterCupBtn, pressed && styles.pressedOpacity]}
               >
-                <EmptyCupIcon size={18} color={colors.textDisabled} />
+                <Image
+                  source={images.trackerFillEmpty}
+                  style={styles.waterCupImage}
+                  resizeMode="contain"
+                  accessibilityLabel="Bớt nước"
+                />
               </Pressable>
               <View style={styles.waterCapsuleDivider} />
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Thêm 250ml nước"
-                onPress={() => addWater(selectedDate, 250)}
-                style={styles.waterCupBtn}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                onPress={() => addWater(selectedDate, 200)}
+                style={({ pressed }) => [styles.waterCupBtn, pressed && styles.pressedOpacity]}
               >
-                <FullCupIcon size={18} color={colors.trackerWater} />
+                <Image
+                  source={images.trackerFillFull}
+                  style={styles.waterCupImage}
+                  resizeMode="contain"
+                  accessibilityLabel="Thêm nước"
+                />
               </Pressable>
             </View>
           </AppCard>
 
           {/* ── 9. Cân nặng gần nhất (Weight Tracker) Card ───────────────── */}
           <AppCard>
-            <View style={styles.weightTopRow}>
-              <View style={styles.weightTitleRow}>
-                <ScaleIcon size={18} color={colors.trackerWeight} innerColor={colors.surfaceMid} />
-                <AppText variant="labelLg">Cân nặng gần nhất</AppText>
-              </View>
-              <AppButton
-                label="Cập nhật"
-                variant="primary"
-                onPress={() => root?.navigate('BodyMetric')}
-                style={styles.weightUpdateBtn}
+            <View style={styles.weightHeaderRow}>
+              <Image
+                source={images.trackerWeight}
+                style={styles.weightIconImage}
+                resizeMode="contain"
+                accessibilityLabel="Cân nặng gần nhất"
               />
+              <AppText variant="headlineSm" style={styles.weightTitleText}>Cân nặng gần nhất</AppText>
             </View>
 
-            <View style={styles.weightValuesGroup}>
-              <AppText variant="headlineMd" color={colors.brandSecondary}>{currentWeight} kg</AppText>
-              <AppText variant="bodySm" color={colors.textSecondary} style={styles.weightDateText}>
-                {state.weightLogs.length > 0 ? state.weightLogs[state.weightLogs.length - 1].date : '15 Th 09, 2026'}
-              </AppText>
+            <View style={styles.weightMiddleRow}>
+              <View style={styles.weightValuesGroup}>
+                <AppText variant="headlineMd" color={colors.brandSecondary}>{currentWeight} kg</AppText>
+                <AppText variant="bodySm" color={colors.textSecondary} style={styles.weightDateText}>
+                  {formatWeightDate(state.weightLogs.length > 0 ? state.weightLogs[state.weightLogs.length - 1].date : undefined)}
+                </AppText>
+              </View>
+
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Cập nhật cân nặng"
+                onPress={() => root?.navigate('BodyMetric')}
+                style={({ pressed }) => [
+                  styles.weightUpdatePillBtn,
+                  pressed && styles.pressedOpacity,
+                ]}
+              >
+                <AppText variant="labelLg" color={colors.onBrand} style={styles.weightUpdateBtnText}>
+                  Cập nhật
+                </AppText>
+              </Pressable>
             </View>
 
             <View style={styles.weightChartContainer}>

@@ -54,3 +54,13 @@ export function getWeekDays(selectedDateKey: string): WeekDay[] {
     };
   });
 }
+
+export function formatWeightDate(dateStr?: string): string {
+  if (!dateStr) return '15 Th 09, 2026';
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
+  if (match) {
+    const [, year, month, day] = match;
+    return `${day} Th ${month}, ${year}`;
+  }
+  return dateStr;
+}
