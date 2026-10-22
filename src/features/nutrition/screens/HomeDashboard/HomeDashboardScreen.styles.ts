@@ -85,10 +85,29 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       paddingHorizontal: s.xs,
     },
     dayItem: {
-      width: 36,
-      height: 36,
+      width: 44,
+      height: 44,
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    daySelectedOuter: {
+      width: 44,
+      height: 44,
+      borderRadius: r.full,
+      borderWidth: 1.5,
+      borderColor: c.brandPrimary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'transparent',
+    },
+    daySelectedInner: {
+      width: 34,
+      height: 34,
+      borderRadius: r.full,
+      backgroundColor: c.brandAction,
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...sh.accentShadow,
     },
     daySelectedCircle: {
       width: 38,
@@ -97,9 +116,17 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       backgroundColor: c.brandAction,
       alignItems: 'center',
       justifyContent: 'center',
+      ...sh.accentShadow,
+    },
+    dayTodayOutline: {
+      width: 42,
+      height: 42,
+      borderRadius: r.full,
       borderWidth: 1.5,
       borderColor: c.brandPrimary,
-      ...sh.accentShadow,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'transparent',
     },
 
     // 3. Calorie Goal Section
@@ -364,6 +391,25 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       alignItems: 'center',
       justifyContent: 'center',
       marginTop: s.sm - 2,
+    },
+
+    // 10. Floating "Quay lại hôm nay" Button
+    floatingTodayBtn: {
+      position: 'absolute',
+      bottom: 84,
+      alignSelf: 'center',
+      backgroundColor: c.brandSecondary,
+      paddingHorizontal: s.lg + s.xs,
+      paddingVertical: gapMid,
+      borderRadius: r.full,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.35,
+      shadowRadius: 8,
+      elevation: 6,
+      zIndex: 99,
     },
   });
 }

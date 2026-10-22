@@ -19,7 +19,7 @@ import {
 } from 'react-native';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { AppButton, AppCard, AppText, CircularProgress } from '@/components/common';
+import { AppButton, AppCard, AppText, CircularProgress, QuickUtilityGrid } from '@/components/common';
 import type { MainTabParamList, RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
 import { useNutrition } from '../NutritionProvider';
@@ -61,6 +61,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const { streak } = useGamification();
 
   const selectedDate = state.selectedDate || todayKey();
+  const isToday = selectedDate === todayKey();
   const caloriesBurned = getTotalCaloriesBurnedForDate(selectedDate);
   const summary = getSummary(selectedDate, caloriesBurned);
   const root = navigation.getParent() as RootNavigation | undefined;
@@ -142,23 +143,47 @@ export function HomeDashboardScreen({ navigation }: Props) {
             {dateTitle}
           </AppText>
           <View style={styles.weekRow}>
-            {weekDays.map((item) => (
-              <Pressable
-                key={item.key}
-                accessibilityRole="button"
-                accessibilityLabel={`Chọn ${item.label}`}
-                accessibilityState={{ selected: item.isSelected }}
-                onPress={() => setSelectedDate(item.key)}
-                style={item.isSelected ? styles.daySelectedCircle : styles.dayItem}
-              >
-                <AppText
-                  variant="labelLg"
-                  color={item.isSelected ? colors.onBrand : colors.textSecondary}
+            {weekDays.map((item) => {
+              const isSelected = item.isSelected;
+              const isTodayItem = item.isToday;
+
+              return (
+                <Pressable
+                  key={item.key}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Chọn ${item.label}`}
+                  accessibilityState={{ selected: isSelected }}
+                  onPress={() => setSelectedDate(item.key)}
+                  style={styles.dayItem}
                 >
-                  {item.label}
-                </AppText>
-              </Pressable>
-            ))}
+                  {isSelected && isTodayItem ? (
+                    <View style={styles.daySelectedOuter}>
+                      <View style={styles.daySelectedInner}>
+                        <AppText variant="labelLg" color={colors.onBrand}>
+                          {item.label}
+                        </AppText>
+                      </View>
+                    </View>
+                  ) : isSelected ? (
+                    <View style={styles.daySelectedCircle}>
+                      <AppText variant="labelLg" color={colors.onBrand}>
+                        {item.label}
+                      </AppText>
+                    </View>
+                  ) : isTodayItem ? (
+                    <View style={styles.dayTodayOutline}>
+                      <AppText variant="labelLg" color={colors.textPrimary}>
+                        {item.label}
+                      </AppText>
+                    </View>
+                  ) : (
+                    <AppText variant="labelLg" color={colors.textSecondary}>
+                      {item.label}
+                    </AppText>
+                  )}
+                </Pressable>
+              );
+            })}
           </View>
         </View>
 
@@ -260,11 +285,13 @@ export function HomeDashboardScreen({ navigation }: Props) {
           </View>
         </AppCard>
 
-        {/* Pagination Dots */}
-        <View style={styles.paginationRow}>
-          <View style={styles.dotActive} />
-          <View style={styles.dotInactive} />
-        </View>
+        {/* Quick Utility Grid */}
+        <QuickUtilityGrid
+          onSearch={() => root?.navigate('FoodSearch', { date: selectedDate, meal: 'snack' })}
+          onBarcode={() => root?.navigate('BarcodeScanner', { date: selectedDate, meal: 'snack' })}
+          onAIScan={() => root?.navigate('AIMealScan', { date: selectedDate, meal: 'snack' })}
+          onVoice={() => root?.navigate('VoiceLogModal', { date: selectedDate, meal: 'snack' })}
+        />
 
         {/* ── 5. Nhật ký gần đây (Recent Diary) ───────────────────────── */}
         <View style={styles.sectionBlock}>
@@ -385,6 +412,20 @@ export function HomeDashboardScreen({ navigation }: Props) {
           </View>
         </AppCard>
       </ScrollView>
+
+      {/* ── Floating "Quay lại hôm nay" Button ──────────────────────── */}
+      {!isToday && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Quay lại hôm nay"
+          onPress={() => setSelectedDate(todayKey())}
+          style={({ pressed }) => [styles.floatingTodayBtn, pressed && styles.pressedOpacity]}
+        >
+          <AppText variant="labelLg" color={colors.onBrand}>
+            Quay lại hôm nay
+          </AppText>
+        </Pressable>
+      )}
     </SafeAreaView>
   );
 }
