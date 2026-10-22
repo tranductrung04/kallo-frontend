@@ -71,7 +71,7 @@ export function QuickUtilityTile({
   const isDark = theme.scheme === 'dark';
 
   const bg = isDark ? config.dark.bg : config.light.bg;
-  const glyphColor = isDark ? config.dark.glyph : config.light.glyph;
+  const glyphColor = isDark ? theme.colors.onQuickTile : config.light.glyph;
   const borderColor = isDark ? 'transparent' : config.light.border;
   const borderWidth = isDark ? 0 : 1;
 

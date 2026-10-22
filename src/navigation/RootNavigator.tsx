@@ -25,7 +25,7 @@ import { AppText } from '@/components/common';
 import { useAuth } from '@/features/auth/AuthProvider';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
-function SplashScreen() { const theme = useTheme(); const insets = useSafeAreaInsets(); return <View style={[styles.splash, { backgroundColor: theme.colors.primary, paddingTop: insets.top, paddingBottom: insets.bottom }]}><ActivityIndicator color={theme.colors.onPrimary} accessibilityLabel="Đang khởi động" /><AppText variant="title" color={theme.colors.onPrimary}>Kallo</AppText><AppText color={theme.colors.onPrimary}>Chăm sóc sức khỏe mỗi ngày</AppText></View>; }
+function SplashScreen() { const insets = useSafeAreaInsets(); return <View style={[styles.splash, { backgroundColor: '#8B57E8', paddingTop: insets.top, paddingBottom: insets.bottom }]}><ActivityIndicator color="#FFFFFF" accessibilityLabel="Đang khởi động" /><AppText variant="title" color="#FFFFFF">Kallo</AppText><AppText color="#FFFFFF">Chăm sóc sức khỏe mỗi ngày</AppText></View>; }
 
 export function RootNavigator() {
   const theme = useTheme(); const { status } = useAuth();

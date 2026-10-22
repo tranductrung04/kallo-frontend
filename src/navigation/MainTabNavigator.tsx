@@ -52,12 +52,7 @@ export function MainTabNavigator() {
         styles.scanButton,
         {
           backgroundColor: theme.colors.brandPrimary,
-          // floatingButtonGlow shadow
-          shadowColor: isDark ? 'rgba(142, 124, 255, 0.40)' : 'rgba(108, 86, 245, 0.35)',
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 1,
-          shadowRadius: 24,
-          elevation: 10,
+          ...theme.shadows.floatingButtonGlow,
         },
         style as object,
         pressed && styles.scanPressed,
@@ -67,12 +62,13 @@ export function MainTabNavigator() {
     </Pressable>
   );
 
-  // ── Bottom Bar colors per DESIGN.md ────────────────────────────────────
-  // Dark:  #161420 (90% opacity + backdrop blur)
-  // Light: #FFFFFF (92% opacity + backdrop blur)
-  const barBg = isDark ? '#161420' : '#FFFFFF';
-  const barBorderTop = isDark ? '#252238' : '#E4E0F0';
-  const activeColor = theme.colors.brandPrimary;
+  // ── Bottom Bar colors per DESIGN.md L346-350 ────────────────────────────
+  // Dark:  rgba(20, 17, 30, 0.90)
+  // Light: rgba(255, 255, 255, 0.92)
+  const barBg = theme.colors.tabBar;
+  const barBorderTop = theme.colors.surfaceBorder;
+  // Active Tab: Dark brandSecondary (#B488FC) / Light brandPrimary (#7B4FE0)
+  const activeColor = isDark ? theme.colors.brandSecondary : theme.colors.brandPrimary;
   const inactiveColor = theme.colors.textSecondary;
 
   void state;
@@ -92,15 +88,7 @@ export function MainTabNavigator() {
           borderTopWidth: 1,
           borderTopColor: barBorderTop,
           // Light mode: upward shadow per DESIGN.md
-          ...(isDark
-            ? {}
-            : {
-                shadowColor: 'rgba(19, 18, 27, 0.04)',
-                shadowOffset: { width: 0, height: -4 },
-                shadowOpacity: 1,
-                shadowRadius: 16,
-                elevation: 4,
-              }),
+          ...(isDark ? {} : theme.shadows.bottomBar),
         },
         tabBarLabelStyle: {
           fontSize: 10,

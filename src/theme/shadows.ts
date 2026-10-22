@@ -35,13 +35,40 @@ export const shadows = {
       elevation: 8,
     } satisfies ViewStyle,
 
-    // Floating Button Glow: FAB (+) button
-    floatingButtonGlow: {
-      shadowColor: '#9E64F7',
+    // Accent Shadow: Active indicators on dark
+    accentShadow: {
+      shadowColor: 'rgba(158, 100, 247, 0.28)',
       shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.35,
-      shadowRadius: 12,
-      elevation: 6,
+      shadowOpacity: 1,
+      shadowRadius: 20,
+      elevation: 8,
+    } satisfies ViewStyle,
+
+    // Primary CTA Button (on Dark: no shadow, uses surface luminescence)
+    primaryButton: {
+      shadowColor: 'transparent',
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0,
+      shadowRadius: 0,
+      elevation: 0,
+    } satisfies ViewStyle,
+
+    // Floating Button Glow: FAB (+) button per DESIGN.md L302
+    floatingButtonGlow: {
+      shadowColor: 'rgba(158, 100, 247, 0.40)',
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 1,
+      shadowRadius: 24,
+      elevation: 10,
+    } satisfies ViewStyle,
+
+    // Bottom Bar (on Dark: border conveys depth)
+    bottomBar: {
+      shadowColor: 'transparent',
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0,
+      shadowRadius: 0,
+      elevation: 0,
     } satisfies ViewStyle,
   },
 
@@ -55,34 +82,52 @@ export const shadows = {
       elevation: 3,
     } satisfies ViewStyle,
 
-    // Level 2: Floating popovers, toasts, elevated nested wells
+    // Level 2: Floating popovers, toasts, elevated nested wells per DESIGN.md L272
     level2: {
-      shadowColor: 'rgba(93, 72, 202, 0.08)',
+      shadowColor: 'rgba(123, 79, 224, 0.08)',
       shadowOffset: { width: 0, height: 8 },
       shadowOpacity: 1,
       shadowRadius: 24,
       elevation: 6,
     } satisfies ViewStyle,
 
-    // Accent Shadow: Selected date pill, primary CTAs
+    // Radiant Glow: Active indicators on light per DESIGN.md L58
+    radiantGlow: {
+      shadowColor: 'rgba(123, 79, 224, 0.24)',
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 1,
+      shadowRadius: 24,
+      elevation: 8,
+    } satisfies ViewStyle,
+
+    // Accent Shadow: Selected date pill, primary CTAs per DESIGN.md L274
     accentShadow: {
-      shadowColor: 'rgba(108, 86, 245, 0.24)',
+      shadowColor: 'rgba(123, 79, 224, 0.24)',
       shadowOffset: { width: 0, height: 6 },
       shadowOpacity: 1,
       shadowRadius: 20,
       elevation: 8,
     } satisfies ViewStyle,
 
-    // Floating Button Shadow: FAB (+) button
+    // Primary CTA Shadow per DESIGN.md L295
+    primaryButton: {
+      shadowColor: 'rgba(123, 79, 224, 0.25)',
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 1,
+      shadowRadius: 16,
+      elevation: 6,
+    } satisfies ViewStyle,
+
+    // Floating Button Shadow: FAB (+) button per DESIGN.md L302
     floatingButtonGlow: {
-      shadowColor: 'rgba(108, 86, 245, 0.35)',
+      shadowColor: 'rgba(123, 79, 224, 0.35)',
       shadowOffset: { width: 0, height: 8 },
       shadowOpacity: 1,
       shadowRadius: 20,
       elevation: 10,
     } satisfies ViewStyle,
 
-    // Bottom Bar: Subtle upward shadow
+    // Bottom Bar: Subtle upward shadow per DESIGN.md L275
     bottomBar: {
       shadowColor: 'rgba(19, 18, 27, 0.04)',
       shadowOffset: { width: 0, height: -4 },
