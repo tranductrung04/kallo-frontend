@@ -378,6 +378,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
 
             <View style={styles.headerRightRow}>
               <Pressable
+                key={item.key}
                 accessibilityRole="button"
                 accessibilityLabel={`Chuỗi ${streak.currentStreak} ngày`}
                 style={styles.streakContainer}
