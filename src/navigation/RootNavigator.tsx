@@ -38,7 +38,7 @@ export function RootNavigator() {
       <Stack.Screen name="MainTabs" component={MainTabNavigator} options={{ headerShown: false }} />
       <Stack.Screen name="ComponentShowcase" component={ComponentShowcaseScreen} options={{ title: 'Bộ UI Kit' }} />
       <Stack.Screen name="AIScanPlaceholder" component={ScanPlaceholderScreen} options={{ title: 'AI Meal Scan' }} />
-      <Stack.Screen name="FoodSearch" component={FoodSearchScreen} options={{ title: 'Tìm món ăn' }} />
+      <Stack.Screen name="FoodSearch" component={FoodSearchScreen} options={{ headerShown: false }} />
       <Stack.Screen name="FoodDetail" component={FoodDetailScreen} options={{ title: 'Chi tiết món ăn' }} />
       <Stack.Screen name="CustomFoodForm" component={CustomFoodFormScreen} options={{ title: 'Món ăn tùy chỉnh' }} />
       <Stack.Screen name="AIMealScan" component={AIMealScanScreen} options={{ headerShown: false, presentation: 'fullScreenModal' }} />
@@ -57,7 +57,8 @@ export function RootNavigator() {
       <Stack.Screen name="FriendsLeaderboard" component={FriendsLeaderboardScreen} options={{ title: 'Bảng xếp hạng bạn bè' }} />
       <Stack.Screen name="NotificationCenter" component={NotificationCenterScreen} options={{ title: 'Trung tâm thông báo' }} />
       <Stack.Screen name="ReminderSettings" component={ReminderSettingsScreen} options={{ title: 'Cài đặt nhắc nhở' }} />
-      <Stack.Screen name="ReportOverview" component={ReportOverviewScreen} options={{ title: 'Thống kê báo cáo' }} />
+      <Stack.Screen name="ReportOverview" component={ReportOverviewScreen} options={{ headerShown: false }} />
+
     </>}
   </Stack.Navigator></NavigationContainer>;
 }
