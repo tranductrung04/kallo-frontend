@@ -94,7 +94,11 @@ export function PlusIcon({ size = 14, color, strokeWidth = 3 }: PlusIconProps) {
 export function FlameIcon({ size = 16, color }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-      <Path d="M12 23c-4.97 0-9-3.8-9-8.5C3 8.5 9 2 9 2s-.5 4.5 2 6c1.6-2.5 3-5 3-5s6 6.5 6 11.5c0 4.7-4.03 8.5-9 8.5zm0-4c2.21 0 4-1.79 4-4 0-2.5-2.5-4.5-2.5-4.5s-.5 1.5-1.5 2c-1.5 1-2 2-2 3.5 0 1.66 1.34 3 2 3z" />
+      <Path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M12 23c-4.97 0-9-3.8-9-8.5C3 8.5 9 2 9 2s-.5 4.5 2 6c1.6-2.5 3-5 3-5s6 6.5 6 11.5c0 4.7-4.03 8.5-9 8.5zm0-4c2.21 0 4-1.79 4-4 0-2.5-2.5-4.5-2.5-4.5s-.5 1.5-1.5 2c-1.5 1-2 2-2 3.5 0 1.66 1.34 3 2 3z"
+      />
     </Svg>
   );
 }
@@ -145,38 +149,45 @@ export function LightningIcon({ size = 13, color }: IconProps) {
   );
 }
 
-/** Icon Đường bột (Carbs) — bông lúa mì */
-export function WheatIcon({ size = 15, color, creaseColor }: WheatIconProps) {
+/** Icon Đường bột (Carbs) — bông lúa mì nghiêng 45°, các hạt tách rời */
+export function WheatIcon({ size = 15, color = '#3B82F6', creaseColor }: WheatIconProps) {
   const crease = creaseColor || '#1D4ED8';
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <G transform="rotate(45, 12, 12)">
-        {/* Cuống lúa */}
-        <Path d="M 12 16 L 12 21.6" stroke={color} strokeWidth={1.6} strokeLinecap="round" />
-        {/* 3 râu mảnh ở chóp */}
-        <Path d="M 12 3.2 L 12 1.0" stroke={color} strokeWidth={0.8} strokeLinecap="round" />
-        <Path d="M 11.2 3.8 L 9.4 1.8" stroke={color} strokeWidth={0.7} strokeLinecap="round" />
-        <Path d="M 12.8 3.8 L 14.6 1.8" stroke={color} strokeWidth={0.7} strokeLinecap="round" />
+        {/* Cuống + trục bông */}
+        <Path d="M 12 8.5 L 12 21.8" stroke={color} strokeWidth={1.4} strokeLinecap="round" />
 
-        {/* Thân hạt lúa mì đầy đặn */}
+        {/* Hạt trên cùng (chóp) */}
         <Path
-          d="M 12 3.2 C 13.0 4.2 14.4 5.2 15.0 6.6 C 15.4 7.6 14.8 8.6 14.0 9.0 C 15.6 9.8 17.0 11.0 16.8 12.6 C 16.6 13.8 15.5 14.4 14.5 14.6 C 15.2 15.2 15.4 16.2 14.5 16.8 C 13.6 17.4 12.6 17.2 12.0 17.0 C 11.4 17.2 10.4 17.4 9.5 16.8 C 8.6 16.2 8.8 15.2 9.5 14.6 C 8.5 14.4 7.4 13.8 7.2 12.6 C 7.0 11.0 8.4 9.8 10.0 9.0 C 9.2 8.6 8.6 7.6 9.0 6.6 C 9.6 5.2 11.0 4.2 12 3.2 Z"
+          d="M 12 2.2 C 13.5 3.8 13.7 6 12 8.2 C 10.3 6 10.5 3.8 12 2.2 Z"
           fill={color}
         />
 
-        {/* Gân phân hạt tạo chiều sâu */}
-        <Path d="M 12 6.8 L 12 16.8" stroke={crease} strokeWidth={0.8} strokeLinecap="round" />
-        <Path d="M 12 8.6 C 10.8 7.8 9.8 7.2 8.8 7.0" stroke={crease} strokeWidth={0.8} strokeLinecap="round" />
-        <Path d="M 12 8.6 C 13.2 7.8 14.2 7.2 15.2 7.0" stroke={crease} strokeWidth={0.8} strokeLinecap="round" />
-        <Path d="M 12 12.0 C 10.5 11.2 9.0 10.6 7.4 10.4" stroke={crease} strokeWidth={0.8} strokeLinecap="round" />
-        <Path d="M 12 12.0 C 13.5 11.2 15.0 10.6 16.6 10.4" stroke={crease} strokeWidth={0.8} strokeLinecap="round" />
-        <Path d="M 12 15.0 C 10.8 14.4 9.8 13.8 8.8 13.6" stroke={crease} strokeWidth={0.8} strokeLinecap="round" />
-        <Path d="M 12 15.0 C 13.2 14.4 14.2 13.8 15.2 13.6" stroke={crease} strokeWidth={0.8} strokeLinecap="round" />
+        {/* Cặp hạt 1 */}
+        <Path d="M 11.5 10.6 C 8.8 10.2 7.6 8 7.8 6 C 10.2 6.4 11.7 8.2 11.5 10.6 Z" fill={color} />
+        <Path d="M 12.5 10.6 C 15.2 10.2 16.4 8 16.2 6 C 13.8 6.4 12.3 8.2 12.5 10.6 Z" fill={color} />
+
+        {/* Cặp hạt 2 */}
+        <Path d="M 11.5 14 C 8.8 13.6 7.6 11.4 7.8 9.4 C 10.2 9.8 11.7 11.6 11.5 14 Z" fill={color} />
+        <Path d="M 12.5 14 C 15.2 13.6 16.4 11.4 16.2 9.4 C 13.8 9.8 12.3 11.6 12.5 14 Z" fill={color} />
+
+        {/* Cặp hạt 3 */}
+        <Path d="M 11.5 17.4 C 8.8 17 7.6 14.8 7.8 12.8 C 10.2 13.2 11.7 15 11.5 17.4 Z" fill={color} />
+        <Path d="M 12.5 17.4 C 15.2 17 16.4 14.8 16.2 12.8 C 13.8 13.2 12.3 15 12.5 17.4 Z" fill={color} />
+
+        {/* Gân mảnh trong từng hạt */}
+        <Path d="M 12 3.6 L 12 7" stroke={crease} strokeWidth={0.6} strokeLinecap="round" />
+        <Path d="M 11 10 L 8.8 7" stroke={crease} strokeWidth={0.6} strokeLinecap="round" />
+        <Path d="M 13 10 L 15.2 7" stroke={crease} strokeWidth={0.6} strokeLinecap="round" />
+        <Path d="M 11 13.4 L 8.8 10.4" stroke={crease} strokeWidth={0.6} strokeLinecap="round" />
+        <Path d="M 13 13.4 L 15.2 10.4" stroke={crease} strokeWidth={0.6} strokeLinecap="round" />
+        <Path d="M 11 16.8 L 8.8 13.8" stroke={crease} strokeWidth={0.6} strokeLinecap="round" />
+        <Path d="M 13 16.8 L 15.2 13.8" stroke={crease} strokeWidth={0.6} strokeLinecap="round" />
       </G>
     </Svg>
   );
 }
-export const LeafIcon = WheatIcon;
 
 /** Icon Chất béo (Fats) — giọt dầu */
 export function DropletIcon({ size = 13, color }: IconProps) {
@@ -254,12 +265,16 @@ export function FiberIcon({
 
 // ─── Tracking & Utility Icons ────────────────────────────────────────────────
 
-export function ScaleIcon({ size = 18, color, innerColor }: ScaleIconProps) {
+export function ScaleIcon({ size = 22, color, innerColor }: ScaleIconProps) {
+  const fillColor = color || '#F59E0B';
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-      <Rect x={3} y={3} width={18} height={18} rx={5} fill={color} />
-      <Circle cx={12} cy={9} r={3} fill={innerColor} />
-      <Line x1={12} y1={9} x2={13.5} y2={7.5} stroke={color} strokeWidth={1.5} />
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      {/* Scale body */}
+      <Rect x={2} y={2} width={20} height={20} rx={6} fill={fillColor} />
+      {/* Dark display cutout */}
+      <Rect x={6} y={5} width={12} height={6} rx={2.5} fill={innerColor || '#181524'} />
+      {/* Light dial strip */}
+      <Rect x={7.5} y={6.5} width={9} height={3} rx={1} fill="#FEF3C7" />
     </Svg>
   );
 }
@@ -320,92 +335,245 @@ export function CloudAddIcon({ size = 38, color }: IconProps) {
   );
 }
 
+export type BowlFoodPlusIconProps = IconProps & {
+  cutoutColor?: string;
+};
+
+/** Icon Bát cơm thêm món (+) — Dùng cho trạng thái trống của Nhật ký gần đây (Recent Diary) */
+export function BowlFoodPlusIcon({
+  size = 40,
+  color,
+  cutoutColor = '#0D0B14',
+}: BowlFoodPlusIconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 640 640" fill="none">
+      {/* Cơm vun chóp 3 múi tròn đầy */}
+      <Path
+        fill={color}
+        d="M64 240c0-35.3 28.7-64 64-64h1.6c7.4-36.5 39.7-64 78.4-64c15 0 29 4.1 40.9 11.2C262.2 97.5 289 80 320 80s57.8 17.6 71.1 43.2c12-7.1 26-11.2 40.9-11.2c38.7 0 71 27.5 78.4 64h1.6c35.3 0 64 28.7 64 64c0 11.7-3.1 22.6-8.6 32H72.6c-5.5-9.4-8.6-20.3-8.6-32z"
+      />
+      {/* Thân bát bo cong đều thu về đáy */}
+      <Path
+        fill={color}
+        d="M64 379.4c0-15.1 12.3-27.4 27.4-27.4h457.1c15.1 0 27.4 12.3 27.4 27.4c0 70.5-44.4 130.7-106.7 154.1l-1.7 14.5c-2 16-15.6 28-31.8 28H204.2c-16.1 0-29.8-12-31.8-28l-1.8-14.4C108.4 478.1 64 417.9 64 347.4z"
+      />
+      {/* Vòng đệm cutout tách biệt huy hiệu dấu cộng và thân bát */}
+      <Circle cx={460} cy={460} r={140} fill={cutoutColor} />
+      {/* Huy hiệu tròn dấu cộng */}
+      <Circle cx={460} cy={460} r={112} fill={color} />
+      {/* Dấu cộng nét đậm bo tròn bên trong huy hiệu */}
+      <Line
+        x1={405}
+        y1={460}
+        x2={515}
+        y2={460}
+        stroke={cutoutColor}
+        strokeWidth={30}
+        strokeLinecap="round"
+      />
+      <Line
+        x1={460}
+        y1={405}
+        x2={460}
+        y2={515}
+        stroke={cutoutColor}
+        strokeWidth={30}
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
+export const BowlAddIcon = BowlFoodPlusIcon;
+
 // ─── Activity Icons ──────────────────────────────────────────────────────────
 
-export function RunningIcon({ size = 22, color }: IconProps) {
+export type ActivityIconProps = IconProps & {
+  cutoutColor?: string;
+};
+
+/** Icon Chạy bộ — Người chạy nghiêng về phía trước kèm 3 vạch gió tốc độ bên trái */
+export function RunningIcon({ size = 24, color }: IconProps) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-      <Circle cx={13.5} cy={4.5} r={2.2} />
-      <Path d="M13.5 8c-.6 0-1.2.2-1.7.5L8.5 10.8c-.5.3-.8.9-.7 1.5.1.6.6 1.1 1.2 1.1.2 0 .4 0 .6-.1l2.4-1.3v4.2l-3.3 2c-.6.3-.8 1.1-.5 1.7.3.6 1.1.8 1.7.5l4-2.4c.4-.2.6-.6.6-1.1V12l2.3 2.3c.4.4 1 .5 1.5.2.5-.3.8-.9.6-1.5l-1.3-3.6c-.4-.9-1.2-1.4-2.2-1.4h-1.3z" />
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      {/* 3 vạch gió tốc độ */}
+      <Rect x="1.5" y="7.6" width="4.6" height="1.5" rx="0.75" fill={color} />
+      <Rect x="0.8" y="11" width="6.4" height="1.5" rx="0.75" fill={color} />
+      <Rect x="2.2" y="14.4" width="4.2" height="1.5" rx="0.75" fill={color} />
+      {/* Đầu */}
+      <Circle cx="17.6" cy="4.6" r="2.1" fill={color} />
+      {/* Thân, tay, chân */}
+      <G stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+        {/* Thân */}
+        <Path d="M14.8 8.4 L12.6 13.4" />
+        {/* Tay trước */}
+        <Path d="M14.8 8.8 L17.8 11 L20 9.2" />
+        {/* Tay sau */}
+        <Path d="M14.6 8.8 L11.4 9.6 L9.8 12" />
+        {/* Chân trước */}
+        <Path d="M12.6 13.4 L16.2 15.6 L14.8 20" />
+        {/* Chân sau */}
+        <Path d="M12.6 13.4 L10.4 16.6 L7.4 18.6" />
+      </G>
     </Svg>
   );
 }
 
-export function BicycleIcon({ size = 22, color }: IconProps) {
+/** Icon Đạp xe — Người đạp xe duỗi một tay về phía trước, hai bánh tròn lớn */
+export function BicycleIcon({ size = 24, color }: IconProps) {
   return (
-    <Svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={color}
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <Circle cx={5.5} cy={17.5} r={3.5} />
-      <Circle cx={18.5} cy={17.5} r={3.5} />
-      <Path d="M15 6h-3l-3 7h6.5l2-4.5H19" />
-      <Path d="M12 17.5V14l-3-3" />
-      <Circle cx={12} cy={5} r={1} fill={color} />
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      {/* Đầu */}
+      <Circle cx="12.6" cy="4.8" r="1.8" fill={color} />
+      {/* Thân nghiêng ra trước */}
+      <Path
+        d="M10.6 12.4 L12 8 L14 10"
+        stroke={color}
+        strokeWidth={2.2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Tay duỗi thẳng về phía trước */}
+      <Path
+        d="M12.4 8.4 L16 8.2 L20.2 8.2"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Tay còn lại nắm ghi-đông */}
+      <Path
+        d="M14 10 L16.4 11.2"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Khung xe nối hai bánh */}
+      <Path
+        d="M6.4 17.6 L10.6 12.4 L12.4 17.6 L16.4 11.2 L17.6 17.6"
+        stroke={color}
+        strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Bánh sau */}
+      <Circle cx="6.4" cy="17.6" r="3.6" stroke={color} strokeWidth={1.9} />
+      <Circle cx="6.4" cy="17.6" r="0.9" fill={color} />
+      {/* Bánh trước */}
+      <Circle cx="17.6" cy="17.6" r="3.6" stroke={color} strokeWidth={1.9} />
+      <Circle cx="17.6" cy="17.6" r="0.9" fill={color} />
     </Svg>
   );
 }
 
-export function ShuttlecockIcon({ size = 22, color }: IconProps) {
+/** Icon Cầu lông — Quả cầu lông nghiêng: đế bấc ở dưới trái, tán lông vũ xòe lên phải */
+export function ShuttlecockIcon({
+  size = 24,
+  color,
+  cutoutColor = '#221D34',
+}: ActivityIconProps) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-      <Circle cx={12} cy={18} r={3.5} />
-      <Path d="M8.5 15.5L6 6.5l4 1.5 2-4.5 2 4.5 4-1.5-2.5 9h-7z" fill="none" stroke={color} strokeWidth={1.8} />
-      <Line x1={8} y1={11} x2={16} y2={11} stroke={color} strokeWidth={1.5} />
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      {/* rotate(+45): đế xuống trái, tán lông lên phải */}
+      <G transform="rotate(45, 12, 12)">
+        {/* Đế bấc */}
+        <Path d="M10.2 18.2 C10.2 19.8 11 21 12 21 C13 21 13.8 19.8 13.8 18.2 Z" fill={color} />
+        {/* Tán lông vũ */}
+        <Path d="M9.8 17.2 L6.2 4.8 C10 3.6 14 3.6 17.8 4.8 L14.2 17.2 Z" fill={color} />
+        {/* Rãnh phân lông */}
+        <Line x1="12" y1="4" x2="12" y2="17.2" stroke={cutoutColor} strokeWidth={1.1} />
+        <Line x1="9.2" y1="4.4" x2="10.8" y2="17.2" stroke={cutoutColor} strokeWidth={0.9} />
+        <Line x1="14.8" y1="4.4" x2="13.2" y2="17.2" stroke={cutoutColor} strokeWidth={0.9} />
+        {/* Chỉ thắt ngang */}
+        <Path d="M7.8 12 C10.5 11.5 13.5 11.5 16.2 12" stroke={cutoutColor} strokeWidth={1.1} strokeLinecap="round" />
+      </G>
     </Svg>
   );
 }
 
-export function PickleballIcon({ size = 22, color }: IconProps) {
+/** Icon Pickleball — Vợt mặt thuôn về cán, nghiêng 45°, quả bóng tách viền ở góc trên trái */
+export function PickleballIcon({
+  size = 24,
+  color,
+  cutoutColor = '#221D34',
+}: ActivityIconProps) {
   return (
-    <Svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={color}
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <Rect x={5} y={3} width={12} height={13} rx={5} />
-      <Path d="M11 16v6" strokeWidth={3} />
-      <Circle cx={18.5} cy={6.5} r={2} fill={color} stroke="none" />
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <G transform="rotate(45, 12, 12)">
+        {/* Cán vợt */}
+        <Rect x="10.9" y="16" width="2.2" height="5.6" rx="1.1" fill={color} />
+        {/* Mặt vợt thuôn dần về cán */}
+        <Path
+          d="M7.2 8.2 C7.2 5.2 9.2 3.2 12 3.2 C14.8 3.2 16.8 5.2 16.8 8.2 C16.8 11 15.6 13 14 14.6 L13.4 16 L10.6 16 L10 14.6 C8.4 13 7.2 11 7.2 8.2 Z"
+          fill={color}
+        />
+        {/* Ngấn nối mặt vợt - cán */}
+        <Line x1="10.2" y1="15.9" x2="13.8" y2="15.9" stroke={cutoutColor} strokeWidth={0.9} />
+      </G>
+      {/* Viền tách bóng khỏi vợt */}
+      <Circle cx="6.2" cy="6.2" r="3.4" fill={cutoutColor} />
+      {/* Quả bóng */}
+      <Circle cx="6.2" cy="6.2" r="2.4" fill={color} />
     </Svg>
   );
 }
 
-export function YogaIcon({ size = 22, color }: IconProps) {
+/** Icon Yoga — Người ngồi thiền khoanh chân, hai tay dang ngang đặt trên gối */
+export function YogaIcon({ size = 24, color }: IconProps) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-      <Circle cx={12} cy={4} r={2.5} />
-      <Path d="M12 8c-1.5 0-2.8.8-3.5 2l-3 5.5c-.3.5-.1 1.2.4 1.5.5.3 1.2.1 1.5-.4l2.6-4.8V16l-3.5 1.5c-.5.2-.8.8-.6 1.3.2.5.8.8 1.3.6L12 17.5l4.4 1.9c.5.2 1.1-.1 1.3-.6.2-.5-.1-1.1-.6-1.3L13.5 16v-4.2l2.6 4.8c.3.5 1 .7 1.5.4.5-.3.7-1 .4-1.5l-3-5.5C14.3 8.8 13.5 8 12 8z" />
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      {/* Đầu */}
+      <Circle cx="12" cy="5" r="2.3" fill={color} />
+      {/* Thân (vai rộng, thu dần xuống eo) */}
+      <Path
+        d="M9.4 8.8 H14.6 L14 14.6 H10 Z"
+        fill={color}
+        stroke={color}
+        strokeWidth={1.2}
+        strokeLinejoin="round"
+      />
+      {/* Hai tay dang sang hai bên, hơi chếch xuống */}
+      <Path
+        d="M9.8 9.8 L4.6 12.6 M14.2 9.8 L19.4 12.6"
+        stroke={color}
+        strokeWidth={1.9}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Hai chân khoanh bắt chéo nhau (hình chữ X dẹt) */}
+      <Path
+        d="M4.5 18.8 L19.5 16.2 M4.5 16.2 L19.5 18.8"
+        stroke={color}
+        strokeWidth={2.4}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </Svg>
   );
 }
 
-export function MoreActivitiesIcon({ size = 22, color }: IconProps) {
+/** Icon Khác — Trang ghi chú có 3 dòng kèm huy hiệu 3 chấm ở góc dưới phải */
+export function MoreActivitiesIcon({
+  size = 24,
+  color,
+  cutoutColor = '#221D34',
+}: ActivityIconProps) {
   return (
-    <Svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={color}
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <Rect x={4} y={4} width={16} height={16} rx={3} />
-      <Line x1={8} y1={9} x2={16} y2={9} />
-      <Line x1={8} y1={13} x2={16} y2={13} />
-      <Line x1={8} y1={17} x2={12} y2={17} />
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      {/* Trang tài liệu */}
+      <Rect x="4.5" y="3" width="14" height="15" rx="2.6" fill={color} />
+      {/* 3 dòng danh sách */}
+      <Line x1="8" y1="7" x2="15.5" y2="7" stroke={cutoutColor} strokeWidth={1.5} strokeLinecap="round" />
+      <Line x1="8" y1="10.5" x2="15.5" y2="10.5" stroke={cutoutColor} strokeWidth={1.5} strokeLinecap="round" />
+      <Line x1="8" y1="14" x2="12" y2="14" stroke={cutoutColor} strokeWidth={1.5} strokeLinecap="round" />
+      {/* Viền tách huy hiệu */}
+      <Circle cx="18" cy="18" r="4.6" fill={cutoutColor} />
+      {/* Huy hiệu */}
+      <Circle cx="18" cy="18" r="3.5" fill={color} />
+      {/* Dấu 3 chấm */}
+      <Circle cx="16.4" cy="18" r="0.65" fill={cutoutColor} />
+      <Circle cx="18" cy="18" r="0.65" fill={cutoutColor} />
+      <Circle cx="19.6" cy="18" r="0.65" fill={cutoutColor} />
     </Svg>
   );
 }

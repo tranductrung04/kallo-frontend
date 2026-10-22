@@ -36,7 +36,7 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       backgroundColor: c.canvasBase,
     },
     scrollContent: {
-      paddingBottom: 110,
+      paddingBottom: s.lg,
     },
     topHeroContainer: {
       backgroundColor: c.surfaceMid,
@@ -331,9 +331,9 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
 
     // 6. Workout Grid (AppCard + style)
     activityGridCard: {
-      paddingVertical: s.md,
+      paddingVertical: s.lg,
       paddingHorizontal: gapMid,
-      gap: s.md,
+      gap: s.lg,
       marginTop: s.sm,
     },
     activityRow: {
@@ -367,24 +367,31 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
     subCard: {
       flex: 1,
       justifyContent: 'space-between',
-      minHeight: 110,
+      minHeight: 116,
     },
     healthConnectRow: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: s.sm,
-      marginTop: s.sm,
+      marginTop: s.md,
     },
     healthIconBox: {
-      width: 34,
-      height: 34,
+      width: 38,
+      height: 38,
       borderRadius: r.DEFAULT,
-      backgroundColor: c.onBrand,
+      backgroundColor: '#FFFFFF',
       alignItems: 'center',
       justifyContent: 'center',
+      padding: 3,
+    },
+    healthConnectImage: {
+      width: 28,
+      height: 28,
     },
     healthConnectText: {
       flex: 1,
+      fontSize: 12,
+      lineHeight: 16,
     },
     workoutTopRow: {
       flexDirection: 'row',
@@ -392,20 +399,28 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       alignItems: 'center',
     },
     plusCircleBtn: {
-      width: 24,
-      height: 24,
+      width: 28,
+      height: 28,
       borderRadius: r.full,
-      backgroundColor: c.brandAction,
+      backgroundColor: c.brandSecondary,
       alignItems: 'center',
       justifyContent: 'center',
     },
+    workoutMiddle: {
+      marginTop: s.sm - 2,
+    },
     workoutEmptyText: {
-      marginVertical: s.sm - 2,
+      marginBottom: s.xs + 2,
+    },
+    workoutDivider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: c.surfaceBorder,
     },
     workoutBottomRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: s.xs,
+      gap: s.xs + 2,
+      marginTop: s.xs,
     },
 
     // 8. Water Card (AppCard + style)
@@ -418,7 +433,11 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
     waterLeftCol: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: gapMid,
+      gap: s.md,
+    },
+    waterDropletImage: {
+      width: 26,
+      height: 26,
     },
     waterTextGroup: {
       gap: 2,
@@ -426,51 +445,69 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
     waterControlsCapsule: {
       backgroundColor: c.canvasBase,
       borderRadius: r.full,
-      paddingHorizontal: gapMid,
-      paddingVertical: s.sm,
+      paddingHorizontal: s.md,
+      paddingVertical: s.sm + 2,
       flexDirection: 'row',
       alignItems: 'center',
-      gap: s.sm,
-      borderWidth: 1,
-      borderColor: c.surfaceBorder,
+      gap: s.md,
     },
     waterCupBtn: {
-      padding: s.xs,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    waterCupImage: {
+      width: 24,
+      height: 26,
     },
     waterCapsuleDivider: {
-      width: 1,
+      width: 1.5,
       height: 16,
-      backgroundColor: c.surfaceBorder,
+      backgroundColor: 'rgba(255, 255, 255, 0.15)',
     },
 
     // 9. Weight Card
-    weightTopRow: {
+    weightHeaderRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: s.sm,
+      marginBottom: s.md - 2,
+    },
+    weightIconImage: {
+      width: 24,
+      height: 24,
+    },
+    weightTitleText: {
+      fontSize: 16,
+      fontWeight: '700',
+    },
+    weightMiddleRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
       marginBottom: s.sm,
     },
-    weightTitleRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: s.sm,
-    },
-    // AppButton primary mặc định cao 52px → thu nhỏ cho nút "Cập nhật"
-    weightUpdateBtn: {
-      minHeight: 30,
-      paddingVertical: s.xs,
-      paddingHorizontal: s.md,
-    },
     weightValuesGroup: {
-      marginBottom: s.sm,
+      justifyContent: 'center',
     },
     weightDateText: {
       marginTop: 2,
     },
+    weightUpdatePillBtn: {
+      backgroundColor: c.brandPrimary,
+      paddingVertical: 8,
+      paddingHorizontal: 20,
+      borderRadius: r.full,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    weightUpdateBtnText: {
+      fontSize: 14,
+      fontWeight: '600',
+    },
     weightChartContainer: {
       alignItems: 'center',
       justifyContent: 'center',
-      marginTop: s.sm - 2,
+      marginTop: 4,
     },
 
     // 10. Floating "Quay lại hôm nay" Button

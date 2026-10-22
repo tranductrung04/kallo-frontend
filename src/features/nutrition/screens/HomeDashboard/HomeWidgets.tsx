@@ -66,7 +66,7 @@ export function MacroColumn({ styles, title, icon, current, goal, color }: Macro
 
 type ActivityEntry = {
   label: string;
-  Icon: React.ComponentType<IconProps>;
+  Icon: React.ComponentType<any>;
 };
 
 const ACTIVITIES: ActivityEntry[] = [
@@ -98,10 +98,10 @@ export function ActivityGrid({ styles, onSelect }: ActivityGridProps) {
               accessibilityRole="button"
               accessibilityLabel={label}
               onPress={() => onSelect(label)}
-              style={styles.activityItem}
+              style={({ pressed }) => [styles.activityItem, pressed && styles.pressedOpacity]}
             >
               <View style={styles.activityCircle}>
-                <Icon size={22} color={colors.textPrimary} />
+                <Icon size={24} color={colors.textPrimary} cutoutColor={colors.surfaceHigh} />
               </View>
               <AppText variant="labelMd" align="center" style={styles.activityLabel}>
                 {label}
@@ -116,11 +116,13 @@ export function ActivityGrid({ styles, onSelect }: ActivityGridProps) {
 
 // ─── WeightChart ──────────────────────────────────────────────────────────────
 
-const CHART_HEIGHT = 80;
-const PLOT_LEFT = 25;
-const GRID_ROWS = [15, 30, 45, 60, 75];
-const GRID_COL_START = 40;
-const GRID_COL_STEP = 30;
+const CHART_HEIGHT = 98;
+const PLOT_LEFT = 36;
+const GRID_TOP = 6;
+const GRID_BOTTOM = 96;
+const GRID_ROWS = [6, 24, 42, 60, 78, 96];
+const WEIGHT_LINE_Y = 78;
+const NUM_GRID_COLS = 7;
 
 type WeightChartProps = {
   width: number;
@@ -129,14 +131,18 @@ type WeightChartProps = {
 
 export function WeightChart({ width, weight }: WeightChartProps) {
   const { colors, typography } = useTheme();
-  const plotRight = width - 3;
+  const plotRight = Math.max(PLOT_LEFT + 60, width - 4);
+  const colStep = (plotRight - PLOT_LEFT) / NUM_GRID_COLS;
 
-  // Vạch dọc sinh theo bề rộng thực tế, không hardcode vị trí
+  // 8 vertical grid lines bounding the 7 grid columns
   const gridCols: number[] = [];
-  for (let x = GRID_COL_START; x < plotRight; x += GRID_COL_STEP) gridCols.push(x);
+  for (let i = 0; i <= NUM_GRID_COLS; i++) {
+    gridCols.push(PLOT_LEFT + i * colStep);
+  }
 
   return (
     <Svg width={width} height={CHART_HEIGHT}>
+      {/* Horizontal grid lines */}
       {GRID_ROWS.map((y) => (
         <Line
           key={`h-${y}`}
@@ -145,34 +151,57 @@ export function WeightChart({ width, weight }: WeightChartProps) {
           x2={plotRight}
           y2={y}
           stroke={colors.surfaceBorder}
-          strokeOpacity={0.7}
+          strokeOpacity={0.65}
           strokeWidth={1}
         />
       ))}
-      {gridCols.map((x) => (
+
+      {/* Vertical grid lines */}
+      {gridCols.map((x, idx) => (
         <Line
-          key={`v-${x}`}
+          key={`v-${idx}`}
           x1={x}
-          y1={10}
+          y1={GRID_TOP}
           x2={x}
-          y2={75}
+          y2={GRID_BOTTOM}
           stroke={colors.surfaceBorder}
-          strokeOpacity={0.7}
+          strokeOpacity={0.65}
           strokeWidth={1}
         />
       ))}
+
+      {/* Weight label next to the circle */}
       <SvgText
-        x={14}
-        y={64}
-        fill={colors.textSecondary}
-        fontSize={typography.labelSm.fontSize}
+        x={PLOT_LEFT - 8}
+        y={WEIGHT_LINE_Y + 4}
+        fill={colors.brandSecondary}
+        fontSize={12}
+        fontWeight="600"
         textAnchor="end"
-        fontFamily={typography.labelSm.fontFamily}
+        fontFamily={typography.labelLg.fontFamily}
       >
         {weight}
       </SvgText>
-      <Line x1={PLOT_LEFT} y1={60} x2={plotRight} y2={60} stroke={colors.textPrimary} strokeWidth={1.5} />
-      <Circle cx={PLOT_LEFT} cy={60} r={4} stroke={colors.textPrimary} strokeWidth={2} fill={colors.surfaceMid} />
+
+      {/* Solid white weight baseline across the grid */}
+      <Line
+        x1={PLOT_LEFT}
+        y1={WEIGHT_LINE_Y}
+        x2={plotRight}
+        y2={WEIGHT_LINE_Y}
+        stroke="#FFFFFF"
+        strokeWidth={2}
+      />
+
+      {/* Open ring indicator at the baseline start */}
+      <Circle
+        cx={PLOT_LEFT}
+        cy={WEIGHT_LINE_Y}
+        r={5.5}
+        stroke="#FFFFFF"
+        strokeWidth={2}
+        fill={colors.surfaceMid}
+      />
     </Svg>
   );
 }
