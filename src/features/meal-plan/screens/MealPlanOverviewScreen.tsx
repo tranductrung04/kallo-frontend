@@ -18,13 +18,20 @@ import { useMealPlan } from '../MealPlanProvider';
 import { formatVnd } from '../utils';
 import {
   CURATED_MEAL_PLANS,
-  DIET_CATEGORIES,
+  CALORIE_FILTER_TABS,
   buildMealPlanFromCurated,
   type CuratedPlan,
+  type CalorieRange,
 } from '../curatedPlans';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
-type TabKey = 'my_plans' | 'explore';
+type TabKey = 'my_plans' | 'explore' | 'custom';
+
+// Palette tied to the cream premium banner artwork (asset-driven, not theme tokens)
+const BANNER_TEXT = '#1D1712';
+const BANNER_SUBTEXT = '#43391F';
+const BANNER_CTA_BG = '#FFBE3B';
+const BANNER_CTA_TEXT = '#1F1A0A';
 
 export function MealPlanOverviewScreen() {
   const theme = useTheme();
@@ -32,12 +39,13 @@ export function MealPlanOverviewScreen() {
   const isDark = theme.scheme === 'dark';
   const { currentPlan, savedPlans, clearCurrentPlan, setActivePlan, applyPlanToDiary, deletePlan } = useMealPlan();
 
-  const [activeTab, setActiveTab] = useState<TabKey>('my_plans');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  // Default to Explore tab with 2400-2600 Cal range selected to match user mockup exactly
+  const [activeTab, setActiveTab] = useState<TabKey>('explore');
+  const [selectedCalorieRange, setSelectedCalorieRange] = useState<CalorieRange>('2400-2600 Cal');
 
-  const filteredCuratedPlans = selectedCategory === 'all'
-    ? CURATED_MEAL_PLANS
-    : CURATED_MEAL_PLANS.filter((p) => p.category === selectedCategory);
+  const filteredCuratedPlans = CURATED_MEAL_PLANS.filter(
+    (p) => p.calorieRange === selectedCalorieRange,
+  );
 
   const handleAdoptCuratedPlan = (curated: CuratedPlan) => {
     const newPlan = buildMealPlanFromCurated(curated);
@@ -52,8 +60,20 @@ export function MealPlanOverviewScreen() {
           text: 'Xem thực đơn của tôi',
           onPress: () => setActiveTab('my_plans'),
         },
-      ]
+        {
+          text: 'Ở lại đây',
+          style: 'cancel',
+        },
+      ],
     );
+  };
+
+  const handleViewCuratedDetail = (curated: CuratedPlan) => {
+    const newPlan = buildMealPlanFromCurated(curated);
+    if (setActivePlan) {
+      setActivePlan(newPlan);
+    }
+    navigation.navigate('MealPlanDetail');
   };
 
   const handleApplyTodayToDiary = () => {
@@ -70,7 +90,7 @@ export function MealPlanOverviewScreen() {
           },
         },
         { text: 'Ở lại đây', style: 'cancel' },
-      ]
+      ],
     );
   };
 
@@ -91,8 +111,19 @@ export function MealPlanOverviewScreen() {
             }
           },
         },
-      ]
+      ],
     );
+  };
+
+  const getScreenTitle = () => {
+    switch (activeTab) {
+      case 'explore':
+        return 'Khám phá thực đơn';
+      case 'custom':
+        return 'Thực đơn tự tạo';
+      default:
+        return 'Thực đơn của bạn';
+    }
   };
 
   return (
@@ -117,12 +148,16 @@ export function MealPlanOverviewScreen() {
             </TouchableOpacity>
           )}
           <AppText variant="headlineLg" style={styles.mainTitle}>
-            Thực đơn của bạn
+            {getScreenTitle()}
           </AppText>
         </View>
 
-        {/* ── Segmented Pill Tabs (Exact UI from Design) ───────────────── */}
-        <View style={styles.tabBarRow}>
+        {/* ── Segmented Pill Tabs (Thực đơn của bạn | Khám phá thực đơn | Thực đơn tự tạo) ── */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.tabBarRow}
+        >
           <TouchableOpacity
             activeOpacity={0.85}
             onPress={() => setActiveTab('my_plans')}
@@ -130,11 +165,11 @@ export function MealPlanOverviewScreen() {
               styles.pillTab,
               activeTab === 'my_plans'
                 ? {
-                    backgroundColor: isDark ? 'rgba(158, 100, 247, 0.22)' : '#EDE5FF',
-                    borderColor: isDark ? 'rgba(158, 100, 247, 0.5)' : '#7B4FE0',
+                    backgroundColor: isDark ? 'rgba(158, 100, 247, 0.28)' : '#EDE5FF',
+                    borderColor: isDark ? '#7C3AED' : '#7B4FE0',
                   }
                 : {
-                    backgroundColor: theme.colors.surfaceHigh,
+                    backgroundColor: isDark ? '#221D34' : theme.colors.surfaceHigh,
                     borderColor: 'transparent',
                   },
             ]}
@@ -146,7 +181,7 @@ export function MealPlanOverviewScreen() {
               color={
                 activeTab === 'my_plans'
                   ? isDark ? '#D6B8FF' : '#7B4FE0'
-                  : theme.colors.textSecondary
+                  : theme.colors.textPrimary
               }
             >
               Thực đơn của bạn
@@ -160,11 +195,11 @@ export function MealPlanOverviewScreen() {
               styles.pillTab,
               activeTab === 'explore'
                 ? {
-                    backgroundColor: isDark ? 'rgba(158, 100, 247, 0.22)' : '#EDE5FF',
-                    borderColor: isDark ? 'rgba(158, 100, 247, 0.5)' : '#7B4FE0',
+                    backgroundColor: isDark ? 'rgba(158, 100, 247, 0.28)' : '#EDE5FF',
+                    borderColor: isDark ? '#7C3AED' : '#7B4FE0',
                   }
                 : {
-                    backgroundColor: theme.colors.surfaceHigh,
+                    backgroundColor: isDark ? '#221D34' : theme.colors.surfaceHigh,
                     borderColor: 'transparent',
                   },
             ]}
@@ -176,13 +211,43 @@ export function MealPlanOverviewScreen() {
               color={
                 activeTab === 'explore'
                   ? isDark ? '#D6B8FF' : '#7B4FE0'
-                  : theme.colors.textSecondary
+                  : theme.colors.textPrimary
               }
             >
               Khám phá thực đơn
             </AppText>
           </TouchableOpacity>
-        </View>
+
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => setActiveTab('custom')}
+            style={[
+              styles.pillTab,
+              activeTab === 'custom'
+                ? {
+                    backgroundColor: isDark ? 'rgba(158, 100, 247, 0.28)' : '#EDE5FF',
+                    borderColor: isDark ? '#7C3AED' : '#7B4FE0',
+                  }
+                : {
+                    backgroundColor: isDark ? '#221D34' : theme.colors.surfaceHigh,
+                    borderColor: 'transparent',
+                  },
+            ]}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: activeTab === 'custom' }}
+          >
+            <AppText
+              variant="labelLg"
+              color={
+                activeTab === 'custom'
+                  ? isDark ? '#D6B8FF' : '#7B4FE0'
+                  : theme.colors.textPrimary
+              }
+            >
+              Thực đơn tự tạo
+            </AppText>
+          </TouchableOpacity>
+        </ScrollView>
       </View>
 
       {/* ── TAB 1: THỰC ĐƠN CỦA BẠN ──────────────────────────────────── */}
@@ -342,8 +407,259 @@ export function MealPlanOverviewScreen() {
               </AppCard>
 
               {/* ── Saved Plans Section ──────────────────────────────── */}
+              {savedPlans.length > 0 && (
+                <>
+                  <View style={styles.sectionHeader}>
+                    <AppText variant="headlineSm">Thực đơn đã lưu</AppText>
+                    <AppText variant="caption" color={theme.colors.textSecondary}>
+                      {savedPlans.length} thực đơn
+                    </AppText>
+                  </View>
+
+                  {savedPlans.map((plan) => (
+                    <AppCard key={plan.id} style={styles.savedCard}>
+                      <View style={styles.savedCardContent}>
+                        <AppText variant="labelLg">{plan.title}</AppText>
+                        <AppText variant="bodySm" color={theme.colors.textSecondary}>
+                          {plan.goal.targetCalories} kcal • {formatVnd(plan.goal.dailyBudgetVnd)}/ngày
+                        </AppText>
+                      </View>
+                      <AppButton
+                        label="Xem"
+                        variant="secondary"
+                        onPress={() => {
+                          setActivePlan?.(plan);
+                          navigation.navigate('MealPlanDetail');
+                        }}
+                      />
+                    </AppCard>
+                  ))}
+                </>
+              )}
+
+              {/* Bottom Generator Link */}
+              <View style={styles.bottomGeneratorRow}>
+                <AppButton
+                  label="Lập thực đơn AI mới (3 bước)"
+                  variant="outline"
+                  onPress={() => navigation.navigate('MealPlanWizard')}
+                />
+              </View>
+            </ScrollView>
+          )}
+        </>
+      )}
+
+      {/* ── TAB 2: KHÁM PHÁ THỰC ĐƠN (EXPLORE - 1:1 TO MOCKUP SCREENSHOT) ── */}
+      {activeTab === 'explore' && (
+        <ScrollView contentContainerStyle={styles.exploreContent} showsVerticalScrollIndicator={false}>
+          {/* ── BETA / Premium AI Banner ─────────────────────────────── */}
+          <TouchableOpacity
+            activeOpacity={0.9}
+            style={styles.betaBanner}
+            onPress={() => navigation.navigate('MealPlanWizard')}
+            accessibilityRole="button"
+            accessibilityLabel="Khám phá Premium - AI gợi ý thực đơn"
+          >
+            <Image
+              source={images.mealPlanAiPremiumBanner}
+              style={styles.betaBannerImage}
+              resizeMode="cover"
+            />
+            <View style={styles.betaBannerContent}>
+              <View style={styles.betaBadge}>
+                <AppText variant="labelMd" color={BANNER_TEXT} style={styles.betaBadgeText}>
+                  BETA
+                </AppText>
+              </View>
+              <AppText variant="headlineSm" color={BANNER_TEXT} style={styles.betaTitle}>
+                AI gợi ý thực đơn
+              </AppText>
+              <AppText variant="bodySm" color={BANNER_SUBTEXT} style={styles.betaSubtitle}>
+                Nâng cấp Premium để trải nghiệm.
+              </AppText>
+              <View style={styles.betaCta}>
+                <AppText variant="labelMd" color={BANNER_CTA_TEXT} style={styles.betaCtaText}>
+                  Khám phá Premium
+                </AppText>
+              </View>
+            </View>
+          </TouchableOpacity>
+
+          {/* ── Section Title: Đề xuất kế hoạch cho bạn ────────────────── */}
+          <View style={styles.sectionHeaderTitleContainer}>
+            <AppText variant="headlineMd" style={styles.sectionHeaderTitle}>
+              Đề xuất kế hoạch cho bạn
+            </AppText>
+          </View>
+
+          {/* ── Calorie Range Filter Pills (< 2200 Cal | 2200-2400 Cal | 2400-2600 Cal | > 2600 Cal) ── */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.calorieChipsContainer}
+          >
+            {CALORIE_FILTER_TABS.map((range) => {
+              const isSelected = selectedCalorieRange === range;
+              return (
+                <TouchableOpacity
+                  key={range}
+                  onPress={() => setSelectedCalorieRange(range)}
+                  style={[
+                    styles.calorieChip,
+                    isSelected
+                      ? {
+                          backgroundColor: isDark ? 'rgba(158, 100, 247, 0.28)' : '#EDE5FF',
+                          borderColor: isDark ? '#7C3AED' : '#7B4FE0',
+                        }
+                      : {
+                          backgroundColor: isDark ? '#221D34' : theme.colors.surfaceHigh,
+                          borderColor: 'transparent',
+                        },
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: isSelected }}
+                  accessibilityLabel={`Lọc thực đơn ${range}`}
+                >
+                  <AppText
+                    variant="labelLg"
+                    color={
+                      isSelected
+                        ? isDark ? '#D6B8FF' : '#7B4FE0'
+                        : theme.colors.textPrimary
+                    }
+                  >
+                    {range}
+                  </AppText>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+
+          {/* ── Curated Plan Cards Feed ───────────────────────────────── */}
+          {filteredCuratedPlans.length === 0 ? (
+            <View style={styles.rangeEmpty}>
+              <AppText variant="bodyMd" color={theme.colors.textSecondary} align="center">
+                Chưa có thực đơn trong khoảng calo này.
+              </AppText>
+              <AppButton
+                label="Xem khoảng 2400 - 2600 Cal"
+                variant="secondary"
+                onPress={() => setSelectedCalorieRange('2400-2600 Cal')}
+              />
+            </View>
+          ) : (
+            filteredCuratedPlans.map((curated) => (
+              <View
+                key={curated.id}
+                style={[
+                  styles.explorePlanCard,
+                  {
+                    backgroundColor: isDark ? '#181524' : theme.colors.surfaceMid,
+                    borderColor: isDark ? '#322B48' : theme.colors.surfaceBorder,
+                  },
+                ]}
+              >
+                <Image
+                  source={curated.coverImage || images.mealPlanCardSample}
+                  style={styles.explorePlanImage}
+                  resizeMode="cover"
+                  accessibilityLabel={`Ảnh minh họa ${curated.title}`}
+                />
+
+                <View style={styles.explorePlanBody}>
+                  <AppText variant="headlineSm" style={styles.planCardTitle} numberOfLines={2}>
+                    {curated.title}
+                  </AppText>
+
+                  <AppText
+                    variant="bodyMd"
+                    color={isDark ? '#A29DB8' : theme.colors.textSecondary}
+                    style={styles.planCardSubtitle}
+                  >
+                    {curated.subtitle}
+                  </AppText>
+
+                  {/* Action Buttons Row */}
+                  <View style={styles.planActionButtonsRow}>
+                    <TouchableOpacity
+                      style={[
+                        styles.planActionButton,
+                        {
+                          backgroundColor: isDark ? '#221D34' : theme.colors.surfaceHigh,
+                          borderColor: isDark ? '#322B48' : theme.colors.surfaceBorder,
+                        },
+                      ]}
+                      onPress={() => handleAdoptCuratedPlan(curated)}
+                      activeOpacity={0.8}
+                      accessibilityRole="button"
+                      accessibilityLabel="Áp dụng thực đơn này"
+                    >
+                      <AppText
+                        variant="labelMd"
+                        color={theme.colors.textPrimary}
+                        style={styles.planActionText}
+                      >
+                        Áp dụng thực đơn này
+                      </AppText>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={[
+                        styles.planActionButton,
+                        {
+                          backgroundColor: isDark ? '#221D34' : theme.colors.surfaceHigh,
+                          borderColor: isDark ? '#322B48' : theme.colors.surfaceBorder,
+                        },
+                      ]}
+                      onPress={() => handleViewCuratedDetail(curated)}
+                      activeOpacity={0.8}
+                      accessibilityRole="button"
+                      accessibilityLabel="Xem chi tiết thực đơn"
+                    >
+                      <AppText
+                        variant="labelMd"
+                        color={theme.colors.textPrimary}
+                        style={styles.planActionText}
+                      >
+                        Xem chi tiết
+                      </AppText>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            ))
+          )}
+        </ScrollView>
+      )}
+
+      {/* ── TAB 3: THỰC ĐƠN TỰ TẠO (CUSTOM PLAN MAKER) ────────────────── */}
+      {activeTab === 'custom' && (
+        <ScrollView contentContainerStyle={styles.customContent} showsVerticalScrollIndicator={false}>
+          <AppCard style={styles.customHeroCard}>
+            <View style={[styles.customBadge, { backgroundColor: theme.colors.brandSoftTint }]}>
+              <AppText variant="labelSm" color={theme.colors.brandPrimary}>
+                CÁ NHÂN HÓA
+              </AppText>
+            </View>
+            <AppText variant="headlineMd" style={styles.customHeroTitle}>
+              Tự tạo thực đơn theo nhu cầu
+            </AppText>
+            <AppText variant="bodyMd" color={theme.colors.textSecondary} style={styles.customHeroSubtitle}>
+              Thiết lập mục tiêu calo, tỷ lệ Macro (Đạm, Đường bột, Chất béo), ngân sách đi chợ món Việt và loại trừ dị ứng thức ăn cá nhân.
+            </AppText>
+            <AppButton
+              label="Bắt đầu tạo thực đơn (3 bước)"
+              variant="primary"
+              style={styles.customHeroButton}
+              onPress={() => navigation.navigate('MealPlanWizard')}
+            />
+          </AppCard>
+
+          {savedPlans.length > 0 ? (
+            <>
               <View style={styles.sectionHeader}>
-                <AppText variant="headlineSm">Thực đơn đã lưu</AppText>
+                <AppText variant="headlineSm">Thực đơn tự tạo đã lưu</AppText>
                 <AppText variant="caption" color={theme.colors.textSecondary}>
                   {savedPlans.length} thực đơn
                 </AppText>
@@ -360,197 +676,21 @@ export function MealPlanOverviewScreen() {
                   <AppButton
                     label="Xem"
                     variant="secondary"
-                    onPress={() => navigation.navigate('MealPlanDetail')}
+                    onPress={() => {
+                      setActivePlan?.(plan);
+                      navigation.navigate('MealPlanDetail');
+                    }}
                   />
                 </AppCard>
               ))}
-
-              {/* Bottom Generator Link */}
-              <View style={styles.bottomGeneratorRow}>
-                <AppButton
-                  label="Lập thực đơn AI mới (3 bước)"
-                  variant="outline"
-                  onPress={() => navigation.navigate('MealPlanWizard')}
-                />
-              </View>
-            </ScrollView>
-          )}
-        </>
-      )}
-
-      {/* ── TAB 2: KHÁM PHÁ THỰC ĐƠN (EXPLORE) ────────────────────────── */}
-      {activeTab === 'explore' && (
-        <ScrollView contentContainerStyle={styles.exploreContent} showsVerticalScrollIndicator={false}>
-          {/* AI Wizard Hero Banner */}
-          <TouchableOpacity
-            activeOpacity={0.9}
-            style={styles.heroBanner}
-            onPress={() => navigation.navigate('MealPlanWizard')}
-            accessibilityRole="button"
-            accessibilityLabel="Tạo thực đơn AI thông minh"
-          >
-            <Image
-              source={images.mealPlanNewAiBanner}
-              style={styles.heroBannerImage}
-              resizeMode="cover"
-            />
-            <View style={styles.heroBannerOverlay}>
-              <View style={styles.aiTag}>
-                <AppText variant="caption" color="#FFFFFF">
-                  ✨ KALLO AI SMART MENU
-                </AppText>
-              </View>
-              <AppText variant="headlineSm" color="#FFFFFF">
-                Lập thực đơn thông minh AI
+            </>
+          ) : (
+            <View style={styles.customEmptyContainer}>
+              <AppText variant="bodyMd" color={theme.colors.textSecondary} align="center">
+                Bạn chưa lưu thực đơn tự tạo nào. Hãy nhấn nút trên để tạo thực đơn đầu tiên với AI!
               </AppText>
-              <AppText variant="bodySm" color="rgba(255,255,255,0.85)">
-                Cá nhân hóa theo Calo, Macro, Ngân sách và Dị ứng
-              </AppText>
-              <View style={styles.heroBannerCta}>
-                <AppText variant="labelSm" color="#FFFFFF">
-                  Tạo thực đơn ngay (3 bước) →
-                </AppText>
-              </View>
             </View>
-          </TouchableOpacity>
-
-          {/* Category Filter Chips */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.categoryChipsContainer}
-          >
-            {DIET_CATEGORIES.map((cat) => {
-              const isSelected = selectedCategory === cat.id;
-              return (
-                <TouchableOpacity
-                  key={cat.id}
-                  onPress={() => setSelectedCategory(cat.id)}
-                  style={[
-                    styles.categoryChip,
-                    isSelected
-                      ? {
-                          backgroundColor: isDark ? 'rgba(158, 100, 247, 0.25)' : '#EDE5FF',
-                          borderColor: theme.colors.brandPrimary,
-                        }
-                      : {
-                          backgroundColor: theme.colors.surfaceHigh,
-                          borderColor: 'transparent',
-                        },
-                  ]}
-                >
-                  <AppText
-                    variant="labelMd"
-                    color={isSelected ? theme.colors.brandPrimary : theme.colors.textSecondary}
-                  >
-                    {cat.label}
-                  </AppText>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-
-          {/* Section Heading */}
-          <View style={styles.sectionHeader}>
-            <AppText variant="headlineSm">Thực đơn từ chuyên gia</AppText>
-            <AppText variant="caption" color={theme.colors.textSecondary}>
-              {filteredCuratedPlans.length} gợi ý
-            </AppText>
-          </View>
-
-          {/* Curated Plans List */}
-          {filteredCuratedPlans.map((curated) => (
-            <AppCard key={curated.id} style={styles.curatedCard}>
-              <View style={styles.curatedHeaderRow}>
-                <View style={[styles.curatedTagBadge, { backgroundColor: theme.colors.brandSoftTint }]}>
-                  <AppText variant="caption" color={theme.colors.brandPrimary}>
-                    {curated.tag}
-                  </AppText>
-                </View>
-                <AppText variant="caption" color={theme.colors.textSecondary}>
-                  {curated.durationDays} ngày
-                </AppText>
-              </View>
-
-              <AppText variant="headlineSm" style={styles.curatedTitle}>
-                {curated.title}
-              </AppText>
-
-              <AppText variant="bodySm" color={theme.colors.textSecondary} style={styles.curatedSubtitle}>
-                {curated.subtitle}
-              </AppText>
-
-              {/* Nutrition summary bar */}
-              <View style={styles.curatedMetricsBar}>
-                <View style={styles.curatedMetricItem}>
-                  <AppText variant="headlineSm" color={theme.colors.brandPrimary}>
-                    {curated.targetCalories}
-                  </AppText>
-                  <AppText variant="caption" color={theme.colors.textSecondary}>
-                    kcal/ngày
-                  </AppText>
-                </View>
-
-                <View style={styles.curatedMetricItem}>
-                  <AppText variant="labelLg" color={theme.colors.macroProtein}>
-                    {curated.macros.protein}g
-                  </AppText>
-                  <AppText variant="caption" color={theme.colors.textSecondary}>
-                    Đạm
-                  </AppText>
-                </View>
-
-                <View style={styles.curatedMetricItem}>
-                  <AppText variant="labelLg" color={theme.colors.macroCarbs}>
-                    {curated.macros.carbs}g
-                  </AppText>
-                  <AppText variant="caption" color={theme.colors.textSecondary}>
-                    Carb
-                  </AppText>
-                </View>
-
-                <View style={styles.curatedMetricItem}>
-                  <AppText variant="labelLg" color={theme.colors.macroFats}>
-                    {curated.macros.fat}g
-                  </AppText>
-                  <AppText variant="caption" color={theme.colors.textSecondary}>
-                    Béo
-                  </AppText>
-                </View>
-              </View>
-
-              {/* Sample dishes */}
-              <View style={styles.dishesRow}>
-                <AppText variant="caption" color={theme.colors.textSecondary}>
-                  Món tiêu biểu:
-                </AppText>
-                <View style={styles.dishesWrap}>
-                  {curated.sampleDishes.map((dish, i) => (
-                    <View
-                      key={i}
-                      style={[styles.dishPill, { backgroundColor: theme.colors.surfaceHigh }]}
-                    >
-                      <AppText variant="caption" color={theme.colors.textPrimary}>
-                        {dish}
-                      </AppText>
-                    </View>
-                  ))}
-                </View>
-              </View>
-
-              <View style={styles.curatedFooterRow}>
-                <AppText variant="labelMd" color={theme.colors.textSecondary}>
-                  ~{formatVnd(curated.dailyBudgetVnd)} / ngày
-                </AppText>
-                <AppButton
-                  label="Áp dụng thực đơn này"
-                  variant="primary"
-                  style={styles.adoptButton}
-                  onPress={() => handleAdoptCuratedPlan(curated)}
-                />
-              </View>
-            </AppCard>
-          ))}
+          )}
         </ScrollView>
       )}
     </SafeAreaView>
@@ -568,9 +708,9 @@ const styles = StyleSheet.create({
   // ── Top Header & Tab Pills ──────────────────────────────────────────
   topHeader: {
     paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 16,
-    gap: 16,
+    paddingTop: 8,
+    paddingBottom: 14,
+    gap: 14,
   },
   titleRow: {
     flexDirection: 'row',
@@ -591,10 +731,12 @@ const styles = StyleSheet.create({
   tabBarRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 10,
+    paddingVertical: 2,
+    paddingRight: 12,
   },
   pillTab: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 18,
     paddingVertical: 10,
     borderRadius: 9999,
     borderWidth: 1,
@@ -602,7 +744,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  // ── Empty State Reproduction ─────────────────────────────────────────
+  // ── Empty State ──────────────────────────────────────────────────────
   emptyContainer: {
     flex: 1,
     alignItems: 'center',
@@ -725,108 +867,168 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
 
-  // ── Explore Tab Content ──────────────────────────────────────────────
+  // ── Explore Tab Content (1:1 with Mockup) ────────────────────────────
   exploreContent: {
     paddingHorizontal: 20,
     paddingBottom: 40,
     gap: 16,
   },
-  heroBanner: {
-    height: 160,
+
+  // ── BETA / Premium AI Banner ─────────────────────────────────────────
+  betaBanner: {
     borderRadius: 20,
     overflow: 'hidden',
     position: 'relative',
-    backgroundColor: '#1E1B2E',
+    aspectRatio: 657 / 390,
+    minHeight: 180,
   },
-  heroBannerImage: {
+  betaBannerImage: {
+    ...StyleSheet.absoluteFillObject,
     width: '100%',
     height: '100%',
   },
-  heroBannerOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(15, 14, 25, 0.55)',
+  betaBannerContent: {
+    flex: 1,
+    maxWidth: '58%',
     padding: 16,
-    justifyContent: 'flex-end',
-    gap: 4,
-  },
-  aiTag: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#8B57E8',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    marginBottom: 2,
-  },
-  heroBannerCta: {
-    marginTop: 4,
-  },
-  categoryChipsContainer: {
-    gap: 8,
-    paddingVertical: 4,
-  },
-  categoryChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 9999,
-    borderWidth: 1,
-  },
-  curatedCard: {
-    borderRadius: 18,
-    padding: 16,
-    gap: 12,
-  },
-  curatedHeaderRow: {
-    flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
   },
-  curatedTagBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
+  betaBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 14,
+    paddingVertical: 5,
+    borderRadius: 9999,
   },
-  curatedTitle: {
-    fontSize: 18,
+  betaBadgeText: {
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  betaTitle: {
+    fontSize: 21,
+    fontWeight: '800',
+    lineHeight: 26,
+  },
+  betaSubtitle: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '500',
+  },
+  betaCta: {
+    alignSelf: 'flex-start',
+    backgroundColor: BANNER_CTA_BG,
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: 9999,
+  },
+  betaCtaText: {
+    fontSize: 13,
     fontWeight: '700',
   },
-  curatedSubtitle: {
-    lineHeight: 18,
+
+  // ── Section Title ────────────────────────────────────────────────────
+  sectionHeaderTitleContainer: {
+    marginTop: 4,
   },
-  curatedMetricsBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  sectionHeaderTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+  },
+
+  // ── Calorie Range Chips ──────────────────────────────────────────────
+  calorieChipsContainer: {
+    gap: 10,
+    paddingVertical: 2,
+    paddingRight: 8,
+  },
+  calorieChip: {
+    paddingHorizontal: 18,
     paddingVertical: 10,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: 'rgba(128,128,128,0.12)',
-  },
-  curatedMetricItem: {
+    borderRadius: 9999,
+    borderWidth: 1,
     alignItems: 'center',
-    flex: 1,
+    justifyContent: 'center',
   },
-  dishesRow: {
-    gap: 6,
+  rangeEmpty: {
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 24,
   },
-  dishesWrap: {
+
+  // ── Curated Plan Cards Feed ──────────────────────────────────────────
+  explorePlanCard: {
+    borderRadius: 20,
+    overflow: 'hidden',
+    borderWidth: 1,
+    marginBottom: 8,
+  },
+  explorePlanImage: {
+    width: '100%',
+    height: 190,
+  },
+  explorePlanBody: {
+    padding: 16,
+  },
+  planCardTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    lineHeight: 24,
+  },
+  planCardSubtitle: {
+    marginTop: 6,
+    marginBottom: 16,
+    fontSize: 14,
+  },
+  planActionButtonsRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
+    alignItems: 'center',
+    gap: 12,
   },
-  dishPill: {
+  planActionButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 9999,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  planActionText: {
+    fontWeight: '600',
+    fontSize: 13,
+  },
+
+  // ── Custom Tab Content ───────────────────────────────────────────────
+  customContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    gap: 16,
+  },
+  customHeroCard: {
+    borderRadius: 20,
+    padding: 20,
+    gap: 10,
+  },
+  customBadge: {
+    alignSelf: 'flex-start',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
   },
-  curatedFooterRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 4,
+  customHeroTitle: {
+    fontSize: 20,
+    fontWeight: '700',
   },
-  adoptButton: {
-    minHeight: 40,
-    paddingVertical: 8,
+  customHeroSubtitle: {
+    lineHeight: 22,
+    marginTop: 2,
+  },
+  customHeroButton: {
+    marginTop: 8,
+  },
+  customEmptyContainer: {
+    paddingVertical: 32,
     paddingHorizontal: 16,
+    alignItems: 'center',
   },
 });

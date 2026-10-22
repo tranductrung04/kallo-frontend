@@ -517,40 +517,25 @@ export function AccountProfileScreen({ navigation }: Props) {
             Cộng đồng và hỗ trợ
           </AppText>
 
-          {/* Purple Community Banner */}
-          <View style={styles.communityBannerWrap}>
+          {/* Community & Support Banner */}
+          <TouchableOpacity
+            style={styles.communityBannerWrap}
+            activeOpacity={0.88}
+            onPress={() =>
+              Alert.alert(
+                'Cộng đồng Kallo 🎉',
+                'Đang kết nối tới nhóm Facebook và Zalo Cộng đồng Healthy Kallo Việt Nam!'
+              )
+            }
+            accessibilityRole="button"
+            accessibilityLabel="Gia nhập cộng đồng Kallo ngay"
+          >
             <Image
-              source={images.communityBanner}
+              source={images.congDongHoTro}
               style={styles.communityBannerImage}
               resizeMode="cover"
             />
-            <View style={styles.communityBannerOverlay}>
-              <View style={styles.speechBubbleBadge}>
-                <AppText variant="caption" color="#6D28D9" style={styles.bubbleText}>
-                  Bạn đã vào group chưa?
-                </AppText>
-              </View>
-
-              <AppText variant="labelLg" color="#FFFFFF" style={styles.communityBannerHeadline}>
-                Gia nhập cộng đồng Kallo ngay!
-              </AppText>
-
-              <TouchableOpacity
-                style={styles.communityJoinBtn}
-                activeOpacity={0.85}
-                onPress={() =>
-                  Alert.alert(
-                    'Cộng đồng Kallo 🎉',
-                    'Đang kết nối tới nhóm Facebook và Zalo Cộng đồng Healthy Kallo Việt Nam!'
-                  )
-                }
-              >
-                <AppText variant="labelMd" color="#FFFFFF">
-                  Tham gia ngay
-                </AppText>
-              </TouchableOpacity>
-            </View>
-          </View>
+          </TouchableOpacity>
 
           {/* Social media tiles */}
           <AppCard style={styles.socialCard}>
@@ -817,7 +802,7 @@ export function AccountProfileScreen({ navigation }: Props) {
                 <AppText variant="caption" color={theme.colors.textSecondary}>
                   Mục tiêu nước mỗi ngày
                 </AppText>
-                <AppText variant="headlineSm" color={theme.colors.trackerWater ?? theme.colors.brandPrimary}>
+                <AppText variant="headlineSm" color={theme.colors.water}>
                   {weightKg * 35} ml
                 </AppText>
                 <AppText variant="caption" color={theme.colors.textSecondary}>
@@ -1246,42 +1231,15 @@ const styles = StyleSheet.create({
 
   // ── Cộng đồng và hỗ trợ ─────────────────────────────────────────────
   communityBannerWrap: {
-    height: 140,
+    width: '100%',
+    aspectRatio: 2862 / 1472,
     borderRadius: 20,
     overflow: 'hidden',
-    position: 'relative',
-    backgroundColor: '#2E1065',
+    backgroundColor: '#1E1435',
   },
   communityBannerImage: {
     width: '100%',
     height: '100%',
-  },
-  communityBannerOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(28, 12, 58, 0.65)',
-    padding: 16,
-    justifyContent: 'space-between',
-  },
-  speechBubbleBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#EDE9FE',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  bubbleText: {
-    fontWeight: '700',
-  },
-  communityBannerHeadline: {
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  communityJoinBtn: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#8B5CF6',
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 9999,
   },
   socialCard: {
     borderRadius: 18,
