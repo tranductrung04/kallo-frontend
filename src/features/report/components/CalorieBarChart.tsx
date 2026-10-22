@@ -164,7 +164,7 @@ export function CalorieBarChart({
           </Svg>
 
           {/* Invisible Touchable Overlay for each column */}
-          <View style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
+          <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
             <View style={styles.touchRow}>
               {days.map((d, i) => (
                 <Pressable

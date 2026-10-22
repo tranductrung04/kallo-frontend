@@ -24,7 +24,7 @@ export type RootStackParamList = {
   MainTabs: NavigatorScreenParams<MainTabParamList> | undefined;
   ComponentShowcase: undefined;
   AIScanPlaceholder: undefined;
-  FoodSearch: { date: string; meal: MealSlot };
+  FoodSearch: { date: string; meal: MealSlot; hour?: string };
   FoodDetail: { foodId: string; date: string; meal: MealSlot; logId?: string; source?: FoodLogSource };
   CustomFoodForm: { foodId?: string; date: string; meal: MealSlot; barcode?: string };
   AIMealScan: { date: string; meal: MealSlot };
@@ -43,5 +43,5 @@ export type RootStackParamList = {
   FriendsLeaderboard: undefined;
   NotificationCenter: undefined;
   ReminderSettings: undefined;
-  ReportOverview: undefined;
+  ReportOverview: { date?: string; metric?: string } | undefined;
 };

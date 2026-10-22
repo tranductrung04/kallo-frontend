@@ -1,12 +1,3 @@
-// ─── HomeDashboardScreen — Nocturne & Daylight Vitality ───────────────────────
-// Dùng lại component trong @/components/common (AppText, AppCard, AppButton,
-// ProgressBar, CircularProgress) và token của theme, nên tự đổi theo light ↔ dark.
-//   • Icon        → @/components/icons
-//   • Stylesheet  → ./HomeDashboard/HomeDashboardScreen.styles.ts (chỉ còn layout)
-//   • Khối lặp    → ./HomeDashboard/HomeWidgets.tsx (MacroColumn, ActivityGrid, WeightChart)
-//   • Helper ngày → ./HomeDashboard/dateUtils.ts
-// ─────────────────────────────────────────────────────────────────────────────
-
 import React, { useMemo, useRef, useState } from 'react';
 import {
   Alert,

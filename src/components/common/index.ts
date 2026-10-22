@@ -24,3 +24,6 @@ export type { FoodLogListItemProps } from './FoodLogListItem';
 export { OfflineBanner } from './OfflineBanner';
 export { StatusBanner } from './StatusBanner';
 export type { StatusBannerProps, StatusBannerType } from './StatusBanner';
+export { MonthCalendarModal, DatePickerModal, formatFullCalendarTitle } from './MonthCalendarModal';
+export type { MonthCalendarModalProps, DatePickerModalProps } from './MonthCalendarModal';
+
