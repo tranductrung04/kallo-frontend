@@ -21,21 +21,34 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
   // Pill vàng "Nâng cấp gói" — glow nhẹ theo màu accent
   const upgradeGlow: ViewStyle = {
     shadowColor: c.upgradeAccent,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
   };
 
   return StyleSheet.create({
     safe: {
       flex: 1,
+      backgroundColor: c.surfaceMid,
+    },
+    scrollView: {
+      flex: 1,
       backgroundColor: c.canvasBase,
     },
     scrollContent: {
-      paddingHorizontal: s.lg,
-      paddingTop: s.md,
       paddingBottom: s.xxl,
+    },
+    topHeroContainer: {
+      backgroundColor: c.surfaceMid,
+      paddingHorizontal: s.lg,
+      paddingTop: gapMid,
+      paddingBottom: s.md,
+      borderColor: c.surfaceBorder,
+      marginBottom: gapMid,
+      ...sh.level1,
+    },
+    mainContent: {
+      paddingHorizontal: s.lg,
     },
     pressedOpacity: {
       opacity: 0.8,
@@ -46,14 +59,25 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: s.md,
+      marginBottom: gapMid,
     },
     upgradePillTop: {
-      backgroundColor: c.upgradeAccent,
-      paddingHorizontal: s.md,
-      paddingVertical: s.sm,
+      backgroundColor: '#FED065',
+      paddingHorizontal: 16,
+      paddingVertical: 7,
       borderRadius: r.full,
+      overflow: 'hidden',
+      alignItems: 'center',
+      justifyContent: 'center',
       ...upgradeGlow,
+    },
+    upgradePillText: {
+      fontFamily: 'PlusJakartaSans_800ExtraBold',
+      fontSize: 14,
+      lineHeight: 18,
+      fontWeight: '800',
+      color: '#8A5E0B',
+      letterSpacing: -0.2,
     },
     headerRightRow: {
       flexDirection: 'row',
@@ -71,12 +95,12 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
 
     // 2. Weekday / Date Section
     weekSection: {
-      marginBottom: s.lg,
+      marginBottom: 24,
     },
     weekDateTitle: {
       letterSpacing: 0.5,
       textTransform: 'uppercase',
-      marginBottom: s.md,
+      marginBottom: gapMid,
     },
     weekRow: {
       flexDirection: 'row',
@@ -131,18 +155,19 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
 
     // 3. Calorie Goal Section
     calorieSection: {
-      marginBottom: s.md,
+      marginBottom: 0,
     },
     sectionHeaderRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: gapMid,
+      marginBottom: s.sm,
     },
     gaugeContainer: {
       alignItems: 'center',
       justifyContent: 'center',
-      marginVertical: s.md,
+      marginTop: s.sm,
+      marginBottom: 24,
     },
     gaugeSubRow: {
       flexDirection: 'row',
@@ -166,7 +191,7 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       flexDirection: 'row',
       justifyContent: 'space-around',
       alignItems: 'center',
-      paddingVertical: s.sm,
+      paddingVertical: 2,
     },
     calorieStatCol: {
       alignItems: 'center',
@@ -183,7 +208,10 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
 
     // 4. Macro Nutrients Card
     macroCard: {
-      marginBottom: s.sm,
+      overflow: 'hidden',
+      padding: 0,
+      marginTop: s.sm,
+      marginBottom: 10,
     },
     macroColsRow: {
       flexDirection: 'row',
@@ -222,7 +250,7 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      gap: s.sm - 2,
+      gap: 8,
       marginBottom: s.md,
     },
     dotActive: {
@@ -235,7 +263,7 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       width: 6,
       height: 6,
       borderRadius: r.full,
-      backgroundColor: c.surfaceBorder,
+      backgroundColor: '#5E5970',
     },
 
     // 5. Section Blocks

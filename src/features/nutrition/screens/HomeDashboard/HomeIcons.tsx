@@ -5,7 +5,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React from 'react';
-import Svg, { Circle, Line, Path, Rect } from 'react-native-svg';
+import Svg, { Circle, G, Line, Path, Rect } from 'react-native-svg';
 
 export type IconProps = {
   size?: number;
@@ -65,13 +65,37 @@ export function LightningIcon({ size = 13, color }: IconProps) {
   );
 }
 
-export function LeafIcon({ size = 13, color }: IconProps) {
+export function WheatIcon({ size = 15, color }: IconProps) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-      <Path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5c0 2 2 3.5 3 3.5s3.5-1 4.5-2.5l1.5 1.5c-1.5 2-3.5 3-5 3v1c2 0 5-2 6-4 3-1 6-4 7-6.5z" />
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <G transform="rotate(45, 12, 12)">
+        {/* Short stem stalk */}
+        <Path d="M 12 16 L 12 21.6" stroke={color} strokeWidth={1.6} strokeLinecap="round" />
+        {/* 3 delicate awn whiskers at the apex */}
+        <Path d="M 12 3.2 L 12 1.0" stroke={color} strokeWidth={0.8} strokeLinecap="round" />
+        <Path d="M 11.2 3.8 L 9.4 1.8" stroke={color} strokeWidth={0.7} strokeLinecap="round" />
+        <Path d="M 12.8 3.8 L 14.6 1.8" stroke={color} strokeWidth={0.7} strokeLinecap="round" />
+
+        {/* Plump scalloped grain spike silhouette */}
+        <Path
+          d="M 12 3.2 C 13.0 4.2 14.4 5.2 15.0 6.6 C 15.4 7.6 14.8 8.6 14.0 9.0 C 15.6 9.8 17.0 11.0 16.8 12.6 C 16.6 13.8 15.5 14.4 14.5 14.6 C 15.2 15.2 15.4 16.2 14.5 16.8 C 13.6 17.4 12.6 17.2 12.0 17.0 C 11.4 17.2 10.4 17.4 9.5 16.8 C 8.6 16.2 8.8 15.2 9.5 14.6 C 8.5 14.4 7.4 13.8 7.2 12.6 C 7.0 11.0 8.4 9.8 10.0 9.0 C 9.2 8.6 8.6 7.6 9.0 6.6 C 9.6 5.2 11.0 4.2 12 3.2 Z"
+          fill={color}
+        />
+
+        {/* Depth crease lines between grains */}
+        <Path d="M 12 6.8 L 12 16.8" stroke="#1D4ED8" strokeWidth={0.8} strokeLinecap="round" />
+        <Path d="M 12 8.6 C 10.8 7.8 9.8 7.2 8.8 7.0" stroke="#1D4ED8" strokeWidth={0.8} strokeLinecap="round" />
+        <Path d="M 12 8.6 C 13.2 7.8 14.2 7.2 15.2 7.0" stroke="#1D4ED8" strokeWidth={0.8} strokeLinecap="round" />
+        <Path d="M 12 12.0 C 10.5 11.2 9.0 10.6 7.4 10.4" stroke="#1D4ED8" strokeWidth={0.8} strokeLinecap="round" />
+        <Path d="M 12 12.0 C 13.5 11.2 15.0 10.6 16.6 10.4" stroke="#1D4ED8" strokeWidth={0.8} strokeLinecap="round" />
+        <Path d="M 12 15.0 C 10.8 14.4 9.8 13.8 8.8 13.6" stroke="#1D4ED8" strokeWidth={0.8} strokeLinecap="round" />
+        <Path d="M 12 15.0 C 13.2 14.4 14.2 13.8 15.2 13.6" stroke="#1D4ED8" strokeWidth={0.8} strokeLinecap="round" />
+      </G>
     </Svg>
   );
 }
+
+export const LeafIcon = WheatIcon;
 
 export function DropletIcon({ size = 13, color }: IconProps) {
   return (
@@ -263,6 +287,78 @@ export function PlusIcon({ size = 14, color }: IconProps) {
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={3} strokeLinecap="round">
       <Line x1={12} y1={5} x2={12} y2={19} />
       <Line x1={5} y1={12} x2={19} y2={12} />
+    </Svg>
+  );
+}
+
+export function SaltIcon({ size = 15, color = '#FDE68A' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <G transform="rotate(-45, 12, 12)">
+        {/* Shaker body with pale warm yellow fill */}
+        <Rect x="7.9" y="3.2" width="8.2" height="11.0" rx="2.2" fill={color} />
+        {/* White shaker cap */}
+        <Rect x="8.6" y="15.3" width="6.8" height="3.4" rx="1.2" fill="#FFFFFF" />
+        {/* 3 falling white salt specks */}
+        <Circle cx="9.6" cy="21.0" r="0.95" fill="#FFFFFF" />
+        <Circle cx="14.4" cy="21.0" r="0.95" fill="#FFFFFF" />
+        <Circle cx="12.0" cy="23.4" r="1.05" fill="#FFFFFF" />
+      </G>
+    </Svg>
+  );
+}
+
+export function SugarIcon({ size = 15, color = '#38BDF8' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+      <G transform="rotate(-45, 12, 12)">
+        {/* Left twist wrapper (flared fan with scalloped ruffles) */}
+        <Path
+          d="M 6.8 10.8 C 5.8 10.2 4.2 9.0 3.0 8.4 C 2.4 8.1 1.8 8.6 2.0 9.2 L 2.4 10.6 C 1.8 11.2 1.8 12.8 2.4 13.4 L 2.0 14.8 C 1.8 15.4 2.4 15.9 3.0 15.6 C 4.2 15.0 5.8 13.8 6.8 13.2 Z"
+        />
+        {/* Right twist wrapper (symmetrical to left) */}
+        <Path
+          d="M 17.2 10.8 C 18.2 10.2 19.8 9.0 21.0 8.4 C 21.6 8.1 22.2 8.6 22.0 9.2 L 21.6 10.6 C 22.2 11.2 22.2 12.8 21.6 13.4 L 22.0 14.8 C 22.2 15.4 21.6 15.9 21.0 15.6 C 19.8 15.0 18.2 13.8 17.2 13.2 Z"
+        />
+        {/* Plump rounded candy body */}
+        <Rect x="6.0" y="7.4" width="12.0" height="9.2" rx="4.6" />
+      </G>
+    </Svg>
+  );
+}
+
+export function FiberIcon({ size = 15, color = '#4ADE80' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      {/* Stalk: Pale mint green (#86EFAC), angled towards bottom-left */}
+      <Path
+        d="M5.2 13.5 L2.8 18.6 C2.5 19.3 2.7 20.1 3.2 20.6 L4.6 21.6 C5.2 22.0 6.0 21.9 6.4 21.3 L10.2 15.4 C8.5 15.0 6.8 14.4 5.2 13.5 Z"
+        fill="#86EFAC"
+      />
+      {/* Crown: Puffy broccoli floret cloud */}
+      <Path
+        d="M5.2 13.5 C2.8 13.0 2.0 10.5 2.4 8.5 C2.8 6.8 4.2 5.4 6.0 5.8 C6.8 3.8 8.8 2.4 10.8 2.5 C13.2 2.6 15.0 4.0 15.8 5.5 C18.2 5.8 21.4 7.2 21.2 9.8 C21.2 11.8 19.8 13.6 18.5 14.8 C17.2 16.2 15.0 16.5 13.5 16.0 C11.8 15.6 10.8 15.4 10.2 15.4 C8.5 15.0 6.8 14.4 5.2 13.5 Z"
+        fill={color}
+      />
+      {/* Texture crease lines inside florets */}
+      <Path
+        d="M11.2 8.4 C12.8 7.5 14.8 8.0 15.8 10.0"
+        stroke="#15803D"
+        strokeWidth={1.2}
+        strokeLinecap="round"
+      />
+      <Path
+        d="M4.8 9.6 C5.6 10.8 6.6 11.6 7.8 11.8"
+        stroke="#15803D"
+        strokeWidth={1.1}
+        strokeLinecap="round"
+      />
+      <Path
+        d="M7.0 14.8 C8.0 15.4 9.2 15.4 10.2 14.8"
+        stroke="#15803D"
+        strokeWidth={1.1}
+        strokeLinecap="round"
+      />
     </Svg>
   );
 }
