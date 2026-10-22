@@ -135,6 +135,18 @@ export function MealPlanProvider({ children }: React.PropsWithChildren) {
     }
   }, [currentPlan]);
 
+  const clearCurrentPlan = useCallback(() => {
+    setCurrentPlan(null);
+  }, []);
+
+  const setActivePlan = useCallback((plan: MealPlan) => {
+    setCurrentPlan(plan);
+    setSavedPlans((current) => [
+      plan,
+      ...current.filter((p) => p.id !== plan.id),
+    ]);
+  }, []);
+
   const applyPlanToDiary = useCallback((dayIndex = 0, targetDate?: string): number => {
     if (!currentPlan) return 0;
     const day = currentPlan.days[dayIndex];
@@ -173,6 +185,8 @@ export function MealPlanProvider({ children }: React.PropsWithChildren) {
     swapItem,
     savePlan,
     deletePlan,
+    clearCurrentPlan,
+    setActivePlan,
     applyPlanToDiary,
   };
 

@@ -36,6 +36,7 @@ export type FoodLog = {
   imageUri?: string;
   aiConfidence?: number;
   nutritionSnapshot?: NutritionValues;
+  time?: string;
 };
 
 export type AddFoodLogInput = Omit<FoodLog, 'id' | 'foodName'> & {

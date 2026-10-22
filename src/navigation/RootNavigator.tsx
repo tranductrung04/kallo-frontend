@@ -38,7 +38,7 @@ export function RootNavigator() {
       <Stack.Screen name="MainTabs" component={MainTabNavigator} options={{ headerShown: false }} />
       <Stack.Screen name="ComponentShowcase" component={ComponentShowcaseScreen} options={{ title: 'Bộ UI Kit' }} />
       <Stack.Screen name="AIScanPlaceholder" component={ScanPlaceholderScreen} options={{ title: 'AI Meal Scan' }} />
-      <Stack.Screen name="FoodSearch" component={FoodSearchScreen} options={{ title: 'Tìm món ăn' }} />
+      <Stack.Screen name="FoodSearch" component={FoodSearchScreen} options={{ headerShown: false }} />
       <Stack.Screen name="FoodDetail" component={FoodDetailScreen} options={{ title: 'Chi tiết món ăn' }} />
       <Stack.Screen name="CustomFoodForm" component={CustomFoodFormScreen} options={{ title: 'Món ăn tùy chỉnh' }} />
       <Stack.Screen name="AIMealScan" component={AIMealScanScreen} options={{ headerShown: false, presentation: 'fullScreenModal' }} />
@@ -47,7 +47,7 @@ export function RootNavigator() {
       <Stack.Screen name="ActivityTracker" component={ActivityTrackerScreen} options={{ title: 'Vận động & Thể thao' }} />
       <Stack.Screen name="HealthSync" component={HealthSyncScreen} options={{ title: 'Đồng bộ sức khỏe' }} />
       <Stack.Screen name="BodyMetric" component={BodyMetricScreen} options={{ title: 'Chỉ số eo / mông' }} />
-      <Stack.Screen name="MealPlanOverview" component={MealPlanOverviewScreen} options={{ title: 'Thực đơn AI' }} />
+      <Stack.Screen name="MealPlanOverview" component={MealPlanOverviewScreen} options={{ headerShown: false }} />
       <Stack.Screen name="MealPlanWizard" component={MealPlanWizardScreen} options={{ title: 'Tạo thực đơn AI' }} />
       <Stack.Screen name="MealPlanDetail" component={MealPlanDetailScreen} options={{ title: 'Chi tiết thực đơn' }} />
       <Stack.Screen name="NutritionChat" component={NutritionChatScreen} options={{ title: 'Trợ lý Kallo AI' }} />
@@ -57,7 +57,8 @@ export function RootNavigator() {
       <Stack.Screen name="FriendsLeaderboard" component={FriendsLeaderboardScreen} options={{ title: 'Bảng xếp hạng bạn bè' }} />
       <Stack.Screen name="NotificationCenter" component={NotificationCenterScreen} options={{ title: 'Trung tâm thông báo' }} />
       <Stack.Screen name="ReminderSettings" component={ReminderSettingsScreen} options={{ title: 'Cài đặt nhắc nhở' }} />
-      <Stack.Screen name="ReportOverview" component={ReportOverviewScreen} options={{ title: 'Thống kê báo cáo' }} />
+      <Stack.Screen name="ReportOverview" component={ReportOverviewScreen} options={{ headerShown: false }} />
+
     </>}
   </Stack.Navigator></NavigationContainer>;
 }
