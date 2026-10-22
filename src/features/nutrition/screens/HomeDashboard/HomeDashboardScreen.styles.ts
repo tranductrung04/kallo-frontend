@@ -53,7 +53,7 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
     topHeroContainer: {
       backgroundColor: c.surfaceMid,
       paddingHorizontal: s.lg,
-      paddingTop: gapMid,
+      paddingTop: s.md,
       paddingBottom: s.md,
       borderColor: c.surfaceBorder,
       marginBottom: gapMid,
@@ -118,7 +118,7 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: gapMid,
+      marginBottom: s.md,
     },
     upgradePillTop: {
       backgroundColor: '#FED065',
