@@ -23,9 +23,7 @@ export function ProgressBar({ value, color, height = 8, style, testID }: Progres
   const theme = useTheme();
   const progress = clampProgress(value);
 
-  // Light mode: #ECE9F6 (lavender-gray track per DESIGN.md)
-  // Dark mode: surfaceHigh (deep violet-slate)
-  const trackColor = theme.scheme === 'light' ? '#ECE9F6' : theme.colors.surfaceHigh;
+  const trackColor = theme.colors.progressTrack;
 
   return (
     <View

@@ -39,31 +39,38 @@ export function AppButton({
   const theme = useTheme();
   const isDisabled = Boolean(disabled || loading);
 
-  const palette = {
-    primary: {
-      backgroundColor: theme.colors.brandPrimary,
-      borderColor: theme.colors.brandPrimary,
-      text: theme.colors.onBrandPrimary,
-    },
-    secondary: {
-      backgroundColor: theme.colors.surfaceHigh,
-      borderColor: theme.colors.surfaceBorder,
-      text: theme.colors.textPrimary,
-    },
-    outline: {
-      backgroundColor: 'transparent',
-      borderColor: theme.colors.brandPrimary,
-      text: theme.colors.brandPrimary,
-    },
-    ghost: {
-      backgroundColor: 'transparent',
-      borderColor: 'transparent',
-      text: theme.colors.brandPrimary,
-    },
-  }[variant];
+  const palette = isDisabled
+    ? {
+        backgroundColor: theme.colors.surfaceHigh,
+        borderColor: theme.colors.surfaceBorder,
+        text: theme.colors.textDisabled,
+      }
+    : {
+        primary: {
+          backgroundColor: theme.colors.brandAction,
+          borderColor: theme.colors.brandAction,
+          text: theme.colors.onBrand,
+        },
+        secondary: {
+          backgroundColor: theme.colors.surfaceHigh,
+          borderColor: theme.colors.surfaceBorder,
+          text: theme.colors.textPrimary,
+        },
+        outline: {
+          backgroundColor: 'transparent',
+          borderColor: theme.colors.brandPrimary,
+          text: theme.colors.brandPrimary,
+        },
+        ghost: {
+          backgroundColor: 'transparent',
+          borderColor: 'transparent',
+          text: theme.colors.brandPrimary,
+        },
+      }[variant];
 
   const buttonHeight = variant === 'primary' ? styles.primaryHeight : styles.secondaryHeight;
   const buttonRadius = variant === 'primary' ? styles.primaryRadius : styles.secondaryRadius;
+  const buttonShadow = variant === 'primary' && !isDisabled ? theme.shadows.primaryButton : undefined;
 
   return (
     <Pressable
@@ -77,9 +84,9 @@ export function AppButton({
         styles.base,
         buttonHeight,
         buttonRadius,
+        buttonShadow,
         { backgroundColor: palette.backgroundColor, borderColor: palette.borderColor },
         pressed && !isDisabled && styles.pressed,
-        isDisabled && styles.disabled,
         style,
       ]}
     >
