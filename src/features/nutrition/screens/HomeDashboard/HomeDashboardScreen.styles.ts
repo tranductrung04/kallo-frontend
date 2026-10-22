@@ -36,12 +36,12 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       backgroundColor: c.canvasBase,
     },
     scrollContent: {
-      paddingBottom: s.xxl,
+      paddingBottom: 110,
     },
     topHeroContainer: {
       backgroundColor: c.surfaceMid,
       paddingHorizontal: s.lg,
-      paddingTop: gapMid,
+      paddingTop: s.md,
       paddingBottom: s.md,
       borderColor: c.surfaceBorder,
       marginBottom: gapMid,
@@ -59,12 +59,12 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: gapMid,
+      marginBottom: s.md,
     },
     upgradePillTop: {
       backgroundColor: '#FED065',
-      paddingHorizontal: 16,
-      paddingVertical: 7,
+      paddingHorizontal: 18,
+      paddingVertical: 9,
       borderRadius: r.full,
       overflow: 'hidden',
       alignItems: 'center',
@@ -73,8 +73,8 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
     },
     upgradePillText: {
       fontFamily: 'PlusJakartaSans_800ExtraBold',
-      fontSize: 14,
-      lineHeight: 18,
+      fontSize: 15,
+      lineHeight: 20,
       fontWeight: '800',
       color: '#8A5E0B',
       letterSpacing: -0.2,
@@ -82,15 +82,27 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
     headerRightRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: s.md,
+      gap: 12,
     },
     streakContainer: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: s.xs,
+      gap: 6,
+      paddingVertical: 4,
+      paddingHorizontal: 4,
+    },
+    streakText: {
+      fontSize: 16,
+      lineHeight: 20,
+      fontFamily: 'PlusJakartaSans_700Bold',
+      fontWeight: '700',
     },
     calendarBtn: {
-      padding: 2,
+      width: 38,
+      height: 38,
+      borderRadius: r.full,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
 
     // 2. Weekday / Date Section
@@ -98,6 +110,10 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       marginBottom: 24,
     },
     weekDateTitle: {
+      fontSize: 14.5,
+      lineHeight: 19,
+      fontFamily: 'PlusJakartaSans_700Bold',
+      fontWeight: '700',
       letterSpacing: 0.5,
       textTransform: 'uppercase',
       marginBottom: gapMid,
@@ -113,6 +129,12 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       height: 44,
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    dayText: {
+      fontSize: 15,
+      lineHeight: 19,
+      fontFamily: 'PlusJakartaSans_700Bold',
+      fontWeight: '700',
     },
     daySelectedOuter: {
       width: 44,
@@ -191,32 +213,44 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       flexDirection: 'row',
       justifyContent: 'space-around',
       alignItems: 'center',
-      paddingVertical: 2,
+      paddingVertical: s.xs,
     },
     calorieStatCol: {
       alignItems: 'center',
       flex: 1,
     },
     statColNumber: {
-      marginBottom: s.xs,
+      fontSize: 21,
+      lineHeight: 26,
+      fontFamily: 'PlusJakartaSans_700Bold',
+      fontWeight: '700',
+      fontVariant: ['tabular-nums'],
+      marginBottom: 6,
     },
     statColLabelRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: s.xs,
+      gap: 6,
+    },
+    statColLabel: {
+      fontSize: 13.5,
+      lineHeight: 18,
+      fontWeight: '500',
     },
 
     // 4. Macro Nutrients Card
     macroCard: {
       overflow: 'hidden',
       padding: 0,
-      marginTop: s.sm,
-      marginBottom: 10,
+      marginTop: s.xl,
+      marginBottom: 12,
     },
     macroColsRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       gap: gapMid,
+      paddingHorizontal: s.md + 2,
+      paddingVertical: 20,
     },
     macroCol: {
       flex: 1,
@@ -224,25 +258,42 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
     macroHeaderRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: s.xs,
-      marginBottom: s.sm,
+      gap: 6,
+      marginBottom: 10,
+    },
+    macroColTitle: {
+      fontSize: 13.5,
+      lineHeight: 18,
+      flexShrink: 1,
     },
     macroBarWrap: {
-      height: 9,
+      height: 12,
       justifyContent: 'center',
-      marginBottom: s.sm,
+      marginBottom: 10,
     },
     macroThumb: {
       position: 'absolute',
-      width: 2.5,
-      height: 9,
+      width: 3.5,
+      height: 12,
       backgroundColor: c.textPrimary,
       borderRadius: r.full,
     },
     macroValuesRow: {
       flexDirection: 'row',
       alignItems: 'baseline',
-      gap: 2,
+      gap: 3,
+    },
+    macroCurrentValue: {
+      fontSize: 17,
+      lineHeight: 22,
+      fontFamily: 'PlusJakartaSans_700Bold',
+      fontWeight: '700',
+      fontVariant: ['tabular-nums'],
+    },
+    macroGoalValue: {
+      fontSize: 13,
+      lineHeight: 18,
+      fontWeight: '500',
     },
 
     // Pagination Dots
@@ -250,20 +301,21 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      gap: 8,
+      gap: 10,
+      marginTop: 2,
       marginBottom: s.md,
     },
     dotActive: {
-      width: 6,
-      height: 6,
+      width: 7,
+      height: 7,
       borderRadius: r.full,
-      backgroundColor: c.brandAction,
+      backgroundColor: c.brandPrimary,
     },
     dotInactive: {
-      width: 6,
-      height: 6,
+      width: 7,
+      height: 7,
       borderRadius: r.full,
-      backgroundColor: '#5E5970',
+      backgroundColor: c.textDisabled,
     },
 
     // 5. Section Blocks
@@ -422,10 +474,13 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
     },
 
     // 10. Floating "Quay lại hôm nay" Button
-    floatingTodayBtn: {
+    floatingTodayWrapper: {
       position: 'absolute',
-      bottom: 84,
+      bottom: 104,
       alignSelf: 'center',
+      zIndex: 99,
+    },
+    floatingTodayBtn: {
       backgroundColor: c.brandSecondary,
       paddingHorizontal: s.lg + s.xs,
       paddingVertical: gapMid,
@@ -437,7 +492,18 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       shadowOpacity: 0.35,
       shadowRadius: 8,
       elevation: 6,
-      zIndex: 99,
+    },
+
+    // 11. Floating Quick Utility Dock
+    floatingDock: {
+      position: 'absolute',
+      left: s.md,
+      right: s.md,
+      bottom: 12,
+      zIndex: 90,
+    },
+    floatingGrid: {
+      gap: 12,
     },
   });
 }

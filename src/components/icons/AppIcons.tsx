@@ -1,12 +1,3 @@
-// ─── Shared App Icons — Unified Icon System ──────────────────────────────────
-// Toàn bộ icon dùng chung trong ứng dụng (Tabs, Header, Macros, Tracking, Activity).
-// Quy tắc thiết kế:
-// 1. Màu luôn nhận từ theme semantic token (theme.colors.*) qua prop color.
-// 2. Kích thước (size) có default chuẩn và có thể ghi đè tùy màn hình.
-// 3. Với icon đa sắc (Wheat, Salt, Fiber), các màu phụ trợ (capColor, creaseColor,
-//    stalkColor) đều có prop để truyền từ theme tokens (macroSalt, macroCarbsStrong...).
-// ─────────────────────────────────────────────────────────────────────────────
-
 import React from 'react';
 import Svg, { Circle, G, Line, Path, Rect } from 'react-native-svg';
 
@@ -439,6 +430,112 @@ export function HealthConnectIcon({ size = 24 }: { size?: number }) {
         fill="#EF4444"
         opacity={0.85}
       />
+    </Svg>
+  );
+}
+
+// ─── Quick Utility Dock Icons ───────────────────────────────────────────────
+
+/** Icon Tìm kiếm nhanh — kính lúp nét đậm liền mạch, cán ngắn bo tròn chuẩn thiết kế */
+export function QuickSearchIcon({ size = 26, color = '#12111A' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      {/* Vành kính lúp tròn đều nét đậm */}
+      <Circle cx="10.8" cy="10.8" r="5.6" stroke={color} strokeWidth={2.8} />
+      {/* Cán kính lúp gắn liền mép vành ở góc 45° với đầu bo tròn */}
+      <Line x1="14.5" y1="14.5" x2="19.0" y2="19.0" stroke={color} strokeWidth={2.8} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+/** Icon Quét mã vạch — khung viewfinder 4 góc, vạch barcode & tia quét ngang */
+export function QuickBarcodeIcon({ size = 26, color = '#12111A' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      {/* 4 khung góc viewfinder bo tròn */}
+      <Path
+        d="M4 8.5V6C4 4.9 4.9 4 6 4H8.5"
+        stroke={color}
+        strokeWidth={2.2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M15.5 4H18C19.1 4 20 4.9 20 6V8.5"
+        stroke={color}
+        strokeWidth={2.2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M4 15.5V18C4 19.1 4.9 20 6 20H8.5"
+        stroke={color}
+        strokeWidth={2.2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M15.5 20H18C19.1 20 20 19.1 20 18V15.5"
+        stroke={color}
+        strokeWidth={2.2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Vạch barcode dọc */}
+      <Line x1="8.5" y1="7.5" x2="8.5" y2="16.5" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
+      <Line x1="11.5" y1="7.5" x2="11.5" y2="16.5" stroke={color} strokeWidth={2.2} strokeLinecap="round" />
+      <Line x1="14" y1="7.5" x2="14" y2="16.5" stroke={color} strokeWidth={1.5} strokeLinecap="round" />
+      <Line x1="16.5" y1="7.5" x2="16.5" y2="16.5" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
+      {/* Tia laser quét ngang qua giữa */}
+      <Line x1="3" y1="12" x2="21" y2="12" stroke={color} strokeWidth={2.2} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+/** Icon Quét AI (Magic) — 2 ngôi sao lấp lánh (sparkles 4 cánh đều nhau đối xứng hoàn hảo) */
+export function QuickSparklesIcon({ size = 28, color = '#12111A' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+      {/* Ngôi sao lớn 4 cánh đều nhau ở góc trên phải */}
+      <Path d="M 14.20 2.80 Q 15.32 8.68 21.20 9.80 Q 15.32 10.92 14.20 16.80 Q 13.08 10.92 7.20 9.80 Q 13.08 8.68 14.20 2.80 Z" />
+      {/* Ngôi sao nhỏ 4 cánh đều nhau ở góc dưới trái */}
+      <Path d="M 7.00 12.80 Q 7.64 16.16 11.00 16.80 Q 7.64 17.44 7.00 20.80 Q 6.36 17.44 3.00 16.80 Q 6.36 16.16 7.00 12.80 Z" />
+    </Svg>
+  );
+}
+
+/** Icon Ghi giọng nói — micro viên nhộng với 2 vạch sóng âm vòm, khung chữ U & trục đứng (không có đế ngang) */
+export function QuickVoiceIcon({
+  size = 26,
+  color = '#12111A',
+  cutoutColor = '#FB7185',
+}: IconProps & { cutoutColor?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      {/* Thân micro viên nhộng bo tròn */}
+      <Rect x="8.5" y="4" width="7" height="11.5" rx="3.5" fill={color} />
+      {/* 2 vạch sóng âm hình vòm phát tín hiệu bên trong micro */}
+      <Path
+        d="M 10.2 7.2 C 11.1 6.0 12.9 6.0 13.8 7.2"
+        stroke={cutoutColor}
+        strokeWidth={1.3}
+        strokeLinecap="round"
+      />
+      <Path
+        d="M 11.0 9.2 C 11.5 8.4 12.5 8.4 13.0 9.2"
+        stroke={cutoutColor}
+        strokeWidth={1.3}
+        strokeLinecap="round"
+      />
+      {/* Khung đỡ chữ U ôm quanh nửa dưới micro */}
+      <Path
+        d="M 5.5 11 C 5.5 15.2 8.4 17.6 12 17.6 C 15.6 17.6 18.5 15.2 18.5 11"
+        stroke={color}
+        strokeWidth={2.2}
+        strokeLinecap="round"
+      />
+      {/* Trục đứng ngắn ở đáy khung chữ U (không có chân đế ngang) */}
+      <Line x1="12" y1="17.6" x2="12" y2="20.6" stroke={color} strokeWidth={2.2} strokeLinecap="round" />
     </Svg>
   );
 }

@@ -10,6 +10,9 @@
 import React, { useMemo, useRef, useState } from 'react';
 import {
   Alert,
+  Animated,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -107,6 +110,76 @@ export function HomeDashboardScreen({ navigation }: Props) {
 
   const openActivityTracker = () => root?.navigate('ActivityTracker', { date: selectedDate });
 
+  // Floating Quick Utility Dock animation & scroll detection
+  const [isDockVisibleState, setIsDockVisibleState] = useState(true);
+  const isDockVisibleRef = useRef(true);
+  const lastScrollYRef = useRef(0);
+  const dockTranslateY = useRef(new Animated.Value(0)).current;
+  const dockOpacity = useRef(new Animated.Value(1)).current;
+
+  const showDock = () => {
+    if (!isDockVisibleRef.current) {
+      isDockVisibleRef.current = true;
+      setIsDockVisibleState(true);
+      Animated.parallel([
+        Animated.spring(dockTranslateY, {
+          toValue: 0,
+          damping: 18,
+          stiffness: 160,
+          mass: 0.8,
+          useNativeDriver: true,
+        }),
+        Animated.timing(dockOpacity, {
+          toValue: 1,
+          duration: 180,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  };
+
+  const hideDock = () => {
+    if (isDockVisibleRef.current) {
+      isDockVisibleRef.current = false;
+      setIsDockVisibleState(false);
+      Animated.parallel([
+        Animated.timing(dockTranslateY, {
+          toValue: 120,
+          duration: 220,
+          useNativeDriver: true,
+        }),
+        Animated.timing(dockOpacity, {
+          toValue: 0,
+          duration: 180,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  };
+
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const currentY = event.nativeEvent.contentOffset.y;
+    const diff = currentY - lastScrollYRef.current;
+
+    // Luôn hiện khi ở gần đỉnh cuộn
+    if (currentY <= 30) {
+      showDock();
+    } else if (diff > 12 && currentY > 60) {
+      // Ẩn khi cuộn xuống một đoạn
+      hideDock();
+    } else if (diff < -12) {
+      // Hiện lại khi cuộn lên
+      showDock();
+    }
+
+    lastScrollYRef.current = currentY;
+  };
+
+  const todayBtnTranslateY = dockTranslateY.interpolate({
+    inputRange: [0, 120],
+    outputRange: [0, 86],
+  });
+
   const handleUpgradePress = () => {
     Alert.alert(
       'Kallo Premium',
@@ -125,6 +198,8 @@ export function HomeDashboardScreen({ navigation }: Props) {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
       >
         {/* ── Top Hero Container (SurfaceMid full-width tràn viền: 1, 2, 3) ── */}
         <View style={styles.topHeroContainer}>
@@ -179,8 +254,13 @@ export function HomeDashboardScreen({ navigation }: Props) {
                 style={styles.streakContainer}
                 onPress={() => root?.navigate('StreakDetail')}
               >
-                <FlameIcon size={16} color={colors.textSecondary} />
-                <AppText variant="labelLg">{streak.currentStreak || 0}</AppText>
+                <FlameIcon
+                  size={20}
+                  color={streak.currentStreak > 0 ? colors.trackerBurn : colors.textSecondary}
+                />
+                <AppText variant="headlineSm" style={styles.streakText}>
+                  {streak.currentStreak || 0}
+                </AppText>
               </Pressable>
 
               <Pressable
@@ -189,14 +269,14 @@ export function HomeDashboardScreen({ navigation }: Props) {
                 style={styles.calendarBtn}
                 onPress={() => setSelectedDate(todayKey())}
               >
-                <CalendarIcon size={18} color={colors.textSecondary} />
+                <CalendarIcon size={22} color={colors.textSecondary} />
               </Pressable>
             </View>
           </View>
 
           {/* ── 2. Date Strip / Weekday Selector ────────────────────────── */}
           <View style={styles.weekSection}>
-            <AppText variant="labelMd" color={colors.textSecondary} style={styles.weekDateTitle}>
+            <AppText color={colors.textPrimary} style={styles.weekDateTitle}>
               {dateTitle}
             </AppText>
             <View style={styles.weekRow}>
@@ -216,25 +296,25 @@ export function HomeDashboardScreen({ navigation }: Props) {
                     {isSelected && isTodayItem ? (
                       <View style={styles.daySelectedOuter}>
                         <View style={styles.daySelectedInner}>
-                          <AppText variant="labelLg" color={colors.onBrand}>
+                          <AppText color={colors.onBrand} style={styles.dayText}>
                             {item.label}
                           </AppText>
                         </View>
                       </View>
                     ) : isSelected ? (
                       <View style={styles.daySelectedCircle}>
-                        <AppText variant="labelLg" color={colors.onBrand}>
+                        <AppText color={colors.onBrand} style={styles.dayText}>
                           {item.label}
                         </AppText>
                       </View>
                     ) : isTodayItem ? (
                       <View style={styles.dayTodayOutline}>
-                        <AppText variant="labelLg" color={colors.textPrimary}>
+                        <AppText color={colors.textPrimary} style={styles.dayText}>
                           {item.label}
                         </AppText>
                       </View>
                     ) : (
-                      <AppText variant="labelLg" color={colors.textSecondary}>
+                      <AppText color={colors.textPrimary} style={styles.dayText}>
                         {item.label}
                       </AppText>
                     )}
@@ -269,32 +349,38 @@ export function HomeDashboardScreen({ navigation }: Props) {
             {/* 3 Metric Columns */}
             <View style={styles.calorieStatsRow}>
               <View style={styles.calorieStatCol}>
-                <AppText variant="headlineSm" style={styles.statColNumber}>
+                <AppText variant="headlineMd" style={styles.statColNumber}>
                   {formatNumber(caloriesGoal)}
                 </AppText>
                 <View style={styles.statColLabelRow}>
-                  <FlagIcon size={12} color={colors.textSecondary} />
-                  <AppText variant="bodySm" color={colors.textSecondary}>Mục tiêu</AppText>
+                  <FlagIcon size={15} color={colors.textSecondary} />
+                  <AppText variant="bodyMd" color={colors.textSecondary} style={styles.statColLabel}>
+                    Mục tiêu
+                  </AppText>
                 </View>
               </View>
 
               <View style={styles.calorieStatCol}>
-                <AppText variant="headlineSm" style={styles.statColNumber}>
+                <AppText variant="headlineMd" style={styles.statColNumber}>
                   {formatNumber(caloriesConsumed)}
                 </AppText>
                 <View style={styles.statColLabelRow}>
-                  <CutleryIcon size={13} color={colors.brandSecondary} />
-                  <AppText variant="bodySm" color={colors.textSecondary}>Đã nạp</AppText>
+                  <CutleryIcon size={16} color={colors.brandSecondary} />
+                  <AppText variant="bodyMd" color={colors.textSecondary} style={styles.statColLabel}>
+                    Đã nạp
+                  </AppText>
                 </View>
               </View>
 
               <View style={styles.calorieStatCol}>
-                <AppText variant="headlineSm" style={styles.statColNumber}>
+                <AppText variant="headlineMd" style={styles.statColNumber}>
                   {formatNumber(caloriesBurned)}
                 </AppText>
                 <View style={styles.statColLabelRow}>
-                  <FlameIcon size={13} color={colors.trackerBurn} />
-                  <AppText variant="bodySm" color={colors.textSecondary}>Tập luyện</AppText>
+                  <FlameIcon size={16} color={colors.trackerBurn} />
+                  <AppText variant="bodyMd" color={colors.textSecondary} style={styles.statColLabel}>
+                    Tập luyện
+                  </AppText>
                 </View>
               </View>
             </View>
@@ -318,52 +404,57 @@ export function HomeDashboardScreen({ navigation }: Props) {
               scrollEventThrottle={16}
             >
               {/* Slide 1: Chất đạm, Đường bột, Chất béo */}
-              <View style={[styles.macroColsRow, { width: macroCardWidth, padding: spacing.md }]}>
+              <View style={[styles.macroColsRow, { width: macroCardWidth }]}>
                 <MacroColumn
                   styles={styles}
                   title="Chất đạm"
-                  icon={<LightningIcon size={13} color={colors.macroProtein} />}
+                  icon={<LightningIcon size={16} color={colors.macroProtein} />}
                   current={summary.protein}
                   goal={proteinGoal}
+                  color={colors.macroProtein}
                 />
                 <MacroColumn
                   styles={styles}
                   title="Đường bột"
-                  icon={<WheatIcon size={15} color={colors.macroCarbs} creaseColor={colors.macroCarbsStrong} />}
+                  icon={<WheatIcon size={17} color={colors.macroCarbs} creaseColor={colors.macroCarbsStrong} />}
                   current={summary.carbs}
                   goal={carbsGoal}
+                  color={colors.macroCarbs}
                 />
                 <MacroColumn
                   styles={styles}
                   title="Chất béo"
-                  icon={<DropletIcon size={13} color={colors.macroFats} />}
+                  icon={<DropletIcon size={16} color={colors.macroFats} />}
                   current={summary.fat}
                   goal={fatGoal}
+                  color={colors.macroFats}
                 />
               </View>
 
               {/* Slide 2: Muối, Đường, Chất xơ */}
-              <View style={[styles.macroColsRow, { width: macroCardWidth, padding: spacing.md }]}>
+              <View style={[styles.macroColsRow, { width: macroCardWidth }]}>
                 <MacroColumn
                   styles={styles}
                   title="Muối"
-                  icon={<SaltIcon size={15} color={colors.macroSalt} capColor={colors.onBrand} />}
+                  icon={<SaltIcon size={17} color={colors.macroSalt} capColor={colors.onBrand} />}
                   current={saltCurrent}
                   goal={saltGoal}
+                  color={colors.macroSalt}
                 />
                 <MacroColumn
                   styles={styles}
                   title="Đường"
-                  icon={<SugarIcon size={15} color={colors.macroSugar} />}
+                  icon={<SugarIcon size={17} color={colors.macroSugar} />}
                   current={sugarCurrent}
                   goal={sugarGoal}
+                  color={colors.macroSugar}
                 />
                 <MacroColumn
                   styles={styles}
                   title="Chất xơ"
                   icon={
                     <FiberIcon
-                      size={15}
+                      size={17}
                       color={colors.macroFiber}
                       stalkColor={colors.macroFiberSoft}
                       creaseColor={colors.macroFiberStrong}
@@ -371,6 +462,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
                   }
                   current={fiberCurrent}
                   goal={fiberGoal}
+                  color={colors.macroFiber}
                 />
               </View>
             </ScrollView>
@@ -381,6 +473,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Trang 1: Đạm, đường bột, chất béo"
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               onPress={() => {
                 macroScrollRef.current?.scrollTo({ x: 0, animated: true });
                 setActiveMacroPage(0);
@@ -390,6 +483,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Trang 2: Muối, đường, chất xơ"
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               onPress={() => {
                 macroScrollRef.current?.scrollTo({ x: macroCardWidth, animated: true });
                 setActiveMacroPage(1);
@@ -397,14 +491,6 @@ export function HomeDashboardScreen({ navigation }: Props) {
               style={activeMacroPage === 1 ? styles.dotActive : styles.dotInactive}
             />
           </View>
-
-          {/* Quick Utility Grid */}
-          <QuickUtilityGrid
-            onSearch={() => root?.navigate('FoodSearch', { date: selectedDate, meal: 'snack' })}
-            onBarcode={() => root?.navigate('BarcodeScanner', { date: selectedDate, meal: 'snack' })}
-            onAIScan={() => root?.navigate('AIMealScan', { date: selectedDate, meal: 'snack' })}
-            onVoice={() => root?.navigate('VoiceLogModal', { date: selectedDate, meal: 'snack' })}
-          />
 
           {/* ── 5. Nhật ký gần đây (Recent Diary) ───────────────────────── */}
           <View style={styles.sectionBlock}>
@@ -529,17 +615,44 @@ export function HomeDashboardScreen({ navigation }: Props) {
 
       {/* ── Floating "Quay lại hôm nay" Button ──────────────────────── */}
       {!isToday && (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Quay lại hôm nay"
-          onPress={() => setSelectedDate(todayKey())}
-          style={({ pressed }) => [styles.floatingTodayBtn, pressed && styles.pressedOpacity]}
+        <Animated.View
+          style={[
+            styles.floatingTodayWrapper,
+            { transform: [{ translateY: todayBtnTranslateY }] },
+          ]}
         >
-          <AppText variant="labelLg" color={colors.onBrand}>
-            Quay lại hôm nay
-          </AppText>
-        </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Quay lại hôm nay"
+            onPress={() => setSelectedDate(todayKey())}
+            style={({ pressed }) => [styles.floatingTodayBtn, pressed && styles.pressedOpacity]}
+          >
+            <AppText variant="labelLg" color={colors.onBrand}>
+              Quay lại hôm nay
+            </AppText>
+          </Pressable>
+        </Animated.View>
       )}
+
+      {/* ── Floating Quick Utility Dock ─────────────────────────────── */}
+      <Animated.View
+        pointerEvents={isDockVisibleState ? 'auto' : 'none'}
+        style={[
+          styles.floatingDock,
+          {
+            transform: [{ translateY: dockTranslateY }],
+            opacity: dockOpacity,
+          },
+        ]}
+      >
+        <QuickUtilityGrid
+          style={styles.floatingGrid}
+          onSearch={() => root?.navigate('FoodSearch', { date: selectedDate, meal: 'snack' })}
+          onBarcode={() => root?.navigate('BarcodeScanner', { date: selectedDate, meal: 'snack' })}
+          onAIScan={() => root?.navigate('AIMealScan', { date: selectedDate, meal: 'snack' })}
+          onVoice={() => root?.navigate('VoiceLogModal', { date: selectedDate, meal: 'snack' })}
+        />
+      </Animated.View>
     </SafeAreaView>
   );
 }
