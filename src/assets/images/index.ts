@@ -85,6 +85,7 @@ const imageFiles = {
   reportLampIcon: require('../../../res/src_assets_images_report_lampicon.webp'),
   trackingCaloriesChart: require('../../../res/src_assets_images_tracker_trackingcalorieschart.webp'),
   caloriesBurnedChart: require('../../../res/src_assets_images_tracker_caloriesburnedchart.webp'),
+  mealPlanAiPremiumBanner: require('../../../res/src_assets_images_mealplanai_mealplanaipremiumbanner.webp'),
   mealPlanNewAiBanner: require('../../../res/src_assets_images_mealplanai_new_ai_banner.webp'),
   mealPlanRecipeSuggestion: require('../../../res/src_assets_images_mealplanai_recipe_suggestion.webp'),
   mealPlanRecipeScanBanner: require('../../../res/src_assets_images_mealplanai_recipescanbanner.webp'),
@@ -123,6 +124,8 @@ const imageFiles = {
   instagramLogo: require('../../../res/src_assets_images_thirdapplogo_instagramlogo.webp'),
   tiktokLogo: require('../../../res/src_assets_images_thirdapplogo_tiktoklogo.webp'),
   fbGroupArtwork: require('../../../res/src_assets_images_introduce_fbgroup.webp'),
+  congDongHoTro: require('../../../res/cong_dong_ho_tro.png'),
+  mealPlanCardSample: require('../../../res/mealplan_card_sample.png'),
 } as const;
 export const images = imageFiles;
 export type ImageKey = keyof typeof imageFiles;

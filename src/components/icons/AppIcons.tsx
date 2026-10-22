@@ -1,4 +1,5 @@
 import React from 'react';
+import { Image } from 'react-native';
 import Svg, { Circle, G, Line, Path, Rect } from 'react-native-svg';
 
 // ─── Shared Props ────────────────────────────────────────────────────────────
@@ -85,6 +86,16 @@ export function PlusIcon({ size = 14, color, strokeWidth = 3 }: PlusIconProps) {
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round">
       <Line x1={12} y1={5} x2={12} y2={19} />
       <Line x1={5} y1={12} x2={19} y2={12} />
+    </Svg>
+  );
+}
+
+/** Icon dấu X (close) */
+export function CloseXIcon({ size = 20, color = '#FFFFFF', strokeWidth = 2.2 }: IconProps & { strokeWidth?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round">
+      <Line x1="18" y1="6" x2="6" y2="18" />
+      <Line x1="6" y1="6" x2="18" y2="18" />
     </Svg>
   );
 }
@@ -705,5 +716,165 @@ export function QuickVoiceIcon({
       {/* Trục đứng ngắn ở đáy khung chữ U (không có chân đế ngang) */}
       <Line x1="12" y1="17.6" x2="12" y2="20.6" stroke={color} strokeWidth={2.2} strokeLinecap="round" />
     </Svg>
+  );
+}
+
+// ─── Header & Navigation Controls ──────────────────────────────────────────
+
+/** Icon Menu Hamburger 3 vạch ngang */
+export function MenuIcon({ size = 22, color = '#FFFFFF' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Line x1="4" y1="6" x2="20" y2="6" stroke={color} strokeWidth={2.2} strokeLinecap="round" />
+      <Line x1="4" y1="12" x2="20" y2="12" stroke={color} strokeWidth={2.2} strokeLinecap="round" />
+      <Line x1="4" y1="18" x2="20" y2="18" stroke={color} strokeWidth={2.2} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+/** Icon Mũi tên trái < */
+export function ChevronLeftIcon({ size = 20, color = '#FFFFFF' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M15 18L9 12L15 6" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+/** Icon Mũi tên phải > */
+export function ChevronRightIcon({ size = 20, color = '#FFFFFF' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M9 6L15 12L9 18" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+/** Icon Mũi tên xuống ∨ */
+export function ChevronDownIcon({ size = 20, color = '#FFFFFF' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M6 9L12 15L18 9" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+/** Icon Mũi tên lên ∧ */
+export function ChevronUpIcon({ size = 20, color = '#FFFFFF' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M18 15L12 9L6 15" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+/** Icon Lấp lánh Sparkles ✨ */
+export function SparklesIcon({ size = 18, color = '#9E64F7' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M12 2L14.3 9.7L22 12L14.3 14.3L12 22L9.7 14.3L2 12L9.7 9.7L12 2Z"
+        fill={color}
+      />
+      <Path
+        d="M19 16L19.9 18.9L22.8 19.8L19.9 20.7L19 23.6L18.1 20.7L15.2 19.8L18.1 18.9L19 16Z"
+        fill={color}
+        opacity={0.85}
+      />
+    </Svg>
+  );
+}
+
+/** Icon Info ⓘ */
+export function InfoIcon({ size = 22, color = '#FFFFFF' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Circle cx="12" cy="12" r="9.5" stroke={color} strokeWidth={1.8} />
+      <Line x1="12" y1="10.5" x2="12" y2="16.5" stroke={color} strokeWidth={2} strokeLinecap="round" />
+      <Circle cx="12" cy="7.2" r="1.1" fill={color} />
+    </Svg>
+  );
+}
+
+/** Icon Kính lúp tìm kiếm */
+export function SearchIcon({ size = 20, color = '#FFFFFF', strokeWidth = 2.2 }: IconProps & { strokeWidth?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Circle cx="10.8" cy="10.8" r="5.8" stroke={color} strokeWidth={strokeWidth} />
+      <Line x1="15" y1="15" x2="19.5" y2="19.5" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+/** Icon Khung quét mã vạch ở góc thanh tìm kiếm (khung 4 góc, capsule & tia quét ngang chuẩn thiết kế) */
+export function ViewfinderBarcodeIcon({ size = 26, color = '#FFFFFF' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M4 8.5V5.5C4 4.7 4.7 4 5.5 4H8.5" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M15.5 4H18.5C19.3 4 20 4.7 20 5.5V8.5" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M20 15.5V18.5C20 19.3 19.3 20 18.5 20H15.5" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M8.5 20H5.5C4.7 20 4 19.3 4 18.5V15.5" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+      <Rect x="6.5" y="9" width="11" height="6" rx="3" stroke={color} strokeWidth={2} />
+      <Line x1="4.5" y1="12" x2="19.5" y2="12" stroke={color} strokeWidth={2} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+/** Minh họa thư mục trống kèm 2 lá và nét xoắn tím bay (chuẩn 100% ảnh thiết kế) */
+export function EmptyFolderIllustration({ size = 140 }: { size?: number }) {
+  return (
+    <Svg width={size} height={size * 0.88} viewBox="0 0 160 140" fill="none">
+      {/* 1. Lá tím bên trái */}
+      <Path
+        d="M 44 32 C 43 23 52 19 57 24 C 58 33 49 37 44 32 Z"
+        fill="#9E64F7"
+      />
+
+      {/* 2. Nét xoắn tím lơ lửng ở giữa có vòng lặp loop */}
+      <Path
+        d="M 62 48 C 74 48 82 43 86 37 C 91 28 85 22 81 25 C 77 28 78 35 85 34 C 92 33 99 25 104 14"
+        stroke="#9E64F7"
+        strokeWidth={2.8}
+        strokeLinecap="round"
+      />
+
+      {/* 3. Lá tím bên phải */}
+      <Path
+        d="M 110 35 C 111 27 120 25 123 30 C 122 38 114 40 110 35 Z"
+        fill="#9E64F7"
+      />
+
+      {/* 4. Thân sau của thư mục (hình chữ nhật bo góc tối) */}
+      <Rect
+        x={24}
+        y={42}
+        width={112}
+        height={76}
+        rx={14}
+        fill="#1D1929"
+      />
+
+      {/* 5. Nắp trước của thư mục (vát nhẹ mở ra trước) */}
+      <Path
+        d="M 20 113 
+           L 29 65 C 30 59 35 55 41 55 
+           L 126 55 C 134 55 140 61 139 68 
+           L 133 114 C 132 119 128 122 123 122 
+           L 28 122 C 23 122 19 118 20 113 Z"
+        fill="#2A243A"
+      />
+    </Svg>
+  );
+}
+
+/** Minh họa điện thoại hiển thị giao diện Nhật ký theo thời gian */
+export function TimelineDiaryPhoneIllustration({ size = 70 }: { size?: number }) {
+  return (
+    <Image
+      source={require('../../assets/images/src_assets_images_fooddiaryartwork.png')}
+      style={{ width: size, height: size, borderRadius: 16 }}
+      resizeMode="contain"
+      accessibilityLabel="Nhật ký theo thời gian"
+    />
   );
 }

@@ -1,35 +1,165 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Pressable, SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  Alert,
+  ScrollView,
+  StatusBar,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AppButton, AppCard, AppInput, AppText, EmptyStateView } from '@/components/common';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
 import { useNutrition } from '../NutritionProvider';
-import { normalizeSearch } from '../utils';
-import type { Food } from '../types';
+import { normalizeSearch, todayKey } from '../utils';
+import type { Food, MealSlot } from '../types';
+import { getDateTitle, getMealSlotForHour } from './FoodDiary';
+import {
+  DateTimePickerModal,
+  FoodRowItem,
+  FoodSearchBar,
+  FoodSearchEmptyState,
+  FoodSearchHeader,
+  FoodSearchTabs,
+  FoodSearchActionCards,
+  type SearchTab,
+  styles,
+} from './FoodSearch';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FoodSearch'>;
-type SearchTab = 'all' | 'recent' | 'mine';
 
 export function FoodSearchScreen({ navigation, route }: Props) {
   const theme = useTheme();
   const { foods, state } = useNutrition();
+
+  const [date, setDate] = useState(route.params.date || todayKey());
+  const [selectedHour, setSelectedHour] = useState(route.params.hour || '11:00');
+  const [meal, setMeal] = useState<MealSlot>(
+    route.params.meal || getMealSlotForHour(selectedHour)
+  );
+
   const [query, setQuery] = useState('');
-  const [debounced, setDebounced] = useState('');
-  const [tab, setTab] = useState<SearchTab>('all');
-  useEffect(() => { const timer = setTimeout(() => setDebounced(query), 300); return () => clearTimeout(timer); }, [query]);
-  const results = useMemo(() => {
-    const term = normalizeSearch(debounced);
-    return foods.filter((food) => (tab === 'mine' ? food.isCustom : tab === 'recent' ? state.recentFoodIds.includes(food.id) : true) && (!term || normalizeSearch(food.name).includes(term)));
-  }, [debounced, foods, state.recentFoodIds, tab]);
-  const openFood = (food: Food) => navigation.navigate('FoodDetail', { foodId: food.id, date: route.params.date, meal: route.params.meal });
-  return <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.background }]}><ScrollView contentContainerStyle={styles.content}>
-    <View><AppText variant="title">Tìm món ăn</AppText><AppText color={theme.colors.textMuted}>Tìm theo tên món, có hỗ trợ tìm không dấu</AppText></View>
-    <AppInput value={query} onChangeText={setQuery} placeholder="Ví dụ: pho bo" autoFocus accessibilityLabel="Tìm kiếm món ăn" />
-    <View style={styles.tabs}>{[['all', 'Tất cả'], ['recent', 'Gần đây'], ['mine', 'Món của tôi']].map(([key, label]) => <Pressable key={key} onPress={() => setTab(key as SearchTab)} accessibilityRole="tab" accessibilityState={{ selected: tab === key }} style={[styles.tab, { borderColor: tab === key ? theme.colors.primary : theme.colors.border, backgroundColor: tab === key ? theme.colors.primarySurface : theme.colors.surface }]}><AppText color={tab === key ? theme.colors.primaryPressed : theme.colors.text}>{label}</AppText></Pressable>)}</View>
-    <AppButton label="+ Tạo món ăn tùy chỉnh" variant="outline" onPress={() => navigation.navigate('CustomFoodForm', { date: route.params.date, meal: route.params.meal })} accessibilityLabel="Tạo món ăn tùy chỉnh" />
-    {results.length === 0 ? <EmptyStateView variant={tab === 'recent' ? 'favorite' : 'search'} title="Không tìm thấy món ăn" message="Thử từ khóa khác hoặc tạo món ăn của riêng bạn." /> : results.map((food) => <FoodRow key={food.id} food={food} onPress={() => openFood(food)} />)}
-  </ScrollView></SafeAreaView>;
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [activeTab, setActiveTab] = useState<SearchTab>('recent');
+  const [hourPickerVisible, setHourPickerVisible] = useState(false);
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(query), 200);
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  // Filter foods based on query
+  const searchResults = useMemo(() => {
+    const term = normalizeSearch(debouncedQuery);
+    if (!term) return [];
+    return foods.filter((food) => normalizeSearch(food.name).includes(term));
+  }, [debouncedQuery, foods]);
+
+  // Tab foods when query is empty
+  const tabFoods = useMemo(() => {
+    if (activeTab === 'recent') {
+      return foods.filter((f) => state.recentFoodIds.includes(f.id));
+    }
+    if (activeTab === 'mine') {
+      return foods.filter((f) => f.isCustom);
+    }
+    if (activeTab === 'favorite') {
+      return foods.filter((f) => state.favoriteFoodIds.includes(f.id));
+    }
+    return [];
+  }, [activeTab, foods, state.recentFoodIds, state.customFoods, state.favoriteFoodIds]);
+
+  const openFood = (food: Food) => {
+    navigation.navigate('FoodDetail', {
+      foodId: food.id,
+      date,
+      meal,
+      source: 'SEARCH',
+    });
+  };
+
+  const handleConfirmDateTime = (newDate: string, newHour: string) => {
+    setDate(newDate);
+    setSelectedHour(newHour);
+    setMeal(getMealSlotForHour(newHour));
+    setHourPickerVisible(false);
+  };
+
+  const dateTitle = getDateTitle(date);
+  const isSearchActive = query.trim().length > 0;
+  const currentList = isSearchActive ? searchResults : tabFoods;
+
+  return (
+    <SafeAreaView edges={['top']} style={[styles.container, { backgroundColor: theme.colors.canvasBase }]}>
+      <StatusBar barStyle="light-content" backgroundColor={theme.colors.canvasBase} />
+
+      {/* ── 1. Top Header: <  Hôm nay • 11:00 ▾  ⓘ ──────────────────────────── */}
+      <FoodSearchHeader
+        dateTitle={dateTitle}
+        selectedHour={selectedHour}
+        onGoBack={() => navigation.goBack()}
+        onOpenPicker={() => setHourPickerVisible(true)}
+        onOpenInfo={() =>
+          Alert.alert(
+            'Hướng dẫn tìm kiếm',
+            'Nhập tên thực phẩm hoặc sử dụng tính năng Quét mã vạch, Nhận diện AI và Giọng nói để thêm món ăn nhanh chóng.'
+          )
+        }
+      />
+
+      {/* ── 2. Search Input Bar ────────────────────────────────────────────── */}
+      <FoodSearchBar
+        query={query}
+        onChangeQuery={setQuery}
+        onOpenBarcode={() => navigation.navigate('BarcodeScanner', { date, meal })}
+      />
+
+      {/* ── 3. Tabs: Gần đây | Tạo bởi tôi | Yêu thích (Căn giữa) ───────────── */}
+      <FoodSearchTabs
+        activeTab={activeTab}
+        onSelectTab={setActiveTab}
+      />
+
+      {/* ── 4. 3 Action Cards (Quét mã vạch | Nhận diện món | Giọng nói) ────── */}
+      <FoodSearchActionCards
+        onBarcodeScan={() => navigation.navigate('BarcodeScanner', { date, meal })}
+        onAIMealScan={() => navigation.navigate('AIMealScan', { date, meal })}
+        onVoiceLog={() => navigation.navigate('VoiceLogModal', { date, meal })}
+      />
+
+      {/* ── 5. Main Content Area: Search Results or Empty State ────────────── */}
+      <ScrollView
+        contentContainerStyle={styles.scrollBody}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        {currentList.length > 0 ? (
+          <View style={styles.resultsList}>
+            {currentList.map((food) => (
+              <FoodRowItem
+                key={food.id}
+                food={food}
+                onPress={() => openFood(food)}
+              />
+            ))}
+          </View>
+        ) : (
+          <FoodSearchEmptyState
+            isSearchActive={isSearchActive}
+            activeTab={activeTab}
+            onCreateCustom={() => navigation.navigate('CustomFoodForm', { date, meal })}
+          />
+        )}
+      </ScrollView>
+
+      {/* ── 6. Hour / Meal Picker Dropdown Modal ────────────────────────────── */}
+      <DateTimePickerModal
+        visible={hourPickerVisible}
+        initialDate={date}
+        initialHour={selectedHour}
+        onClose={() => setHourPickerVisible(false)}
+        onConfirm={handleConfirmDateTime}
+      />
+    </SafeAreaView>
+  );
 }
-function FoodRow({ food, onPress }: { food: Food; onPress: () => void }) { const theme = useTheme(); return <AppCard onPress={onPress} accessibilityLabel={`Chọn món ${food.name}`} style={styles.food}><View style={styles.foodText}><AppText variant="bodyMedium">{food.name}</AppText><AppText variant="caption" color={theme.colors.textMuted}>{food.calories} kcal / 100 g · P {food.protein} g · C {food.carbs} g · F {food.fat} g</AppText></View><AppText color={theme.colors.primary}>›</AppText></AppCard>; }
-const styles = StyleSheet.create({ safe: { flex: 1 }, content: { padding: 16, gap: 14, paddingBottom: 30 }, tabs: { flexDirection: 'row', gap: 8 }, tab: { minHeight: 44, borderWidth: 1, borderRadius: 22, paddingHorizontal: 14, alignItems: 'center', justifyContent: 'center' }, food: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }, foodText: { flex: 1, gap: 4 } });
