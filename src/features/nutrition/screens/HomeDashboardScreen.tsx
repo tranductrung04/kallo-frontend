@@ -16,7 +16,14 @@ import {
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { AppButton, AppCard, AppText, CircularProgress, QuickUtilityGrid } from '@/components/common';
+import {
+  AppButton,
+  AppCard,
+  AppText,
+  CircularProgress,
+  MonthCalendarModal,
+  QuickUtilityGrid,
+} from '@/components/common';
 import type { MainTabParamList, RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
 import { images } from '@/assets/images';
@@ -56,6 +63,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const { state, getSummary, addWater, setSelectedDate } = useNutrition();
   const { getTotalCaloriesBurnedForDate } = useActivity();
   const { streak } = useGamification();
+  const [calendarModalVisible, setCalendarModalVisible] = useState(false);
   const [pillSize, setPillSize] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
   const selectedDate = state.selectedDate || todayKey();
   const isToday = selectedDate === todayKey();
@@ -261,8 +269,8 @@ export function HomeDashboardScreen({ navigation }: Props) {
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Mở lịch"
-                style={styles.calendarBtn}
-                onPress={() => setSelectedDate(todayKey())}
+                style={({ pressed }) => [styles.calendarBtn, pressed && styles.pressedOpacity]}
+                onPress={() => setCalendarModalVisible(true)}
               >
                 <CalendarIcon size={22} color={colors.textSecondary} />
               </Pressable>
@@ -698,6 +706,22 @@ export function HomeDashboardScreen({ navigation }: Props) {
           onVoice={() => root?.navigate('VoiceLogModal', { date: selectedDate, meal: 'snack' })}
         />
       </Animated.View>
+
+      {/* ── Month Calendar Modal ─────────────────────────────────────── */}
+      <MonthCalendarModal
+        visible={calendarModalVisible}
+        date={selectedDate}
+        isToday={isToday}
+        onSelectDate={(newDate) => {
+          setSelectedDate(newDate);
+          setCalendarModalVisible(false);
+        }}
+        onSelectToday={() => {
+          setSelectedDate(todayKey());
+          setCalendarModalVisible(false);
+        }}
+        onClose={() => setCalendarModalVisible(false)}
+      />
     </SafeAreaView>
   );
 }
