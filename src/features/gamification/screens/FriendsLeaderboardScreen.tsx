@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   bannerOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(20, 18, 30, 0.45)',
     padding: 16,
     justifyContent: 'space-between',
