@@ -1,5 +1,6 @@
 import React from 'react';
 import { Image } from 'react-native';
+import { images } from '@/assets/images';
 import Svg, {
   Circle,
   Ellipse,
@@ -892,7 +893,7 @@ export function EmptyFolderIllustration({ size = 140 }: { size?: number }) {
 export function TimelineDiaryPhoneIllustration({ size = 70 }: { size?: number }) {
   return (
     <Image
-      source={require('../../assets/images/src_assets_images_fooddiaryartwork.png')}
+      source={images.foodDiaryArtwork}
       style={{ width: size, height: size, borderRadius: 16 }}
       resizeMode="contain"
       accessibilityLabel="Nhật ký theo thời gian"
@@ -1057,7 +1058,7 @@ export type CelebrationPopperBadgeProps = {
 export function CelebrationPopperBadge({ size = 56 }: CelebrationPopperBadgeProps) {
   return (
     <Image
-      source={require('../../assets/images/streak_celebrate_popper.png')}
+      source={images.streakCelebratePopper}
       style={{ width: size, height: size }}
       resizeMode="contain"
       accessibilityLabel="Pháo giấy ăn mừng chuỗi Streak"

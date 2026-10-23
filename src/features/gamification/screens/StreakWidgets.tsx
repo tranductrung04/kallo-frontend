@@ -55,7 +55,7 @@ export function StreakActionCardWidget({
       <View style={styles.actionCard}>
         <View style={styles.foodAvatarContainer}>
           <Image
-            source={require('@/assets/images/src_assets_images_fooddefault.webp')}
+            source={images.foodDefault}
             style={styles.foodAvatar}
             resizeMode="contain"
           />
