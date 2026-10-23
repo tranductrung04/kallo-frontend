@@ -128,6 +128,24 @@ export function HomeDashboardScreen({ navigation }: Props) {
 
   const openActivityTracker = () => root?.navigate('ActivityTracker', { date: selectedDate });
 
+  const handleSelectActivity = (activityLabel: string) => {
+    if (activityLabel === 'Chạy bộ') {
+      root?.navigate('RunningWorkout', { date: selectedDate });
+    } else if (activityLabel === 'Đạp xe') {
+      root?.navigate('CyclingWorkout', { date: selectedDate });
+    } else if (activityLabel === 'Cầu lông') {
+      root?.navigate('BadmintonWorkout', { date: selectedDate });
+    } else if (activityLabel === 'Pickleball') {
+      root?.navigate('PickleballWorkout', { date: selectedDate });
+    } else if (activityLabel === 'Yoga') {
+      root?.navigate('YogaWorkout', { date: selectedDate });
+    } else if (activityLabel === 'Khác') {
+      root?.navigate('AddActivity', { date: selectedDate });
+    } else {
+      root?.navigate('ActivityTracker', { date: selectedDate });
+    }
+  };
+
   // Floating Quick Utility Dock animation & scroll detection
   const [isDockVisibleState, setIsDockVisibleState] = useState(true);
   const isDockVisibleRef = useRef(true);
@@ -663,7 +681,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
           {/* ── 6. Hoạt động tập luyện (Workout Grid) ───────────────────── */}
           <View style={styles.sectionBlock}>
             <AppText variant="headlineSm">Hoạt động tập luyện</AppText>
-            <ActivityGrid styles={styles} onSelect={openActivityTracker} />
+            <ActivityGrid styles={styles} onSelect={handleSelectActivity} />
           </View>
 
           {/* ── 7. Two Column Cards: Bước chân & Tập luyện ───────────────── */}

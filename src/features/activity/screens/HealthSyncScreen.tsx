@@ -3,289 +3,284 @@ import {
   ActivityIndicator,
   Image,
   Platform,
-  SafeAreaView,
-  ScrollView,
+  StatusBar,
   StyleSheet,
+  Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import Svg, { Path } from 'react-native-svg';
+import type { RootStackParamList } from '@/navigation/types';
+import { ChevronLeftIcon } from '@/components/icons';
 import { images } from '@/assets/images';
-import { AppButton, AppCard, AppText } from '@/components/common';
-import { useTheme } from '@/theme';
-import { formatNumber } from '@/features/nutrition/utils';
 import { useActivity } from '../ActivityProvider';
 
-export function HealthSyncScreen() {
-  const theme = useTheme();
-  const { state, syncHealthData, requestHealthPermission } = useActivity();
-  const [syncing, setSyncing] = useState(false);
-  const [syncFeedback, setSyncFeedback] = useState<string | null>(null);
+type Props = NativeStackScreenProps<RootStackParamList, 'HealthSync'>;
+
+
+// Green checkmark icon
+function GreenCheckIcon() {
+  return (
+    <View style={styles.greenCheckBadge}>
+      <Svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={3.5} strokeLinecap="round" strokeLinejoin="round">
+        <Path d="M20 6L9 17l-5-5" />
+      </Svg>
+    </View>
+  );
+}
+
+export function HealthSyncScreen({ navigation }: Props) {
+  const insets = useSafeAreaInsets();
+  const { requestHealthPermission, syncHealthData } = useActivity();
+  const [connecting, setConnecting] = useState(false);
 
   const isAndroid = Platform.OS === 'android';
   const activeSource = isAndroid ? 'HEALTH_CONNECT' : 'APPLE_HEALTH';
-  const permissionStatus = isAndroid
-    ? state.syncStatus.healthConnect
-    : state.syncStatus.appleHealth;
 
-  const handleConnect = async () => {
-    await requestHealthPermission(activeSource);
-  };
-
-  const handleSyncNow = async () => {
-    setSyncing(true);
-    setSyncFeedback(null);
+  const handleAllowAccess = async () => {
     try {
-      const res = await syncHealthData(activeSource);
-      if (res.duplicate) {
-        setSyncFeedback('✓ Dữ liệu hôm nay đã đồng bộ mới nhất (không có bước chân mới).');
-      } else {
-        setSyncFeedback(
-          `✓ Đồng bộ thành công: +${formatNumber(res.newSteps)} bước chân, +${formatNumber(res.newCalories)} kcal.`
-        );
-      }
+      setConnecting(true);
+      await requestHealthPermission(activeSource);
+      await syncHealthData(activeSource);
+      navigation.goBack();
     } catch {
-      setSyncFeedback('✕ Đồng bộ thất bại. Vui lòng kiểm tra quyền truy cập.');
+      navigation.goBack();
     } finally {
-      setSyncing(false);
+      setConnecting(false);
     }
   };
 
+  const handleSkip = () => {
+    navigation.goBack();
+  };
+
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.background }]}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.header}>
-          <AppText variant="title">Đồng bộ Dữ liệu Sức khỏe</AppText>
-          <AppText color={theme.colors.textMuted}>
-            Tự động lấy dữ liệu bước chân và calo tiêu hao từ hệ điều hành
-          </AppText>
-        </View>
+    <View style={[styles.container, { paddingTop: Math.max(8, insets.top) }]}>
+      <StatusBar barStyle="light-content" backgroundColor="#120E22" />
 
-        {/* Health Connect Card */}
-        <AppCard style={styles.providerCard}>
-          <View style={styles.providerHeader}>
-            <Image
-              source={images.healthConnectArtwork}
-              style={styles.artwork}
-              resizeMode="contain"
-              accessibilityLabel="Google Health Connect"
-            />
-            <View style={styles.providerInfo}>
-              <View style={styles.nameRow}>
-                <Image
-                  source={images.healthConnectIcon}
-                  style={styles.providerIcon}
-                  resizeMode="contain"
-                  accessibilityLabel="Biểu tượng Health Connect"
-                />
-                <AppText variant="heading">Health Connect</AppText>
-              </View>
-              <AppText variant="caption" color={theme.colors.textMuted}>
-                Nền tảng Google cho thiết bị Android
-              </AppText>
-            </View>
-          </View>
+      {/* ── Header ────────────────────────────────────────── */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          style={styles.backButton}
+          accessibilityRole="button"
+          accessibilityLabel="Quay lại"
+        >
+          <ChevronLeftIcon size={22} color="#FFFFFF" />
+        </TouchableOpacity>
+      </View>
 
-          <View style={styles.statusRow}>
-            <AppText variant="caption">Trạng thái:</AppText>
-            <View
-              style={[
-                styles.statusBadge,
-                {
-                  backgroundColor:
-                    state.syncStatus.healthConnect === 'CONNECTED'
-                      ? theme.colors.primarySurface
-                      : theme.colors.surfaceMuted,
-                },
-              ]}
-            >
-              <AppText
-                variant="caption"
-                color={
-                  state.syncStatus.healthConnect === 'CONNECTED'
-                    ? theme.colors.primary
-                    : theme.colors.textMuted
-                }
-              >
-                {state.syncStatus.healthConnect === 'CONNECTED'
-                  ? '● Đã kết nối'
-                  : '○ Chưa cấp quyền'}
-              </AppText>
-            </View>
-          </View>
+      {/* ── Graphic Header Section ────────────────────────── */}
+      <View style={styles.graphicSection}>
+        {/* App Logo */}
+        <Image
+          source={images.trackerLogo}
+          style={styles.trackerLogoImg}
+          resizeMode="contain"
+          accessibilityLabel="Logo ứng dụng"
+        />
 
-          {state.syncStatus.healthConnect !== 'CONNECTED' ? (
-            <AppButton
-              label="Cấp quyền Health Connect"
-              variant="outline"
-              onPress={() => requestHealthPermission('HEALTH_CONNECT')}
-            />
-          ) : null}
-        </AppCard>
+        {/* Sync Cycle Icon */}
+        <Image
+          source={images.syncIcon}
+          style={styles.syncIconImg}
+          resizeMode="contain"
+          accessibilityLabel="Đồng bộ"
+        />
 
-        {/* Apple HealthKit Card */}
-        <AppCard style={styles.providerCard}>
-          <View style={styles.providerHeader}>
-            <Image
-              source={images.appleHealthArtwork}
-              style={styles.artwork}
-              resizeMode="contain"
-              accessibilityLabel="Apple Health"
-            />
-            <View style={styles.providerInfo}>
-              <View style={styles.nameRow}>
-                <Image
-                  source={images.appleHealthIcon}
-                  style={styles.providerIcon}
-                  resizeMode="contain"
-                  accessibilityLabel="Biểu tượng Apple Health"
-                />
-                <AppText variant="heading">Apple HealthKit</AppText>
-              </View>
-              <AppText variant="caption" color={theme.colors.textMuted}>
-                Đồng bộ bước chân và nhịp tim từ iPhone / Apple Watch
-              </AppText>
-            </View>
-          </View>
-
-          <View style={styles.statusRow}>
-            <AppText variant="caption">Trạng thái:</AppText>
-            <View
-              style={[
-                styles.statusBadge,
-                {
-                  backgroundColor:
-                    state.syncStatus.appleHealth === 'CONNECTED'
-                      ? theme.colors.primarySurface
-                      : theme.colors.surfaceMuted,
-                },
-              ]}
-            >
-              <AppText
-                variant="caption"
-                color={
-                  state.syncStatus.appleHealth === 'CONNECTED'
-                    ? theme.colors.primary
-                    : theme.colors.textMuted
-                }
-              >
-                {state.syncStatus.appleHealth === 'CONNECTED'
-                  ? '● Đã kết nối'
-                  : '○ Chưa cấp quyền'}
-              </AppText>
-            </View>
-          </View>
-
-          {state.syncStatus.appleHealth !== 'CONNECTED' ? (
-            <AppButton
-              label="Cấp quyền Apple Health"
-              variant="outline"
-              onPress={() => requestHealthPermission('APPLE_HEALTH')}
-            />
-          ) : null}
-        </AppCard>
-
-        {/* Sync Action Area */}
-        <AppCard style={styles.syncActionCard}>
-          <View style={styles.syncActionHeader}>
-            <Image
-              source={images.trackerSyncIcon}
-              style={[styles.syncIcon, syncing && styles.spin]}
-              accessibilityLabel="Biểu tượng đồng bộ"
-            />
-            <View style={styles.syncTextCol}>
-              <AppText variant="heading">Đồng bộ tức thì</AppText>
-              <AppText variant="caption" color={theme.colors.textMuted}>
-                Kiểm tra dữ liệu mới nhất. Khử trùng lặp tự động (AC2 mục 4.5).
-              </AppText>
-            </View>
-          </View>
-
-          {syncFeedback ? (
-            <View
-              style={[
-                styles.feedbackBox,
-                {
-                  backgroundColor: syncFeedback.startsWith('✓')
-                    ? theme.colors.primarySurface
-                    : '#FDEDED',
-                },
-              ]}
-            >
-              <AppText
-                variant="caption"
-                color={syncFeedback.startsWith('✓') ? theme.colors.primary : theme.colors.danger}
-              >
-                {syncFeedback}
-              </AppText>
-            </View>
-          ) : null}
-
-          <AppButton
-            label={syncing ? 'Đang đồng bộ...' : 'Đồng bộ ngay bây giờ'}
-            onPress={handleSyncNow}
-            disabled={syncing}
+        {/* Google Health Connect App Icon */}
+        <View style={styles.healthConnectIconContainer}>
+          <Image
+            source={images.healthConnectIcon}
+            style={styles.healthConnectImg}
+            resizeMode="contain"
+            accessibilityLabel="Google Health Connect"
           />
-        </AppCard>
-
-        {/* Sync History Logs */}
-        <View style={styles.historySection}>
-          <AppText variant="heading">Lịch sử đồng bộ ({state.syncLogs.length})</AppText>
-          {state.syncLogs.length === 0 ? (
-            <AppCard style={styles.emptyCard}>
-              <AppText color={theme.colors.textMuted} align="center">
-                Chưa có lượt đồng bộ nào. Nhấn "Đồng bộ ngay" để tải bước chân!
-              </AppText>
-            </AppCard>
-          ) : (
-            state.syncLogs.map((log) => (
-              <AppCard key={log.id} style={styles.logCard}>
-                <View style={styles.logRow}>
-                  <View>
-                    <AppText variant="heading">
-                      {log.source === 'APPLE_HEALTH' ? 'Apple Health' : 'Health Connect'}
-                    </AppText>
-                    <AppText variant="caption" color={theme.colors.textMuted}>
-                      {new Date(log.syncedAt).toLocaleTimeString('vi-VN')} • Ngày {log.date}
-                    </AppText>
-                  </View>
-                  <View style={styles.logStats}>
-                    <AppText variant="heading" color={theme.colors.primary}>
-                      {formatNumber(log.steps)} bước
-                    </AppText>
-                    <AppText variant="caption" color={theme.colors.calorieBurned}>
-                      {formatNumber(log.caloriesBurned)} kcal
-                    </AppText>
-                  </View>
-                </View>
-              </AppCard>
-            ))
-          )}
         </View>
-      </ScrollView>
-    </SafeAreaView>
+      </View>
+
+      {/* ── Main Content Section ───────────────────────────── */}
+      <View style={styles.contentSection}>
+        <Text style={styles.headlineText}>
+          Wao muốn giúp bạn theo dõi vận động chính xác hơn! 🚀
+        </Text>
+
+        {/* Benefit 1 */}
+        <View style={styles.benefitRow}>
+          <GreenCheckIcon />
+          <Text style={styles.benefitText}>Tính toán calories đốt cháy</Text>
+        </View>
+
+        {/* Benefit 2 */}
+        <View style={styles.benefitRow}>
+          <GreenCheckIcon />
+          <Text style={styles.benefitText}>
+            Đồng bộ bước chân & quãng đường & cân nặng
+          </Text>
+        </View>
+
+        {/* Privacy Note */}
+        <Text style={styles.privacyNoteText}>
+          Bạn hoàn toàn có thể kiểm soát dữ liệu chia sẻ! Wao chỉ sử dụng thông tin này cho chính bạn, không chia sẻ với bên thứ ba.
+        </Text>
+      </View>
+
+      {/* ── Bottom Action Buttons ──────────────────────────── */}
+      <View style={[styles.footer, { paddingBottom: Math.max(20, insets.bottom + 12) }]}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={handleSkip}
+          disabled={connecting}
+          style={styles.skipButton}
+          accessibilityRole="button"
+          accessibilityLabel="Thiết lập sau"
+        >
+          <Text style={styles.skipButtonText}>Thiết lập sau</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={handleAllowAccess}
+          disabled={connecting}
+          style={styles.allowButton}
+          accessibilityRole="button"
+          accessibilityLabel="Cho phép truy cập"
+        >
+          {connecting ? (
+            <ActivityIndicator size="small" color="#FFFFFF" />
+          ) : (
+            <Text style={styles.allowButtonText}>Cho phép truy cập</Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1 },
-  content: { padding: 16, gap: 16, paddingBottom: 32 },
-  header: { gap: 4 },
-  providerCard: { gap: 12 },
-  providerHeader: { flexDirection: 'row', gap: 12, alignItems: 'center' },
-  artwork: { width: 54, height: 54 },
-  providerInfo: { flex: 1, gap: 2 },
-  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  providerIcon: { width: 20, height: 20 },
-  statusRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
-  syncActionCard: { gap: 12 },
-  syncActionHeader: { flexDirection: 'row', gap: 12, alignItems: 'center' },
-  syncIcon: { width: 36, height: 36 },
-  spin: { opacity: 0.6 },
-  syncTextCol: { flex: 1 },
-  feedbackBox: { padding: 10, borderRadius: 8 },
-  historySection: { gap: 10, marginTop: 8 },
-  emptyCard: { padding: 20, alignItems: 'center' },
-  logCard: { paddingVertical: 10, paddingHorizontal: 14 },
-  logRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  logStats: { alignItems: 'flex-end' },
+  container: {
+    flex: 1,
+    backgroundColor: '#120E22',
+  },
+  header: {
+    height: 52,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  graphicSection: {
+    backgroundColor: '#1E1834',
+    paddingVertical: 36,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 26,
+  },
+  trackerLogoImg: {
+    width: 76,
+    height: 76,
+    borderRadius: 22,
+  },
+  syncIconImg: {
+    width: 44,
+    height: 44,
+  },
+  healthConnectIconContainer: {
+    width: 76,
+    height: 76,
+    borderRadius: 22,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  healthConnectImg: {
+    width: 48,
+    height: 48,
+  },
+  contentSection: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 32,
+  },
+  headlineText: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontFamily: 'PlusJakartaSans_700Bold',
+    fontWeight: '700',
+    lineHeight: 28,
+    marginBottom: 22,
+  },
+  benefitRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 14,
+  },
+  greenCheckBadge: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    backgroundColor: '#34A853',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+    marginTop: 2,
+  },
+  benefitText: {
+    flex: 1,
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans_500Medium',
+    lineHeight: 24,
+  },
+  privacyNoteText: {
+    color: '#BDB9CE',
+    fontSize: 14.5,
+    fontFamily: 'PlusJakartaSans_400Regular',
+    lineHeight: 22,
+    marginTop: 18,
+  },
+  footer: {
+    paddingHorizontal: 20,
+  },
+  skipButton: {
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#27223C',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  skipButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans_700Bold',
+    fontWeight: '700',
+  },
+  allowButton: {
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#9E64F7',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  allowButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'PlusJakartaSans_700Bold',
+    fontWeight: '700',
+  },
 });
