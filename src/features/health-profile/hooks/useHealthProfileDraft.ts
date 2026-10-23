@@ -1,15 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '@/features/auth/AuthProvider';
+import { LOCAL_DEMO_ENABLED } from '@/features/auth/localAccount';
 import {
   saveHealthProfile,
   getApiErrorMessage,
 } from '../api';
 import type {
   HealthProfileDraft,
-  Gender,
-  ActivityLevel,
-  GoalType,
   MacroName,
 } from '../types';
 import {
@@ -25,6 +23,7 @@ import {
 export const HEALTH_PROFILE_DRAFT_KEY = '@kallo/onboarding-draft';
 
 export const initialHealthProfileDraft: HealthProfileDraft = {
+  nickname: '',
   dependent: 'me',
   gender: 'female',
   age: '',
@@ -36,6 +35,8 @@ export const initialHealthProfileDraft: HealthProfileDraft = {
   weeklyRate: '0',
   allergies: [],
   customAllergy: '',
+  dietaryPreference: 'standard',
+  healthConditions: [],
   macros: defaultMacroPercentages('maintain'),
 };
 
@@ -135,6 +136,26 @@ export function useHealthProfileDraft(draftStorageKey = HEALTH_PROFILE_DRAFT_KEY
     }
   };
 
+  const toggleHealthCondition = (conditionKey: string) => {
+    setDraft((current) => {
+      const existing = current.healthConditions || [];
+      if (conditionKey === 'none') {
+        return { ...current, healthConditions: existing.includes('none') ? [] : ['none'] };
+      }
+      const filtered = existing.filter((item) => item !== 'none');
+      return {
+        ...current,
+        healthConditions: filtered.includes(conditionKey)
+          ? filtered.filter((item) => item !== conditionKey)
+          : [...filtered, conditionKey],
+      };
+    });
+  };
+
+  const setDietaryPreference = (pref: string) => {
+    setDraft((current) => ({ ...current, dietaryPreference: pref }));
+  };
+
   const validateHealthMetrics = (): string | undefined => {
     if (!isValidAge(age)) return 'Tuổi phải từ 13 đến 120.';
     if (!isValidHeight(height)) return 'Chiều cao phải từ 100 đến 250 cm.';
@@ -153,25 +174,34 @@ export function useHealthProfileDraft(draftStorageKey = HEALTH_PROFILE_DRAFT_KEY
     setSaving(true);
     setError(undefined);
     try {
-      await saveHealthProfile({
-        gender: draft.gender,
-        birthDate: `${new Date().getFullYear() - age}-01-01`,
-        heightCm: height,
-        weightKg: weight,
-        activityLevel: draft.activity,
-        goalType: draft.goal,
-        targetWeightKg: targetWeight,
-        weeklyRateKg: weeklyRate,
-        allergies: draft.allergies,
-        bmi: result.bmi,
-        bmr: result.bmr,
-        tdee: result.tdee,
-        dailyCalorieGoal: result.dailyCalorieGoal,
-        proteinGoalGrams: result.macros.proteinGrams,
-        carbsGoalGrams: result.macros.carbsGrams,
-        fatGoalGrams: result.macros.fatGrams,
-        waterGoalMl: Math.round(weight * 35),
-      });
+      try {
+        await saveHealthProfile({
+          nickname: draft.nickname?.trim() || undefined,
+          gender: draft.gender,
+          birthDate: `${new Date().getFullYear() - age}-01-01`,
+          heightCm: height,
+          weightKg: weight,
+          activityLevel: draft.activity,
+          goalType: draft.goal,
+          targetWeightKg: targetWeight,
+          weeklyRateKg: weeklyRate,
+          allergies: draft.allergies,
+          dietaryPreference: draft.dietaryPreference || 'standard',
+          healthConditions: draft.healthConditions || [],
+          bmi: result.bmi,
+          bmr: result.bmr,
+          tdee: result.tdee,
+          dailyCalorieGoal: result.dailyCalorieGoal,
+          proteinGoalGrams: result.macros.proteinGrams,
+          carbsGoalGrams: result.macros.carbsGrams,
+          fatGoalGrams: result.macros.fatGrams,
+          waterGoalMl: Math.round(weight * 35),
+        });
+      } catch (saveError) {
+        if (!LOCAL_DEMO_ENABLED) {
+          throw saveError;
+        }
+      }
       await AsyncStorage.removeItem(draftStorageKey);
       await refreshProfileStatus();
       return true;
@@ -200,6 +230,8 @@ export function useHealthProfileDraft(draftStorageKey = HEALTH_PROFILE_DRAFT_KEY
     updateMacro,
     toggleAllergy,
     addCustomAllergy,
+    toggleHealthCondition,
+    setDietaryPreference,
     validateHealthMetrics,
     saveProfile,
   };

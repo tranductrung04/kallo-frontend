@@ -11,6 +11,7 @@ export type MacroTargets = MacroPercentages & {
 };
 
 export type HealthProfilePayload = {
+  nickname?: string;
   gender: Gender;
   birthDate: string;
   heightCm: number;
@@ -20,6 +21,8 @@ export type HealthProfilePayload = {
   targetWeightKg: number;
   weeklyRateKg: number;
   allergies: string[];
+  dietaryPreference?: string;
+  healthConditions?: string[];
   bmi: number;
   bmr: number;
   tdee: number;
@@ -40,6 +43,7 @@ export type HealthProfileCalculationResult = {
 };
 
 export type HealthProfileDraft = {
+  nickname: string;
   dependent: string;
   gender: Gender;
   age: string;
@@ -51,10 +55,19 @@ export type HealthProfileDraft = {
   weeklyRate: string;
   allergies: string[];
   customAllergy: string;
+  dietaryPreference: string;
+  healthConditions: string[];
   macros: MacroPercentages;
 };
 
-export const COMMON_ALLERGIES = ['Hải sản', 'Đậu phộng', 'Sữa', 'Trứng', 'Gluten'];
+export const COMMON_ALLERGIES = [
+  'Hải sản',
+  'Sữa & Chế phẩm sữa',
+  'Đậu phộng & Hạt',
+  'Trứng gà/vịt',
+  'Gluten / Lúa mì',
+  'Đậu nành',
+];
 
 export const ACTIVITY_OPTIONS: Array<[ActivityLevel, string]> = [
   ['sedentary', 'Ít vận động'],
