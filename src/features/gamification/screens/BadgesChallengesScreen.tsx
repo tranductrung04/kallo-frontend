@@ -346,7 +346,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   courseBannerOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(20, 18, 30, 0.45)',
     padding: 16,
     justifyContent: 'flex-end',
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   awardBg: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     opacity: 0.15,
   },
   trophyIcon: {

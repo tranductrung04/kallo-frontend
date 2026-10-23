@@ -45,7 +45,7 @@ export function MealPlanProvider({ children }: React.PropsWithChildren) {
   const generatePlan = useCallback(async (goal: MealPlanGoal): Promise<MealPlan> => {
     setIsGenerating(true);
     // Simulate AI generation delay 600ms for smooth UX
-    await new Promise((resolve) => setTimeout(resolve, 600));
+    await new Promise<void>((resolve) => setTimeout(() => resolve(), 600));
     const newPlan = generateMealPlan(goal, VIETNAMESE_RECIPES);
     setCurrentPlan(newPlan);
     setIsGenerating(false);

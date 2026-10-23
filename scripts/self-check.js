@@ -9,7 +9,7 @@ assert.equal(clampProgress(Number.NaN), 0);
 
 const root = path.resolve(__dirname, '..');
 const assetRegistry = fs.readFileSync(path.join(root, 'src', 'assets', 'images', 'index.ts'), 'utf8');
-for (const asset of assetRegistry.matchAll(/require\('\.\.\/\.\.\/\.\.\/res\/([^']+)'\)/g)) {
-  assert.ok(fs.existsSync(path.join(root, 'res', asset[1])), `Missing asset: ${asset[1]}`);
+for (const asset of assetRegistry.matchAll(/require\('\.\/([^']+)'\)/g)) {
+  assert.ok(fs.existsSync(path.join(root, 'src', 'assets', 'images', asset[1])), `Missing asset: ${asset[1]}`);
 }
 console.log('Phase 1 self-check passed');
