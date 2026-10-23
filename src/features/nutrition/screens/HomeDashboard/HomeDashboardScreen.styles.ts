@@ -54,6 +54,53 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       opacity: 0.8,
     },
 
+    // Sticky Header khi cuộn trang
+    stickyHeader: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      height: 54,
+      backgroundColor: c.surfaceMid,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: s.lg,
+      zIndex: 100,
+      elevation: 6,
+    },
+    stickyDateBtn: {
+      paddingVertical: 6,
+      paddingRight: 12,
+    },
+    stickyDateText: {
+      fontSize: 15,
+      lineHeight: 20,
+      fontFamily: 'PlusJakartaSans_800ExtraBold',
+      fontWeight: '800',
+      color: c.textPrimary,
+      letterSpacing: 0.3,
+      textTransform: 'uppercase',
+    },
+    stickyUpgradePill: {
+      backgroundColor: '#FED065',
+      paddingHorizontal: 18,
+      paddingVertical: 9,
+      borderRadius: r.full,
+      overflow: 'hidden',
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...upgradeGlow,
+    },
+    stickyUpgradePillText: {
+      fontFamily: 'PlusJakartaSans_800ExtraBold',
+      fontSize: 15,
+      lineHeight: 20,
+      fontWeight: '800',
+      color: '#8A5E0B',
+      letterSpacing: -0.2,
+    },
+
     // 1. Top Header
     topHeader: {
       flexDirection: 'row',

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { FlameIcon, PlusIcon, SparklesIcon } from '@/components/icons';
 import { formatNumber } from '@/features/nutrition/utils';
+import { CalorieIntakeGuideModal } from '@/features/nutrition/components';
 import { styles } from './ReportOverviewScreen.styles';
 
 export type DayCalorieSectionProps = {
@@ -19,6 +20,8 @@ export function DayCalorieSection({
   progressPercent,
   onLogFood,
 }: DayCalorieSectionProps) {
+  const [guideModalVisible, setGuideModalVisible] = useState(false);
+
   return (
     <View style={styles.sectionContainer}>
       <Text style={styles.sectionTitle}>Lượng calo trong ngày</Text>
@@ -26,13 +29,18 @@ export function DayCalorieSection({
       {/* Main Calorie Intake Card */}
       <View style={styles.cardSurface}>
         <View style={styles.calorieTopRow}>
-          <View>
+          <TouchableOpacity
+            onPress={() => setGuideModalVisible(true)}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Xem hướng dẫn calo nạp vào"
+          >
             <Text style={styles.cardLabelText}>Calo nạp vào</Text>
             <View style={styles.calorieValuesRow}>
               <Text style={styles.calorieCurrentText}>{formatNumber(calories)}</Text>
               <Text style={styles.calorieGoalText}>/{formatNumber(goalCalories)} cal</Text>
             </View>
-          </View>
+          </TouchableOpacity>
 
           <View style={styles.logFoodContainer}>
             <Text style={styles.logFoodText}>Ghi món ăn</Text>
@@ -66,7 +74,7 @@ export function DayCalorieSection({
         </View>
       </View>
 
-      {/* Wao Insight / Motivation Card */}
+      {/* Kallo Insight / Motivation Card */}
       <View style={[styles.cardSurface, styles.insightCard]}>
         <View style={styles.insightHeaderRow}>
           <SparklesIcon size={18} color="#9E64F7" />
@@ -78,10 +86,16 @@ export function DayCalorieSection({
         </View>
         <Text style={styles.insightSubtitle}>
           {calories === 0
-            ? 'Bắt đầu log để Wao theo dõi lượng calo và xu hướng ăn uống của bạn.'
+            ? 'Bắt đầu log để Kallo theo dõi lượng calo và xu hướng ăn uống của bạn.'
             : `Bạn còn ${formatNumber(caloriesRemaining)} cal để đạt mục tiêu dinh dưỡng.`}
         </Text>
       </View>
+
+      {/* Calorie Intake Guide Modal */}
+      <CalorieIntakeGuideModal
+        visible={guideModalVisible}
+        onClose={() => setGuideModalVisible(false)}
+      />
     </View>
   );
 }
