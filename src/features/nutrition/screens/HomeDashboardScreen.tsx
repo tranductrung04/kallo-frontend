@@ -241,7 +241,13 @@ export function HomeDashboardScreen({ navigation }: Props) {
                 accessibilityRole="button"
                 accessibilityLabel={`Chuỗi ${streak.currentStreak} ngày`}
                 style={styles.streakContainer}
-                onPress={() => root?.navigate('StreakDetail')}
+                onPress={() => {
+                  if (root) {
+                    root.navigate('StreakDetail');
+                  } else {
+                    (navigation as any).navigate('StreakDetail');
+                  }
+                }}
               >
                 <FlameIcon
                   size={20}
@@ -366,7 +372,12 @@ export function HomeDashboardScreen({ navigation }: Props) {
                   {formatNumber(caloriesBurned)}
                 </AppText>
                 <View style={styles.statColLabelRow}>
-                  <FlameIcon size={16} color={colors.trackerBurn} />
+                  <Image
+                    source={images.trackerFire}
+                    style={styles.statColFireIcon}
+                    resizeMode="contain"
+                    accessibilityLabel="Tập luyện"
+                  />
                   <AppText variant="bodyMd" color={colors.textSecondary} style={styles.statColLabel}>
                     Tập luyện
                   </AppText>
@@ -546,7 +557,12 @@ export function HomeDashboardScreen({ navigation }: Props) {
                 <View style={styles.workoutDivider} />
               </View>
               <View style={styles.workoutBottomRow}>
-                <FlameIcon size={16} color={colors.trackerBurn} />
+                <Image
+                  source={images.trackerFire}
+                  style={styles.workoutFireIcon}
+                  resizeMode="contain"
+                  accessibilityLabel="Calo tiêu hao"
+                />
                 <AppText variant="labelLg">{caloriesBurned}</AppText>
               </View>
             </AppCard>

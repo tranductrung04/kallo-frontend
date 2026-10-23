@@ -34,7 +34,7 @@ export const colors = {
     quickScanner: '#16A34A',
     vipStreak: '#D97706',
     trackerWater: '#0891B2',
-    trackerBurn: '#DC2626',
+    trackerBurn: '#EF4444',
     trackerWeight: '#D97706',
 
     // Premium / Upgrade CTA
@@ -119,7 +119,7 @@ export const colors = {
     quickScanner: '#22C55E',
     vipStreak: '#F59E0B',
     trackerWater: '#22D3EE',
-    trackerBurn: '#F87171',
+    trackerBurn: '#EF4444',
     trackerWeight: '#FBBF24',
 
     // Premium / Upgrade CTA

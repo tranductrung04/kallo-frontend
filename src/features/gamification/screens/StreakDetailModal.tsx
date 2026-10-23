@@ -1,315 +1,261 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Alert,
   Image,
-  SafeAreaView,
   ScrollView,
+  StatusBar,
   StyleSheet,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { images } from '@/assets/images';
-import { AppButton, AppCard, AppText } from '@/components/common';
+import { ChevronLeftIcon, InfoIcon } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
-import { useTheme } from '@/theme';
 import { useGamification } from '../GamificationProvider';
+import {
+  StreakActionCardWidget,
+  StreakBottomStatsWidget,
+  StreakChallengeWidget,
+  StreakHeroWidget,
+  StreakWeekWidget,
+} from './StreakWidgets';
+import { StreakRulesModal } from './StreakRulesModal';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'StreakDetail'>;
 
 export function StreakDetailModal({ navigation }: Props) {
-  const theme = useTheme();
+  const insets = useSafeAreaInsets();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+  const [heroHeight, setHeroHeight] = useState<number>(0);
+  const [isRulesVisible, setIsRulesVisible] = useState(false);
   const { streak, freezeStreak } = useGamification();
 
-  const isAchievedMilestone = streak.currentStreak >= 7;
-  const isFrozen = streak.isFrozenToday;
+  // Danh sách các ngày trong tuần (T2 -> CN)
+  const weekDays = useMemo(
+    () => ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
+    []
+  );
 
-  const bgImage = isFrozen
-    ? images.streakFreezeBg
-    : isAchievedMilestone
-    ? images.streakAchievedBg
-    : streak.isMaintainedToday
-    ? images.streakActiveBg
-    : images.streakInactiveBg;
+  // Chỉ số ngày hôm nay trong tuần (0: T2 ... 6: CN)
+  const todayDayIndex = useMemo(() => {
+    const day = new Date().getDay();
+    return (day + 6) % 7;
+  }, []);
 
-  const chainImage = isFrozen
-    ? images.streakProtectedBg
-    : isAchievedMilestone
-    ? images.streakAchieveChainBg
-    : images.streakChainBg;
+  const currentStreak = streak.currentStreak || 0;
+  const challengeTargetDays = currentStreak >= 7 ? 14 : currentStreak >= 3 ? 7 : 3;
 
-  const artImage = isFrozen
-    ? images.streakFreezeArt1
-    : isAchievedMilestone
-    ? images.streakAchievedArt1
-    : null;
-
-  const handleFreeze = () => {
-    if (streak.freezeDaysRemaining <= 0) {
-      Alert.alert('Hết lượt bảo vệ', 'Bạn đã sử dụng hết ngày đóng băng chuỗi.');
-      return;
-    }
-    const success = freezeStreak();
-    if (success) {
-      Alert.alert(
-        'Đã bảo vệ chuỗi! 🛡️',
-        'Chuỗi Streak của bạn hôm nay đã được bảo vệ an toàn ngay cả khi bạn bận rộn.'
-      );
-    }
+  const handleInfoPress = () => {
+    setIsRulesVisible(true);
   };
 
-  const handleShare = () => {
+  const handleAddMealPress = () => {
+    const today = new Date().toISOString().slice(0, 10);
+    (navigation as any).navigate('FoodSearch', {
+      date: today,
+      meal: 'snack',
+    });
+  };
+
+  const handleShieldPress = () => {
+    if (streak.isFrozenToday) {
+      Alert.alert(
+        'Khiên Kallo đang bật 🛡️',
+        'Chuỗi Streak của bạn hôm nay đã được bảo vệ an toàn!'
+      );
+      return;
+    }
+
+    if (streak.freezeDaysRemaining <= 0) {
+      Alert.alert(
+        'Hết Khiên Kallo',
+        'Bạn đã sử dụng hết lượt khiên bảo vệ chuỗi.'
+      );
+      return;
+    }
+
     Alert.alert(
-      'Chia sẻ thành tích 🎉',
-      `Tôi đã duy trì thói quen sống khỏe ${streak.currentStreak} ngày liên tiếp cùng Kallo! #KalloHealth #Streak${streak.currentStreak}`
+      'Kích hoạt Khiên Kallo 🛡️',
+      `Bạn còn ${streak.freezeDaysRemaining} lượt khiên. Kích hoạt để bảo vệ chuỗi hôm nay ngay cả khi bạn chưa kịp ghi món?`,
+      [
+        { text: 'Hủy', style: 'cancel' },
+        {
+          text: 'Kích hoạt ngay',
+          onPress: () => {
+            const ok = freezeStreak();
+            if (ok) {
+              Alert.alert('Thành công 🎉', 'Chuỗi của bạn hôm nay đã được bảo vệ!');
+            }
+          },
+        },
+      ]
     );
   };
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.canvasBase }]}>
-      <View style={styles.container}>
-        {/* ── Background Wall ─────────────────────────────────────────── */}
-        <Image
-          source={bgImage}
-          style={styles.bgCover}
-          resizeMode="cover"
-        />
+    <SafeAreaView style={styles.safeArea} edges={['left', 'right']}>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="transparent"
+        translucent
+      />
 
-        {/* ── Header ─────────────────────────────────────────────────── */}
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.closeBtn}
-            onPress={() => navigation.goBack()}
-            accessibilityRole="button"
-            accessibilityLabel="Đóng modal streak"
-          >
-            <AppText variant="headlineSm" color="#FFFFFF">✕</AppText>
-          </TouchableOpacity>
-          <AppText variant="headlineSm" color="#FFFFFF">
-            Chuỗi ngày Kallo Streak
-          </AppText>
-          <TouchableOpacity
-            style={styles.shareHeaderBtn}
-            onPress={handleShare}
-            accessibilityRole="button"
-            accessibilityLabel="Chia sẻ chuỗi ngày"
-          >
-            <AppText variant="headlineSm" color="#FFFFFF">↗</AppText>
-          </TouchableOpacity>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + 36 },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ── 1. Top Hero Card with Background ────────────────────────── */}
+        <View
+          style={[
+            styles.topHeroCard,
+            {
+              paddingTop: insets.top + 6,
+              backgroundColor: currentStreak > 0 ? '#8A5AEB' : '#1D172D',
+            },
+          ]}
+          onLayout={(e) => {
+            const h = Math.round(e.nativeEvent.layout.height);
+            if (h > 0 && h !== heroHeight) {
+              setHeroHeight(h);
+            }
+          }}
+        >
+          <Image
+            source={currentStreak > 0 ? images.streakActiveBg : images.streakInactiveBg}
+            style={[
+              styles.topCardBgImage,
+              {
+                width: screenWidth,
+                height: heroHeight > 0 ? heroHeight : Math.round(screenHeight * 0.42),
+              },
+            ]}
+            resizeMode="cover"
+          />
+
+          <View style={styles.topHeroContent}>
+            {/* Navigation Bar */}
+            <View style={styles.navBar}>
+              <TouchableOpacity
+                style={styles.navButton}
+                onPress={() => navigation.goBack()}
+                accessibilityRole="button"
+                accessibilityLabel="Quay lại"
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              >
+                <ChevronLeftIcon size={26} color="#FFFFFF" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.navButton}
+                onPress={handleInfoPress}
+                accessibilityRole="button"
+                accessibilityLabel="Thông tin quy tắc chuỗi"
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              >
+                <InfoIcon size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Top Streak Hero Section */}
+            <StreakHeroWidget currentStreak={currentStreak} />
+
+            {/* Callout Action Card (streak=0: fooddefault; streak>0: celebration card) */}
+            <StreakActionCardWidget
+              streak={currentStreak}
+              onLogMeal={handleAddMealPress}
+            />
+          </View>
         </View>
 
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* ── Main Streak Display ───────────────────────────────────── */}
-          <View style={styles.streakHero}>
-            <Image
-              source={chainImage}
-              style={styles.chainImage}
-              resizeMode="contain"
-            />
+        {/* ── 2. Lower Body on Dark Background ──────────────────────────── */}
+        <View style={styles.bodyWrap}>
+          {/* Section: Thử thách của bạn */}
+          <StreakChallengeWidget
+            currentStreak={currentStreak}
+            targetDays={challengeTargetDays}
+          />
 
-            {artImage && (
-              <Image
-                source={artImage}
-                style={styles.artImage}
-                resizeMode="contain"
-              />
-            )}
+          {/* Section: Mục tiêu chuỗi */}
+          <StreakWeekWidget
+            currentStreak={currentStreak}
+            todayDayIndex={todayDayIndex}
+            weekDays={weekDays}
+            targetDays={challengeTargetDays}
+          />
 
-            <View style={styles.counterWrap}>
-              <AppText variant="display" color="#FFFFFF" style={styles.streakNumber}>
-                {streak.currentStreak}
-              </AppText>
-              <AppText variant="headlineSm" color="rgba(255,255,255,0.9)">
-                NGÀY LIÊN TIẾP 🔥
-              </AppText>
-              <AppText variant="bodySm" color="rgba(255,255,255,0.8)">
-                {isFrozen
-                  ? 'Chuỗi đang được bảo vệ hôm nay 🛡️'
-                  : streak.isMaintainedToday
-                  ? 'Bạn đã hoàn thành mục tiêu hôm nay!'
-                  : 'Hãy ghi đủ nhật ký để duy trì chuỗi nhé!'}
-              </AppText>
-            </View>
-          </View>
+          {/* Cặp thẻ tóm tắt dưới cùng & Chuỗi tốt nhất */}
+          <StreakBottomStatsWidget
+            currentStreak={currentStreak}
+            longestStreak={streak.longestStreak ?? currentStreak}
+            freezeDaysRemaining={streak.freezeDaysRemaining ?? 0}
+            onShieldPress={handleShieldPress}
+          />
+        </View>
+      </ScrollView>
 
-          {/* ── Streak Statistics ─────────────────────────────────────── */}
-          <AppCard style={styles.card}>
-            <View style={styles.statsRow}>
-              <View style={styles.statItem}>
-                <AppText variant="caption" color={theme.colors.textSecondary}>
-                  Kỷ lục cao nhất
-                </AppText>
-                <AppText variant="headlineLg" color={theme.colors.brandPrimary}>
-                  {streak.longestStreak} ngày
-                </AppText>
-              </View>
-              <View style={styles.divider} />
-              <View style={styles.statItem}>
-                <AppText variant="caption" color={theme.colors.textSecondary}>
-                  Lượt đóng băng còn
-                </AppText>
-                <AppText variant="headlineLg" color={theme.colors.calorieBurned}>
-                  {streak.freezeDaysRemaining} lượt
-                </AppText>
-              </View>
-            </View>
-          </AppCard>
-
-          {/* ── Freeze Protection Action Card ─────────────────────────── */}
-          <AppCard style={styles.card}>
-            <AppText variant="headlineSm">Khiên đóng băng Streak</AppText>
-            <AppText variant="bodySm" color={theme.colors.textSecondary}>
-              Bảo vệ chuỗi thành tích không bị ngắt quãng vào những ngày bạn bận rộn hoặc đi du lịch.
-            </AppText>
-
-            <AppButton
-              label={
-                isFrozen
-                  ? 'Đã bảo vệ chuỗi hôm nay ✓'
-                  : `Kích hoạt đóng băng (${streak.freezeDaysRemaining} lượt còn lại)`
-              }
-              variant={isFrozen ? 'secondary' : 'primary'}
-              onPress={handleFreeze}
-              disabled={isFrozen || streak.freezeDaysRemaining <= 0}
-            />
-          </AppCard>
-
-          {/* ── Streak Rules Card ─────────────────────────────────────── */}
-          <AppCard style={styles.card}>
-            <AppText variant="headlineSm">Quy tắc tính Streak (FR-GAM-01)</AppText>
-            <View style={styles.rulesList}>
-              <AppText variant="bodySm">
-                ✓ Ghi nhận ít nhất <AppText variant="headlineSm">2 bữa ăn</AppText> trong ngày.
-              </AppText>
-              <AppText variant="bodySm">
-                ✓ Tổng calo nạp nằm trong sai số <AppText variant="headlineSm">±10% mục tiêu</AppText>.
-              </AppText>
-              <AppText variant="bodySm">
-                ✓ Hệ thống tự động kiểm tra vào 23:59 mỗi đêm.
-              </AppText>
-            </View>
-          </AppCard>
-
-          {/* ── Share Chain Banner ────────────────────────────────────── */}
-          <TouchableOpacity
-            style={styles.shareBanner}
-            onPress={handleShare}
-            activeOpacity={0.88}
-          >
-            <Image
-              source={images.streakShareChainBg}
-              style={styles.shareBannerImage}
-              resizeMode="cover"
-            />
-            <View style={styles.shareBannerOverlay}>
-              <AppText variant="headlineSm" color="#FFFFFF">
-                Chia sẻ lên Facebook / Zalo
-              </AppText>
-              <AppText variant="caption" color="rgba(255,255,255,0.85)">
-                Lan tỏa tinh thần sống khỏe cùng bạn bè
-              </AppText>
-            </View>
-          </TouchableOpacity>
-        </ScrollView>
-      </View>
+      {/* Trang giải thích quy tắc chuỗi ngày khi bấm InfoIcon */}
+      <StreakRulesModal
+        visible={isRulesVisible}
+        onClose={() => setIsRulesVisible(false)}
+      />
     </SafeAreaView>
   );
 }
 
+// ─── Stylesheet ───────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
-  safe: { flex: 1 },
-  container: { flex: 1 },
-  bgCover: {
-    ...StyleSheet.absoluteFillObject,
-    width: '100%',
-    height: '100%',
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#14111E',
   },
-  header: {
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 20,
+  },
+  topHeroCard: {
+    width: '100%',
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    overflow: 'hidden',
+    paddingHorizontal: 0,
+    paddingBottom: 16,
+    position: 'relative',
+  },
+  topHeroContent: {
+    width: '100%',
+    paddingHorizontal: 16,
+  },
+  topCardBgImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  navBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingVertical: 10,
   },
-  closeBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  shareHeaderBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  scrollContent: {
-    padding: 16,
-    gap: 16,
-    paddingBottom: 40,
-  },
-  streakHero: {
-    alignItems: 'center',
-    paddingVertical: 20,
-    position: 'relative',
-  },
-  chainImage: {
-    width: '100%',
-    height: 180,
-    position: 'absolute',
-    top: 10,
-    opacity: 0.8,
-  },
-  artImage: {
-    width: 140,
-    height: 140,
-    marginBottom: 8,
-  },
-  counterWrap: {
-    alignItems: 'center',
-    gap: 4,
-    zIndex: 2,
-  },
-  streakNumber: {
-    fontSize: 72,
-    lineHeight: 78,
-    fontWeight: '800',
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 0, height: 4 },
-    textShadowRadius: 10,
-  },
-  card: { gap: 12 },
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-  },
-  statItem: { alignItems: 'center', gap: 4 },
-  divider: {
-    width: 1,
+  navButton: {
+    width: 40,
     height: 40,
-    backgroundColor: 'rgba(128,128,128,0.2)',
-  },
-  rulesList: { gap: 6 },
-  shareBanner: {
-    height: 100,
-    borderRadius: 16,
-    overflow: 'hidden',
-    position: 'relative',
-  },
-  shareBannerImage: {
-    width: '100%',
-    height: '100%',
-  },
-  shareBannerOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(20, 18, 30, 0.45)',
-    padding: 16,
+    alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
+  },
+  bodyWrap: {
+    paddingHorizontal: 16,
+    paddingTop: 18,
   },
 });

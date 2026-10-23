@@ -13,13 +13,11 @@ npm run self-check
 npm run start
 npm run android
 npm run ios
-npm run copy-assets
 ```
 
 - `npm run typecheck` runs strict TypeScript checking with `tsc --noEmit`.
 - `npm run self-check` runs assertion-based checks for phases 1 through 7. Run any individual phase with its matching `node scripts/<name>.js` command; available scripts are `self-check.js` and `phase2-self-check.js` through `phase7-self-check.js`.
 - `npm run start` launches the Expo development server; `npm run android` and `npm run ios` launch it on the matching platform.
-- `npm run copy-assets` copies source assets from `res/` into `src/assets/images/` and refreshes the generated registry inputs.
 - No lint script, test runner, or production build script is configured in `package.json`.
 
 ## Architecture
