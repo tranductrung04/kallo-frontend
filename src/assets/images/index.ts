@@ -32,6 +32,7 @@ const imageFiles = {
   waterCup: require('../../../res/src_assets_images_water_watercup.webp'),
   waterBottle: require('../../../res/src_assets_images_water_waterbottle.webp'),
   onboardingMascot: require('../../../res/src_assets_images_onboardingv2_mascot.webp'),
+  mascotAvatar: require('../../../res/src_assets_images_onboardingv2_avatarillustration.webp'),
   welcome1: require('../../../res/src_assets_images_onboardingv2_welcome1.webp'),
   welcome2: require('../../../res/src_assets_images_onboardingv2_welcome2.webp'),
   welcome3: require('../../../res/src_assets_images_onboardingv2_welcome3.webp'),

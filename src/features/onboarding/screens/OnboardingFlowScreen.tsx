@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { AppButton, AppText, ProgressBar } from '@/components/common';
 import { useTheme } from '@/theme';
@@ -25,7 +25,12 @@ import {
   NotificationPermissionStep,
 } from '../components';
 
-export function OnboardingFlowScreen() {
+interface OnboardingFlowScreenProps {
+  route?: { params?: { nickname?: string } };
+  navigation?: any;
+}
+
+export function OnboardingFlowScreen({ route, navigation }: OnboardingFlowScreenProps) {
   const theme = useTheme();
   const [step, setStep] = useState(0);
 
@@ -47,6 +52,12 @@ export function OnboardingFlowScreen() {
     addCustomAllergy,
     saveProfile,
   } = useHealthProfileDraft();
+
+  useEffect(() => {
+    if (route?.params?.nickname && loaded && draft.nickname !== route.params.nickname) {
+      updateDraft('nickname', route.params.nickname);
+    }
+  }, [route?.params?.nickname, loaded]);
 
   const validateStep = () => {
     if (step === 2 && !isValidAge(age)) return 'Tuổi phải từ 13 đến 120.';
@@ -187,6 +198,12 @@ export function OnboardingFlowScreen() {
               setError(undefined);
               setStep((current) => current - 1);
             }}
+          />
+        ) : navigation?.canGoBack?.() ? (
+          <AppButton
+            label="Quay lại"
+            variant="ghost"
+            onPress={() => navigation.goBack()}
           />
         ) : null}
 

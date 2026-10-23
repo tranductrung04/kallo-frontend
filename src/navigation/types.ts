@@ -16,7 +16,23 @@ export type AuthStackParamList = {
   ForgotPassword: undefined;
   ResetPassword: { token?: string } | undefined;
 };
-export type OnboardingStackParamList = { Onboarding: undefined };
+export type OnboardingStackParamList = {
+  KalloWelcome: undefined;
+  HealthProfileWizard: { initialStep?: number } | undefined;
+  Nickname: undefined;
+  GenderSelection: undefined;
+  HeightSelection: undefined;
+  CurrentWeightSelection: undefined;
+  GoalSelection: undefined;
+  TargetWeightSelection: undefined;
+  ActivityLevelSelection: undefined;
+  DietAndAllergiesSelection: undefined;
+  HealthConditionsSelection: undefined;
+  ProfileSummary: undefined;
+  CalculatingPlan: undefined;
+  PlanResult: undefined;
+  Onboarding: { nickname?: string; gender?: string; height?: string; weight?: string; goal?: string; targetWeight?: string; activity?: string } | undefined;
+};
 export type RootStackParamList = {
   Splash: undefined;
   Auth: NavigatorScreenParams<AuthStackParamList>;
