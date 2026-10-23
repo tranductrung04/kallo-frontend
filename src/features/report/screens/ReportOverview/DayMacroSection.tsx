@@ -9,6 +9,11 @@ import {
 } from '@/components/icons';
 import { styles } from './ReportOverviewScreen.styles';
 import { NutrientComparisonModal } from './NutrientComparisonModal';
+import {
+  CarbGuideModal,
+  FatGuideModal,
+  ProteinGuideModal,
+} from '@/features/nutrition/components';
 
 export type DayMacroSectionProps = {
   proteinGrams: number;
@@ -64,6 +69,9 @@ export function DayMacroSection({
   cholesterolCurrent,
 }: DayMacroSectionProps) {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [isProteinModalVisible, setIsProteinModalVisible] = useState<boolean>(false);
+  const [isCarbModalVisible, setIsCarbModalVisible] = useState<boolean>(false);
+  const [isFatModalVisible, setIsFatModalVisible] = useState<boolean>(false);
 
   return (
     <View style={styles.sectionContainer}>
@@ -73,7 +81,13 @@ export function DayMacroSection({
       <View style={styles.cardSurface}>
         <View style={styles.macroColumnsRow}>
           {/* Column 1: Đạm */}
-          <View style={styles.macroColumn}>
+          <TouchableOpacity
+            style={styles.macroColumn}
+            onPress={() => setIsProteinModalVisible(true)}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Xem hướng dẫn chất đạm"
+          >
             <View style={styles.macroColHeader}>
               <LightningIcon size={13} color="#FF6B6B" />
               <Text style={[styles.macroColTitle, { color: '#FF6B6B' }]}>
@@ -85,10 +99,16 @@ export function DayMacroSection({
               <Text style={styles.pillNumWhite}>{proteinPct}</Text>
               <Text style={styles.pillNumPurple}> / {targetProteinPct}%</Text>
             </View>
-          </View>
+          </TouchableOpacity>
 
           {/* Column 2: Đường bột */}
-          <View style={styles.macroColumn}>
+          <TouchableOpacity
+            style={styles.macroColumn}
+            onPress={() => setIsCarbModalVisible(true)}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Xem hướng dẫn đường bột"
+          >
             <View style={styles.macroColHeader}>
               <WheatIcon size={14} color="#3B82F6" />
               <Text style={[styles.macroColTitle, { color: '#3B82F6' }]}>
@@ -100,10 +120,16 @@ export function DayMacroSection({
               <Text style={styles.pillNumWhite}>{carbsPct}</Text>
               <Text style={styles.pillNumPurple}> / {targetCarbsPct}%</Text>
             </View>
-          </View>
+          </TouchableOpacity>
 
           {/* Column 3: Chất béo */}
-          <View style={styles.macroColumn}>
+          <TouchableOpacity
+            style={styles.macroColumn}
+            onPress={() => setIsFatModalVisible(true)}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Xem hướng dẫn chất béo"
+          >
             <View style={styles.macroColHeader}>
               <DropletIcon size={13} color="#FBBF24" />
               <Text style={[styles.macroColTitle, { color: '#FBBF24' }]}>
@@ -115,7 +141,7 @@ export function DayMacroSection({
               <Text style={styles.pillNumWhite}>{fatPct}</Text>
               <Text style={styles.pillNumPurple}> / {targetFatPct}%</Text>
             </View>
-          </View>
+          </TouchableOpacity>
         </View>
 
         {/* Button: So sánh các chỉ số khác -> Mở bảng so sánh dinh dưỡng */}
@@ -143,7 +169,7 @@ export function DayMacroSection({
         </Text>
         <Text style={styles.optimizationSubtitle}>
           {!hasLogs
-            ? 'Thêm món ăn vào nhật ký để Wao có thể hiểu rõ hơn thói quen ăn uống của bạn.'
+            ? 'Thêm món ăn vào nhật ký để Kallo có thể hiểu rõ hơn thói quen ăn uống của bạn.'
             : 'Bữa ăn hôm nay đã phân bổ hợp lý theo mục tiêu calo.'}
         </Text>
       </View>
@@ -168,6 +194,24 @@ export function DayMacroSection({
         saltCurrent={saltCurrent}
         saltGoal={saltGoal}
         hasLogs={hasLogs}
+      />
+
+      {/* Protein Guide Modal (Chất đạm) */}
+      <ProteinGuideModal
+        visible={isProteinModalVisible}
+        onClose={() => setIsProteinModalVisible(false)}
+      />
+
+      {/* Carb Guide Modal (Đường bột) */}
+      <CarbGuideModal
+        visible={isCarbModalVisible}
+        onClose={() => setIsCarbModalVisible(false)}
+      />
+
+      {/* Fat Guide Modal (Chất béo) */}
+      <FatGuideModal
+        visible={isFatModalVisible}
+        onClose={() => setIsFatModalVisible(false)}
       />
     </View>
   );

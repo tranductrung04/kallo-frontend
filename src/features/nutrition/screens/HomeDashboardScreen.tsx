@@ -28,6 +28,17 @@ import type { MainTabParamList, RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
 import { images } from '@/assets/images';
 import { useNutrition } from '../NutritionProvider';
+import {
+  CalorieGoalGuideModal,
+  CalorieIntakeGuideModal,
+  CarbGuideModal,
+  FatGuideModal,
+  FiberGuideModal,
+  ProteinGuideModal,
+  SaltGuideModal,
+  SugarGuideModal,
+  WorkoutGuideModal,
+} from '../components';
 import { useActivity } from '@/features/activity';
 import { useGamification } from '@/features/gamification';
 import { formatNumber, todayKey } from '../utils';
@@ -64,7 +75,17 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const { getTotalCaloriesBurnedForDate } = useActivity();
   const { streak } = useGamification();
   const [calendarModalVisible, setCalendarModalVisible] = useState(false);
+  const [calorieGoalModalVisible, setCalorieGoalModalVisible] = useState(false);
+  const [calorieIntakeModalVisible, setCalorieIntakeModalVisible] = useState(false);
+  const [workoutModalVisible, setWorkoutModalVisible] = useState(false);
+  const [proteinModalVisible, setProteinModalVisible] = useState(false);
+  const [carbModalVisible, setCarbModalVisible] = useState(false);
+  const [fatModalVisible, setFatModalVisible] = useState(false);
+  const [saltModalVisible, setSaltModalVisible] = useState(false);
+  const [sugarModalVisible, setSugarModalVisible] = useState(false);
+  const [fiberModalVisible, setFiberModalVisible] = useState(false);
   const [pillSize, setPillSize] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
+  const [stickyPillSize, setStickyPillSize] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
   const selectedDate = state.selectedDate || todayKey();
   const isToday = selectedDate === todayKey();
   const caloriesBurned = getTotalCaloriesBurnedForDate(selectedDate);
@@ -114,6 +135,23 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const dockTranslateY = useRef(new Animated.Value(0)).current;
   const dockOpacity = useRef(new Animated.Value(1)).current;
 
+  // Sticky Top Header (hiển thị ngày + nâng cấp gói khi cuộn xuống)
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const [isStickyVisible, setIsStickyVisible] = useState(false);
+  const isStickyVisibleRef = useRef(false);
+
+  const stickyOpacity = scrollY.interpolate({
+    inputRange: [50, 110],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
+
+  const stickyTranslateY = scrollY.interpolate({
+    inputRange: [50, 110],
+    outputRange: [-8, 0],
+    extrapolate: 'clamp',
+  });
+
   const showDock = () => {
     if (!isDockVisibleRef.current) {
       isDockVisibleRef.current = true;
@@ -156,6 +194,16 @@ export function HomeDashboardScreen({ navigation }: Props) {
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const currentY = event.nativeEvent.contentOffset.y;
+    scrollY.setValue(currentY);
+
+    if (currentY > 75 && !isStickyVisibleRef.current) {
+      isStickyVisibleRef.current = true;
+      setIsStickyVisible(true);
+    } else if (currentY <= 75 && isStickyVisibleRef.current) {
+      isStickyVisibleRef.current = false;
+      setIsStickyVisible(false);
+    }
+
     const diff = currentY - lastScrollYRef.current;
 
     // Luôn hiện khi ở gần đỉnh cuộn
@@ -191,6 +239,72 @@ export function HomeDashboardScreen({ navigation }: Props) {
         barStyle={theme.scheme === 'dark' ? 'light-content' : 'dark-content'}
         backgroundColor={colors.surfaceMid}
       />
+
+      {/* ── Sticky Top Header khi cuộn xuống: Ngày + Nâng cấp gói ── */}
+      <Animated.View
+        style={[
+          styles.stickyHeader,
+          {
+            opacity: stickyOpacity,
+            transform: [{ translateY: stickyTranslateY }],
+          },
+        ]}
+        pointerEvents={isStickyVisible ? 'auto' : 'none'}
+      >
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Mở lịch chọn ngày"
+          onPress={() => setCalendarModalVisible(true)}
+          style={({ pressed }) => [styles.stickyDateBtn, pressed && styles.pressedOpacity]}
+        >
+          <AppText style={styles.stickyDateText}>
+            {dateTitle}
+          </AppText>
+        </Pressable>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Nâng cấp gói"
+          onLayout={(e) => {
+            const { width, height } = e.nativeEvent.layout;
+            if (width > 0 && height > 0 && (width !== stickyPillSize.width || height !== stickyPillSize.height)) {
+              setStickyPillSize({ width, height });
+            }
+          }}
+          style={({ pressed }) => [styles.stickyUpgradePill, pressed && styles.pressedOpacity]}
+          onPress={handleUpgradePress}
+        >
+          {stickyPillSize.width > 0 && stickyPillSize.height > 0 && (
+            <Svg
+              style={StyleSheet.absoluteFill}
+              width={stickyPillSize.width}
+              height={stickyPillSize.height}
+            >
+              <Defs>
+                <LinearGradient id="upgradeGradSticky" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <Stop offset="0%" stopColor="#FFFFFF" />
+                  <Stop offset="25%" stopColor="#FFF4C2" />
+                  <Stop offset="65%" stopColor="#FED268" />
+                  <Stop offset="100%" stopColor="#F5A021" />
+                </LinearGradient>
+              </Defs>
+              <Rect
+                x={0}
+                y={0}
+                width={stickyPillSize.width}
+                height={stickyPillSize.height}
+                rx={stickyPillSize.height / 2}
+                ry={stickyPillSize.height / 2}
+                fill="url(#upgradeGradSticky)"
+              />
+            </Svg>
+          )}
+          <AppText variant="labelLg" style={styles.stickyUpgradePillText}>
+            Nâng cấp gói
+          </AppText>
+        </Pressable>
+      </Animated.View>
+
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -330,7 +444,14 @@ export function HomeDashboardScreen({ navigation }: Props) {
           {/* ── 3. Mục tiêu calo (Calorie Target) ────────────────────────── */}
           <View style={styles.calorieSection}>
             <View style={styles.sectionHeaderRow}>
-              <AppText variant="headlineSm">Mục tiêu calo</AppText>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Xem hướng dẫn mục tiêu calo"
+                onPress={() => setCalorieGoalModalVisible(true)}
+                style={({ pressed }) => [pressed && styles.pressedOpacity]}
+              >
+                <AppText variant="headlineSm">Mục tiêu calo</AppText>
+              </Pressable>
               <AppButton
                 label="Xem báo cáo"
                 variant="secondary"
@@ -351,7 +472,12 @@ export function HomeDashboardScreen({ navigation }: Props) {
 
             {/* 3 Metric Columns */}
             <View style={styles.calorieStatsRow}>
-              <View style={styles.calorieStatCol}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Xem hướng dẫn calo mục tiêu"
+                style={({ pressed }) => [styles.calorieStatCol, pressed && styles.pressedOpacity]}
+                onPress={() => setCalorieGoalModalVisible(true)}
+              >
                 <AppText variant="headlineMd" style={styles.statColNumber}>
                   {formatNumber(caloriesGoal)}
                 </AppText>
@@ -361,9 +487,14 @@ export function HomeDashboardScreen({ navigation }: Props) {
                     Mục tiêu
                   </AppText>
                 </View>
-              </View>
+              </Pressable>
 
-              <View style={styles.calorieStatCol}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Xem hướng dẫn calo nạp vào"
+                style={({ pressed }) => [styles.calorieStatCol, pressed && styles.pressedOpacity]}
+                onPress={() => setCalorieIntakeModalVisible(true)}
+              >
                 <AppText variant="headlineMd" style={styles.statColNumber}>
                   {formatNumber(caloriesConsumed)}
                 </AppText>
@@ -373,9 +504,14 @@ export function HomeDashboardScreen({ navigation }: Props) {
                     Đã nạp
                   </AppText>
                 </View>
-              </View>
+              </Pressable>
 
-              <View style={styles.calorieStatCol}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Xem hướng dẫn tập luyện"
+                style={({ pressed }) => [styles.calorieStatCol, pressed && styles.pressedOpacity]}
+                onPress={() => setWorkoutModalVisible(true)}
+              >
                 <AppText variant="headlineMd" style={styles.statColNumber}>
                   {formatNumber(caloriesBurned)}
                 </AppText>
@@ -390,7 +526,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
                     Tập luyện
                   </AppText>
                 </View>
-              </View>
+              </Pressable>
             </View>
           </View>
         </View>
@@ -420,6 +556,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
                   current={summary.protein}
                   goal={proteinGoal}
                   color={colors.macroProtein}
+                  onPress={() => setProteinModalVisible(true)}
                 />
                 <MacroColumn
                   styles={styles}
@@ -428,6 +565,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
                   current={summary.carbs}
                   goal={carbsGoal}
                   color={colors.macroCarbs}
+                  onPress={() => setCarbModalVisible(true)}
                 />
                 <MacroColumn
                   styles={styles}
@@ -436,6 +574,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
                   current={summary.fat}
                   goal={fatGoal}
                   color={colors.macroFats}
+                  onPress={() => setFatModalVisible(true)}
                 />
               </View>
 
@@ -448,6 +587,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
                   current={saltCurrent}
                   goal={saltGoal}
                   color={colors.macroSalt}
+                  onPress={() => setSaltModalVisible(true)}
                 />
                 <MacroColumn
                   styles={styles}
@@ -456,6 +596,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
                   current={sugarCurrent}
                   goal={sugarGoal}
                   color={colors.macroSugar}
+                  onPress={() => setSugarModalVisible(true)}
                 />
                 <MacroColumn
                   styles={styles}
@@ -471,6 +612,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
                   current={fiberCurrent}
                   goal={fiberGoal}
                   color={colors.macroFiber}
+                  onPress={() => setFiberModalVisible(true)}
                 />
               </View>
             </ScrollView>
@@ -721,6 +863,60 @@ export function HomeDashboardScreen({ navigation }: Props) {
           setCalendarModalVisible(false);
         }}
         onClose={() => setCalendarModalVisible(false)}
+      />
+
+      {/* ── Calorie Goal Guide Modal (Calo Mục Tiêu) ──────────────────── */}
+      <CalorieGoalGuideModal
+        visible={calorieGoalModalVisible}
+        onClose={() => setCalorieGoalModalVisible(false)}
+      />
+
+      {/* ── Calorie Intake Guide Modal (Calo Nạp Vào) ─────────────────── */}
+      <CalorieIntakeGuideModal
+        visible={calorieIntakeModalVisible}
+        onClose={() => setCalorieIntakeModalVisible(false)}
+      />
+
+      {/* ── Workout Guide Modal (Tập Luyện) ─────────────────────────── */}
+      <WorkoutGuideModal
+        visible={workoutModalVisible}
+        onClose={() => setWorkoutModalVisible(false)}
+      />
+
+      {/* ── Protein Guide Modal (Chất Đạm) ───────────────────────────── */}
+      <ProteinGuideModal
+        visible={proteinModalVisible}
+        onClose={() => setProteinModalVisible(false)}
+      />
+
+      {/* ── Carb Guide Modal (Đường Bột) ─────────────────────────────── */}
+      <CarbGuideModal
+        visible={carbModalVisible}
+        onClose={() => setCarbModalVisible(false)}
+      />
+
+      {/* ── Fat Guide Modal (Chất Béo) ───────────────────────────────── */}
+      <FatGuideModal
+        visible={fatModalVisible}
+        onClose={() => setFatModalVisible(false)}
+      />
+
+      {/* ── Salt Guide Modal (Muối) ──────────────────────────────────── */}
+      <SaltGuideModal
+        visible={saltModalVisible}
+        onClose={() => setSaltModalVisible(false)}
+      />
+
+      {/* ── Sugar Guide Modal (Đường) ─────────────────────────────────── */}
+      <SugarGuideModal
+        visible={sugarModalVisible}
+        onClose={() => setSugarModalVisible(false)}
+      />
+
+      {/* ── Fiber Guide Modal (Chất Xơ) ───────────────────────────────── */}
+      <FiberGuideModal
+        visible={fiberModalVisible}
+        onClose={() => setFiberModalVisible(false)}
       />
     </SafeAreaView>
   );
