@@ -6,6 +6,7 @@ export type ActivityType =
   | 'gym'
   | 'yoga'
   | 'badminton'
+  | 'pickleball'
   | 'football'
   | 'jump_rope'
   | 'other';

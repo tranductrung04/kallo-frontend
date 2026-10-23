@@ -790,6 +790,15 @@ export function ChevronUpIcon({ size = 20, color = '#FFFFFF' }: IconProps) {
   );
 }
 
+/** Icon Dấu tích Check ✓ */
+export function CheckIcon({ size = 20, color = '#9E64F7', strokeWidth = 2.4 }: IconProps & { strokeWidth?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M20 6L9 17L4 12" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
 /** Icon Lấp lánh Sparkles ✨ */
 export function SparklesIcon({ size = 18, color = '#9E64F7' }: IconProps) {
   return (
