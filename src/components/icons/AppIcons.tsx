@@ -1,6 +1,17 @@
 import React from 'react';
 import { Image } from 'react-native';
-import Svg, { Circle, G, Line, Path, Rect } from 'react-native-svg';
+import Svg, {
+  Circle,
+  Ellipse,
+  Defs,
+  G,
+  Line,
+  LinearGradient,
+  Path,
+  Rect,
+  Stop,
+  Text as SvgText,
+} from 'react-native-svg';
 
 // ─── Shared Props ────────────────────────────────────────────────────────────
 
@@ -102,13 +113,23 @@ export function CloseXIcon({ size = 20, color = '#FFFFFF', strokeWidth = 2.2 }: 
 
 // ─── Header, Macro & Metabolic Icons ─────────────────────────────────────────
 
-export function FlameIcon({ size = 16, color }: IconProps) {
+export function FlameIcon({
+  size = 16,
+  color = "#F44E42",
+  coreColor = "#FA9A91"
+}: IconProps & { coreColor?: string }) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      {/* Flame Path (Ngọn lửa ngoài) */}
       <Path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M12 23c-4.97 0-9-3.8-9-8.5C3 8.5 9 2 9 2s-.5 4.5 2 6c1.6-2.5 3-5 3-5s6 6.5 6 11.5c0 4.7-4.03 8.5-9 8.5zm0-4c2.21 0 4-1.79 4-4 0-2.5-2.5-4.5-2.5-4.5s-.5 1.5-1.5 2c-1.5 1-2 2-2 3.5 0 1.66 1.34 3 2 3z"
+        d="M12 21.8C6.5 21.8 4.1 19.2 4.1 15C4.1 11.2 7.3 6.8 8.9 6.8C9.5 6.8 9.9 7.3 10.1 7.5C10.8 6.1 12.2 4.4 13.3 4.4C14.4 4.4 15.1 6.3 15.5 7.3C15.7 7 15.9 7 16.4 7C17.9 7 19.8 11.2 19.8 15C19.8 19.2 17.4 21.8 12 21.8Z"
+        fill={color}
+      />
+
+      {/* Core Path (Lõi lửa bên trong) */}
+      <Path
+        d="M11.8 20.6C8.4 20.6 6.9 18.7 6.9 16C6.9 13.6 9.9 10.4 12 10.4C14.2 10.4 16.5 13.6 16.5 16C16.5 18.7 15.1 20.6 11.8 20.6Z"
+        fill={coreColor}
       />
     </Svg>
   );
@@ -878,3 +899,388 @@ export function TimelineDiaryPhoneIllustration({ size = 70 }: { size?: number })
     />
   );
 }
+
+// ─── Gamification & Streak Icons ─────────────────────────────────────────────
+
+interface CampfireFlameIconProps {
+  size?: number;
+  streak?: number;
+  isLit?: boolean;
+}
+const FLAME_PATH =
+  'M50 78 C32.1 78 24.4 69.2 24.4 55.5 C24.4 42.6 34.9 28.1 39.8 28.1 C41.9 28.1 43.3 29.8 44.1 30.6 C46.1 25.8 51.1 20.1 54.6 20.1 C58.1 20.1 60.2 26.6 61.6 29.8 C62.3 28.9 62.9 28.9 64.4 28.9 C69.4 28.9 75.6 42.6 75.6 55.5 C75.6 69.2 67.9 78 50 78 Z';
+
+const CORE_PATH =
+  'M49.6 74 C38.4 74 33.5 67.6 33.5 58.7 C33.5 50.7 43.3 40.2 50.4 40.2 C57.4 40.2 65.1 50.7 65.1 58.7 C65.1 67.6 60.2 74 49.6 74 Z';
+
+export function CampfireFlameIcon({
+  size = 116,
+  streak = 0,
+  isLit: isLitProp,
+}: CampfireFlameIconProps) {
+  const isLit = isLitProp !== undefined ? isLitProp : streak > 0;
+
+  // Hào quang: 3 lớp phóng to dần quanh tâm đáy ngọn lửa
+  const glowLayers = isLit
+    ? [
+      { scale: 1.24, fill: '#C9B6F5', opacity: 0.35 },
+      { scale: 1.15, fill: '#DCCDFB', opacity: 0.5 },
+      { scale: 1.07, fill: '#F3ECFF', opacity: 0.75 },
+    ]
+    : [
+      { scale: 1.24, fill: '#7A7396', opacity: 0.18 },
+      { scale: 1.15, fill: '#857FA0', opacity: 0.28 },
+      { scale: 1.07, fill: '#938DAE', opacity: 0.4 },
+    ];
+
+  return (
+    <Svg width={size} height={size} viewBox="0 0 100 100" fill="none">
+      <Defs>
+        {/* Sáng */}
+        <LinearGradient id="fireOuterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <Stop offset="0%" stopColor="#FF5F52" />
+          <Stop offset="100%" stopColor="#F23F3A" />
+        </LinearGradient>
+        <LinearGradient id="fireCoreGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <Stop offset="0%" stopColor="#FFA89D" />
+          <Stop offset="100%" stopColor="#FF8278" />
+        </LinearGradient>
+        {/* Tắt */}
+        <LinearGradient id="ghostOuterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <Stop offset="0%" stopColor="#9C97B6" />
+          <Stop offset="100%" stopColor="#7E7898" />
+        </LinearGradient>
+      </Defs>
+
+      {/* ── 1. Bóng đổ dưới đống củi ── */}
+      <Ellipse
+        cx={50}
+        cy={86}
+        rx={30}
+        ry={4.5}
+        fill={isLit ? '#3B3A6E' : '#2E2A42'}
+        opacity={isLit ? 0.45 : 0.7}
+      />
+
+      {/* ── 2. Hào quang (Glow layers) ── */}
+      {glowLayers.map((layer, i) => (
+        <G
+          key={i}
+          transform={`translate(50 72) scale(${layer.scale}) translate(-50 -72)`}
+        >
+          <Path d={FLAME_PATH} fill={layer.fill} opacity={layer.opacity} />
+        </G>
+      ))}
+
+      {/* ── 3. Ngọn lửa chính ── */}
+      <Path
+        d={FLAME_PATH}
+        fill={isLit ? 'url(#fireOuterGrad)' : 'url(#ghostOuterGrad)'}
+      />
+
+      {/* ── 4. Lõi lửa ── */}
+      <Path
+        d={CORE_PATH}
+        fill={isLit ? 'url(#fireCoreGrad)' : '#E3E0EC'}
+      />
+
+      {/* ── 5. Củi bắt chéo (vẽ sau để che chân ngọn lửa) ── */}
+      <Rect
+        x={15}
+        y={73.5}
+        width={70}
+        height={9}
+        rx={4.5}
+        fill={isLit ? '#6B4338' : '#5A5575'}
+        transform="rotate(10 50 78)"
+      />
+      <Rect
+        x={15}
+        y={73.5}
+        width={70}
+        height={9}
+        rx={4.5}
+        fill={isLit ? '#80503F' : '#6A6585'}
+        transform="rotate(-10 50 78)"
+      />
+      <Circle cx={20.5} cy={83.2} r={4.4} fill={isLit ? '#8E5D49' : '#716C8E'} />
+      <Circle cx={79.5} cy={83.2} r={4.4} fill={isLit ? '#8E5D49' : '#716C8E'} />
+    </Svg>
+  );
+}
+
+export type SaladBowlIconProps = {
+  size?: number;
+  bgCircleColor?: string;
+};
+
+/** Icon Bát Salad / Ghi nhận món ăn */
+export function SaladBowlIcon({
+  size = 56,
+  bgCircleColor = '#F9F2D8',
+}: SaladBowlIconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 48 48" fill="none">
+      <Circle cx={24} cy={24} r={24} fill={bgCircleColor} />
+      <Path
+        d="M10 27 C10 37 16 41 24 41 C32 41 38 37 38 27 Z"
+        fill="#6D46BA"
+      />
+      <Path
+        d="M19 41 L29 41 C28 42.8 26.5 43.5 24 43.5 C21.5 43.5 20 42.8 19 41 Z"
+        fill="#533496"
+      />
+      <Path
+        d="M11 27 C11 21 16 17 24 17 C32 17 37 21 37 27 Z"
+        fill="#FBBF24"
+      />
+      <Path
+        d="M27 22 C31 15 38 15 38 15 C38 15 37 21 32 24 Z"
+        fill="#22C55E"
+      />
+      <Path
+        d="M32 18 L29 22"
+        stroke="#16A34A"
+        strokeWidth={1}
+        strokeLinecap="round"
+      />
+      <Circle cx={18} cy={22} r={3.5} fill="#EF4444" />
+    </Svg>
+  );
+}
+
+export type CelebrationPopperBadgeProps = {
+  size?: number;
+};
+
+/** Huy hiệu pháo giấy ăn mừng duy trì chuỗi Streak thành công */
+export function CelebrationPopperBadge({ size = 56 }: CelebrationPopperBadgeProps) {
+  return (
+    <Image
+      source={require('../../assets/images/streak_celebrate_popper.png')}
+      style={{ width: size, height: size }}
+      resizeMode="contain"
+      accessibilityLabel="Pháo giấy ăn mừng chuỗi Streak"
+    />
+  );
+}
+
+export const PartyPopperBadge = CelebrationPopperBadge;
+
+export type KalloShieldIconProps = {
+  size?: number;
+};
+
+/** Icon Khiên Kallo (bảo vệ đóng băng streak) */
+export function KalloShieldIcon({ size = 30 }: KalloShieldIconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 32 32" fill="none">
+      <Defs>
+        <LinearGradient id="kalloShieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <Stop offset="0%" stopColor="#38BDF8" />
+          <Stop offset="100%" stopColor="#0284C7" />
+        </LinearGradient>
+      </Defs>
+
+      {/* Viền và nền khiên */}
+      <Path
+        d="M16 3
+           L27 7
+           C27 18 21 26 16 29
+           C11 26 5 18 5 7
+           L16 3 Z"
+        fill="url(#kalloShieldGrad)"
+        stroke="#7DD3FC"
+        strokeWidth={1.5}
+        strokeLinejoin="round"
+      />
+
+      {/* Chữ K trong tâm khiên Kallo */}
+      <Path
+        d="M12 10.5 L12 21.5"
+        stroke="#FFFFFF"
+        strokeWidth={2.6}
+        strokeLinecap="round"
+      />
+      <Path
+        d="M19.5 11 L13 16.5 L19.5 21.5"
+        stroke="#FFFFFF"
+        strokeWidth={2.4}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      {/* Ngôi sao lấp lánh góc trên khiên */}
+      <Path
+        d="M21 7.5 Q22 7.5 22 6.5 Q22 7.5 23 7.5 Q22 7.5 22 8.5 Q22 7.5 21 7.5 Z"
+        fill="#FFFFFF"
+      />
+    </Svg>
+  );
+}
+
+export const WaoShieldIcon = KalloShieldIcon;
+export type WaoShieldIconProps = KalloShieldIconProps;
+
+export type CirclePlusIconProps = {
+  size?: number;
+  circleColor?: string;
+  plusColor?: string;
+  strokeWidth?: number;
+};
+
+/** Icon Dấu cộng trong vòng tròn (+) */
+export function CirclePlusIcon({
+  size = 20,
+  circleColor = '#B066FE',
+  plusColor = '#1D172D',
+  strokeWidth = 2.4,
+}: CirclePlusIconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Circle cx={12} cy={12} r={10} fill={circleColor} />
+      <Path
+        d="M12 7.5v9M7.5 12h9"
+        stroke={plusColor}
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
+
+export type MilestoneCalendarBadgeProps = {
+  days: number;
+  isActive?: boolean;
+  isAchieved?: boolean;
+  width?: number;
+  height?: number;
+};
+
+/** Huy hiệu cuốn lịch mốc ngày phong cách sticker viền trắng / xám (3, 7, 14 ngày) */
+export function MilestoneCalendarBadge({
+  days,
+  isActive = false,
+  isAchieved = false,
+  width = 36,
+  height = 40,
+}: MilestoneCalendarBadgeProps) {
+  const isOrange = isActive || isAchieved;
+  const outerBorderColor = isOrange ? '#FFFFFF' : '#C3C0D0';
+  const baseColor = isOrange ? '#FF6422' : '#2D283E';
+  const tabStrapColor = isOrange ? '#E64212' : '#4E4960';
+  const innerCardColor = isOrange ? '#FFFFFF' : '#C3C0D0';
+  const textColor = isOrange ? '#FF5520' : '#2D283E';
+
+  // Đường viền dạng sticker kết hợp thân lịch bo tròn và 2 tai móc treo ở trên đỉnh
+  const silhouettePath =
+    'M 2 14.5 ' +
+    'A 6.5 6.5 0 0 1 8.5 8 ' +
+    'L 9 8 ' +
+    'L 9 4.75 ' +
+    'A 2.75 2.75 0 0 1 14.5 4.75 ' +
+    'L 14.5 8 ' +
+    'L 21.5 8 ' +
+    'L 21.5 4.75 ' +
+    'A 2.75 2.75 0 0 1 27 4.75 ' +
+    'L 27 8 ' +
+    'L 27.5 8 ' +
+    'A 6.5 6.5 0 0 1 34 14.5 ' +
+    'L 34 31.5 ' +
+    'A 6.5 6.5 0 0 1 27.5 38 ' +
+    'L 8.5 38 ' +
+    'A 6.5 6.5 0 0 1 2 31.5 ' +
+    'Z';
+
+  return (
+    <Svg width={width} height={height} viewBox="0 0 36 40" fill="none">
+      {/* Khối nền và viền ngoài sticker */}
+      <Path
+        d={silhouettePath}
+        fill={baseColor}
+        stroke={outerBorderColor}
+        strokeWidth={2.5}
+        strokeLinejoin="round"
+      />
+
+      {/* Rãnh khuy móc gáy lịch ở 2 tai treo */}
+      <Rect
+        x={10.5}
+        y={3.5}
+        width={2.5}
+        height={5.5}
+        rx={1.25}
+        fill={tabStrapColor}
+      />
+      <Rect
+        x={23}
+        y={3.5}
+        width={2.5}
+        height={5.5}
+        rx={1.25}
+        fill={tabStrapColor}
+      />
+
+      {/* Trang lịch bên trong */}
+      <Rect
+        x={5}
+        y={15}
+        width={26}
+        height={19}
+        rx={4}
+        fill={innerCardColor}
+      />
+
+      {/* Số mốc ngày */}
+      <SvgText
+        x={18}
+        y={days >= 10 ? 29 : 29.5}
+        fill={textColor}
+        fontSize={days >= 100 ? 11 : days >= 10 ? 12.5 : 15}
+        fontWeight="bold"
+        textAnchor="middle"
+      >
+        {days}
+      </SvgText>
+    </Svg>
+  );
+}
+
+
+/** Biểu tượng cờ mục tiêu kèm dấu tick trong Mục tiêu chuỗi */
+export function StreakGoalFlagIcon({
+  width = 34,
+  height = 38,
+}: {
+  width?: number;
+  height?: number;
+}) {
+  return (
+    <Svg width={width} height={height} viewBox="0 0 32 38" fill="none">
+      {/* Đầu chóp cán cờ */}
+      <Circle cx={8} cy={6.5} r={2.5} fill="#757088" />
+
+      {/* Thân cán cờ */}
+      <Rect x={6.75} y={7} width={2.5} height={24} rx={1.25} fill="#757088" />
+
+      {/* Nếp gấp bóng phía sau lá cờ */}
+      <Path
+        d="M 21 11 C 23.5 11 25.5 12.5 25.5 15.5 L 25.5 18 C 25.5 21 23.5 22.5 21 22.5 Z"
+        fill="#59546B"
+      />
+
+      {/* Lá cờ chính màu tím xám nhạt */}
+      <Rect x={8} y={9.5} width={14} height={14} rx={2.5} fill="#C4C0D4" />
+
+      {/* Dấu tick hoàn thành màu tím than đậm */}
+      <Path
+        d="M 11.8 16.5 L 14.2 19 L 18.8 13.5"
+        stroke="#2D293E"
+        strokeWidth={2.2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+

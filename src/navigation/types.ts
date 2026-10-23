@@ -39,6 +39,7 @@ export type RootStackParamList = {
   NutritionChat: { initialPrompt?: string } | undefined;
   VoiceLogModal: { date?: string; meal?: MealSlot } | undefined;
   StreakDetail: undefined;
+  StreakRules: undefined;
   BadgesChallenges: undefined;
   FriendsLeaderboard: undefined;
   NotificationCenter: undefined;
