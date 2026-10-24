@@ -47,6 +47,13 @@ export type RootStackParamList = {
   MealScanResult: { imageUri: string; date: string; meal: MealSlot };
   BarcodeScanner: { date: string; meal: MealSlot };
   ActivityTracker: { date?: string } | undefined;
+  RunningWorkout: { date?: string; activityName?: string } | undefined;
+  CyclingWorkout: { date?: string; activityName?: string } | undefined;
+  BadmintonWorkout: { date?: string; activityName?: string } | undefined;
+  PickleballWorkout: { date?: string; activityName?: string } | undefined;
+  YogaWorkout: { date?: string; activityName?: string } | undefined;
+  ActivityWorkout: { activityId: string; activityName: string; met?: number; date?: string };
+  AddActivity: { date?: string } | undefined;
   HealthSync: undefined;
   BodyMetric: undefined;
   MealPlanOverview: undefined;

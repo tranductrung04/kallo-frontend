@@ -30,16 +30,17 @@ type MacroColumnProps = {
   current: number;
   goal: number;
   color?: string;
+  onPress?: () => void;
 };
 
-export function MacroColumn({ styles, title, icon, current, goal, color }: MacroColumnProps) {
+export function MacroColumn({ styles, title, icon, current, goal, color, onPress }: MacroColumnProps) {
   const { colors } = useTheme();
   // ProgressBar tự clamp 0–1; ở đây chỉ cần chặn chia cho 0
   const ratio = goal > 0 ? current / goal : 0;
   const thumbPercent = Math.min(95, Math.max(0, ratio * 100));
 
-  return (
-    <View style={styles.macroCol}>
+  const content = (
+    <>
       <View style={styles.macroHeaderRow}>
         {icon}
         <AppText variant="labelMd" numberOfLines={1} style={styles.macroColTitle}>
@@ -58,8 +59,23 @@ export function MacroColumn({ styles, title, icon, current, goal, color }: Macro
           / {formatNumber(goal)}g
         </AppText>
       </View>
-    </View>
+    </>
   );
+
+  if (onPress) {
+    return (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Xem hướng dẫn ${title}`}
+        style={({ pressed }) => [styles.macroCol, pressed && styles.pressedOpacity]}
+        onPress={onPress}
+      >
+        {content}
+      </Pressable>
+    );
+  }
+
+  return <View style={styles.macroCol}>{content}</View>;
 }
 
 // ─── ActivityGrid ─────────────────────────────────────────────────────────────

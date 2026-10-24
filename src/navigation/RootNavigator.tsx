@@ -15,7 +15,7 @@ import { CustomFoodFormScreen } from '@/features/nutrition/screens/CustomFoodFor
 import { AIMealScanScreen } from '@/features/nutrition/screens/AIMealScanScreen';
 import { MealScanResultScreen } from '@/features/nutrition/screens/MealScanResultScreen';
 import { BarcodeScannerScreen } from '@/features/nutrition/screens/BarcodeScannerScreen';
-import { ActivityTrackerScreen, HealthSyncScreen, BodyMetricScreen } from '@/features/activity';
+import { ActivityTrackerScreen, HealthSyncScreen, BodyMetricScreen, RunningWorkoutScreen, CyclingWorkoutScreen, BadmintonWorkoutScreen, PickleballWorkoutScreen, YogaWorkoutScreen, AddActivityScreen, ActivityWorkoutScreen } from '@/features/activity';
 import { MealPlanOverviewScreen, MealPlanWizardScreen, MealPlanDetailScreen } from '@/features/meal-plan';
 import { NutritionChatScreen, VoiceLogModal } from '@/features/assistant';
 import { StreakDetailModal, StreakRulesScreen, BadgesChallengesScreen, FriendsLeaderboardScreen } from '@/features/gamification';
@@ -45,7 +45,14 @@ export function RootNavigator() {
       <Stack.Screen name="MealScanResult" component={MealScanResultScreen} options={{ title: 'Kết quả nhận diện' }} />
       <Stack.Screen name="BarcodeScanner" component={BarcodeScannerScreen} options={{ headerShown: false, presentation: 'fullScreenModal' }} />
       <Stack.Screen name="ActivityTracker" component={ActivityTrackerScreen} options={{ title: 'Vận động & Thể thao' }} />
-      <Stack.Screen name="HealthSync" component={HealthSyncScreen} options={{ title: 'Đồng bộ sức khỏe' }} />
+      <Stack.Screen name="RunningWorkout" component={RunningWorkoutScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="CyclingWorkout" component={CyclingWorkoutScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="BadmintonWorkout" component={BadmintonWorkoutScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="PickleballWorkout" component={PickleballWorkoutScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="YogaWorkout" component={YogaWorkoutScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="ActivityWorkout" component={ActivityWorkoutScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="AddActivity" component={AddActivityScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="HealthSync" component={HealthSyncScreen} options={{ headerShown: false }} />
       <Stack.Screen name="BodyMetric" component={BodyMetricScreen} options={{ title: 'Chỉ số eo / mông' }} />
       <Stack.Screen name="MealPlanOverview" component={MealPlanOverviewScreen} options={{ headerShown: false }} />
       <Stack.Screen name="MealPlanWizard" component={MealPlanWizardScreen} options={{ title: 'Tạo thực đơn AI' }} />

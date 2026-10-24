@@ -790,6 +790,15 @@ export function ChevronUpIcon({ size = 20, color = '#FFFFFF' }: IconProps) {
   );
 }
 
+/** Icon Dấu tích Check ✓ */
+export function CheckIcon({ size = 20, color = '#9E64F7', strokeWidth = 2.4 }: IconProps & { strokeWidth?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M20 6L9 17L4 12" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
 /** Icon Lấp lánh Sparkles ✨ */
 export function SparklesIcon({ size = 18, color = '#9E64F7' }: IconProps) {
   return (
@@ -806,6 +815,28 @@ export function SparklesIcon({ size = 18, color = '#9E64F7' }: IconProps) {
     </Svg>
   );
 }
+
+/** Icon cuốn sách (kiến thức / cẩm nang) */
+export function BookIcon({ size = 16, color = '#A59EBD', strokeWidth = 2 }: IconProps & { strokeWidth?: number }) {
+  return (
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <Path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+      <Path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+    </Svg>
+  );
+}
+
+export const BookOpenIcon = BookIcon;
+export const KnowledgeBookIcon = BookIcon;
 
 /** Icon Info ⓘ */
 export function InfoIcon({ size = 22, color = '#FFFFFF' }: IconProps) {
