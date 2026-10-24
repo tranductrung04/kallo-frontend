@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { ChevronRightIcon } from '@/components/icons';
+import { useTheme } from '@/theme';
 import type { ActivityItemMeta } from '../extendedActivities';
 
 export type ActivityRowItemProps = {
@@ -12,18 +13,20 @@ export const ActivityRowItem = React.memo(function ActivityRowItem({
   item,
   onPress,
 }: ActivityRowItemProps) {
+  const { colors: c } = useTheme();
+
   return (
     <TouchableOpacity
       activeOpacity={0.7}
       onPress={() => onPress(item)}
-      style={styles.activityRowItem}
+      style={[styles.activityRowItem, { borderBottomColor: c.surfaceBorder }]}
       accessibilityRole="button"
       accessibilityLabel={item.name}
     >
-      <Text style={styles.activityNameText} numberOfLines={1}>
+      <Text style={[styles.activityNameText, { color: c.textPrimary }]} numberOfLines={1}>
         {item.name}
       </Text>
-      <ChevronRightIcon size={18} color="#C4C0D4" />
+      <ChevronRightIcon size={18} color={c.textSecondary} />
     </TouchableOpacity>
   );
 });
@@ -35,11 +38,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
   activityNameText: {
     flex: 1,
-    color: '#FFFFFF',
     fontSize: 16,
     fontFamily: 'PlusJakartaSans_400Regular',
     marginRight: 10,

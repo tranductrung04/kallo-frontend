@@ -15,6 +15,7 @@ import {
   SearchIcon,
   ViewfinderBarcodeIcon,
 } from '@/components/icons';
+import { useTheme } from '@/theme';
 import type { Food } from '../../types';
 import { styles } from './FoodSearchScreen.styles';
 
@@ -36,6 +37,9 @@ export function FoodSearchHeader({
   onOpenPicker,
   onOpenInfo,
 }: FoodSearchHeaderProps) {
+  const theme = useTheme();
+  const { colors: c } = theme;
+
   return (
     <View style={styles.headerBar}>
       {/* Back Button */}
@@ -44,7 +48,7 @@ export function FoodSearchHeader({
         style={styles.headerIconButton}
         accessibilityLabel="Quay lại"
       >
-        <ChevronLeftIcon size={22} color="#FFFFFF" />
+        <ChevronLeftIcon size={22} color={c.textPrimary} />
       </TouchableOpacity>
 
       {/* Center: Hôm nay • 11:00 ▾ */}
@@ -66,7 +70,7 @@ export function FoodSearchHeader({
         style={styles.headerIconButton}
         accessibilityLabel="Thông tin"
       >
-        <InfoIcon size={22} color="#FFFFFF" />
+        <InfoIcon size={22} color={c.textPrimary} />
       </TouchableOpacity>
     </View>
   );
@@ -84,19 +88,23 @@ export function FoodSearchBar({
   onChangeQuery,
   onOpenBarcode,
 }: FoodSearchBarProps) {
+  const theme = useTheme();
+  const { colors: c } = theme;
+
   return (
     <View style={styles.searchBarWrapper}>
       <View style={styles.searchBarContainer}>
         {/* Magnifying Glass Icon */}
-        <SearchIcon size={20} color="#FFFFFF" strokeWidth={2.2} />
+        <SearchIcon size={20} color={c.textPrimary} strokeWidth={2.2} />
 
         {/* Text Input */}
         <TextInput
           value={query}
           onChangeText={onChangeQuery}
           placeholder="Tìm thực phẩm hoặc món ăn"
-          placeholderTextColor="#7A758D"
+          placeholderTextColor={c.textDisabled}
           style={styles.searchInput}
+          selectionColor={c.brandSecondary}
           returnKeyType="search"
           autoCorrect={false}
         />
@@ -109,11 +117,12 @@ export function FoodSearchBar({
         accessibilityLabel="Quét mã vạch"
         activeOpacity={0.75}
       >
-        <ViewfinderBarcodeIcon size={28} color="#FFFFFF" />
+        <ViewfinderBarcodeIcon size={28} color={c.textPrimary} />
       </TouchableOpacity>
     </View>
   );
 }
+
 
 // ─── 3. FoodSearchTabs ───────────────────────────────────────────────────────
 export type FoodSearchTabsProps = {
@@ -178,6 +187,9 @@ export function FoodSearchActionCards({
   onAIMealScan,
   onVoiceLog,
 }: FoodSearchActionCardsProps) {
+  const theme = useTheme();
+  const { colors: c } = theme;
+
   return (
     <View style={styles.actionCardsRow}>
       {/* Card 1: Quét mã vạch */}
@@ -186,8 +198,8 @@ export function FoodSearchActionCards({
         activeOpacity={0.75}
         onPress={onBarcodeScan}
       >
-        <View style={[styles.actionCircle, { backgroundColor: '#2563EB' }]}>
-          <QuickBarcodeIcon size={24} color="#FFFFFF" />
+        <View style={[styles.actionCircle, { backgroundColor: c.macroCarbs }]}>
+          <QuickBarcodeIcon size={24} color={c.onBrand} />
         </View>
         <Text style={styles.actionCardTitle}>Quét mã{'\n'}vạch</Text>
       </TouchableOpacity>
@@ -198,8 +210,8 @@ export function FoodSearchActionCards({
         activeOpacity={0.75}
         onPress={onAIMealScan}
       >
-        <View style={[styles.actionCircle, { backgroundColor: '#22C55E' }]}>
-          <QuickSparklesIcon size={24} color="#0D0B14" />
+        <View style={[styles.actionCircle, { backgroundColor: c.quickScanner }]}>
+          <QuickSparklesIcon size={24} color={c.onQuickTile} />
         </View>
         <Text style={styles.actionCardTitle}>Nhận diện{'\n'}món ăn</Text>
       </TouchableOpacity>
@@ -210,14 +222,15 @@ export function FoodSearchActionCards({
         activeOpacity={0.75}
         onPress={onVoiceLog}
       >
-        <View style={[styles.actionCircle, { backgroundColor: '#F87171' }]}>
-          <QuickVoiceIcon size={24} color="#0D0B14" cutoutColor="#F87171" />
+        <View style={[styles.actionCircle, { backgroundColor: c.macroProtein }]}>
+          <QuickVoiceIcon size={24} color={c.onQuickTile} cutoutColor={c.macroProtein} />
         </View>
         <Text style={styles.actionCardTitle}>Ghi bằng{'\n'}giọng nói</Text>
       </TouchableOpacity>
     </View>
   );
 }
+
 
 // ─── 5. FoodRowItem ──────────────────────────────────────────────────────────
 export type FoodRowItemProps = {

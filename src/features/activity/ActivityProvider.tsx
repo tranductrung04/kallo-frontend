@@ -31,7 +31,7 @@ const initialState: ActivityState = {
     healthConnect: 'NOT_GRANTED',
     appleHealth: 'NOT_GRANTED',
   },
-  stepGoal: 10000,
+  stepGoal: 3000,
 };
 
 function generateId(prefix: string) {
@@ -226,6 +226,13 @@ export function ActivityProvider({ children }: React.PropsWithChildren) {
     return [...state.bodyMetricLogs].sort((a, b) => b.date.localeCompare(a.date))[0];
   }, [state.bodyMetricLogs]);
 
+  const updateStepGoal = useCallback((goal: number) => {
+    setState((prev) => ({
+      ...prev,
+      stepGoal: goal,
+    }));
+  }, []);
+
   const value = useMemo<ActivityContextValue>(
     () => ({
       state,
@@ -239,6 +246,7 @@ export function ActivityProvider({ children }: React.PropsWithChildren) {
       addBodyMetricLog,
       getLatestBodyMetric,
       requestHealthPermission,
+      updateStepGoal,
     }),
     [
       state,
@@ -252,6 +260,7 @@ export function ActivityProvider({ children }: React.PropsWithChildren) {
       addBodyMetricLog,
       getLatestBodyMetric,
       requestHealthPermission,
+      updateStepGoal,
     ]
   );
 

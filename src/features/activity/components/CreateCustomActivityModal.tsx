@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CloseXIcon } from '@/components/icons';
+import { useTheme } from '@/theme';
 import { calculateCaloriesBurned } from '../utils';
 
 export type CreateCustomActivityModalProps = {
@@ -28,6 +29,8 @@ export function CreateCustomActivityModal({
   userWeight = 65,
 }: CreateCustomActivityModalProps) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const { colors: c } = theme;
 
   const [customName, setCustomName] = useState('');
   const [customCalories, setCustomCalories] = useState('0');
@@ -119,13 +122,16 @@ export function CreateCustomActivityModal({
       onRequestClose={handleClose}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={[styles.createModalContainer, { paddingTop: Math.max(8, insets.top) }]}>
-          <StatusBar barStyle="light-content" backgroundColor="#120E22" />
+        <View style={[styles.createModalContainer, { backgroundColor: c.canvasBase, paddingTop: Math.max(8, insets.top) }]}>
+          <StatusBar
+            barStyle={theme.scheme === 'dark' ? 'light-content' : 'dark-content'}
+            backgroundColor={c.canvasBase}
+          />
 
           {/* Header: Centered Title & Close Icon */}
           <View style={styles.createModalHeader}>
             <View style={styles.createModalHeaderSpacer} />
-            <Text style={styles.createModalTitle}>Tạo mới hoạt động</Text>
+            <Text style={[styles.createModalTitle, { color: c.textPrimary }]}>Tạo mới hoạt động</Text>
             <TouchableOpacity
               onPress={handleClose}
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
@@ -133,7 +139,7 @@ export function CreateCustomActivityModal({
               accessibilityRole="button"
               accessibilityLabel="Đóng"
             >
-              <CloseXIcon size={20} color="#FFFFFF" strokeWidth={2.2} />
+              <CloseXIcon size={20} color={c.textPrimary} strokeWidth={2.2} />
             </TouchableOpacity>
           </View>
 
@@ -141,17 +147,17 @@ export function CreateCustomActivityModal({
           <View style={styles.createModalBody}>
             {/* Row 1: Tên bài tập */}
             <View style={styles.createFieldRow}>
-              <Text style={styles.createFieldLabel}>Tên bài tập</Text>
+              <Text style={[styles.createFieldLabel, { color: c.textPrimary }]}>Tên bài tập</Text>
               <TextInput
                 value={customName}
                 onChangeText={setCustomName}
                 placeholder="Nhập tên bài tập"
-                placeholderTextColor="#6E6983"
-                style={styles.createNameInput}
-                selectionColor="#9E64F7"
+                placeholderTextColor={c.textDisabled}
+                style={[styles.createNameInput, { color: c.textPrimary }]}
+                selectionColor={c.brandPrimary}
               />
             </View>
-            <View style={styles.createRowDivider} />
+            <View style={[styles.createRowDivider, { backgroundColor: c.surfaceBorder }]} />
 
             {/* Row 2: Calo tiêu thụ */}
             <TouchableOpacity
@@ -159,7 +165,7 @@ export function CreateCustomActivityModal({
               onPress={() => customCaloriesRef.current?.focus()}
               style={styles.createFieldRow}
             >
-              <Text style={styles.createFieldLabel}>Calo tiêu thụ</Text>
+              <Text style={[styles.createFieldLabel, { color: c.textPrimary }]}>Calo tiêu thụ</Text>
               <View style={styles.createRightValueGroup}>
                 <TextInput
                   ref={customCaloriesRef}
@@ -169,14 +175,14 @@ export function CreateCustomActivityModal({
                   onBlur={handleCustomCaloriesBlur}
                   keyboardType="numeric"
                   placeholder="0"
-                  placeholderTextColor="#6E6983"
-                  style={styles.createNumberInput}
-                  selectionColor="#9E64F7"
+                  placeholderTextColor={c.textDisabled}
+                  style={[styles.createNumberInput, { color: c.textPrimary }]}
+                  selectionColor={c.brandPrimary}
                 />
-                <Text style={styles.createFieldUnit}>Cal</Text>
+                <Text style={[styles.createFieldUnit, { color: c.textSecondary }]}>Cal</Text>
               </View>
             </TouchableOpacity>
-            <View style={styles.createRowDivider} />
+            <View style={[styles.createRowDivider, { backgroundColor: c.surfaceBorder }]} />
 
             {/* Row 3: Thời gian luyện tập */}
             <TouchableOpacity
@@ -184,7 +190,7 @@ export function CreateCustomActivityModal({
               onPress={() => customDurationRef.current?.focus()}
               style={styles.createFieldRow}
             >
-              <Text style={styles.createFieldLabel}>Thời gian luyện tập</Text>
+              <Text style={[styles.createFieldLabel, { color: c.textPrimary }]}>Thời gian luyện tập</Text>
               <View style={styles.createRightValueGroup}>
                 <TextInput
                   ref={customDurationRef}
@@ -194,14 +200,14 @@ export function CreateCustomActivityModal({
                   onBlur={handleCustomDurationBlur}
                   keyboardType="numeric"
                   placeholder="0"
-                  placeholderTextColor="#6E6983"
-                  style={styles.createNumberInput}
-                  selectionColor="#9E64F7"
+                  placeholderTextColor={c.textDisabled}
+                  style={[styles.createNumberInput, { color: c.textPrimary }]}
+                  selectionColor={c.brandPrimary}
                 />
-                <Text style={styles.createFieldUnit}>Phút</Text>
+                <Text style={[styles.createFieldUnit, { color: c.textSecondary }]}>Phút</Text>
               </View>
             </TouchableOpacity>
-            <View style={styles.createRowDivider} />
+            <View style={[styles.createRowDivider, { backgroundColor: c.surfaceBorder }]} />
           </View>
 
           {/* Bottom Button */}
@@ -213,8 +219,8 @@ export function CreateCustomActivityModal({
               style={[
                 styles.createModalSaveBtn,
                 canSaveCustom
-                  ? styles.createModalSaveBtnActive
-                  : styles.createModalSaveBtnDisabled,
+                  ? { backgroundColor: c.brandPrimary }
+                  : { backgroundColor: c.surfaceHigh },
               ]}
               accessibilityRole="button"
               accessibilityLabel="Lưu bài tập"
@@ -223,8 +229,8 @@ export function CreateCustomActivityModal({
                 style={[
                   styles.createModalSaveText,
                   canSaveCustom
-                    ? styles.createModalSaveTextActive
-                    : styles.createModalSaveTextDisabled,
+                    ? { color: c.onBrand }
+                    : { color: c.textDisabled },
                 ]}
               >
                 Lưu bài tập
@@ -240,7 +246,6 @@ export function CreateCustomActivityModal({
 const styles = StyleSheet.create({
   createModalContainer: {
     flex: 1,
-    backgroundColor: '#120E22',
   },
   createModalHeader: {
     height: 52,
@@ -255,7 +260,6 @@ const styles = StyleSheet.create({
     height: 44,
   },
   createModalTitle: {
-    color: '#FFFFFF',
     fontSize: 18,
     fontFamily: 'PlusJakartaSans_700Bold',
     fontWeight: '700',
@@ -279,13 +283,11 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
   },
   createFieldLabel: {
-    color: '#FFFFFF',
     fontSize: 16,
     fontFamily: 'PlusJakartaSans_500Medium',
   },
   createNameInput: {
     flex: 1,
-    color: '#FFFFFF',
     fontSize: 16,
     fontFamily: 'PlusJakartaSans_500Medium',
     textAlign: 'right',
@@ -299,7 +301,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   createNumberInput: {
-    color: '#FFFFFF',
     fontSize: 16,
     fontFamily: 'PlusJakartaSans_600SemiBold',
     fontWeight: '600',
@@ -309,14 +310,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   createFieldUnit: {
-    color: '#FFFFFF',
     fontSize: 16,
     fontFamily: 'PlusJakartaSans_500Medium',
     minWidth: 32,
   },
   createRowDivider: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
   },
   createModalFooter: {
     paddingHorizontal: 20,
@@ -327,21 +326,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  createModalSaveBtnActive: {
-    backgroundColor: '#8B57E8',
-  },
-  createModalSaveBtnDisabled: {
-    backgroundColor: '#1E1838',
-  },
   createModalSaveText: {
     fontSize: 16,
     fontFamily: 'PlusJakartaSans_700Bold',
     fontWeight: '700',
-  },
-  createModalSaveTextActive: {
-    color: '#FFFFFF',
-  },
-  createModalSaveTextDisabled: {
-    color: '#554E6D',
   },
 });
