@@ -14,6 +14,7 @@ import { normalizeSearch, todayKey } from '../utils';
 import type { Food, MealSlot } from '../types';
 import { getDateTitle, getMealSlotForHour } from './FoodDiary';
 import {
+  createStyles,
   DateTimePickerModal,
   FoodRowItem,
   FoodSearchBar,
@@ -22,13 +23,13 @@ import {
   FoodSearchTabs,
   FoodSearchActionCards,
   type SearchTab,
-  styles,
 } from './FoodSearch';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FoodSearch'>;
 
 export function FoodSearchScreen({ navigation, route }: Props) {
   const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const { foods, state } = useNutrition();
 
   const [date, setDate] = useState(route.params.date || todayKey());
@@ -91,7 +92,10 @@ export function FoodSearchScreen({ navigation, route }: Props) {
 
   return (
     <SafeAreaView edges={['top']} style={[styles.container, { backgroundColor: theme.colors.canvasBase }]}>
-      <StatusBar barStyle="light-content" backgroundColor={theme.colors.canvasBase} />
+      <StatusBar
+        barStyle={theme.scheme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={theme.colors.canvasBase}
+      />
 
       {/* ── 1. Top Header: <  Hôm nay • 11:00 ▾  ⓘ ──────────────────────────── */}
       <FoodSearchHeader
