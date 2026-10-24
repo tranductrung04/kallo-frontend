@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   Image,
   Keyboard,
@@ -16,6 +16,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '@/navigation/types';
 import { ChevronLeftIcon } from '@/components/icons';
 import { images } from '@/assets/images';
+import { useTheme, type ThemeContextValue } from '@/theme';
 import { useActivity } from '../ActivityProvider';
 import { calculateCaloriesBurned } from '../utils';
 import { useNutrition } from '@/features/nutrition/NutritionProvider';
@@ -25,6 +26,9 @@ type Props = NativeStackScreenProps<RootStackParamList, 'CyclingWorkout'>;
 
 export function CyclingWorkoutScreen({ navigation, route }: Props) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const { colors: c } = theme;
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const { width: screenWidth } = useWindowDimensions();
   const { addActivityLog } = useActivity();
   const { state: nutritionState } = useNutrition();
@@ -147,7 +151,10 @@ export function CyclingWorkoutScreen({ navigation, route }: Props) {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={[styles.container, { paddingTop: Math.max(8, insets.top) }]}>
-        <StatusBar barStyle="light-content" backgroundColor="#120E22" />
+        <StatusBar
+          barStyle={theme.scheme === 'dark' ? 'light-content' : 'dark-content'}
+          backgroundColor={c.canvasBase}
+        />
 
         {/* ── Header ────────────────────────────────────────── */}
         <View style={styles.header}>
@@ -158,7 +165,7 @@ export function CyclingWorkoutScreen({ navigation, route }: Props) {
             accessibilityRole="button"
             accessibilityLabel="Quay lại"
           >
-            <ChevronLeftIcon size={22} color="#FFFFFF" />
+            <ChevronLeftIcon size={22} color={c.textPrimary} />
           </TouchableOpacity>
 
           <View style={styles.titleContainer}>
@@ -212,9 +219,9 @@ export function CyclingWorkoutScreen({ navigation, route }: Props) {
                 onBlur={handleDistanceBlur}
                 keyboardType="decimal-pad"
                 placeholder="0"
-                placeholderTextColor="#79748D"
+                placeholderTextColor={c.textDisabled}
                 style={styles.fieldInput}
-                selectionColor="#9E64F7"
+                selectionColor={c.brandSecondary}
               />
               <Text style={styles.fieldUnit}>Km</Text>
             </View>
@@ -237,9 +244,9 @@ export function CyclingWorkoutScreen({ navigation, route }: Props) {
                 onBlur={handleDurationBlur}
                 keyboardType="numeric"
                 placeholder="0"
-                placeholderTextColor="#79748D"
+                placeholderTextColor={c.textDisabled}
                 style={styles.fieldInput}
-                selectionColor="#9E64F7"
+                selectionColor={c.brandSecondary}
               />
               <Text style={styles.fieldUnit}>Phút</Text>
             </View>
@@ -260,9 +267,9 @@ export function CyclingWorkoutScreen({ navigation, route }: Props) {
                 onChangeText={handleCaloriesChange}
                 keyboardType="numeric"
                 placeholder=""
-                placeholderTextColor="#79748D"
+                placeholderTextColor={c.textDisabled}
                 style={styles.fieldInput}
-                selectionColor="#9E64F7"
+                selectionColor={c.brandSecondary}
               />
               <Text style={styles.fieldUnit}>Cal</Text>
             </View>
@@ -274,105 +281,109 @@ export function CyclingWorkoutScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#120E22',
-  },
-  header: {
-    height: 52,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-  },
-  backButton: {
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  titleContainer: {
-    maxWidth: 240,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  saveButton: {
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'flex-end',
-  },
-  saveText: {
-    fontSize: 16,
-    fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontWeight: '600',
-  },
-  saveTextDisabled: {
-    color: '#5C576F',
-  },
-  saveTextActive: {
-    color: '#FFFFFF',
-  },
-  headerDivider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  heroWrapper: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 26,
-    marginBottom: 34,
-  },
-  heroImage: {
-    borderRadius: 16,
-  },
-  formContainer: {
-    paddingHorizontal: 20,
-  },
-  fieldRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 18,
-  },
-  fieldLabel: {
-    color: '#E3DFEF',
-    fontSize: 16,
-    fontFamily: 'PlusJakartaSans_400Regular',
-  },
-  fieldRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-  },
-  fieldInput: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontFamily: 'PlusJakartaSans_400Regular',
-    textAlign: 'right',
-    minWidth: 44,
-    paddingVertical: 0,
-    paddingHorizontal: 0,
-    marginRight: 10,
-  },
-  fieldUnit: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontWeight: '700',
-    minWidth: 36,
-    textAlign: 'right',
-  },
-  rowDivider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
-  },
-});
+function createStyles(theme: ThemeContextValue) {
+  const { colors: c } = theme;
+
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: c.canvasBase,
+    },
+    header: {
+      height: 52,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 16,
+    },
+    backButton: {
+      width: 44,
+      height: 44,
+      justifyContent: 'center',
+      alignItems: 'flex-start',
+    },
+    titleContainer: {
+      maxWidth: 240,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    headerTitle: {
+      color: c.textPrimary,
+      fontSize: 18,
+      fontFamily: 'PlusJakartaSans_700Bold',
+      fontWeight: '700',
+      textAlign: 'center',
+    },
+    saveButton: {
+      width: 44,
+      height: 44,
+      justifyContent: 'center',
+      alignItems: 'flex-end',
+    },
+    saveText: {
+      fontSize: 16,
+      fontFamily: 'PlusJakartaSans_600SemiBold',
+      fontWeight: '600',
+    },
+    saveTextDisabled: {
+      color: c.textDisabled,
+    },
+    saveTextActive: {
+      color: c.brandSecondary,
+    },
+    headerDivider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: c.surfaceBorder,
+    },
+    heroWrapper: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: 26,
+      marginBottom: 34,
+    },
+    heroImage: {
+      borderRadius: 16,
+    },
+    formContainer: {
+      paddingHorizontal: 20,
+    },
+    fieldRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 18,
+    },
+    fieldLabel: {
+      color: c.textPrimary,
+      fontSize: 16,
+      fontFamily: 'PlusJakartaSans_400Regular',
+    },
+    fieldRight: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+    },
+    fieldInput: {
+      color: c.textPrimary,
+      fontSize: 16,
+      fontFamily: 'PlusJakartaSans_400Regular',
+      textAlign: 'right',
+      minWidth: 44,
+      paddingVertical: 0,
+      paddingHorizontal: 0,
+      marginRight: 10,
+    },
+    fieldUnit: {
+      color: c.textPrimary,
+      fontSize: 16,
+      fontFamily: 'PlusJakartaSans_700Bold',
+      fontWeight: '700',
+      minWidth: 36,
+      textAlign: 'right',
+    },
+    rowDivider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: c.surfaceBorder,
+    },
+  });
+}

@@ -41,12 +41,11 @@ export function FiberGuideModal({ visible, onClose, onOpenArticle }: FiberGuideM
     })
   ).current;
 
-  // Bảng màu tối ưu hóa hiển thị chuẩn theo hình thiết kế
-  const cardBg = isDark ? '#1E1A2E' : '#FFFFFF';
-  const titleColor = isDark ? '#FFFFFF' : '#13121B';
-  const bodyColor = isDark ? '#DDD9E8' : '#3F3B4D';
-  const closeIconColor = isDark ? '#FFFFFF' : '#13121B';
-  const dividerColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)';
+  const cardBg = theme.colors.surfaceMid;
+  const titleColor = theme.colors.textPrimary;
+  const bodyColor = theme.colors.textSecondary;
+  const closeIconColor = theme.colors.textPrimary;
+  const dividerColor = theme.colors.surfaceBorder;
 
   const handleArticlePress = () => {
     if (onOpenArticle) {
@@ -169,8 +168,8 @@ export function FiberGuideModal({ visible, onClose, onOpenArticle }: FiberGuideM
               {/* Thông tin bài viết */}
               <View style={styles.articleInfo}>
                 <View style={styles.categoryRow}>
-                  <BookIcon size={14} color="#A59EBD" />
-                  <Text style={styles.categoryText}>kiến thức</Text>
+                  <BookIcon size={14} color={theme.colors.textSecondary} />
+                  <Text style={[styles.categoryText, { color: theme.colors.textSecondary }]}>kiến thức</Text>
                 </View>
                 <Text style={[styles.articleTitle, { color: titleColor }]} numberOfLines={2}>
                   Cách ăn đủ chất xơ để tiêu hoá khỏe mỗi ngày

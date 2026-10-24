@@ -5,6 +5,7 @@ import {
   Image,
   NativeScrollEvent,
   NativeSyntheticEvent,
+  Platform,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -72,7 +73,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const styles = useMemo(() => createStyles(theme, screenWidth), [theme, screenWidth]);
 
   const { state, getSummary, addWater, setSelectedDate } = useNutrition();
-  const { getTotalCaloriesBurnedForDate } = useActivity();
+  const { getTotalCaloriesBurnedForDate, getTotalStepsForDate, state: activityState } = useActivity();
   const { streak } = useGamification();
   const [calendarModalVisible, setCalendarModalVisible] = useState(false);
   const [calorieGoalModalVisible, setCalorieGoalModalVisible] = useState(false);
@@ -89,8 +90,17 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const selectedDate = state.selectedDate || todayKey();
   const isToday = selectedDate === todayKey();
   const caloriesBurned = getTotalCaloriesBurnedForDate(selectedDate);
+  const todaySteps = getTotalStepsForDate(selectedDate);
   const summary = getSummary(selectedDate, caloriesBurned);
   const root = navigation.getParent() as RootNavigation | undefined;
+
+  const isStepConnected =
+    activityState.syncStatus.healthConnect === 'CONNECTED' ||
+    (Platform.OS === 'ios' && activityState.syncStatus.appleHealth === 'CONNECTED');
+
+  const handleStepCardPress = () => {
+    root?.navigate('StepDetail', { openConnectModal: !isStepConnected });
+  };
 
   const weekDays = useMemo(() => getWeekDays(selectedDate), [selectedDate]);
   const dateTitle = useMemo(() => formatHeaderDate(selectedDate), [selectedDate]);
@@ -126,6 +136,8 @@ export function HomeDashboardScreen({ navigation }: Props) {
   // Chiều rộng biểu đồ = màn hình − padding màn hình − padding card (mỗi bên)
   const weightChartWidth = screenWidth - (spacing.lg + spacing.md) * 2;
 
+  const openWorkoutStatistics = () =>
+    root?.navigate('WorkoutStatistics', { openConnectModal: !isStepConnected });
   const openActivityTracker = () => root?.navigate('ActivityTracker', { date: selectedDate });
 
   const handleSelectActivity = (activityLabel: string) => {
@@ -687,29 +699,38 @@ export function HomeDashboardScreen({ navigation }: Props) {
           {/* ── 7. Two Column Cards: Bước chân & Tập luyện ───────────────── */}
           <View style={styles.twoColRow}>
             <AppCard
-              accessibilityLabel="Kết nối Google Health"
-              onPress={() => root?.navigate('HealthSync')}
+              accessibilityLabel="Bước chân"
+              onPress={handleStepCardPress}
               style={styles.subCard}
             >
-              <AppText variant="labelLg">Bước chân</AppText>
-              <View style={styles.healthConnectRow}>
-                <View style={styles.healthIconBox}>
-                  <Image
-                    source={images.healthConnectIcon}
-                    style={styles.healthConnectImage}
-                    resizeMode="contain"
-                    accessibilityLabel="Google Health Connect"
-                  />
-                </View>
-                <AppText variant="bodySm" color={colors.textSecondary} style={styles.healthConnectText}>
-                  Kết nối Google Health để tự động cập nhật
+              <View style={styles.workoutTopRow}>
+                <AppText variant="labelLg">Bước chân</AppText>
+                {isStepConnected && <View style={styles.stepConnectedDot} />}
+              </View>
+
+              <View style={styles.workoutMiddle}>
+                <AppText variant="headlineSm" style={styles.stepCountValue}>
+                  {formatNumber(todaySteps)}
+                  <AppText variant="caption" color={colors.textSecondary}> bước</AppText>
+                </AppText>
+                <View style={styles.workoutDivider} />
+              </View>
+              <View style={styles.workoutBottomRow}>
+                <Image
+                  source={images.healthConnectIcon}
+                  style={styles.healthConnectMiniIcon}
+                  resizeMode="contain"
+                  accessibilityLabel="Google Health Connect"
+                />
+                <AppText variant="caption" color={colors.textSecondary}>
+                  {(todaySteps * 0.00075).toFixed(1)} km
                 </AppText>
               </View>
             </AppCard>
 
             <AppCard
               accessibilityLabel="Ghi nhận tập luyện"
-              onPress={openActivityTracker}
+              onPress={openWorkoutStatistics}
               style={styles.subCard}
             >
               <View style={styles.workoutTopRow}>
@@ -785,7 +806,10 @@ export function HomeDashboardScreen({ navigation }: Props) {
           </AppCard>
 
           {/* ── 9. Cân nặng gần nhất (Weight Tracker) Card ───────────────── */}
-          <AppCard>
+          <AppCard
+            accessibilityLabel="Thống kê cân nặng"
+            onPress={() => root?.navigate('WeightStatistics')}
+          >
             <View style={styles.weightHeaderRow}>
               <Image
                 source={images.trackerWeight}
@@ -807,7 +831,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Cập nhật cân nặng"
-                onPress={() => root?.navigate('BodyMetric')}
+                onPress={() => root?.navigate('RecordWeight')}
                 style={({ pressed }) => [
                   styles.weightUpdatePillBtn,
                   pressed && styles.pressedOpacity,

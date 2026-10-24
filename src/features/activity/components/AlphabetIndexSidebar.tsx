@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useTheme } from '@/theme';
 
 export type AlphabetIndexSidebarProps = {
   alphabet: string[];
@@ -14,6 +15,8 @@ export function AlphabetIndexSidebar({
   hasItemsMap,
   onSelectLetter,
 }: AlphabetIndexSidebarProps) {
+  const { colors: c } = useTheme();
+
   return (
     <View style={styles.alphabetIndex}>
       {alphabet.map((letter) => {
@@ -31,7 +34,8 @@ export function AlphabetIndexSidebar({
             <Text
               style={[
                 styles.alphabetLetterText,
-                isSelected && styles.alphabetLetterActive,
+                { color: c.textSecondary },
+                isSelected && { color: c.brandSecondary, fontWeight: '800', fontSize: 12 },
                 !hasItems && styles.alphabetLetterDisabled,
               ]}
             >
@@ -58,17 +62,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   alphabetLetterText: {
-    color: '#6E6983',
     fontSize: 11,
     fontFamily: 'PlusJakartaSans_600SemiBold',
     fontWeight: '600',
   },
-  alphabetLetterActive: {
-    color: '#B488FC',
-    fontWeight: '800',
-    fontSize: 12,
-  },
   alphabetLetterDisabled: {
-    opacity: 0.5,
+    opacity: 0.4,
   },
 });

@@ -117,8 +117,8 @@ export function BodyMetricScreen() {
                     currentRisk.riskLevel === 'low'
                       ? theme.colors.primarySurface
                       : currentRisk.riskLevel === 'moderate'
-                      ? '#FEF9E7'
-                      : '#FDEDED',
+                      ? `${theme.colors.warning}22`
+                      : `${theme.colors.danger}22`,
                 },
               ]}
             >
@@ -204,8 +204,8 @@ export function BodyMetricScreen() {
                           log.riskLevel === 'low'
                             ? theme.colors.primarySurface
                             : log.riskLevel === 'moderate'
-                            ? '#FEF9E7'
-                            : '#FDEDED',
+                            ? `${theme.colors.warning}22`
+                            : `${theme.colors.danger}22`,
                       },
                     ]}
                   >

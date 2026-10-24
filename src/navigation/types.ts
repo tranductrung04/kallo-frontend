@@ -55,6 +55,10 @@ export type RootStackParamList = {
   ActivityWorkout: { activityId: string; activityName: string; met?: number; date?: string };
   AddActivity: { date?: string } | undefined;
   HealthSync: undefined;
+  StepDetail: { openConnectModal?: boolean } | undefined;
+  WorkoutStatistics: { openConnectModal?: boolean } | undefined;
+  WeightStatistics: undefined;
+  RecordWeight: { date?: string; initialWeight?: number } | undefined;
   BodyMetric: undefined;
   MealPlanOverview: undefined;
   MealPlanWizard: undefined;

@@ -24,6 +24,7 @@ function responseBody(value: RecognitionResponse | { data?: RecognitionResponse 
 
 export function MealScanResultScreen({ navigation, route }: Props) {
   const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const { addFoodLog } = useNutrition();
   const [response, setResponse] = useState<RecognitionResponse>();
   const [error, setError] = useState<string>();
@@ -87,19 +88,79 @@ export function MealScanResultScreen({ navigation, route }: Props) {
 }
 
 function BoundingBoxes({ items, width, height, sourceWidth, sourceHeight }: { items: SelectedItem[]; width: number; height: number; sourceWidth: number; sourceHeight: number }) {
+  const theme = useTheme();
   const scale = Math.min(width / Math.max(1, sourceWidth), height / Math.max(1, sourceHeight));
   const renderedWidth = sourceWidth * scale;
   const renderedHeight = sourceHeight * scale;
   const offsetX = (width - renderedWidth) / 2;
   const offsetY = (height - renderedHeight) / 2;
-  return <Svg pointerEvents="none" style={StyleSheet.absoluteFill} width={width} height={height}>{items.map(({ item, name }, index) => { const box = item.bbox; const x = clamp(box.x); const y = clamp(box.y); const right = clamp(box.x + box.w); const bottom = clamp(box.y + box.h); return <React.Fragment key={`${item.class_id}-${index}`}><Rect x={offsetX + x * renderedWidth} y={offsetY + y * renderedHeight} width={Math.max(0, right - x) * renderedWidth} height={Math.max(0, bottom - y) * renderedHeight} fill="transparent" stroke="#2ECC71" strokeWidth={3} /><SvgText x={offsetX + x * renderedWidth + 4} y={offsetY + y * renderedHeight + 18} fill="#FFFFFF" fontSize="13" stroke="#173322" strokeWidth="0.5">{`${name} ${Math.round(item.confidence * 100)}%`}</SvgText></React.Fragment>; })}</Svg>;
+  return (
+    <Svg pointerEvents="none" style={StyleSheet.absoluteFill} width={width} height={height}>
+      {items.map(({ item, name }, index) => {
+        const box = item.bbox;
+        const x = clamp(box.x);
+        const y = clamp(box.y);
+        const right = clamp(box.x + box.w);
+        const bottom = clamp(box.y + box.h);
+        return (
+          <React.Fragment key={`${item.class_id}-${index}`}>
+            <Rect
+              x={offsetX + x * renderedWidth}
+              y={offsetY + y * renderedHeight}
+              width={Math.max(0, right - x) * renderedWidth}
+              height={Math.max(0, bottom - y) * renderedHeight}
+              fill="transparent"
+              stroke={theme.colors.quickScanner}
+              strokeWidth={3}
+            />
+            <SvgText
+              x={offsetX + x * renderedWidth + 4}
+              y={offsetY + y * renderedHeight + 18}
+              fill={theme.colors.onBrand}
+              fontSize="13"
+              stroke={theme.colors.canvasBase}
+              strokeWidth="0.5"
+            >
+              {`${name} ${Math.round(item.confidence * 100)}%`}
+            </SvgText>
+          </React.Fragment>
+        );
+      })}
+    </Svg>
+  );
 }
 
 function RecognitionCard({ item, value, onToggle, onFactorChange, onRename }: { item: RecognitionItem; value?: SelectedItem; onToggle: () => void; onFactorChange: (factor: number) => void; onRename: (name: string) => void }) {
   const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const factor = value?.factor ?? 1;
   const nutrition = useMemo(() => ({ calories: item.nutrition.calories * factor, protein: item.nutrition.protein_g * factor, carbs: item.nutrition.carbs_g * factor, fat: item.nutrition.fat_g * factor }), [factor, item.nutrition]);
   return <AppCard style={[styles.resultCard, !value && styles.unselected]}><View style={styles.cardHeader}><Pressable onPress={onToggle} accessibilityRole="checkbox" accessibilityState={{ checked: Boolean(value) }} style={styles.check}><AppText>{value ? '☑' : '□'}</AppText></Pressable><View style={styles.flex}><AppText variant="bodyMedium">{value?.name ?? item.class_name}</AppText><AppText variant="caption" color={theme.colors.textMuted}>{Math.round(item.confidence * 100)}% tin cậy · Ước lượng {formatNumber(item.portion.grams * factor)} g ({item.portion.unit})</AppText></View><AppButton label="Đổi tên" variant="ghost" onPress={() => onRename(value?.name === item.class_name ? `${item.class_name} (đã sửa)` : item.class_name)} /></View><View style={styles.factorRow}>{[0.5, 1, 1.5, 2].map((option) => <Pressable key={option} onPress={() => onFactorChange(clampFactor(option))} accessibilityRole="radio" accessibilityState={{ selected: factor === option }} style={[styles.factor, { borderColor: factor === option ? theme.colors.primary : theme.colors.border }]}><AppText>{option}×</AppText></Pressable>)}</View>{value ? <AppText variant="caption" color={theme.colors.textMuted}>{formatNumber(nutrition.calories)} kcal · P {formatNumber(nutrition.protein, 1)} g · C {formatNumber(nutrition.carbs, 1)} g · F {formatNumber(nutrition.fat, 1)} g</AppText> : null}</AppCard>;
 }
 
-const styles = StyleSheet.create({ safe: { flex: 1 }, content: { padding: 16, gap: 14, paddingBottom: 36 }, titleRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 }, flex: { flex: 1, gap: 4 }, preview: { height: 300, backgroundColor: '#101713', borderRadius: 16, overflow: 'hidden', position: 'relative' }, previewImage: { width: '100%', height: '100%' }, error: { gap: 10 }, empty: { alignItems: 'center', gap: 10 }, emptyImage: { width: '100%', height: 130 }, resultCard: { gap: 10 }, unselected: { opacity: 0.65 }, cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 }, check: { minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }, factorRow: { flexDirection: 'row', gap: 8 }, factor: { minHeight: 44, minWidth: 52, borderWidth: 1, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }, meals: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 }, meal: { minHeight: 44, borderWidth: 1, borderRadius: 22, paddingHorizontal: 14, justifyContent: 'center' }, feedback: { gap: 9 }, feedbackImage: { width: '100%', height: 120 }, checkbox: { minHeight: 44, justifyContent: 'center' } });
+function createStyles(theme: any) {
+  const c = theme.colors;
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: c.canvasBase },
+    content: { padding: 16, gap: 14, paddingBottom: 36 },
+    titleRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
+    flex: { flex: 1, gap: 4 },
+    preview: { height: 300, backgroundColor: c.surfaceMid, borderRadius: 16, overflow: 'hidden', position: 'relative' },
+    previewImage: { width: '100%', height: '100%' },
+    error: { gap: 10 },
+    empty: { alignItems: 'center', gap: 10 },
+    emptyImage: { width: '100%', height: 130 },
+    resultCard: { gap: 10 },
+    unselected: { opacity: 0.65 },
+    cardHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    check: { minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
+    factorRow: { flexDirection: 'row', gap: 8 },
+    factor: { minHeight: 44, minWidth: 52, borderWidth: 1, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+    meals: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    meal: { minHeight: 44, borderWidth: 1, borderRadius: 22, paddingHorizontal: 14, justifyContent: 'center' },
+    feedback: { gap: 9 },
+    feedbackImage: { width: '100%', height: 120 },
+    checkbox: { minHeight: 44, justifyContent: 'center' }
+  });
+}
+

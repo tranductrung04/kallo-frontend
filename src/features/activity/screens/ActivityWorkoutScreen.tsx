@@ -18,6 +18,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '@/navigation/types';
 import { ChevronLeftIcon, ChevronRightIcon } from '@/components/icons';
 import { images } from '@/assets/images';
+import { useTheme, type ThemeContextValue } from '@/theme';
 import { useActivity } from '../ActivityProvider';
 import { calculateCaloriesBurned } from '../utils';
 import { useNutrition } from '@/features/nutrition/NutritionProvider';
@@ -60,10 +61,15 @@ function getSportImage(activityId: string, activityName: string): ImageSourcePro
 }
 
 export function ActivityWorkoutScreen({ navigation, route }: Props) {
+  const theme = useTheme();
+  const { colors: c } = theme;
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
   const { addActivityLog } = useActivity();
   const { state: nutritionState } = useNutrition();
+
 
   const { activityId, activityName, met: initialMet, date } = route.params;
   const selectedDate = date || nutritionState.selectedDate || todayKey();
@@ -191,7 +197,10 @@ export function ActivityWorkoutScreen({ navigation, route }: Props) {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={[styles.container, { paddingTop: Math.max(8, insets.top) }]}>
-        <StatusBar barStyle="light-content" backgroundColor="#120E22" />
+        <StatusBar
+          barStyle={theme.scheme === 'dark' ? 'light-content' : 'dark-content'}
+          backgroundColor={c.canvasBase}
+        />
 
         {/* ── Header ────────────────────────────────────────── */}
         <View style={styles.header}>
@@ -202,7 +211,7 @@ export function ActivityWorkoutScreen({ navigation, route }: Props) {
             accessibilityRole="button"
             accessibilityLabel="Quay lại"
           >
-            <ChevronLeftIcon size={22} color="#FFFFFF" />
+            <ChevronLeftIcon size={22} color={c.textPrimary} />
           </TouchableOpacity>
 
           <View style={styles.titleContainer}>
@@ -253,7 +262,7 @@ export function ActivityWorkoutScreen({ navigation, route }: Props) {
               <Text style={styles.fieldValueText} numberOfLines={1}>
                 {selectedIntensity.label}
               </Text>
-              <ChevronRightIcon size={18} color="#C4C0D4" />
+              <ChevronRightIcon size={18} color={c.textSecondary} />
             </View>
           </TouchableOpacity>
           <View style={styles.rowDivider} />
@@ -274,9 +283,9 @@ export function ActivityWorkoutScreen({ navigation, route }: Props) {
                 onBlur={handleDurationBlur}
                 keyboardType="numeric"
                 placeholder="0"
-                placeholderTextColor="#79748D"
+                placeholderTextColor={c.textDisabled}
                 style={styles.fieldInput}
-                selectionColor="#9E64F7"
+                selectionColor={c.brandSecondary}
               />
               <Text style={styles.fieldUnit}>Phút</Text>
             </View>
@@ -297,9 +306,9 @@ export function ActivityWorkoutScreen({ navigation, route }: Props) {
                 onChangeText={handleCaloriesChange}
                 keyboardType="numeric"
                 placeholder=""
-                placeholderTextColor="#79748D"
+                placeholderTextColor={c.textDisabled}
                 style={styles.fieldInput}
-                selectionColor="#9E64F7"
+                selectionColor={c.brandSecondary}
               />
               <Text style={styles.fieldUnit}>Cal</Text>
             </View>
@@ -371,190 +380,194 @@ export function ActivityWorkoutScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#120E22',
-  },
-  header: {
-    height: 52,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-  },
-  backButton: {
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  titleContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 8,
-  },
-  headerTitle: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  saveButton: {
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'flex-end',
-  },
-  saveText: {
-    fontSize: 16,
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontWeight: '700',
-  },
-  saveTextActive: {
-    color: '#9E64F7',
-  },
-  saveTextDisabled: {
-    color: '#4A4260',
-  },
-  headerDivider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  heroWrapper: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 24,
-    marginBottom: 28,
-  },
-  heroImage: {
-    borderRadius: 16,
-    backgroundColor: '#1C1635',
-  },
-  formContainer: {
-    paddingHorizontal: 20,
-  },
-  fieldRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 18,
-  },
-  fieldLabel: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontFamily: 'PlusJakartaSans_500Medium',
-  },
-  fieldRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    maxWidth: '65%',
-    justifyContent: 'flex-end',
-  },
-  fieldValueText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontFamily: 'PlusJakartaSans_500Medium',
-    marginRight: 4,
-  },
-  fieldInput: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontWeight: '600',
-    textAlign: 'right',
-    minWidth: 40,
-    paddingVertical: 0,
-    paddingHorizontal: 4,
-  },
-  fieldUnit: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontFamily: 'PlusJakartaSans_500Medium',
-    minWidth: 32,
-  },
-  rowDivider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.65)',
-    justifyContent: 'flex-end',
-  },
-  bottomSheet: {
-    backgroundColor: '#1E1838',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingTop: 12,
-    paddingHorizontal: 20,
-  },
-  sheetHandle: {
-    width: 38,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    alignSelf: 'center',
-    marginBottom: 16,
-  },
-  sheetTitle: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontWeight: '700',
-    marginBottom: 14,
-    textAlign: 'center',
-  },
-  intensityOptionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 14,
-    paddingHorizontal: 14,
-    borderRadius: 14,
-    marginBottom: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
-  },
-  intensityOptionRowSelected: {
-    backgroundColor: 'rgba(158, 100, 247, 0.15)',
-    borderWidth: 1,
-    borderColor: '#9E64F7',
-  },
-  intensityOptionInfo: {
-    flex: 1,
-  },
-  intensityOptionText: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontFamily: 'PlusJakartaSans_600SemiBold',
-  },
-  intensityOptionTextSelected: {
-    color: '#B488FC',
-    fontWeight: '700',
-  },
-  intensityMetText: {
-    color: '#8A82A5',
-    fontSize: 13,
-    fontFamily: 'PlusJakartaSans_400Regular',
-    marginTop: 2,
-  },
-  checkCircle: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: '#9E64F7',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 12,
-  },
-  checkInner: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#9E64F7',
-  },
-});
+function createStyles(theme: ThemeContextValue) {
+  const { colors: c } = theme;
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: c.canvasBase,
+    },
+    header: {
+      height: 52,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 16,
+    },
+    backButton: {
+      width: 44,
+      height: 44,
+      justifyContent: 'center',
+      alignItems: 'flex-start',
+    },
+    titleContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 8,
+    },
+    headerTitle: {
+      color: c.textPrimary,
+      fontSize: 18,
+      fontFamily: 'PlusJakartaSans_700Bold',
+      fontWeight: '700',
+      textAlign: 'center',
+    },
+    saveButton: {
+      width: 44,
+      height: 44,
+      justifyContent: 'center',
+      alignItems: 'flex-end',
+    },
+    saveText: {
+      fontSize: 16,
+      fontFamily: 'PlusJakartaSans_700Bold',
+      fontWeight: '700',
+    },
+    saveTextActive: {
+      color: c.brandSecondary,
+    },
+    saveTextDisabled: {
+      color: c.textDisabled,
+    },
+    headerDivider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: c.surfaceBorder,
+    },
+    heroWrapper: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: 24,
+      marginBottom: 28,
+    },
+    heroImage: {
+      borderRadius: 16,
+      backgroundColor: c.surfaceHigh,
+    },
+    formContainer: {
+      paddingHorizontal: 20,
+    },
+    fieldRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 18,
+    },
+    fieldLabel: {
+      color: c.textSecondary,
+      fontSize: 16,
+      fontFamily: 'PlusJakartaSans_500Medium',
+    },
+    fieldRight: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      maxWidth: '65%',
+      justifyContent: 'flex-end',
+    },
+    fieldValueText: {
+      color: c.textPrimary,
+      fontSize: 16,
+      fontFamily: 'PlusJakartaSans_500Medium',
+      marginRight: 4,
+    },
+    fieldInput: {
+      color: c.textPrimary,
+      fontSize: 16,
+      fontFamily: 'PlusJakartaSans_600SemiBold',
+      fontWeight: '600',
+      textAlign: 'right',
+      minWidth: 40,
+      paddingVertical: 0,
+      paddingHorizontal: 4,
+    },
+    fieldUnit: {
+      color: c.textPrimary,
+      fontSize: 16,
+      fontFamily: 'PlusJakartaSans_500Medium',
+      minWidth: 32,
+    },
+    rowDivider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: c.surfaceBorder,
+    },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.65)',
+      justifyContent: 'flex-end',
+    },
+    bottomSheet: {
+      backgroundColor: c.surfaceMid,
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      paddingTop: 12,
+      paddingHorizontal: 20,
+    },
+    sheetHandle: {
+      width: 38,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: c.surfaceBorder,
+      alignSelf: 'center',
+      marginBottom: 16,
+    },
+    sheetTitle: {
+      color: c.textPrimary,
+      fontSize: 18,
+      fontFamily: 'PlusJakartaSans_700Bold',
+      fontWeight: '700',
+      marginBottom: 14,
+      textAlign: 'center',
+    },
+    intensityOptionRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 14,
+      paddingHorizontal: 14,
+      borderRadius: 14,
+      marginBottom: 8,
+      backgroundColor: c.surfaceHigh,
+    },
+    intensityOptionRowSelected: {
+      backgroundColor: c.surfaceHigh,
+      borderWidth: 1,
+      borderColor: c.brandSecondary,
+    },
+    intensityOptionInfo: {
+      flex: 1,
+    },
+    intensityOptionText: {
+      color: c.textPrimary,
+      fontSize: 15,
+      fontFamily: 'PlusJakartaSans_600SemiBold',
+    },
+    intensityOptionTextSelected: {
+      color: c.brandSecondary,
+      fontWeight: '700',
+    },
+    intensityMetText: {
+      color: c.textSecondary,
+      fontSize: 13,
+      fontFamily: 'PlusJakartaSans_400Regular',
+      marginTop: 2,
+    },
+    checkCircle: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      borderWidth: 2,
+      borderColor: c.brandSecondary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginLeft: 12,
+    },
+    checkInner: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: c.brandSecondary,
+    },
+  });
+}
+

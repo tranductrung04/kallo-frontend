@@ -14,6 +14,7 @@ import Svg, { Path } from 'react-native-svg';
 
 import type { Food, FoodLog, MealSlot, NutritionSummary } from '../../types';
 import { formatNumber, todayKey } from '../../utils';
+import { useTheme } from '@/theme';
 import {
   getDateTitle,
   getFullDateHeaderTitle,
@@ -59,6 +60,9 @@ export function DiaryHeader({
   onPrevDay,
   onNextDay,
 }: DiaryHeaderProps) {
+  const theme = useTheme();
+  const { colors: c } = theme;
+
   return (
     <View style={styles.headerBar}>
       {/* Left: Hamburger Menu Button */}
@@ -77,7 +81,7 @@ export function DiaryHeader({
           style={styles.chevronButton}
           accessibilityLabel="Ngày trước"
         >
-          <ChevronLeftIcon size={18} color="#C4C0D4" />
+          <ChevronLeftIcon size={18} color={c.textSecondary} />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -93,7 +97,7 @@ export function DiaryHeader({
           style={styles.chevronButton}
           accessibilityLabel="Ngày tiếp theo"
         >
-          <ChevronRightIcon size={18} color="#C4C0D4" />
+          <ChevronRightIcon size={18} color={c.textSecondary} />
         </TouchableOpacity>
       </View>
 
@@ -112,6 +116,8 @@ export type MacroStripProps = {
 };
 
 export function MacroStrip({ summary, page, onPageChange, onPressReport }: MacroStripProps) {
+  const theme = useTheme();
+  const { colors: c } = theme;
   const { width: screenWidth } = useWindowDimensions();
   const scrollRef = useRef<ScrollView>(null);
 
@@ -152,7 +158,7 @@ export function MacroStrip({ summary, page, onPageChange, onPressReport }: Macro
               onPress={() => onPressReport?.('calories')}
               style={styles.macroItem}
             >
-              <FlameIcon size={15} color="#9E64F7" />
+              <FlameIcon size={15} color={c.brandPrimary} />
               <Text style={styles.macroText}>
                 {formatNumber(summary.calories)} / {formatNumber(summary.caloriesGoal || 1794)}
               </Text>
@@ -164,7 +170,7 @@ export function MacroStrip({ summary, page, onPageChange, onPressReport }: Macro
               onPress={() => onPressReport?.('protein')}
               style={styles.macroItem}
             >
-              <LightningIcon size={14} color="#FF6B6B" />
+              <LightningIcon size={14} color={c.macroProtein} />
               <Text style={styles.macroText}>
                 {formatNumber(Math.round(summary.protein))} / {formatNumber(summary.proteinGoal || 90)}
               </Text>
@@ -176,7 +182,7 @@ export function MacroStrip({ summary, page, onPageChange, onPressReport }: Macro
               onPress={() => onPressReport?.('carbs')}
               style={styles.macroItem}
             >
-              <WheatIcon size={15} color="#3B82F6" />
+              <WheatIcon size={15} color={c.macroCarbs} />
               <Text style={styles.macroText}>
                 {formatNumber(Math.round(summary.carbs))} / {formatNumber(summary.carbsGoal || 224)}
               </Text>
@@ -188,7 +194,7 @@ export function MacroStrip({ summary, page, onPageChange, onPressReport }: Macro
               onPress={() => onPressReport?.('fat')}
               style={styles.macroItem}
             >
-              <DropletIcon size={14} color="#FBBF24" />
+              <DropletIcon size={14} color={c.macroFats} />
               <Text style={styles.macroText}>
                 {formatNumber(Math.round(summary.fat))} / {formatNumber(summary.fatGoal || 60)}
               </Text>
@@ -206,7 +212,7 @@ export function MacroStrip({ summary, page, onPageChange, onPressReport }: Macro
                 style={[
                   styles.progressFill,
                   {
-                    backgroundColor: '#9E64F7',
+                    backgroundColor: c.brandPrimary,
                     width: `${Math.min(100, Math.max(0, (summary.calories / (summary.caloriesGoal || 1794)) * 100))}%`,
                   },
                 ]}
@@ -217,7 +223,7 @@ export function MacroStrip({ summary, page, onPageChange, onPressReport }: Macro
                 style={[
                   styles.progressFill,
                   {
-                    backgroundColor: '#FF6B6B',
+                    backgroundColor: c.macroProtein,
                     width: `${Math.min(100, Math.max(0, (summary.protein / (summary.proteinGoal || 90)) * 100))}%`,
                   },
                 ]}
@@ -228,7 +234,7 @@ export function MacroStrip({ summary, page, onPageChange, onPressReport }: Macro
                 style={[
                   styles.progressFill,
                   {
-                    backgroundColor: '#3B82F6',
+                    backgroundColor: c.macroCarbs,
                     width: `${Math.min(100, Math.max(0, (summary.carbs / (summary.carbsGoal || 224)) * 100))}%`,
                   },
                 ]}
@@ -239,7 +245,7 @@ export function MacroStrip({ summary, page, onPageChange, onPressReport }: Macro
                 style={[
                   styles.progressFill,
                   {
-                    backgroundColor: '#FBBF24',
+                    backgroundColor: c.macroFats,
                     width: `${Math.min(100, Math.max(0, (summary.fat / (summary.fatGoal || 60)) * 100))}%`,
                   },
                 ]}
@@ -257,7 +263,7 @@ export function MacroStrip({ summary, page, onPageChange, onPressReport }: Macro
               onPress={() => onPressReport?.('calories')}
               style={styles.macroItem}
             >
-              <FlameIcon size={15} color="#9E64F7" />
+              <FlameIcon size={15} color={c.brandPrimary} />
               <Text style={styles.macroText}>
                 {formatNumber(summary.calories)} / {formatNumber(summary.caloriesGoal || 1952)}
               </Text>
@@ -269,7 +275,7 @@ export function MacroStrip({ summary, page, onPageChange, onPressReport }: Macro
               onPress={() => onPressReport?.('salt')}
               style={styles.macroItem}
             >
-              <SaltIcon size={15} color="#FDE68A" capColor="#FFFFFF" />
+              <SaltIcon size={15} color={c.macroSalt} capColor={c.onBrand} />
               <Text style={styles.macroText}>
                 {formatNumber(saltCurrent)} / {formatNumber(saltGoal)}
               </Text>
@@ -281,7 +287,7 @@ export function MacroStrip({ summary, page, onPageChange, onPressReport }: Macro
               onPress={() => onPressReport?.('sugar')}
               style={styles.macroItem}
             >
-              <SugarIcon size={15} color="#38BDF8" />
+              <SugarIcon size={15} color={c.macroSugar} />
               <Text style={styles.macroText}>
                 {formatNumber(sugarCurrent)} / {formatNumber(sugarGoal)}
               </Text>
@@ -295,9 +301,9 @@ export function MacroStrip({ summary, page, onPageChange, onPressReport }: Macro
             >
               <FiberIcon
                 size={15}
-                color="#4ADE80"
-                stalkColor="#86EFAC"
-                creaseColor="#15803D"
+                color={c.macroFiber}
+                stalkColor={c.macroFiberSoft}
+                creaseColor={c.macroFiberStrong}
               />
               <Text style={styles.macroText}>
                 {formatNumber(fiberCurrent)} / {formatNumber(fiberGoal)}
@@ -316,7 +322,7 @@ export function MacroStrip({ summary, page, onPageChange, onPressReport }: Macro
                 style={[
                   styles.progressFill,
                   {
-                    backgroundColor: '#9E64F7',
+                    backgroundColor: c.brandPrimary,
                     width: `${Math.min(100, Math.max(0, (summary.calories / (summary.caloriesGoal || 1952)) * 100))}%`,
                   },
                 ]}
@@ -327,7 +333,7 @@ export function MacroStrip({ summary, page, onPageChange, onPressReport }: Macro
                 style={[
                   styles.progressFill,
                   {
-                    backgroundColor: '#FDE68A',
+                    backgroundColor: c.macroSalt,
                     width: `${Math.min(100, Math.max(0, (saltCurrent / saltGoal) * 100))}%`,
                   },
                 ]}
@@ -338,7 +344,7 @@ export function MacroStrip({ summary, page, onPageChange, onPressReport }: Macro
                 style={[
                   styles.progressFill,
                   {
-                    backgroundColor: '#38BDF8',
+                    backgroundColor: c.macroSugar,
                     width: `${Math.min(100, Math.max(0, (sugarCurrent / sugarGoal) * 100))}%`,
                   },
                 ]}
@@ -349,7 +355,7 @@ export function MacroStrip({ summary, page, onPageChange, onPressReport }: Macro
                 style={[
                   styles.progressFill,
                   {
-                    backgroundColor: '#4ADE80',
+                    backgroundColor: c.macroFiber,
                     width: `${Math.min(100, Math.max(0, (fiberCurrent / fiberGoal) * 100))}%`,
                   },
                 ]}
@@ -358,6 +364,7 @@ export function MacroStrip({ summary, page, onPageChange, onPressReport }: Macro
           </TouchableOpacity>
         </View>
       </ScrollView>
+
 
       {/* Carousel Pagination Dots */}
       <View style={styles.carouselDotsContainer}>
@@ -415,6 +422,8 @@ export function TimelineHourRow({
   onPressLog,
   onDeleteLog,
 }: TimelineHourRowProps) {
+  const theme = useTheme();
+  const { colors: c } = theme;
   const hasLogs = logs.length > 0;
   const totalCaloriesInHour = logs.reduce((sum, log) => {
     const nut = getLogNutrition(log, foods);
@@ -430,7 +439,6 @@ export function TimelineHourRow({
             {hour}
           </Text>
         </View>
-
 
         <View style={styles.connectingLine} />
 
@@ -448,7 +456,7 @@ export function TimelineHourRow({
           style={styles.plusButton}
           accessibilityLabel={`Thêm món vào lúc ${hour}`}
         >
-          <PlusIcon size={14} color="#C4C0D4" strokeWidth={2.4} />
+          <PlusIcon size={14} color={c.textSecondary} strokeWidth={2.4} />
         </TouchableOpacity>
       </View>
 
@@ -640,6 +648,9 @@ function ToggleSwitch({
   onValueChange: (val: boolean) => void;
   accessibilityLabel?: string;
 }) {
+  const theme = useTheme();
+  const { colors: c } = theme;
+
   return (
     <TouchableOpacity
       activeOpacity={0.8}
@@ -649,7 +660,7 @@ function ToggleSwitch({
       accessibilityLabel={accessibilityLabel}
       style={[
         styles.toggleSwitchContainer,
-        { backgroundColor: value ? '#9E64F7' : '#38314A' },
+        { backgroundColor: value ? c.brandPrimary : c.surfaceBorder },
       ]}
     >
       <View
@@ -691,6 +702,9 @@ export function DiaryMenuModal({
   onToggleHideEmptyHours,
   onCustomizeHours,
 }: DiaryMenuModalProps) {
+  const theme = useTheme();
+  const { colors: c } = theme;
+
   return (
     <Modal
       visible={visible}
@@ -744,7 +758,7 @@ export function DiaryMenuModal({
             <Text style={styles.settingOptionLabel}>
               Tuỳ chỉnh khung giờ hiển thị
             </Text>
-            <ChevronRightIcon size={18} color="#C4C0D4" />
+            <ChevronRightIcon size={18} color={c.textSecondary} />
           </TouchableOpacity>
 
           {/* Divider */}
