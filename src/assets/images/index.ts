@@ -144,6 +144,7 @@ const imageFiles = {
   fbGroupArtwork: require('./community/fb_group_artwork.webp'),
   congDongHoTro: require('./community/cong_dong_ho_tro.png'),
   mealPlanCardSample: require('./meal-plan/card_sample.png'),
+  mascotAvatar: require('./onboarding/avatar_illustration.webp'),
 } as const;
 export const images = imageFiles;
 export type ImageKey = keyof typeof imageFiles;
