@@ -1,24 +1,27 @@
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { images } from '@/assets/images';
+import { useTheme } from '@/theme';
 
 export type AutoTrackBannerProps = {
   onPress: () => void;
 };
 
 export function AutoTrackBanner({ onPress }: AutoTrackBannerProps) {
+  const { colors: c } = useTheme();
+
   return (
     <View style={styles.autoTrackSection}>
-      <Text style={styles.sectionHeaderTitle}>THEO DÕI TỰ ĐỘNG</Text>
+      <Text style={[styles.sectionHeaderTitle, { color: c.textSecondary }]}>THEO DÕI TỰ ĐỘNG</Text>
 
       <TouchableOpacity
         activeOpacity={0.85}
         onPress={onPress}
-        style={styles.healthBannerCard}
+        style={[styles.healthBannerCard, { backgroundColor: c.surfaceHigh, borderColor: c.surfaceBorder }]}
         accessibilityRole="button"
         accessibilityLabel="Kết nối Google Health"
       >
-        <View style={styles.healthIconContainer}>
+        <View style={[styles.healthIconContainer, { backgroundColor: c.surfaceMid }]}>
           <Image
             source={images.healthConnectIcon}
             style={styles.healthIconImg}
@@ -26,10 +29,10 @@ export function AutoTrackBanner({ onPress }: AutoTrackBannerProps) {
           />
         </View>
         <View style={styles.healthTextCol}>
-          <Text style={styles.healthCardTitle}>
+          <Text style={[styles.healthCardTitle, { color: c.textPrimary }]}>
             Kết nối Google Health để Wao tự theo dõi calo hoạt động cho bạn.
           </Text>
-          <Text style={styles.healthConnectLink}>Kết nối</Text>
+          <Text style={[styles.healthConnectLink, { color: c.brandSecondary }]}>Kết nối</Text>
         </View>
       </TouchableOpacity>
     </View>
@@ -41,7 +44,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionHeaderTitle: {
-    color: '#8E8A9E',
     fontSize: 13,
     fontFamily: 'PlusJakartaSans_700Bold',
     fontWeight: '700',
@@ -51,9 +53,9 @@ const styles = StyleSheet.create({
   healthBannerCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#2A1F56',
     borderRadius: 16,
     padding: 16,
+    borderWidth: 1,
   },
   healthIconContainer: {
     width: 54,
@@ -72,13 +74,11 @@ const styles = StyleSheet.create({
     marginLeft: 14,
   },
   healthCardTitle: {
-    color: '#FFFFFF',
     fontSize: 14,
     fontFamily: 'PlusJakartaSans_500Medium',
     lineHeight: 20,
   },
   healthConnectLink: {
-    color: '#B488FC',
     fontSize: 14,
     fontFamily: 'PlusJakartaSans_700Bold',
     fontWeight: '700',

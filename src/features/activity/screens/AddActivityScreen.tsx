@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '@/navigation/types';
 import { ChevronLeftIcon, PlusIcon, SearchIcon } from '@/components/icons';
+import { useTheme, type ThemeContextValue } from '@/theme';
 import { useActivity } from '../ActivityProvider';
 import { useNutrition } from '@/features/nutrition/NutritionProvider';
 import { todayKey } from '@/features/nutrition/utils';
@@ -34,11 +35,16 @@ export { EXTENDED_ACTIVITIES, ActivityItemMeta, ActivitySection };
 type Props = NativeStackScreenProps<RootStackParamList, 'AddActivity'>;
 
 export function AddActivityScreen({ navigation, route }: Props) {
+  const theme = useTheme();
+  const { colors: c } = theme;
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   const insets = useSafeAreaInsets();
   const { addActivityLog } = useActivity();
   const { state: nutritionState } = useNutrition();
 
   const selectedDate = route.params?.date || nutritionState.selectedDate || todayKey();
+
 
   const userWeight =
     nutritionState.weightLogs.length > 0
@@ -168,7 +174,10 @@ export function AddActivityScreen({ navigation, route }: Props) {
 
   return (
     <View style={[styles.container, { paddingTop: Math.max(8, insets.top) }]}>
-      <StatusBar barStyle="light-content" backgroundColor="#120E22" />
+      <StatusBar
+        barStyle={theme.scheme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={c.canvasBase}
+      />
 
       {/* ── Header ────────────────────────────────────────── */}
       <View style={styles.header}>
@@ -179,7 +188,7 @@ export function AddActivityScreen({ navigation, route }: Props) {
           accessibilityRole="button"
           accessibilityLabel="Quay lại"
         >
-          <ChevronLeftIcon size={22} color="#FFFFFF" />
+          <ChevronLeftIcon size={22} color={c.textPrimary} />
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Thêm hoạt động</Text>
@@ -191,7 +200,7 @@ export function AddActivityScreen({ navigation, route }: Props) {
           accessibilityRole="button"
           accessibilityLabel="Tạo mới hoạt động"
         >
-          <PlusIcon size={18} color="#FFFFFF" strokeWidth={2.5} />
+          <PlusIcon size={18} color={c.textPrimary} strokeWidth={2.5} />
         </TouchableOpacity>
       </View>
 
@@ -201,14 +210,14 @@ export function AddActivityScreen({ navigation, route }: Props) {
       <View style={styles.fixedTopSection}>
         {/* Search Bar */}
         <View style={styles.searchBar}>
-          <SearchIcon size={18} color="#7A7490" strokeWidth={2.4} />
+          <SearchIcon size={18} color={c.textSecondary} strokeWidth={2.4} />
           <TextInput
             value={searchQuery}
             onChangeText={setSearchQuery}
             placeholder="Tìm kiếm hoạt động"
-            placeholderTextColor="#68627D"
+            placeholderTextColor={c.textDisabled}
             style={styles.searchInput}
-            selectionColor="#9E64F7"
+            selectionColor={c.brandSecondary}
           />
         </View>
 
@@ -278,82 +287,86 @@ export function AddActivityScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#120E22',
-  },
-  header: {
-    height: 52,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-  },
-  backButton: {
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  headerTitle: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  plusButton: {
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'flex-end',
-  },
-  headerDivider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  fixedTopSection: {
-    paddingHorizontal: 18,
-    paddingTop: 14,
-  },
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#201A38',
-    borderRadius: 24,
-    height: 48,
-    paddingHorizontal: 16,
-    marginBottom: 16,
-  },
-  searchInput: {
-    flex: 1,
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontFamily: 'PlusJakartaSans_400Regular',
-    marginLeft: 10,
-    paddingVertical: 0,
-  },
-  contentRow: {
-    flex: 1,
-    flexDirection: 'row',
-  },
-  sectionList: {
-    flex: 1,
-  },
-  sectionListContent: {
-    paddingLeft: 18,
-    paddingRight: 6,
-  },
-  letterHeaderWrapper: {
-    backgroundColor: '#120E22',
-    paddingTop: 10,
-    paddingBottom: 6,
-  },
-  letterHeader: {
-    color: '#9E9AA7',
-    fontSize: 18,
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontWeight: '700',
-  },
-});
+function createStyles(theme: ThemeContextValue) {
+  const { colors: c } = theme;
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: c.canvasBase,
+    },
+    header: {
+      height: 52,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 16,
+    },
+    backButton: {
+      width: 44,
+      height: 44,
+      justifyContent: 'center',
+      alignItems: 'flex-start',
+    },
+    headerTitle: {
+      color: c.textPrimary,
+      fontSize: 18,
+      fontFamily: 'PlusJakartaSans_700Bold',
+      fontWeight: '700',
+      textAlign: 'center',
+    },
+    plusButton: {
+      width: 44,
+      height: 44,
+      justifyContent: 'center',
+      alignItems: 'flex-end',
+    },
+    headerDivider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: c.surfaceBorder,
+    },
+    fixedTopSection: {
+      paddingHorizontal: 18,
+      paddingTop: 14,
+    },
+    searchBar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: c.surfaceMid,
+      borderRadius: 24,
+      height: 48,
+      paddingHorizontal: 16,
+      marginBottom: 16,
+    },
+    searchInput: {
+      flex: 1,
+      color: c.textPrimary,
+      fontSize: 15,
+      fontFamily: 'PlusJakartaSans_400Regular',
+      marginLeft: 10,
+      paddingVertical: 0,
+    },
+    contentRow: {
+      flex: 1,
+      flexDirection: 'row',
+    },
+    sectionList: {
+      flex: 1,
+    },
+    sectionListContent: {
+      paddingLeft: 18,
+      paddingRight: 6,
+    },
+    letterHeaderWrapper: {
+      backgroundColor: c.canvasBase,
+      paddingTop: 10,
+      paddingBottom: 6,
+    },
+    letterHeader: {
+      color: c.textSecondary,
+      fontSize: 18,
+      fontFamily: 'PlusJakartaSans_700Bold',
+      fontWeight: '700',
+    },
+  });
+}
+

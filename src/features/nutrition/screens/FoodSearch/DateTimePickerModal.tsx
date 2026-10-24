@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CloseXIcon } from '@/components/icons';
+import { useTheme } from '@/theme';
 import { offsetDate, todayKey } from '../../utils';
 import { styles } from './FoodSearchScreen.styles';
 
@@ -44,6 +45,7 @@ export function DateTimePickerModal({
   onClose,
   onConfirm,
 }: DateTimePickerModalProps) {
+  const theme = useTheme();
   const insets = useSafeAreaInsets();
   const [tempDate, setTempDate] = useState(initialDate);
   const [tempHour, setTempHour] = useState(initialHour.slice(0, 2) || '11');
@@ -160,7 +162,7 @@ export function DateTimePickerModal({
               accessibilityLabel="Đóng"
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             >
-              <CloseXIcon size={20} color="#A39DB7" />
+              <CloseXIcon size={20} color={theme.colors.textSecondary} />
             </TouchableOpacity>
           </View>
 
