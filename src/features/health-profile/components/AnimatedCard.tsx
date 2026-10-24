@@ -12,6 +12,7 @@ interface AnimatedCardProps {
   onPress: () => void;
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
+  containerStyle?: StyleProp<ViewStyle>;
   selectedBorderColor?: string;
   selectedBgColor?: string;
   unselectedBorderColor?: string;
@@ -26,6 +27,7 @@ export function AnimatedCard({
   onPress,
   children,
   style,
+  containerStyle,
   selectedBorderColor = '#A78BFA',
   selectedBgColor = '#241945',
   unselectedBorderColor = '#2E2254',
@@ -79,6 +81,9 @@ export function AnimatedCard({
     backgroundColor: selected ? selectedBgColor : unselectedBgColor,
   };
 
+  const flattened = StyleSheet.flatten(style);
+  const isFlex = flattened?.flex !== undefined;
+
   return (
     <Pressable
       onPress={onPress}
@@ -87,12 +92,17 @@ export function AnimatedCard({
       accessibilityRole={accessibilityRole}
       accessibilityState={{ selected }}
       accessibilityLabel={accessibilityLabel}
+      style={[
+        isFlex && { flex: flattened.flex },
+        containerStyle,
+      ]}
     >
       <Animated.View
         style={[
           styles.card,
           dynamicStyle,
           style,
+          isFlex && { width: '100%' },
           {
             transform: [
               { scale: Animated.multiply(scaleAnim, selectPulseAnim) },

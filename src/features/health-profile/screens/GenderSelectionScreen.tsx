@@ -11,7 +11,7 @@ import Svg, { Circle, Line, Path } from 'react-native-svg';
 import { images } from '@/assets/images';
 import { AppText } from '@/components/common';
 import { ChevronLeftIcon } from '@/components/icons';
-import { AnimatedCard, AnimatedRadio } from '../components';
+import { AnimatedCard } from '../components';
 import { useHealthProfileDraft } from '../hooks/useHealthProfileDraft';
 import type { Gender } from '../types';
 
@@ -30,7 +30,7 @@ export function GenderSelectionScreen({
 }: GenderSelectionScreenProps) {
   const insets = useSafeAreaInsets();
   const { draft, updateDraft } = useHealthProfileDraft();
-  const [selectedGender, setSelectedGender] = useState<Gender>(draft.gender || 'female');
+  const [selectedGender, setSelectedGender] = useState<Gender>(draft.gender || 'male');
 
   const handleNext = () => {
     updateDraft('gender', selectedGender);
@@ -54,8 +54,8 @@ export function GenderSelectionScreen({
   const isMale = selectedGender === 'male';
 
   const content = (
-    <>
-      {/* ── Avatar & Speech Bubble Row ─────────────────────────── */}
+    <View style={styles.contentWrap}>
+      {/* ── Avatar & White Speech Bubble Row (Exactly like reference image) ── */}
       <View style={styles.bubbleRow}>
         <View style={styles.avatarWrap}>
           <Image
@@ -73,49 +73,40 @@ export function GenderSelectionScreen({
         </View>
       </View>
 
-      {/* ── 2 Square Cards Side-by-Side ─────────────────────────── */}
-      <View style={styles.cardsRow}>
-        {/* Nữ - Pink accent with custom SVG */}
-        <AnimatedCard
-          selected={isFemale}
-          onPress={() => setSelectedGender('female')}
-          style={styles.squareCard}
-          selectedBorderColor="#F43F5E"
-          selectedBgColor="#2A1226"
-          unselectedBorderColor="#2E2352"
-          unselectedBgColor="#1A1433"
-          activeScale={0.95}
-          accessibilityLabel="Giới tính Nữ"
-          accessibilityRole="radio"
-        >
-          <View style={styles.cardInner}>
-            {/* Top Right Radio Indicator */}
-            <View style={styles.radioTopRight}>
-              <AnimatedRadio selected={isFemale} activeColor="#F43F5E" size={20} />
-            </View>
-
-            {/* SVG Female Icon in Circular Wrap */}
-            <View
-              style={[
-                styles.iconCircle,
-                isFemale ? styles.femaleCircleSelected : styles.circleUnselected,
-              ]}
-            >
-              <Svg width={38} height={38} viewBox="0 0 24 24" fill="none">
+      {/* ── 2 Minimalist Square Cards Side-by-Side (Centered in screen) ── */}
+      <View style={styles.centerSection}>
+        <View style={styles.cardsRow}>
+          {/* Nữ (Female) */}
+          <AnimatedCard
+            selected={isFemale}
+            onPress={() => setSelectedGender('female')}
+            containerStyle={styles.cardContainer}
+            style={styles.genderCard}
+            selectedBorderColor="#9D6CFA"
+            selectedBgColor="#260F53"
+            unselectedBorderColor="#2D2A3F"
+            unselectedBgColor="#2D2A3F"
+            activeScale={0.96}
+            accessibilityLabel="Giới tính Nữ"
+            accessibilityRole="radio"
+          >
+            <View style={styles.cardContent}>
+              {/* SVG Female Icon ♀ */}
+              <Svg width={30} height={30} viewBox="0 0 24 24" fill="none">
                 <Circle
                   cx="12"
                   cy="9.5"
                   r="5.5"
-                  stroke={isFemale ? '#FB7185' : '#716894'}
-                  strokeWidth="2.4"
+                  stroke={isFemale ? '#FFFFFF' : '#A09CAE'}
+                  strokeWidth="2.2"
                 />
                 <Line
                   x1="12"
                   y1="15"
                   x2="12"
                   y2="21.5"
-                  stroke={isFemale ? '#FB7185' : '#716894'}
-                  strokeWidth="2.4"
+                  stroke={isFemale ? '#FFFFFF' : '#A09CAE'}
+                  strokeWidth="2.2"
                   strokeLinecap="round"
                 />
                 <Line
@@ -123,104 +114,91 @@ export function GenderSelectionScreen({
                   y1="18.2"
                   x2="15.5"
                   y2="18.2"
-                  stroke={isFemale ? '#FB7185' : '#716894'}
-                  strokeWidth="2.4"
+                  stroke={isFemale ? '#FFFFFF' : '#A09CAE'}
+                  strokeWidth="2.2"
                   strokeLinecap="round"
                 />
               </Svg>
+
+              <AppText
+                style={[
+                  styles.genderLabel,
+                  isFemale && styles.genderLabelSelected,
+                ]}
+              >
+                Nữ
+              </AppText>
             </View>
+          </AnimatedCard>
 
-            {/* Label */}
-            <AppText
-              style={[
-                styles.genderLabel,
-                isFemale ? styles.femaleLabelSelected : styles.labelUnselected,
-              ]}
-            >
-              Nữ
-            </AppText>
-          </View>
-        </AnimatedCard>
-
-        {/* Nam - Blue accent with custom SVG */}
-        <AnimatedCard
-          selected={isMale}
-          onPress={() => setSelectedGender('male')}
-          style={styles.squareCard}
-          selectedBorderColor="#0284C7"
-          selectedBgColor="#0D223E"
-          unselectedBorderColor="#2E2352"
-          unselectedBgColor="#1A1433"
-          activeScale={0.95}
-          accessibilityLabel="Giới tính Nam"
-          accessibilityRole="radio"
-        >
-          <View style={styles.cardInner}>
-            {/* Top Right Radio Indicator */}
-            <View style={styles.radioTopRight}>
-              <AnimatedRadio selected={isMale} activeColor="#0284C7" size={20} />
-            </View>
-
-            {/* SVG Male Icon in Circular Wrap */}
-            <View
-              style={[
-                styles.iconCircle,
-                isMale ? styles.maleCircleSelected : styles.circleUnselected,
-              ]}
-            >
-              <Svg width={38} height={38} viewBox="0 0 24 24" fill="none">
+          {/* Nam (Male) */}
+          <AnimatedCard
+            selected={isMale}
+            onPress={() => setSelectedGender('male')}
+            containerStyle={styles.cardContainer}
+            style={styles.genderCard}
+            selectedBorderColor="#9D6CFA"
+            selectedBgColor="#260F53"
+            unselectedBorderColor="#2D2A3F"
+            unselectedBgColor="#2D2A3F"
+            activeScale={0.96}
+            accessibilityLabel="Giới tính Nam"
+            accessibilityRole="radio"
+          >
+            <View style={styles.cardContent}>
+              {/* SVG Male Icon ♂ */}
+              <Svg width={30} height={30} viewBox="0 0 24 24" fill="none">
                 <Circle
                   cx="10"
                   cy="14"
                   r="5.5"
-                  stroke={isMale ? '#38BDF8' : '#716894'}
-                  strokeWidth="2.4"
+                  stroke={isMale ? '#FFFFFF' : '#A09CAE'}
+                  strokeWidth="2.2"
                 />
                 <Line
                   x1="14"
                   y1="10"
                   x2="20"
                   y2="4"
-                  stroke={isMale ? '#38BDF8' : '#716894'}
-                  strokeWidth="2.4"
+                  stroke={isMale ? '#FFFFFF' : '#A09CAE'}
+                  strokeWidth="2.2"
                   strokeLinecap="round"
                 />
                 <Path
                   d="M15 4h5v5"
-                  stroke={isMale ? '#38BDF8' : '#716894'}
-                  strokeWidth="2.4"
+                  stroke={isMale ? '#FFFFFF' : '#A09CAE'}
+                  strokeWidth="2.2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
               </Svg>
-            </View>
 
-            {/* Label */}
-            <AppText
-              style={[
-                styles.genderLabel,
-                isMale ? styles.maleLabelSelected : styles.labelUnselected,
-              ]}
-            >
-              Nam
-            </AppText>
-          </View>
-        </AnimatedCard>
+              <AppText
+                style={[
+                  styles.genderLabel,
+                  isMale && styles.genderLabelSelected,
+                ]}
+              >
+                Nam
+              </AppText>
+            </View>
+          </AnimatedCard>
+        </View>
       </View>
 
-      {/* ── Bottom Action Button ───────────────────────────────── */}
-      <View style={[styles.bottomArea, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+      {/* ── Bottom Action Button ("Tiếp tục") ──────────────────── */}
+      <View style={[styles.bottomArea, { paddingBottom: Math.max(insets.bottom, 20) }]}>
         <TouchableOpacity
           style={styles.actionButton}
           onPress={handleNext}
-          activeOpacity={0.85}
+          activeOpacity={0.88}
           accessibilityRole="button"
           accessibilityLabel="Tiếp tục"
         >
           <AppText style={styles.buttonText}>Tiếp tục</AppText>
         </TouchableOpacity>
       </View>
-    </>
+    </View>
   );
 
   if (hideHeader) {
@@ -255,10 +233,14 @@ export function GenderSelectionScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#120E29',
+    backgroundColor: '#0E091D',
   },
   innerContainer: {
     flex: 1,
+  },
+  contentWrap: {
+    flex: 1,
+    justifyContent: 'space-between',
   },
   topBar: {
     flexDirection: 'row',
@@ -274,29 +256,29 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   progressTrack: {
-    height: 6,
+    height: 5,
     backgroundColor: '#272049',
-    borderRadius: 3,
+    borderRadius: 2.5,
     marginHorizontal: 20,
     marginTop: 4,
-    marginBottom: 24,
+    marginBottom: 20,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
     backgroundColor: '#9D6CFA',
-    borderRadius: 3,
+    borderRadius: 2.5,
   },
   bubbleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginBottom: 28,
+    marginTop: 12,
   },
   avatarWrap: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
     backgroundColor: '#302657',
     borderWidth: 2,
     borderColor: '#9D6CFA',
@@ -309,18 +291,21 @@ const styles = StyleSheet.create({
   },
   bubble: {
     flex: 1,
-    backgroundColor: '#241B42',
-    borderRadius: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 18,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    paddingVertical: 18,
+    paddingHorizontal: 22,
     position: 'relative',
-    borderWidth: 1,
-    borderColor: '#382D61',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   bubbleTail: {
     position: 'absolute',
     left: -8,
-    top: 18,
+    top: 22,
     width: 0,
     height: 0,
     borderTopWidth: 6,
@@ -328,70 +313,52 @@ const styles = StyleSheet.create({
     borderRightWidth: 8,
     borderTopColor: 'transparent',
     borderBottomColor: 'transparent',
-    borderRightColor: '#241B42',
+    borderRightColor: '#FFFFFF',
   },
   bubbleText: {
-    fontSize: 16,
+    fontSize: 16.5,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#111827',
     lineHeight: 22,
+  },
+  centerSection: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
   },
   cardsRow: {
     flexDirection: 'row',
-    gap: 16,
-    paddingHorizontal: 20,
-  },
-  squareCard: {
-    flex: 1,
-    height: 175,
-    padding: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cardInner: {
     width: '100%',
-    height: '100%',
+    gap: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cardContainer: {
+    flex: 1,
+  },
+  genderCard: {
+    width: '100%',
+    height: 120,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cardContent: {
     alignItems: 'center',
     justifyContent: 'center',
-    position: 'relative',
-  },
-  radioTopRight: {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-  },
-  iconCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 14,
-  },
-  femaleCircleSelected: {
-    backgroundColor: 'rgba(244, 63, 94, 0.18)',
-  },
-  maleCircleSelected: {
-    backgroundColor: 'rgba(2, 132, 199, 0.18)',
-  },
-  circleUnselected: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    gap: 10,
   },
   genderLabel: {
-    fontSize: 18,
+    fontSize: 16.5,
+    fontWeight: '600',
+    color: '#A09CAE',
+  },
+  genderLabelSelected: {
+    color: '#FFFFFF',
     fontWeight: '700',
   },
-  femaleLabelSelected: {
-    color: '#FDA4AF',
-  },
-  maleLabelSelected: {
-    color: '#BAE6FD',
-  },
-  labelUnselected: {
-    color: '#E2E8F0',
-  },
   bottomArea: {
-    marginTop: 'auto',
     paddingHorizontal: 20,
     paddingTop: 16,
   },
