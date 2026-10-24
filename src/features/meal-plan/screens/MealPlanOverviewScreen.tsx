@@ -883,7 +883,7 @@ const styles = StyleSheet.create({
     minHeight: 180,
   },
   betaBannerImage: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     width: '100%',
     height: '100%',
   },

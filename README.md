@@ -56,14 +56,6 @@ npm run android
 npm run ios
 ```
 
-### 6. Đồng bộ Tài nguyên Hình ảnh (Ngoại quan)
-Tài nguyên hình ảnh được quản lý qua `res/` và kết nối với `src/assets/images/index.ts`. Để đồng bộ tài nguyên:
-```bash
-npm run copy-assets
-```
-
----
-
 ## Tài liệu tham chiếu
 
 - [REQUIREMENT.md](docs/REQUIREMENT.md): Tài liệu Đặc tả Yêu cầu Nghiệp vụ Phần mềm (SRS v1.1).

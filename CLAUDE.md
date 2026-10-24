@@ -13,13 +13,11 @@ npm run self-check
 npm run start
 npm run android
 npm run ios
-npm run copy-assets
 ```
 
 - `npm run typecheck` runs strict TypeScript checking with `tsc --noEmit`.
 - `npm run self-check` runs assertion-based checks for phases 1 through 7. Run any individual phase with its matching `node scripts/<name>.js` command; available scripts are `self-check.js` and `phase2-self-check.js` through `phase7-self-check.js`.
 - `npm run start` launches the Expo development server; `npm run android` and `npm run ios` launch it on the matching platform.
-- `npm run copy-assets` copies source assets from `res/` into `src/assets/images/` and refreshes the generated registry inputs.
 - No lint script, test runner, or production build script is configured in `package.json`.
 
 ## Architecture
@@ -31,7 +29,7 @@ npm run copy-assets
 - Domain providers expose typed hooks and persist local state with AsyncStorage. Nutrition, activity, meal-plan, gamification, and system flows are local-first with best-effort API calls. `src/services/api/client.ts` attaches JWT access tokens and coordinates one concurrent `/auth/refresh` retry; `EXPO_PUBLIC_API_URL` overrides the default `http://localhost:8080/api`.
 - `src/services/offline/` owns the client-UUID sync queue. `OfflineSyncProvider` persists queue and connectivity/sync state, retries pending or failed items through `syncManager.ts`, and `OfflineBanner` surfaces global status.
 - `src/components/common/` is the typed reusable UI kit. Components consume `useTheme()`. `src/theme/` contains light/dark semantic tokens for colors, typography, spacing, radii, and shadows; theme selection persists through AsyncStorage.
-- `src/assets/images/index.ts` is the typed asset registry. `res/` is the source asset directory and `src/assets/images/` contains copied app-local assets; keep registry entries and source files synchronized with `npm run copy-assets`.
+- `src/assets/images/index.ts` is the typed asset registry. Image assets reside directly under `src/assets/images/`.
 - `@/*` resolves to `src/*` through matching Babel and TypeScript configuration. `app.json` defines the Kallo Expo identity, portrait orientation, automatic system UI style, camera/image permissions, and Android/iOS bundle identifiers.
 
 ## Project references
