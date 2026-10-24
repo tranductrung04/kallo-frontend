@@ -232,6 +232,10 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       alignItems: 'center',
       gap: 6,
     },
+    statColFireIcon: {
+      width: 16,
+      height: 16,
+    },
     statColLabel: {
       fontSize: 13.5,
       lineHeight: 18,
@@ -421,6 +425,10 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       alignItems: 'center',
       gap: s.xs + 2,
       marginTop: s.xs,
+    },
+    workoutFireIcon: {
+      width: 16,
+      height: 16,
     },
 
     // 8. Water Card (AppCard + style)

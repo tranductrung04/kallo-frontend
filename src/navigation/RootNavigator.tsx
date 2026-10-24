@@ -18,7 +18,7 @@ import { BarcodeScannerScreen } from '@/features/nutrition/screens/BarcodeScanne
 import { ActivityTrackerScreen, HealthSyncScreen, BodyMetricScreen } from '@/features/activity';
 import { MealPlanOverviewScreen, MealPlanWizardScreen, MealPlanDetailScreen } from '@/features/meal-plan';
 import { NutritionChatScreen, VoiceLogModal } from '@/features/assistant';
-import { StreakDetailModal, BadgesChallengesScreen, FriendsLeaderboardScreen } from '@/features/gamification';
+import { StreakDetailModal, StreakRulesScreen, BadgesChallengesScreen, FriendsLeaderboardScreen } from '@/features/gamification';
 import { NotificationCenterScreen, ReminderSettingsScreen } from '@/features/system';
 import { ReportOverviewScreen } from '@/features/report/screens/ReportOverviewScreen';
 import { useTheme } from '@/theme';
@@ -52,7 +52,8 @@ export function RootNavigator() {
       <Stack.Screen name="MealPlanDetail" component={MealPlanDetailScreen} options={{ title: 'Chi tiết thực đơn' }} />
       <Stack.Screen name="NutritionChat" component={NutritionChatScreen} options={{ title: 'Trợ lý Kallo AI' }} />
       <Stack.Screen name="VoiceLogModal" component={VoiceLogModal} options={{ headerShown: false, presentation: 'modal' }} />
-      <Stack.Screen name="StreakDetail" component={StreakDetailModal} options={{ headerShown: false, presentation: 'modal' }} />
+      <Stack.Screen name="StreakDetail" component={StreakDetailModal} options={{ headerShown: false, presentation: 'fullScreenModal' }} />
+      <Stack.Screen name="StreakRules" component={StreakRulesScreen} options={{ headerShown: false, presentation: 'fullScreenModal' }} />
       <Stack.Screen name="BadgesChallenges" component={BadgesChallengesScreen} options={{ title: 'Huy hiệu & Thử thách' }} />
       <Stack.Screen name="FriendsLeaderboard" component={FriendsLeaderboardScreen} options={{ title: 'Bảng xếp hạng bạn bè' }} />
       <Stack.Screen name="NotificationCenter" component={NotificationCenterScreen} options={{ title: 'Trung tâm thông báo' }} />
