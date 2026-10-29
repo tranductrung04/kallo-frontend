@@ -1,6 +1,12 @@
+import { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { colors, type ColorTokens } from '@/theme/colors';
-import type { ThemeContextValue } from '@/theme';
+import { useTheme, type ThemeContextValue } from '@/theme';
+
+export function useFoodDiaryStyles() {
+  const theme = useTheme();
+  return useMemo(() => createStyles(theme), [theme]);
+}
 
 export function createStyles(theme: ThemeContextValue | { colors: ColorTokens }) {
   const { colors: c } = theme;

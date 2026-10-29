@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Alert,
   Image,
   SafeAreaView,
   ScrollView,
+  StatusBar,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -13,7 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import { images } from '@/assets/images';
 import { AppButton, AppCard, AppText } from '@/components/common';
 import type { RootStackParamList } from '@/navigation/types';
-import { useTheme } from '@/theme';
+import { useTheme, type ThemeContextValue } from '@/theme';
 import { useMealPlan } from '../MealPlanProvider';
 import { formatVnd } from '../utils';
 import {
@@ -35,8 +36,8 @@ const BANNER_CTA_TEXT = '#1F1A0A';
 
 export function MealPlanOverviewScreen() {
   const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<NavigationProp>();
-  const isDark = theme.scheme === 'dark';
   const { currentPlan, savedPlans, clearCurrentPlan, setActivePlan, applyPlanToDiary, deletePlan } = useMealPlan();
 
   // Default to Explore tab with 2400-2600 Cal range selected to match user mockup exactly
@@ -128,6 +129,10 @@ export function MealPlanOverviewScreen() {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.canvasBase }]}>
+      <StatusBar
+        barStyle={theme.scheme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={theme.colors.canvasBase}
+      />
       {/* ── Top Header ─────────────────────────────────────────────────── */}
       <View style={styles.topHeader}>
         <View style={styles.titleRow}>
@@ -165,12 +170,12 @@ export function MealPlanOverviewScreen() {
               styles.pillTab,
               activeTab === 'my_plans'
                 ? {
-                    backgroundColor: isDark ? 'rgba(158, 100, 247, 0.28)' : '#EDE5FF',
-                    borderColor: isDark ? '#7C3AED' : '#7B4FE0',
+                    backgroundColor: theme.colors.brandSoftTint,
+                    borderColor: theme.colors.brandPrimary,
                   }
                 : {
-                    backgroundColor: isDark ? '#221D34' : theme.colors.surfaceHigh,
-                    borderColor: 'transparent',
+                    backgroundColor: theme.colors.surfaceHigh,
+                    borderColor: theme.colors.surfaceBorder,
                   },
             ]}
             accessibilityRole="tab"
@@ -180,7 +185,7 @@ export function MealPlanOverviewScreen() {
               variant="labelLg"
               color={
                 activeTab === 'my_plans'
-                  ? isDark ? '#D6B8FF' : '#7B4FE0'
+                  ? theme.colors.brandPrimary
                   : theme.colors.textPrimary
               }
             >
@@ -195,12 +200,12 @@ export function MealPlanOverviewScreen() {
               styles.pillTab,
               activeTab === 'explore'
                 ? {
-                    backgroundColor: isDark ? 'rgba(158, 100, 247, 0.28)' : '#EDE5FF',
-                    borderColor: isDark ? '#7C3AED' : '#7B4FE0',
+                    backgroundColor: theme.colors.brandSoftTint,
+                    borderColor: theme.colors.brandPrimary,
                   }
                 : {
-                    backgroundColor: isDark ? '#221D34' : theme.colors.surfaceHigh,
-                    borderColor: 'transparent',
+                    backgroundColor: theme.colors.surfaceHigh,
+                    borderColor: theme.colors.surfaceBorder,
                   },
             ]}
             accessibilityRole="tab"
@@ -210,7 +215,7 @@ export function MealPlanOverviewScreen() {
               variant="labelLg"
               color={
                 activeTab === 'explore'
-                  ? isDark ? '#D6B8FF' : '#7B4FE0'
+                  ? theme.colors.brandPrimary
                   : theme.colors.textPrimary
               }
             >
@@ -225,12 +230,12 @@ export function MealPlanOverviewScreen() {
               styles.pillTab,
               activeTab === 'custom'
                 ? {
-                    backgroundColor: isDark ? 'rgba(158, 100, 247, 0.28)' : '#EDE5FF',
-                    borderColor: isDark ? '#7C3AED' : '#7B4FE0',
+                    backgroundColor: theme.colors.brandSoftTint,
+                    borderColor: theme.colors.brandPrimary,
                   }
                 : {
-                    backgroundColor: isDark ? '#221D34' : theme.colors.surfaceHigh,
-                    borderColor: 'transparent',
+                    backgroundColor: theme.colors.surfaceHigh,
+                    borderColor: theme.colors.surfaceBorder,
                   },
             ]}
             accessibilityRole="tab"
@@ -240,7 +245,7 @@ export function MealPlanOverviewScreen() {
               variant="labelLg"
               color={
                 activeTab === 'custom'
-                  ? isDark ? '#D6B8FF' : '#7B4FE0'
+                  ? theme.colors.brandPrimary
                   : theme.colors.textPrimary
               }
             >
@@ -509,12 +514,12 @@ export function MealPlanOverviewScreen() {
                     styles.calorieChip,
                     isSelected
                       ? {
-                          backgroundColor: isDark ? 'rgba(158, 100, 247, 0.28)' : '#EDE5FF',
-                          borderColor: isDark ? '#7C3AED' : '#7B4FE0',
+                          backgroundColor: theme.colors.brandSoftTint,
+                          borderColor: theme.colors.brandPrimary,
                         }
                       : {
-                          backgroundColor: isDark ? '#221D34' : theme.colors.surfaceHigh,
-                          borderColor: 'transparent',
+                          backgroundColor: theme.colors.surfaceHigh,
+                          borderColor: theme.colors.surfaceBorder,
                         },
                   ]}
                   accessibilityRole="button"
@@ -525,7 +530,7 @@ export function MealPlanOverviewScreen() {
                     variant="labelLg"
                     color={
                       isSelected
-                        ? isDark ? '#D6B8FF' : '#7B4FE0'
+                        ? theme.colors.brandPrimary
                         : theme.colors.textPrimary
                     }
                   >
@@ -552,13 +557,7 @@ export function MealPlanOverviewScreen() {
             filteredCuratedPlans.map((curated) => (
               <View
                 key={curated.id}
-                style={[
-                  styles.explorePlanCard,
-                  {
-                    backgroundColor: isDark ? '#181524' : theme.colors.surfaceMid,
-                    borderColor: isDark ? '#322B48' : theme.colors.surfaceBorder,
-                  },
-                ]}
+                style={styles.explorePlanCard}
               >
                 <Image
                   source={curated.coverImage || images.mealPlanCardSample}
@@ -574,7 +573,7 @@ export function MealPlanOverviewScreen() {
 
                   <AppText
                     variant="bodyMd"
-                    color={isDark ? '#A29DB8' : theme.colors.textSecondary}
+                    color={theme.colors.textSecondary}
                     style={styles.planCardSubtitle}
                   >
                     {curated.subtitle}
@@ -583,13 +582,7 @@ export function MealPlanOverviewScreen() {
                   {/* Action Buttons Row */}
                   <View style={styles.planActionButtonsRow}>
                     <TouchableOpacity
-                      style={[
-                        styles.planActionButton,
-                        {
-                          backgroundColor: isDark ? '#221D34' : theme.colors.surfaceHigh,
-                          borderColor: isDark ? '#322B48' : theme.colors.surfaceBorder,
-                        },
-                      ]}
+                      style={styles.planActionButton}
                       onPress={() => handleAdoptCuratedPlan(curated)}
                       activeOpacity={0.8}
                       accessibilityRole="button"
@@ -605,13 +598,7 @@ export function MealPlanOverviewScreen() {
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                      style={[
-                        styles.planActionButton,
-                        {
-                          backgroundColor: isDark ? '#221D34' : theme.colors.surfaceHigh,
-                          borderColor: isDark ? '#322B48' : theme.colors.surfaceBorder,
-                        },
-                      ]}
+                      style={styles.planActionButton}
                       onPress={() => handleViewCuratedDetail(curated)}
                       activeOpacity={0.8}
                       accessibilityRole="button"
@@ -697,338 +684,347 @@ export function MealPlanOverviewScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-  },
-  flex: {
-    flex: 1,
-  },
+function createStyles(theme: ThemeContextValue) {
+  const { colors: c } = theme;
 
-  // ── Top Header & Tab Pills ──────────────────────────────────────────
-  topHeader: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 14,
-    gap: 14,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  mainTitle: {
-    fontSize: 26,
-    fontWeight: '700',
-  },
-  tabBarRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingVertical: 2,
-    paddingRight: 12,
-  },
-  pillTab: {
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    borderRadius: 9999,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  return StyleSheet.create({
+    safe: {
+      flex: 1,
+      backgroundColor: c.canvasBase,
+    },
+    flex: {
+      flex: 1,
+    },
 
-  // ── Empty State ──────────────────────────────────────────────────────
-  emptyContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-    paddingBottom: 60,
-  },
-  emptyIllustration: {
-    width: 170,
-    height: 140,
-    marginBottom: 8,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginTop: 16,
-    paddingHorizontal: 12,
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    lineHeight: 22,
-    marginTop: 10,
-    maxWidth: 320,
-    paddingHorizontal: 8,
-  },
-  ctaButton: {
-    minWidth: 260,
-    marginTop: 32,
-  },
+    // ── Top Header & Tab Pills ──────────────────────────────────────────
+    topHeader: {
+      paddingHorizontal: 20,
+      paddingTop: 8,
+      paddingBottom: 14,
+      gap: 14,
+    },
+    titleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    backButton: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    mainTitle: {
+      fontSize: 26,
+      fontWeight: '700',
+    },
+    tabBarRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      paddingVertical: 2,
+      paddingRight: 12,
+    },
+    pillTab: {
+      paddingHorizontal: 18,
+      paddingVertical: 10,
+      borderRadius: 9999,
+      borderWidth: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
 
-  // ── Active Plan Content ──────────────────────────────────────────────
-  activePlanContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-    gap: 16,
-  },
-  activePlanCard: {
-    borderRadius: 20,
-    gap: 14,
-    padding: 18,
-  },
-  planCardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  badgeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 6,
-  },
-  activeBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-  },
-  planTitleText: {
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  metricsGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: 'rgba(128,128,128,0.15)',
-  },
-  metricBox: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  mealsPeek: {
-    backgroundColor: 'rgba(128,128,128,0.06)',
-    padding: 12,
-    borderRadius: 12,
-    gap: 6,
-  },
-  peekDishesList: {
-    gap: 4,
-  },
-  peekItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  cardActionsStack: {
-    gap: 10,
-    marginTop: 4,
-  },
-  stopPlanButton: {
-    alignSelf: 'center',
-    paddingVertical: 4,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  savedCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 14,
-  },
-  savedCardContent: {
-    flex: 1,
-    gap: 4,
-  },
-  bottomGeneratorRow: {
-    marginTop: 8,
-  },
+    // ── Empty State ──────────────────────────────────────────────────────
+    emptyContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 24,
+      paddingBottom: 60,
+    },
+    emptyIllustration: {
+      width: 170,
+      height: 140,
+      marginBottom: 8,
+    },
+    emptyTitle: {
+      fontSize: 20,
+      fontWeight: '700',
+      marginTop: 16,
+      paddingHorizontal: 12,
+    },
+    emptySubtitle: {
+      fontSize: 14,
+      lineHeight: 22,
+      marginTop: 10,
+      maxWidth: 320,
+      paddingHorizontal: 8,
+    },
+    ctaButton: {
+      minWidth: 260,
+      marginTop: 32,
+    },
 
-  // ── Explore Tab Content (1:1 with Mockup) ────────────────────────────
-  exploreContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-    gap: 16,
-  },
+    // ── Active Plan Content ──────────────────────────────────────────────
+    activePlanContent: {
+      paddingHorizontal: 20,
+      paddingBottom: 40,
+      gap: 16,
+    },
+    activePlanCard: {
+      borderRadius: 20,
+      gap: 14,
+      padding: 18,
+    },
+    planCardHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+    },
+    badgeRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginBottom: 6,
+    },
+    activeBadge: {
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 8,
+    },
+    planTitleText: {
+      fontSize: 20,
+      fontWeight: '700',
+    },
+    metricsGrid: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingVertical: 12,
+      borderTopWidth: 1,
+      borderBottomWidth: 1,
+      borderColor: c.surfaceBorder,
+    },
+    metricBox: {
+      alignItems: 'center',
+      flex: 1,
+    },
+    infoRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+      gap: 8,
+    },
+    mealsPeek: {
+      backgroundColor: c.surfaceHigh,
+      padding: 12,
+      borderRadius: 12,
+      gap: 6,
+    },
+    peekDishesList: {
+      gap: 4,
+    },
+    peekItem: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    cardActionsStack: {
+      gap: 10,
+      marginTop: 4,
+    },
+    stopPlanButton: {
+      alignSelf: 'center',
+      paddingVertical: 4,
+    },
+    sectionHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: 8,
+    },
+    savedCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: 14,
+    },
+    savedCardContent: {
+      flex: 1,
+      gap: 4,
+    },
+    bottomGeneratorRow: {
+      marginTop: 8,
+    },
 
-  // ── BETA / Premium AI Banner ─────────────────────────────────────────
-  betaBanner: {
-    borderRadius: 20,
-    overflow: 'hidden',
-    position: 'relative',
-    aspectRatio: 657 / 390,
-    minHeight: 180,
-  },
-  betaBannerImage: {
-    ...StyleSheet.absoluteFill,
-    width: '100%',
-    height: '100%',
-  },
-  betaBannerContent: {
-    flex: 1,
-    maxWidth: '58%',
-    padding: 16,
-    justifyContent: 'space-between',
-  },
-  betaBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 14,
-    paddingVertical: 5,
-    borderRadius: 9999,
-  },
-  betaBadgeText: {
-    fontSize: 12,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
-  betaTitle: {
-    fontSize: 21,
-    fontWeight: '800',
-    lineHeight: 26,
-  },
-  betaSubtitle: {
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: '500',
-  },
-  betaCta: {
-    alignSelf: 'flex-start',
-    backgroundColor: BANNER_CTA_BG,
-    paddingHorizontal: 16,
-    paddingVertical: 9,
-    borderRadius: 9999,
-  },
-  betaCtaText: {
-    fontSize: 13,
-    fontWeight: '700',
-  },
+    // ── Explore Tab Content (1:1 with Mockup) ────────────────────────────
+    exploreContent: {
+      paddingHorizontal: 20,
+      paddingBottom: 40,
+      gap: 16,
+    },
 
-  // ── Section Title ────────────────────────────────────────────────────
-  sectionHeaderTitleContainer: {
-    marginTop: 4,
-  },
-  sectionHeaderTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-  },
+    // ── BETA / Premium AI Banner ─────────────────────────────────────────
+    betaBanner: {
+      borderRadius: 20,
+      overflow: 'hidden',
+      position: 'relative',
+      aspectRatio: 657 / 390,
+      minHeight: 180,
+    },
+    betaBannerImage: {
+      ...StyleSheet.absoluteFill,
+      width: '100%',
+      height: '100%',
+    },
+    betaBannerContent: {
+      flex: 1,
+      maxWidth: '58%',
+      padding: 16,
+      justifyContent: 'space-between',
+    },
+    betaBadge: {
+      alignSelf: 'flex-start',
+      backgroundColor: '#FFFFFF',
+      paddingHorizontal: 14,
+      paddingVertical: 5,
+      borderRadius: 9999,
+    },
+    betaBadgeText: {
+      fontSize: 12,
+      fontWeight: '800',
+      letterSpacing: 0.5,
+    },
+    betaTitle: {
+      fontSize: 21,
+      fontWeight: '800',
+      lineHeight: 26,
+    },
+    betaSubtitle: {
+      fontSize: 13,
+      lineHeight: 18,
+      fontWeight: '500',
+    },
+    betaCta: {
+      alignSelf: 'flex-start',
+      backgroundColor: BANNER_CTA_BG,
+      paddingHorizontal: 16,
+      paddingVertical: 9,
+      borderRadius: 9999,
+    },
+    betaCtaText: {
+      fontSize: 13,
+      fontWeight: '700',
+    },
 
-  // ── Calorie Range Chips ──────────────────────────────────────────────
-  calorieChipsContainer: {
-    gap: 10,
-    paddingVertical: 2,
-    paddingRight: 8,
-  },
-  calorieChip: {
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    borderRadius: 9999,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  rangeEmpty: {
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 24,
-  },
+    // ── Section Title ────────────────────────────────────────────────────
+    sectionHeaderTitleContainer: {
+      marginTop: 4,
+    },
+    sectionHeaderTitle: {
+      fontSize: 20,
+      fontWeight: '700',
+    },
 
-  // ── Curated Plan Cards Feed ──────────────────────────────────────────
-  explorePlanCard: {
-    borderRadius: 20,
-    overflow: 'hidden',
-    borderWidth: 1,
-    marginBottom: 8,
-  },
-  explorePlanImage: {
-    width: '100%',
-    height: 190,
-  },
-  explorePlanBody: {
-    padding: 16,
-  },
-  planCardTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    lineHeight: 24,
-  },
-  planCardSubtitle: {
-    marginTop: 6,
-    marginBottom: 16,
-    fontSize: 14,
-  },
-  planActionButtonsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  planActionButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 9999,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  planActionText: {
-    fontWeight: '600',
-    fontSize: 13,
-  },
+    // ── Calorie Range Chips ──────────────────────────────────────────────
+    calorieChipsContainer: {
+      gap: 10,
+      paddingVertical: 2,
+      paddingRight: 8,
+    },
+    calorieChip: {
+      paddingHorizontal: 18,
+      paddingVertical: 10,
+      borderRadius: 9999,
+      borderWidth: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    rangeEmpty: {
+      alignItems: 'center',
+      gap: 12,
+      paddingVertical: 24,
+    },
 
-  // ── Custom Tab Content ───────────────────────────────────────────────
-  customContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-    gap: 16,
-  },
-  customHeroCard: {
-    borderRadius: 20,
-    padding: 20,
-    gap: 10,
-  },
-  customBadge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  customHeroTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  customHeroSubtitle: {
-    lineHeight: 22,
-    marginTop: 2,
-  },
-  customHeroButton: {
-    marginTop: 8,
-  },
-  customEmptyContainer: {
-    paddingVertical: 32,
-    paddingHorizontal: 16,
-    alignItems: 'center',
-  },
-});
+    // ── Curated Plan Cards Feed ──────────────────────────────────────────
+    explorePlanCard: {
+      borderRadius: 20,
+      overflow: 'hidden',
+      borderWidth: 1,
+      marginBottom: 8,
+      backgroundColor: c.surfaceMid,
+      borderColor: c.surfaceBorder,
+    },
+    explorePlanImage: {
+      width: '100%',
+      height: 190,
+    },
+    explorePlanBody: {
+      padding: 16,
+    },
+    planCardTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      lineHeight: 24,
+    },
+    planCardSubtitle: {
+      marginTop: 6,
+      marginBottom: 16,
+      fontSize: 14,
+    },
+    planActionButtonsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    planActionButton: {
+      flex: 1,
+      paddingVertical: 12,
+      borderRadius: 9999,
+      borderWidth: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: c.surfaceHigh,
+      borderColor: c.surfaceBorder,
+    },
+    planActionText: {
+      fontWeight: '600',
+      fontSize: 13,
+    },
+
+    // ── Custom Tab Content ───────────────────────────────────────────────
+    customContent: {
+      paddingHorizontal: 20,
+      paddingBottom: 40,
+      gap: 16,
+    },
+    customHeroCard: {
+      borderRadius: 20,
+      padding: 20,
+      gap: 10,
+    },
+    customBadge: {
+      alignSelf: 'flex-start',
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 8,
+    },
+    customHeroTitle: {
+      fontSize: 20,
+      fontWeight: '700',
+    },
+    customHeroSubtitle: {
+      lineHeight: 22,
+      marginTop: 2,
+    },
+    customHeroButton: {
+      marginTop: 8,
+    },
+    customEmptyContainer: {
+      paddingVertical: 32,
+      paddingHorizontal: 16,
+      alignItems: 'center',
+    },
+  });
+}

@@ -7,7 +7,7 @@ import {
   SparklesIcon,
   WheatIcon,
 } from '@/components/icons';
-import { styles } from './ReportOverviewScreen.styles';
+import { useReportStyles } from './ReportOverviewScreen.styles';
 import { NutrientComparisonModal } from './NutrientComparisonModal';
 import {
   CarbGuideModal,
@@ -68,6 +68,7 @@ export function DayMacroSection({
   goalFat,
   cholesterolCurrent,
 }: DayMacroSectionProps) {
+  const { theme, styles } = useReportStyles();
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [isProteinModalVisible, setIsProteinModalVisible] = useState<boolean>(false);
   const [isCarbModalVisible, setIsCarbModalVisible] = useState<boolean>(false);
@@ -89,8 +90,8 @@ export function DayMacroSection({
             accessibilityLabel="Xem hướng dẫn chất đạm"
           >
             <View style={styles.macroColHeader}>
-              <LightningIcon size={13} color="#FF6B6B" />
-              <Text style={[styles.macroColTitle, { color: '#FF6B6B' }]}>
+              <LightningIcon size={13} color={theme.colors.macroProtein} />
+              <Text style={[styles.macroColTitle, { color: theme.colors.macroProtein }]}>
                 CHẤT ĐẠM
               </Text>
             </View>
@@ -110,8 +111,8 @@ export function DayMacroSection({
             accessibilityLabel="Xem hướng dẫn đường bột"
           >
             <View style={styles.macroColHeader}>
-              <WheatIcon size={14} color="#3B82F6" />
-              <Text style={[styles.macroColTitle, { color: '#3B82F6' }]}>
+              <WheatIcon size={14} color={theme.colors.macroCarbs} />
+              <Text style={[styles.macroColTitle, { color: theme.colors.macroCarbs }]}>
                 ĐƯỜNG BỘT
               </Text>
             </View>
@@ -131,8 +132,8 @@ export function DayMacroSection({
             accessibilityLabel="Xem hướng dẫn chất béo"
           >
             <View style={styles.macroColHeader}>
-              <DropletIcon size={13} color="#FBBF24" />
-              <Text style={[styles.macroColTitle, { color: '#FBBF24' }]}>
+              <DropletIcon size={13} color={theme.colors.macroFats} />
+              <Text style={[styles.macroColTitle, { color: theme.colors.macroFats }]}>
                 CHẤT BÉO
               </Text>
             </View>
@@ -153,14 +154,14 @@ export function DayMacroSection({
           accessibilityLabel="So sánh các chỉ số khác"
         >
           <Text style={styles.expandButtonText}>So sánh các chỉ số khác</Text>
-          <ChevronDownIcon size={16} color="#A59EBD" />
+          <ChevronDownIcon size={16} color={theme.colors.textSecondary} />
         </TouchableOpacity>
       </View>
 
       {/* Meal Optimization Card */}
       <View style={[styles.cardSurface, styles.optimizationCard]}>
         <View style={styles.optBadgeContainer}>
-          <SparklesIcon size={14} color="#7C3AED" />
+          <SparklesIcon size={14} color={theme.colors.brandPrimary} />
           <Text style={styles.optBadgeText}>Tối ưu bữa ăn</Text>
         </View>
 

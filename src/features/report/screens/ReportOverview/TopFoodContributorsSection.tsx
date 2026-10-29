@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { DropletIcon, EmptyFolderIllustration, LightningIcon, WheatIcon } from '@/components/icons';
-import { styles } from './ReportOverviewScreen.styles';
+import { useReportStyles } from './ReportOverviewScreen.styles';
 
 export type ContributorItem = {
   name: string;
@@ -20,10 +20,12 @@ export function TopFoodContributorsSection({
   onMetricChange,
   contributors,
 }: TopFoodContributorsSectionProps) {
+  const { theme, styles } = useReportStyles();
+
   const getFillColor = () => {
-    if (contribMetric === 'protein') return '#FF6B6B';
-    if (contribMetric === 'carbs') return '#3B82F6';
-    return '#FBBF24';
+    if (contribMetric === 'protein') return theme.colors.macroProtein;
+    if (contribMetric === 'carbs') return theme.colors.macroCarbs;
+    return theme.colors.macroFats;
   };
 
   return (
@@ -41,7 +43,7 @@ export function TopFoodContributorsSection({
         >
           <LightningIcon
             size={14}
-            color={contribMetric === 'protein' ? '#FFFFFF' : '#FF6B6B'}
+            color={contribMetric === 'protein' ? '#FFFFFF' : theme.colors.macroProtein}
           />
           <Text
             style={[
@@ -62,7 +64,7 @@ export function TopFoodContributorsSection({
         >
           <WheatIcon
             size={15}
-            color={contribMetric === 'carbs' ? '#FFFFFF' : '#3B82F6'}
+            color={contribMetric === 'carbs' ? '#FFFFFF' : theme.colors.macroCarbs}
           />
           <Text
             style={[
@@ -83,7 +85,7 @@ export function TopFoodContributorsSection({
         >
           <DropletIcon
             size={14}
-            color={contribMetric === 'fat' ? '#FFFFFF' : '#FBBF24'}
+            color={contribMetric === 'fat' ? '#FFFFFF' : theme.colors.macroFats}
           />
           <Text
             style={[

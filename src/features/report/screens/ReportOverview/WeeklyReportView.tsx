@@ -13,7 +13,7 @@ import type {
   WeightForecast,
   WeightTrendPoint,
 } from '../../types';
-import { styles } from './ReportOverviewScreen.styles';
+import { useReportStyles } from './ReportOverviewScreen.styles';
 
 export type WeeklyReportViewProps = {
   weekSummary: PeriodSummary;
@@ -34,13 +34,15 @@ export function WeeklyReportView({
   caloriesGoal,
   targetWeightKg,
 }: WeeklyReportViewProps) {
+  const { theme, styles } = useReportStyles();
+
   return (
     <View style={styles.weeklyContainer}>
       {/* High-level Summary Metrics Cards */}
       <View style={styles.weeklySummaryGrid}>
         <View style={styles.weeklySummaryCard}>
           <Text style={styles.weeklyCardLabel}>Tổng Calo Nạp</Text>
-          <Text style={[styles.weeklyCardValue, { color: '#9E64F7' }]}>
+          <Text style={[styles.weeklyCardValue, { color: theme.colors.brandPrimary }]}>
             {formatNumber(weekSummary.totalCaloriesIn)}
           </Text>
           <Text style={styles.weeklyCardSub}>
@@ -50,7 +52,7 @@ export function WeeklyReportView({
 
         <View style={styles.weeklySummaryCard}>
           <Text style={styles.weeklyCardLabel}>Tổng Tiêu hao</Text>
-          <Text style={[styles.weeklyCardValue, { color: '#FF6B6B' }]}>
+          <Text style={[styles.weeklyCardValue, { color: theme.colors.macroProtein }]}>
             {formatNumber(weekSummary.totalCaloriesBurned)}
           </Text>
           <Text style={styles.weeklyCardSub}>
@@ -60,7 +62,7 @@ export function WeeklyReportView({
 
         <View style={styles.weeklySummaryCard}>
           <Text style={styles.weeklyCardLabel}>Nước uống TB</Text>
-          <Text style={[styles.weeklyCardValue, { color: '#38BDF8' }]}>
+          <Text style={[styles.weeklyCardValue, { color: theme.colors.trackerWater }]}>
             {formatNumber(weekSummary.avgWaterMl)} ml
           </Text>
           <Text style={styles.weeklyCardSub}>
@@ -70,7 +72,7 @@ export function WeeklyReportView({
 
         <View style={styles.weeklySummaryCard}>
           <Text style={styles.weeklyCardLabel}>Bước chân TB</Text>
-          <Text style={[styles.weeklyCardValue, { color: '#4ADE80' }]}>
+          <Text style={[styles.weeklyCardValue, { color: theme.colors.quickScanner }]}>
             {formatNumber(weekSummary.avgSteps)}
           </Text>
           <Text style={styles.weeklyCardSub}>bước/ngày</Text>

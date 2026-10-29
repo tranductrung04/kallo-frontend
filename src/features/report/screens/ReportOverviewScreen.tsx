@@ -26,7 +26,7 @@ import {
   ReportHeader,
   TopFoodContributorsSection,
   WeeklyReportView,
-  styles,
+  useReportStyles,
 } from './ReportOverview';
 
 type ScreenRouteProp = RouteProp<RootStackParamList, 'ReportOverview'>;
@@ -36,6 +36,7 @@ export function ReportOverviewScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<ScreenNavProp>();
   const route = useRoute<ScreenRouteProp>();
+  const { theme, styles } = useReportStyles();
 
   const { state: nutritionState, foods, getSummary, getLogs } = useNutrition();
   const { state: activityState } = useActivity();
@@ -212,8 +213,11 @@ export function ReportOverviewScreen() {
       : `${formatDayMonth(weekDatesList[0])} - ${formatDayMonth(weekDatesList[6])}`;
 
   return (
-    <SafeAreaView style={styles.safeContainer}>
-      <StatusBar barStyle="light-content" backgroundColor="#0D0B14" />
+    <SafeAreaView style={[styles.safeContainer, { backgroundColor: theme.colors.canvasBase }]}>
+      <StatusBar
+        barStyle={theme.scheme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={theme.colors.canvasBase}
+      />
 
       {/* ── 1. Top Header ── */}
       <ReportHeader

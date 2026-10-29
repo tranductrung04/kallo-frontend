@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { ChevronLeftIcon, ChevronRightIcon } from '@/components/icons';
-import { styles } from './ReportOverviewScreen.styles';
+import { useReportStyles } from './ReportOverviewScreen.styles';
 
 export type ReportDateNavigatorProps = {
   dateLabel: string;
@@ -14,6 +14,8 @@ export function ReportDateNavigator({
   onPrev,
   onNext,
 }: ReportDateNavigatorProps) {
+  const { theme, styles } = useReportStyles();
+
   return (
     <View style={styles.dateNavigatorContainer}>
       <TouchableOpacity
@@ -22,7 +24,7 @@ export function ReportDateNavigator({
         accessibilityLabel="Ngày trước"
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
-        <ChevronLeftIcon size={18} color="#C4C0D4" />
+        <ChevronLeftIcon size={18} color={theme.colors.textSecondary} />
       </TouchableOpacity>
 
       <Text style={styles.dateNavText}>{dateLabel}</Text>
@@ -33,7 +35,7 @@ export function ReportDateNavigator({
         accessibilityLabel="Ngày sau"
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
-        <ChevronRightIcon size={18} color="#C4C0D4" />
+        <ChevronRightIcon size={18} color={theme.colors.textSecondary} />
       </TouchableOpacity>
     </View>
   );

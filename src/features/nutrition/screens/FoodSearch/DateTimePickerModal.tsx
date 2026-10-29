@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CloseXIcon } from '@/components/icons';
 import { useTheme } from '@/theme';
 import { offsetDate, todayKey } from '../../utils';
-import { styles } from './FoodSearchScreen.styles';
+import { useFoodSearchStyles } from './FoodSearchScreen.styles';
 
 const ITEM_HEIGHT = 44;
 const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
@@ -45,7 +45,7 @@ export function DateTimePickerModal({
   onClose,
   onConfirm,
 }: DateTimePickerModalProps) {
-  const theme = useTheme();
+  const { theme, styles } = useFoodSearchStyles();
   const insets = useSafeAreaInsets();
   const [tempDate, setTempDate] = useState(initialDate);
   const [tempHour, setTempHour] = useState(initialHour.slice(0, 2) || '11');
