@@ -8,3 +8,7 @@ export * from './PickleballWorkoutScreen';
 export * from './YogaWorkoutScreen';
 export * from './AddActivityScreen';
 export * from './ActivityWorkoutScreen';
+export * from './StepDetailScreen';
+export * from './WorkoutStatisticsScreen';
+export * from './WeightStatisticsScreen';
+export * from './RecordWeightScreen';

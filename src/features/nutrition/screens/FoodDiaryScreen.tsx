@@ -14,12 +14,12 @@ import type { FoodLog, MealSlot } from '../types';
 import { offsetDate, todayKey } from '../utils';
 import {
   BASE_HOURS,
+  createStyles,
   DatePickerModal,
   DiaryHeader,
   DiaryMenuModal,
   MacroStrip,
   QuickAddModal,
-  styles,
   TimelineHourRow,
   WaterLoggerModal,
   WeightLoggerModal,
@@ -32,6 +32,7 @@ type RootNavigation = NativeStackNavigationProp<RootStackParamList>;
 
 export function FoodDiaryScreen({ navigation }: Props) {
   const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const root = navigation.getParent() as RootNavigation | undefined;
   const {
     state,
@@ -161,7 +162,10 @@ export function FoodDiaryScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView edges={['top']} style={[styles.container, { backgroundColor: theme.colors.canvasBase }]}>
-      <StatusBar barStyle="light-content" backgroundColor={theme.colors.canvasBase} />
+      <StatusBar
+        barStyle={theme.scheme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={theme.colors.canvasBase}
+      />
 
       {/* ── 1. Top Navigation Bar ────────────────────────────────────────────── */}
       <DiaryHeader
