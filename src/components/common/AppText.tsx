@@ -23,6 +23,9 @@ export function AppText({ variant = 'bodyLg', color, align, style, testID, ...pr
     safeLineHeight = Math.ceil(targetFontSize * 1.28);
   }
 
+  const resolvedColor = color ?? flattened?.color ?? theme.colors.textPrimary;
+  const resolvedAlign = align ?? flattened?.textAlign;
+
   return (
     <Text
       testID={testID}
@@ -30,8 +33,8 @@ export function AppText({ variant = 'bodyLg', color, align, style, testID, ...pr
       {...props}
       style={[
         baseStyle,
-        { color: color ?? theme.colors.textPrimary, textAlign: align },
         style,
+        { color: resolvedColor, textAlign: resolvedAlign },
         safeLineHeight ? { lineHeight: safeLineHeight } : undefined,
       ]}
     />

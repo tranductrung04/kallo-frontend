@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Modal,
   Pressable,
@@ -8,10 +8,11 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path } from 'react-native-svg';
 
-import { CalendarIcon } from '@/components/icons';
+import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from '@/components/icons';
 import { offsetDate, todayKey } from '@/features/nutrition/utils';
+import { useTheme, type ThemeContextValue } from '@/theme';
+import { colors, type ColorTokens } from '@/theme/colors';
 
 export type MonthCalendarModalProps = {
   visible: boolean;
@@ -48,13 +49,18 @@ export function formatFullCalendarTitle(dateKey: string): string {
 
 /**
  * Component Lịch Tháng dạng Dropdown Sheet dùng chung toàn ứng dụng
+ * Tự động hỗ trợ cả giao diện Sáng (Daylight Vitality) & Tối (Nocturne Vitality)
  */
 export function MonthCalendarModal({
   visible,
   date,
   onSelectDate,
   onClose,
+  title,
+  onSelectToday,
 }: MonthCalendarModalProps) {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const insets = useSafeAreaInsets();
 
   // Parse ngày đang được chọn
@@ -128,23 +134,29 @@ export function MonthCalendarModal({
           {/* 1. Header hàng đầu */}
           <View style={styles.calendarHeaderRow}>
             <Text style={styles.calendarHeaderTitle}>
-              {formatFullCalendarTitle(date)}
+              {title || formatFullCalendarTitle(date)}
             </Text>
             <TouchableOpacity
               onPress={() => {
-                const today = todayKey();
-                onSelectDate(today);
+                if (onSelectToday) {
+                  onSelectToday();
+                } else {
+                  const today = todayKey();
+                  onSelectDate(today);
+                }
                 onClose();
               }}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               accessibilityRole="button"
               accessibilityLabel="Về hôm nay"
+              style={styles.calendarTodayBtn}
             >
-              <CalendarIcon size={22} color="#FFFFFF" />
+              <CalendarIcon size={16} color={theme.colors.brandPrimary} />
+              <Text style={styles.calendarTodayBtnText}>Hôm nay</Text>
             </TouchableOpacity>
           </View>
 
-          {/* 2. Thanh chuyển tháng: ◀ Tháng X ▶ */}
+          {/* 2. Thanh chuyển tháng: ◀ Tháng X • YYYY ▶ */}
           <View style={styles.calendarMonthNavRow}>
             <TouchableOpacity
               onPress={handlePrevMonth}
@@ -153,13 +165,11 @@ export function MonthCalendarModal({
               accessibilityRole="button"
               accessibilityLabel="Tháng trước"
             >
-              <Svg width={11} height={14} viewBox="0 0 11 14" fill="none">
-                <Path d="M9 2.5L2.5 7L9 11.5Z" fill="#FFFFFF" />
-              </Svg>
+              <ChevronLeftIcon size={18} color={theme.colors.textPrimary} />
             </TouchableOpacity>
 
             <Text style={styles.calendarMonthNavText}>
-              Tháng {viewMonth}
+              Tháng {viewMonth} • {viewYear}
             </Text>
 
             <TouchableOpacity
@@ -169,9 +179,7 @@ export function MonthCalendarModal({
               accessibilityRole="button"
               accessibilityLabel="Tháng sau"
             >
-              <Svg width={11} height={14} viewBox="0 0 11 14" fill="none">
-                <Path d="M2 2.5L8.5 7L2 11.5Z" fill="#FFFFFF" />
-              </Svg>
+              <ChevronRightIcon size={18} color={theme.colors.textPrimary} />
             </TouchableOpacity>
           </View>
 
@@ -221,7 +229,7 @@ export function MonthCalendarModal({
                       </View>
                     </View>
                   ) : isSelected ? (
-                    /* Ngày được chọn: Vòng tròn tím đặc */
+                    /* Ngày được chọn: Vòng tròn thương hiệu đặc */
                     <View style={styles.calendarSelectedSolid}>
                       <Text style={styles.calendarSelectedDayNumber}>
                         {item.dayNum}
@@ -256,134 +264,176 @@ export function MonthCalendarModal({
 // Alias tương thích ngược
 export const DatePickerModal = MonthCalendarModal;
 
-const styles = StyleSheet.create({
-  calendarModalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
-    justifyContent: 'flex-start',
-  },
-  calendarCard: {
-    backgroundColor: '#201A2F',
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    paddingBottom: 28,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 12,
-  },
-  calendarHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-  },
-  calendarHeaderTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    letterSpacing: -0.2,
-  },
-  calendarMonthNavRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 36,
-    marginTop: 8,
-    marginBottom: 16,
-  },
-  calendarMonthNavText: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  calendarMonthArrowBtn: {
-    width: 36,
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  calendarWeekdaysRow: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    marginBottom: 10,
-  },
-  calendarWeekdayCol: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  calendarWeekdayText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#9E9AA7',
-  },
-  calendarDivider: {
-    height: 1,
-    backgroundColor: '#2C253E',
-    marginHorizontal: 16,
-    marginBottom: 12,
-  },
-  calendarGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: 16,
-  },
-  calendarDayCell: {
-    width: '14.285%',
-    height: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  calendarDayNumber: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#FFFFFF',
-  },
-  calendarSelectedOuterRing: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 1.5,
-    borderColor: '#A78BFA',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  calendarSelectedInnerCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#9E64F7',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  calendarSelectedSolid: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#9E64F7',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  calendarTodayOutline: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 1.5,
-    borderColor: '#A78BFA',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'transparent',
-  },
-  calendarTodayDayNumber: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  calendarSelectedDayNumber: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
+export function createStyles(theme: ThemeContextValue | { colors: ColorTokens; scheme?: string }) {
+  const { colors: c } = theme;
+  const isDark = 'scheme' in theme ? theme.scheme === 'dark' : true;
+
+  return StyleSheet.create({
+    calendarModalOverlay: {
+      flex: 1,
+      backgroundColor: c.overlay,
+      justifyContent: 'flex-start',
+    },
+    calendarCard: {
+      backgroundColor: c.surfaceMid,
+      borderBottomLeftRadius: 30,
+      borderBottomRightRadius: 30,
+      borderBottomWidth: 1,
+      borderLeftWidth: 1,
+      borderRightWidth: 1,
+      borderColor: c.surfaceBorder,
+      paddingBottom: 28,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: isDark ? 0.5 : 0.1,
+      shadowRadius: 20,
+      elevation: 12,
+    },
+    calendarHeaderRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 20,
+      paddingVertical: 12,
+    },
+    calendarHeaderTitle: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: c.textPrimary,
+      letterSpacing: -0.2,
+    },
+    calendarTodayBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 16,
+      backgroundColor: c.brandSoftTint,
+    },
+    calendarTodayBtnText: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: c.brandPrimary,
+    },
+    calendarMonthNavRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 36,
+      marginTop: 8,
+      marginBottom: 16,
+    },
+    calendarMonthNavText: {
+      fontSize: 17,
+      fontWeight: '700',
+      color: c.textPrimary,
+    },
+    calendarMonthArrowBtn: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: c.surfaceHigh,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    calendarWeekdaysRow: {
+      flexDirection: 'row',
+      paddingHorizontal: 16,
+      marginBottom: 10,
+    },
+    calendarWeekdayCol: {
+      flex: 1,
+      alignItems: 'center',
+    },
+    calendarWeekdayText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: c.textSecondary,
+    },
+    calendarDivider: {
+      height: 1,
+      backgroundColor: c.surfaceBorder,
+      marginHorizontal: 16,
+      marginBottom: 12,
+    },
+    calendarGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      paddingHorizontal: 16,
+    },
+    calendarDayCell: {
+      width: '14.285%',
+      height: 48,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    calendarDayNumber: {
+      fontSize: 16,
+      fontWeight: '500',
+      color: c.textPrimary,
+    },
+    calendarSelectedOuterRing: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      borderWidth: 1.5,
+      borderColor: c.brandSecondary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: c.brandSoftTint,
+    },
+    calendarSelectedInnerCircle: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      backgroundColor: c.brandPrimary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: c.brandPrimary,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.35,
+      shadowRadius: 5,
+      elevation: 3,
+    },
+    calendarSelectedSolid: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: c.brandPrimary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: c.brandPrimary,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.35,
+      shadowRadius: 6,
+      elevation: 4,
+    },
+    calendarTodayOutline: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      borderWidth: 1.5,
+      borderColor: c.brandPrimary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: c.brandSoftTint,
+    },
+    calendarTodayDayNumber: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: c.brandPrimary,
+    },
+    calendarSelectedDayNumber: {
+      fontSize: 16,
+      fontWeight: '700',
+      color: c.onBrand,
+    },
+  });
+}
+
+// Default export for backwards compatibility
+export const styles = createStyles({
+  colors: colors.dark,
+  scheme: 'dark',
 });

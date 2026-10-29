@@ -22,7 +22,7 @@ import {
   getMealSlotForHour,
   getMealSlotLabel,
 } from './diaryUtils';
-import { styles } from './FoodDiaryScreen.styles';
+import { useFoodDiaryStyles } from './FoodDiaryScreen.styles';
 import {
   CalendarIcon,
   ChevronLeftIcon,
@@ -62,6 +62,7 @@ export function DiaryHeader({
 }: DiaryHeaderProps) {
   const theme = useTheme();
   const { colors: c } = theme;
+  const styles = useFoodDiaryStyles();
 
   return (
     <View style={styles.headerBar}>
@@ -71,7 +72,7 @@ export function DiaryHeader({
         style={styles.headerIconButton}
         accessibilityLabel="Menu tùy chọn"
       >
-        <MenuIcon size={22} color={textColor} />
+        <MenuIcon size={22} color={textColor || c.textPrimary} />
       </TouchableOpacity>
 
       {/* Center: <  Hôm nay  > */}
@@ -81,7 +82,7 @@ export function DiaryHeader({
           style={styles.chevronButton}
           accessibilityLabel="Ngày trước"
         >
-          <ChevronLeftIcon size={18} color={c.textSecondary} />
+          <ChevronLeftIcon size={18} color={textColor || c.textSecondary} />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -89,7 +90,7 @@ export function DiaryHeader({
           style={styles.dateTitleContainer}
           accessibilityLabel="Chọn ngày"
         >
-          <Text style={styles.dateTitleText}>{getDateTitle(date)}</Text>
+          <Text style={[styles.dateTitleText, { color: textColor || c.textPrimary }]}>{getDateTitle(date)}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -97,7 +98,7 @@ export function DiaryHeader({
           style={styles.chevronButton}
           accessibilityLabel="Ngày tiếp theo"
         >
-          <ChevronRightIcon size={18} color={c.textSecondary} />
+          <ChevronRightIcon size={18} color={textColor || c.textSecondary} />
         </TouchableOpacity>
       </View>
 
@@ -118,6 +119,7 @@ export type MacroStripProps = {
 export function MacroStrip({ summary, page, onPageChange, onPressReport }: MacroStripProps) {
   const theme = useTheme();
   const { colors: c } = theme;
+  const styles = useFoodDiaryStyles();
   const { width: screenWidth } = useWindowDimensions();
   const scrollRef = useRef<ScrollView>(null);
 
@@ -424,6 +426,7 @@ export function TimelineHourRow({
 }: TimelineHourRowProps) {
   const theme = useTheme();
   const { colors: c } = theme;
+  const styles = useFoodDiaryStyles();
   const hasLogs = logs.length > 0;
   const totalCaloriesInHour = logs.reduce((sum, log) => {
     const nut = getLogNutrition(log, foods);
@@ -533,6 +536,7 @@ export function QuickAddModal({
   onSelectCustom,
   onCopyYesterday,
 }: QuickAddModalProps) {
+  const styles = useFoodDiaryStyles();
   if (!hour) return null;
   const activeMealSlot = getMealSlotForHour(hour);
   const activeMealLabel = getMealSlotLabel(activeMealSlot);
@@ -650,6 +654,7 @@ function ToggleSwitch({
 }) {
   const theme = useTheme();
   const { colors: c } = theme;
+  const styles = useFoodDiaryStyles();
 
   return (
     <TouchableOpacity
@@ -704,6 +709,7 @@ export function DiaryMenuModal({
 }: DiaryMenuModalProps) {
   const theme = useTheme();
   const { colors: c } = theme;
+  const styles = useFoodDiaryStyles();
 
   return (
     <Modal
@@ -799,6 +805,7 @@ export function WaterLoggerModal({
   onAddWater,
   onClose,
 }: WaterLoggerModalProps) {
+  const styles = useFoodDiaryStyles();
   return (
     <Modal
       visible={visible}
@@ -858,6 +865,7 @@ export function WeightLoggerModal({
   onAddWeight,
   onClose,
 }: WeightLoggerModalProps) {
+  const styles = useFoodDiaryStyles();
   const baseWeight = weightKg || targetWeightKg || 60;
 
   return (

@@ -3,7 +3,7 @@ import { Text, TouchableOpacity, View } from 'react-native';
 import { FlameIcon, PlusIcon, SparklesIcon } from '@/components/icons';
 import { formatNumber } from '@/features/nutrition/utils';
 import { CalorieIntakeGuideModal } from '@/features/nutrition/components';
-import { styles } from './ReportOverviewScreen.styles';
+import { useReportStyles } from './ReportOverviewScreen.styles';
 
 export type DayCalorieSectionProps = {
   calories: number;
@@ -20,6 +20,7 @@ export function DayCalorieSection({
   progressPercent,
   onLogFood,
 }: DayCalorieSectionProps) {
+  const { theme, styles } = useReportStyles();
   const [guideModalVisible, setGuideModalVisible] = useState(false);
 
   return (
@@ -50,7 +51,7 @@ export function DayCalorieSection({
               accessibilityRole="button"
               accessibilityLabel="Ghi món ăn"
             >
-              <PlusIcon size={16} color="#9E64F7" />
+              <PlusIcon size={16} color={theme.colors.brandPrimary} />
             </TouchableOpacity>
           </View>
         </View>
@@ -58,14 +59,14 @@ export function DayCalorieSection({
         {/* Progress Bar with Flame & Target Marker */}
         <View style={styles.progressBarWrapper}>
           <View style={styles.flameCircleBadge}>
-            <FlameIcon size={16} color="#9E64F7" />
+            <FlameIcon size={16} color={theme.colors.brandPrimary} />
           </View>
 
           <View style={styles.progressTrack}>
             <View
               style={[
                 styles.progressFill,
-                { width: `${progressPercent}%` },
+                { width: `${progressPercent}%`, backgroundColor: theme.colors.brandPrimary },
               ]}
             />
             {/* Goal indicator line mark */}
@@ -77,7 +78,7 @@ export function DayCalorieSection({
       {/* Kallo Insight / Motivation Card */}
       <View style={[styles.cardSurface, styles.insightCard]}>
         <View style={styles.insightHeaderRow}>
-          <SparklesIcon size={18} color="#9E64F7" />
+          <SparklesIcon size={18} color={theme.colors.brandPrimary} />
           <Text style={styles.insightTitle}>
             {calories === 0
               ? 'Bạn chưa ghi món ăn hôm nay!'

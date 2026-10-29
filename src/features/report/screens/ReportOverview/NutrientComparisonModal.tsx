@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTheme } from '@/theme';
 import { formatNumber } from '@/features/nutrition/utils';
 
 export type NutrientComparisonModalProps = {
@@ -68,6 +69,8 @@ export function NutrientComparisonModal({
   hasLogs = false,
 }: NutrientComparisonModalProps) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const { colors: c } = theme;
 
   // Helper to format current logged value or show '-'
   const formatVal = (val: number, unit: string) => {
@@ -196,7 +199,10 @@ export function NutrientComparisonModal({
       statusBarTranslucent
     >
       <Pressable style={styles.backdrop} onPress={onClose}>
-        <Pressable style={styles.sheetContainer} onPress={(e) => e.stopPropagation()}>
+        <Pressable
+          style={[styles.sheetContainer, { backgroundColor: c.surfaceMid, borderColor: c.surfaceBorder }]}
+          onPress={(e) => e.stopPropagation()}
+        >
           {/* Grab Handle area for dragging down or clicking to close */}
           <View {...panResponder.panHandlers} style={styles.handleArea}>
             <TouchableOpacity
@@ -205,17 +211,17 @@ export function NutrientComparisonModal({
               accessibilityRole="button"
               accessibilityLabel="Đóng bảng chỉ số"
             >
-              <View style={styles.dragHandle} />
+              <View style={[styles.dragHandle, { backgroundColor: c.surfaceBorder }]} />
             </TouchableOpacity>
           </View>
 
           {/* Table Header: Tổng | Mục tiêu / Khuyến nghị */}
           <View style={styles.headerRow}>
             <View style={styles.headerLeftSpacer} />
-            <Text style={styles.headerColTotal}>Tổng</Text>
+            <Text style={[styles.headerColTotal, { color: c.textSecondary }]}>Tổng</Text>
             <View style={styles.headerColGoalWrapper}>
-              <Text style={styles.headerColGoalLine}>Mục tiêu/</Text>
-              <Text style={styles.headerColGoalLine}>Khuyến nghị</Text>
+              <Text style={[styles.headerColGoalLine, { color: c.textSecondary }]}>Mục tiêu/</Text>
+              <Text style={[styles.headerColGoalLine, { color: c.textSecondary }]}>Khuyến nghị</Text>
             </View>
           </View>
 
@@ -231,7 +237,7 @@ export function NutrientComparisonModal({
             {sections.map((section, secIdx) => (
               <View key={section.title || `section-${secIdx}`}>
                 {section.title ? (
-                  <Text style={styles.sectionHeaderTitle}>{section.title}</Text>
+                  <Text style={[styles.sectionHeaderTitle, { color: c.textPrimary }]}>{section.title}</Text>
                 ) : null}
 
                 {section.rows.map((row) => {
@@ -245,8 +251,9 @@ export function NutrientComparisonModal({
                         <Text
                           style={[
                             styles.rowNameText,
-                            row.isMain && styles.rowNameMain,
-                            row.isSub && styles.rowNameSub,
+                            { color: c.textSecondary },
+                            row.isMain && [styles.rowNameMain, { color: c.textPrimary }],
+                            row.isSub && [styles.rowNameSub, { color: c.textSecondary }],
                           ]}
                           numberOfLines={1}
                         >
@@ -258,7 +265,8 @@ export function NutrientComparisonModal({
                       <Text
                         style={[
                           styles.colTotalValue,
-                          isDashCurrent && styles.colDashValue,
+                          { color: c.textPrimary },
+                          isDashCurrent && [styles.colDashValue, { color: c.textDisabled }],
                         ]}
                       >
                         {row.current}
@@ -268,7 +276,8 @@ export function NutrientComparisonModal({
                       <Text
                         style={[
                           styles.colGoalValue,
-                          isDashTarget && styles.colDashValue,
+                          { color: c.textPrimary },
+                          isDashTarget && [styles.colDashValue, { color: c.textDisabled }],
                         ]}
                       >
                         {row.target}
