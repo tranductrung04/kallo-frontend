@@ -15,9 +15,8 @@ import {
   SearchIcon,
   ViewfinderBarcodeIcon,
 } from '@/components/icons';
-import { useTheme } from '@/theme';
 import type { Food } from '../../types';
-import { styles } from './FoodSearchScreen.styles';
+import { useFoodSearchStyles } from './FoodSearchScreen.styles';
 
 export type SearchTab = 'recent' | 'mine' | 'favorite';
 
@@ -37,7 +36,7 @@ export function FoodSearchHeader({
   onOpenPicker,
   onOpenInfo,
 }: FoodSearchHeaderProps) {
-  const theme = useTheme();
+  const { theme, styles } = useFoodSearchStyles();
   const { colors: c } = theme;
 
   return (
@@ -88,7 +87,7 @@ export function FoodSearchBar({
   onChangeQuery,
   onOpenBarcode,
 }: FoodSearchBarProps) {
-  const theme = useTheme();
+  const { theme, styles } = useFoodSearchStyles();
   const { colors: c } = theme;
 
   return (
@@ -134,6 +133,8 @@ export function FoodSearchTabs({
   activeTab,
   onSelectTab,
 }: FoodSearchTabsProps) {
+  const { styles } = useFoodSearchStyles();
+
   return (
     <View style={styles.tabsRow}>
       {/* Tab 1: Gần đây */}
@@ -187,7 +188,7 @@ export function FoodSearchActionCards({
   onAIMealScan,
   onVoiceLog,
 }: FoodSearchActionCardsProps) {
-  const theme = useTheme();
+  const { theme, styles } = useFoodSearchStyles();
   const { colors: c } = theme;
 
   return (
@@ -239,6 +240,8 @@ export type FoodRowItemProps = {
 };
 
 export function FoodRowItem({ food, onPress }: FoodRowItemProps) {
+  const { styles } = useFoodSearchStyles();
+
   return (
     <TouchableOpacity
       style={styles.foodRow}
@@ -270,6 +273,8 @@ export function FoodSearchEmptyState({
   activeTab,
   onCreateCustom,
 }: FoodSearchEmptyStateProps) {
+  const { styles } = useFoodSearchStyles();
+
   if (isSearchActive) {
     return (
       <View style={styles.emptyContainer}>

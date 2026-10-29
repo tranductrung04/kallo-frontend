@@ -1,6 +1,7 @@
 import React from 'react';
 import { Image } from 'react-native';
 import { images } from '@/assets/images';
+import { useTheme } from '@/theme';
 import Svg, {
   Circle,
   Ellipse,
@@ -873,20 +874,46 @@ export function ViewfinderBarcodeIcon({ size = 26, color = '#FFFFFF' }: IconProp
   );
 }
 
-/** Minh họa thư mục trống kèm 2 lá và nét xoắn tím bay (chuẩn 100% ảnh thiết kế) */
-export function EmptyFolderIllustration({ size = 140 }: { size?: number }) {
+export type EmptyFolderIllustrationProps = {
+  size?: number;
+  folderBack?: string;
+  folderFront?: string;
+  accentColor?: string;
+};
+
+/** Minh họa thư mục trống kèm 2 lá và nét xoắn tím bay (chuẩn thiết kế, tự động thích ứng Sáng / Tối) */
+export function EmptyFolderIllustration({
+  size = 140,
+  folderBack,
+  folderFront,
+  accentColor,
+}: EmptyFolderIllustrationProps) {
+  const theme = useTheme();
+  const isDark = theme.scheme === 'dark';
+  const { colors: c } = theme;
+
+  // Tự động thích ứng màu sắc theo Theme:
+  // - Light theme: Thân sau tím pastel nhạt (#EDE7F9), nắp trước trắng tinh tế (#FFFFFF) với viền pastel mềm (#DDD4F4)
+  // - Dark theme: Thân sau tím than (#1D1929), nắp trước tím than (#2A243A) với viền (#3D3554)
+  // - Chi tiết lá & nét xoắn bay: Tím thương hiệu nhận diện rõ ràng (Light: #7B4FE0 / Dark: #9E64F7)
+  const resolvedAccent = accentColor ?? (isDark ? '#9E64F7' : (c.brandPrimary || '#7B4FE0'));
+  const resolvedBack = folderBack ?? (isDark ? '#1D1929' : '#EDE7F9');
+  const resolvedBackStroke = isDark ? '#2E2740' : '#DCD2F2';
+  const resolvedFront = folderFront ?? (isDark ? '#2A243A' : '#FFFFFF');
+  const resolvedFrontStroke = isDark ? '#3D3554' : '#DDD4F4';
+
   return (
     <Svg width={size} height={size * 0.88} viewBox="0 0 160 140" fill="none">
       {/* 1. Lá tím bên trái */}
       <Path
         d="M 44 32 C 43 23 52 19 57 24 C 58 33 49 37 44 32 Z"
-        fill="#9E64F7"
+        fill={resolvedAccent}
       />
 
       {/* 2. Nét xoắn tím lơ lửng ở giữa có vòng lặp loop */}
       <Path
         d="M 62 48 C 74 48 82 43 86 37 C 91 28 85 22 81 25 C 77 28 78 35 85 34 C 92 33 99 25 104 14"
-        stroke="#9E64F7"
+        stroke={resolvedAccent}
         strokeWidth={2.8}
         strokeLinecap="round"
       />
@@ -894,17 +921,19 @@ export function EmptyFolderIllustration({ size = 140 }: { size?: number }) {
       {/* 3. Lá tím bên phải */}
       <Path
         d="M 110 35 C 111 27 120 25 123 30 C 122 38 114 40 110 35 Z"
-        fill="#9E64F7"
+        fill={resolvedAccent}
       />
 
-      {/* 4. Thân sau của thư mục (hình chữ nhật bo góc tối) */}
+      {/* 4. Thân sau của thư mục (hình chữ nhật bo góc) */}
       <Rect
         x={24}
         y={42}
         width={112}
         height={76}
         rx={14}
-        fill="#1D1929"
+        fill={resolvedBack}
+        stroke={resolvedBackStroke}
+        strokeWidth={1.5}
       />
 
       {/* 5. Nắp trước của thư mục (vát nhẹ mở ra trước) */}
@@ -914,7 +943,9 @@ export function EmptyFolderIllustration({ size = 140 }: { size?: number }) {
            L 126 55 C 134 55 140 61 139 68 
            L 133 114 C 132 119 128 122 123 122 
            L 28 122 C 23 122 19 118 20 113 Z"
-        fill="#2A243A"
+        fill={resolvedFront}
+        stroke={resolvedFrontStroke}
+        strokeWidth={1.5}
       />
     </Svg>
   );

@@ -52,7 +52,7 @@ export function StreakActionCardWidget({
   // Khi streak = 0: giữ thẻ hành động ghi món hiện tại và dùng ảnh fooddefault.webp
   if (streak <= 0) {
     return (
-      <View style={styles.actionCard}>
+      <View style={[styles.actionCard, { backgroundColor: 'rgba(255, 255, 255, 0.14)', borderColor: 'rgba(255, 255, 255, 0.2)' }]}>
         <View style={styles.foodAvatarContainer}>
           <Image
             source={images.foodDefault}
@@ -108,6 +108,7 @@ export function StreakChallengeWidget({
   currentStreak,
   targetDays = 3,
 }: StreakChallengeWidgetProps) {
+  const { colors: c } = useTheme();
   const progressRatio = Math.min(currentStreak / 14, 1);
 
   // Mốc đã đạt HOẶC là target thì sáng màu, còn lại tối màu
@@ -117,22 +118,25 @@ export function StreakChallengeWidget({
 
   return (
     <View style={styles.sectionWrap}>
-      <AppText style={styles.sectionHeading}>Thử thách của bạn</AppText>
+      <AppText style={styles.sectionHeading} color={c.textPrimary}>Thử thách của bạn</AppText>
 
-      <View style={styles.challengeCard}>
+      <View style={[styles.challengeCard, { backgroundColor: c.surfaceMid, borderColor: c.surfaceBorder }]}>
         <View style={styles.challengeHeaderRow}>
-          <AppText style={styles.challengeLabel}>Chuỗi của bạn</AppText>
-          <AppText style={styles.challengeTarget}>
+          <AppText style={styles.challengeLabel} color={c.textSecondary}>Chuỗi của bạn</AppText>
+          <AppText style={styles.challengeTarget} color={c.textPrimary}>
             {currentStreak}/{targetDays} ngày
           </AppText>
         </View>
 
         <View style={styles.trackContainer}>
-          <View style={styles.trackBarBase}>
+          <View style={[styles.trackBarBase, { backgroundColor: c.progressTrack }]}>
             <View
               style={[
                 styles.trackBarProgress,
-                { width: `${Math.max(progressRatio * 100, 0)}%` },
+                {
+                  width: `${Math.max(progressRatio * 100, 0)}%`,
+                  backgroundColor: c.macroProtein,
+                },
               ]}
             />
           </View>
@@ -183,6 +187,7 @@ export function StreakWeekWidget({
   todayDayIndex,
   targetDays = 3,
 }: StreakWeekWidgetProps) {
+  const { colors: c } = useTheme();
   // Danh sách các thứ trong tuần (T2 -> CN)
   const ALL_DAYS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
 
@@ -208,9 +213,9 @@ export function StreakWeekWidget({
 
   return (
     <View style={styles.sectionWrap}>
-      <AppText style={styles.sectionHeading}>Mục tiêu chuỗi</AppText>
+      <AppText style={styles.sectionHeading} color={c.textPrimary}>Mục tiêu chuỗi</AppText>
 
-      <View style={styles.weekCard}>
+      <View style={[styles.weekCard, { backgroundColor: c.surfaceMid, borderColor: c.surfaceBorder }]}>
         <View style={styles.weekRow}>
           {rollingWeek.map((item) => (
             <View key={`${item.dayLabel}-${item.index}`} style={styles.dayCol}>
@@ -220,7 +225,7 @@ export function StreakWeekWidget({
                 ) : item.isTarget ? (
                   <StreakGoalFlagIcon width={34} height={38} />
                 ) : (
-                  <View style={styles.dayCircle} />
+                  <View style={[styles.dayCircle, { backgroundColor: c.surfaceHigh }]} />
                 )}
               </View>
               <AppText
@@ -228,6 +233,7 @@ export function StreakWeekWidget({
                   styles.dayText,
                   (item.isCompleted || item.isToday) && styles.dayTextActive,
                 ]}
+                color={item.isCompleted || item.isToday ? c.textPrimary : c.textSecondary}
               >
                 {item.dayLabel}
               </AppText>
@@ -254,13 +260,14 @@ export function StreakBottomStatsWidget({
   longestStreak = 0,
   onShieldPress,
 }: StreakBottomStatsWidgetProps) {
+  const { colors: c } = useTheme();
   const displayBestStreak = Math.max(longestStreak, currentStreak);
 
   return (
     <View style={styles.bottomStatsWrap}>
       <View style={styles.bottomStatsRow}>
         {/* Thẻ Chuỗi hiện tại */}
-        <View style={styles.statMiniCard}>
+        <View style={[styles.statMiniCard, { backgroundColor: c.surfaceMid, borderColor: c.surfaceBorder }]}>
           <View style={styles.statIconWrap}>
             <FlameIcon
               size={34}
@@ -269,8 +276,8 @@ export function StreakBottomStatsWidget({
             />
           </View>
           <View style={styles.statTextWrap}>
-            <AppText style={styles.statLabel}>Chuỗi hiện tại</AppText>
-            <AppText style={styles.statValue}>{currentStreak} ngày</AppText>
+            <AppText style={styles.statLabel} color={c.textSecondary}>Chuỗi hiện tại</AppText>
+            <AppText style={styles.statValue} color={c.textPrimary}>{currentStreak} ngày</AppText>
           </View>
         </View>
 
@@ -278,6 +285,7 @@ export function StreakBottomStatsWidget({
         <Pressable
           style={({ pressed }) => [
             styles.statMiniCard,
+            { backgroundColor: c.surfaceMid, borderColor: c.surfaceBorder },
             pressed && { opacity: 0.8 },
           ]}
           onPress={onShieldPress}
@@ -292,14 +300,14 @@ export function StreakBottomStatsWidget({
             />
           </View>
           <View style={styles.statTextWrap}>
-            <AppText style={styles.statLabel}>Khiên Kallo</AppText>
-            <AppText style={styles.statValue}>{freezeDaysRemaining}/2</AppText>
+            <AppText style={styles.statLabel} color={c.textSecondary}>Khiên Kallo</AppText>
+            <AppText style={styles.statValue} color={c.textPrimary}>{freezeDaysRemaining}/2</AppText>
           </View>
         </Pressable>
       </View>
 
       {/* Thẻ Chuỗi tốt nhất */}
-      <View style={styles.bestStreakCard}>
+      <View style={[styles.bestStreakCard, { backgroundColor: c.surfaceMid, borderColor: c.surfaceBorder }]}>
         <View style={styles.statIconWrap}>
           <Image
             source={images.streakBestTrophy}
@@ -308,8 +316,8 @@ export function StreakBottomStatsWidget({
           />
         </View>
         <View style={styles.statTextWrap}>
-          <AppText style={styles.statLabel}>Chuỗi tốt nhất</AppText>
-          <AppText style={styles.statValue}>{displayBestStreak} ngày</AppText>
+          <AppText style={styles.statLabel} color={c.textSecondary}>Chuỗi tốt nhất</AppText>
+          <AppText style={styles.statValue} color={c.textPrimary}>{displayBestStreak} ngày</AppText>
         </View>
       </View>
     </View>
@@ -440,7 +448,6 @@ const styles = StyleSheet.create({
   sectionHeading: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#FFFFFF',
     marginBottom: 12,
   },
 
@@ -462,12 +469,10 @@ const styles = StyleSheet.create({
   challengeLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#A09BAF',
   },
   challengeTarget: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#FFFFFF',
   },
   trackContainer: {
     height: 52,
@@ -528,11 +533,9 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 14,
     fontWeight: '600',
-    color: '#8A859C',
     textAlign: 'center',
   },
   dayTextActive: {
-    color: '#FFFFFF',
     fontWeight: '700',
   },
 
@@ -587,12 +590,10 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#94A3B8',
   },
   statValue: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#FFFFFF',
     marginTop: 2,
   },
 });
