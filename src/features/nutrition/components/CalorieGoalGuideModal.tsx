@@ -36,12 +36,11 @@ export function CalorieGoalGuideModal({ visible, onClose }: CalorieGoalGuideModa
     })
   ).current;
 
-  // Bảng màu tối ưu hóa hiển thị chuẩn theo hình thiết kế
-  const cardBg = isDark ? '#1E1A2E' : '#FFFFFF';
-  const titleColor = isDark ? '#FFFFFF' : '#13121B';
-  const bodyColor = isDark ? '#DDD9E8' : '#3F3B4D';
-  const boldColor = isDark ? '#FFFFFF' : '#13121B';
-  const closeIconColor = isDark ? '#FFFFFF' : '#13121B';
+  const cardBg = theme.colors.surfaceMid;
+  const titleColor = theme.colors.textPrimary;
+  const bodyColor = theme.colors.textSecondary;
+  const boldColor = theme.colors.textPrimary;
+  const closeIconColor = theme.colors.textPrimary;
 
   return (
     <Modal

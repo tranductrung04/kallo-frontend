@@ -15,15 +15,15 @@ import Svg, { Path } from 'react-native-svg';
 import type { RootStackParamList } from '@/navigation/types';
 import { ChevronLeftIcon } from '@/components/icons';
 import { images } from '@/assets/images';
+import { useTheme } from '@/theme';
 import { useActivity } from '../ActivityProvider';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'HealthSync'>;
 
-
 // Green checkmark icon
-function GreenCheckIcon() {
+function GreenCheckIcon({ color }: { color: string }) {
   return (
-    <View style={styles.greenCheckBadge}>
+    <View style={[styles.greenCheckBadge, { backgroundColor: color }]}>
       <Svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={3.5} strokeLinecap="round" strokeLinejoin="round">
         <Path d="M20 6L9 17l-5-5" />
       </Svg>
@@ -33,6 +33,8 @@ function GreenCheckIcon() {
 
 export function HealthSyncScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const { colors: c } = theme;
   const { requestHealthPermission, syncHealthData } = useActivity();
   const [connecting, setConnecting] = useState(false);
 
@@ -57,8 +59,11 @@ export function HealthSyncScreen({ navigation }: Props) {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: Math.max(8, insets.top) }]}>
-      <StatusBar barStyle="light-content" backgroundColor="#120E22" />
+    <View style={[styles.container, { backgroundColor: c.canvasBase, paddingTop: Math.max(8, insets.top) }]}>
+      <StatusBar
+        barStyle={theme.scheme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={c.canvasBase}
+      />
 
       {/* ── Header ────────────────────────────────────────── */}
       <View style={styles.header}>
@@ -69,12 +74,12 @@ export function HealthSyncScreen({ navigation }: Props) {
           accessibilityRole="button"
           accessibilityLabel="Quay lại"
         >
-          <ChevronLeftIcon size={22} color="#FFFFFF" />
+          <ChevronLeftIcon size={22} color={c.textPrimary} />
         </TouchableOpacity>
       </View>
 
       {/* ── Graphic Header Section ────────────────────────── */}
-      <View style={styles.graphicSection}>
+      <View style={[styles.graphicSection, { backgroundColor: c.surfaceMid }]}>
         {/* App Logo */}
         <Image
           source={images.trackerLogo}
@@ -86,13 +91,13 @@ export function HealthSyncScreen({ navigation }: Props) {
         {/* Sync Cycle Icon */}
         <Image
           source={images.syncIcon}
-          style={styles.syncIconImg}
+          style={[styles.syncIconImg, { tintColor: c.textSecondary }]}
           resizeMode="contain"
           accessibilityLabel="Đồng bộ"
         />
 
         {/* Google Health Connect App Icon */}
-        <View style={styles.healthConnectIconContainer}>
+        <View style={[styles.healthConnectIconContainer, { backgroundColor: c.surfaceMid }]}>
           <Image
             source={images.healthConnectIcon}
             style={styles.healthConnectImg}
@@ -104,26 +109,26 @@ export function HealthSyncScreen({ navigation }: Props) {
 
       {/* ── Main Content Section ───────────────────────────── */}
       <View style={styles.contentSection}>
-        <Text style={styles.headlineText}>
+        <Text style={[styles.headlineText, { color: c.textPrimary }]}>
           Wao muốn giúp bạn theo dõi vận động chính xác hơn! 🚀
         </Text>
 
         {/* Benefit 1 */}
         <View style={styles.benefitRow}>
-          <GreenCheckIcon />
-          <Text style={styles.benefitText}>Tính toán calories đốt cháy</Text>
+          <GreenCheckIcon color={c.quickScanner} />
+          <Text style={[styles.benefitText, { color: c.textPrimary }]}>Tính toán calories đốt cháy</Text>
         </View>
 
         {/* Benefit 2 */}
         <View style={styles.benefitRow}>
-          <GreenCheckIcon />
-          <Text style={styles.benefitText}>
+          <GreenCheckIcon color={c.quickScanner} />
+          <Text style={[styles.benefitText, { color: c.textPrimary }]}>
             Đồng bộ bước chân & quãng đường & cân nặng
           </Text>
         </View>
 
         {/* Privacy Note */}
-        <Text style={styles.privacyNoteText}>
+        <Text style={[styles.privacyNoteText, { color: c.textSecondary }]}>
           Bạn hoàn toàn có thể kiểm soát dữ liệu chia sẻ! Wao chỉ sử dụng thông tin này cho chính bạn, không chia sẻ với bên thứ ba.
         </Text>
       </View>
@@ -134,25 +139,25 @@ export function HealthSyncScreen({ navigation }: Props) {
           activeOpacity={0.8}
           onPress={handleSkip}
           disabled={connecting}
-          style={styles.skipButton}
+          style={[styles.skipButton, { backgroundColor: c.surfaceHigh }]}
           accessibilityRole="button"
           accessibilityLabel="Thiết lập sau"
         >
-          <Text style={styles.skipButtonText}>Thiết lập sau</Text>
+          <Text style={[styles.skipButtonText, { color: c.textPrimary }]}>Thiết lập sau</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={handleAllowAccess}
           disabled={connecting}
-          style={styles.allowButton}
+          style={[styles.allowButton, { backgroundColor: c.brandPrimary }]}
           accessibilityRole="button"
           accessibilityLabel="Cho phép truy cập"
         >
           {connecting ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
+            <ActivityIndicator size="small" color={c.onBrand} />
           ) : (
-            <Text style={styles.allowButtonText}>Cho phép truy cập</Text>
+            <Text style={[styles.allowButtonText, { color: c.onBrand }]}>Cho phép truy cập</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -163,7 +168,6 @@ export function HealthSyncScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#120E22',
   },
   header: {
     height: 52,
@@ -178,7 +182,6 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   graphicSection: {
-    backgroundColor: '#1E1834',
     paddingVertical: 36,
     flexDirection: 'row',
     alignItems: 'center',
@@ -217,7 +220,6 @@ const styles = StyleSheet.create({
     paddingTop: 32,
   },
   headlineText: {
-    color: '#FFFFFF',
     fontSize: 20,
     fontFamily: 'PlusJakartaSans_700Bold',
     fontWeight: '700',
@@ -233,7 +235,6 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 6,
-    backgroundColor: '#34A853',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -241,13 +242,11 @@ const styles = StyleSheet.create({
   },
   benefitText: {
     flex: 1,
-    color: '#FFFFFF',
     fontSize: 16,
     fontFamily: 'PlusJakartaSans_500Medium',
     lineHeight: 24,
   },
   privacyNoteText: {
-    color: '#BDB9CE',
     fontSize: 14.5,
     fontFamily: 'PlusJakartaSans_400Regular',
     lineHeight: 22,
@@ -259,13 +258,11 @@ const styles = StyleSheet.create({
   skipButton: {
     height: 52,
     borderRadius: 26,
-    backgroundColor: '#27223C',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
   },
   skipButtonText: {
-    color: '#FFFFFF',
     fontSize: 16,
     fontFamily: 'PlusJakartaSans_700Bold',
     fontWeight: '700',
@@ -273,12 +270,10 @@ const styles = StyleSheet.create({
   allowButton: {
     height: 52,
     borderRadius: 26,
-    backgroundColor: '#9E64F7',
     alignItems: 'center',
     justifyContent: 'center',
   },
   allowButtonText: {
-    color: '#FFFFFF',
     fontSize: 16,
     fontFamily: 'PlusJakartaSans_700Bold',
     fontWeight: '700',

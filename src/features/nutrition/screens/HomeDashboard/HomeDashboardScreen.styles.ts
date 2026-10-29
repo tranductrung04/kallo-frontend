@@ -83,7 +83,7 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       textTransform: 'uppercase',
     },
     stickyUpgradePill: {
-      backgroundColor: '#FED065',
+      backgroundColor: c.upgradeAccent,
       paddingHorizontal: 18,
       paddingVertical: 9,
       borderRadius: r.full,
@@ -97,7 +97,7 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       fontSize: 15,
       lineHeight: 20,
       fontWeight: '800',
-      color: '#8A5E0B',
+      color: c.onUpgradeAccent,
       letterSpacing: -0.2,
     },
 
@@ -109,7 +109,7 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       marginBottom: s.md,
     },
     upgradePillTop: {
-      backgroundColor: '#FED065',
+      backgroundColor: c.upgradeAccent,
       paddingHorizontal: 18,
       paddingVertical: 9,
       borderRadius: r.full,
@@ -123,7 +123,7 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       fontSize: 15,
       lineHeight: 20,
       fontWeight: '800',
-      color: '#8A5E0B',
+      color: c.onUpgradeAccent,
       letterSpacing: -0.2,
     },
     headerRightRow: {
@@ -430,7 +430,7 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       width: 38,
       height: 38,
       borderRadius: r.DEFAULT,
-      backgroundColor: '#FFFFFF',
+      backgroundColor: c.surfaceMid,
       alignItems: 'center',
       justifyContent: 'center',
       padding: 3,
@@ -443,6 +443,21 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       flex: 1,
       fontSize: 12,
       lineHeight: 16,
+    },
+    stepConnectedDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: c.quickScanner,
+    },
+    stepCountValue: {
+      fontSize: 18,
+      fontWeight: '700',
+      marginBottom: s.xs,
+    },
+    healthConnectMiniIcon: {
+      width: 16,
+      height: 16,
     },
     workoutTopRow: {
       flexDirection: 'row',
