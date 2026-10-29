@@ -50,18 +50,6 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
     mainContent: {
       paddingHorizontal: s.lg,
     },
-    topHeroContainer: {
-      backgroundColor: c.surfaceMid,
-      paddingHorizontal: s.lg,
-      paddingTop: s.md,
-      paddingBottom: s.md,
-      borderColor: c.surfaceBorder,
-      marginBottom: gapMid,
-      ...sh.level1,
-    },
-    mainContent: {
-      paddingHorizontal: s.lg,
-    },
     pressedOpacity: {
       opacity: 0.8,
     },
