@@ -1,6 +1,7 @@
+import React, { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { colors, type ColorTokens } from '@/theme/colors';
-import type { ThemeContextValue } from '@/theme';
+import { useTheme, type ThemeContextValue } from '@/theme';
 
 export function createStyles(theme: ThemeContextValue | { colors: ColorTokens }) {
   const { colors: c } = theme;
@@ -333,3 +334,10 @@ export function createStyles(theme: ThemeContextValue | { colors: ColorTokens })
 export const styles = createStyles({
   colors: colors.dark,
 });
+
+export function useFoodSearchStyles() {
+  const theme = useTheme();
+  const searchStyles = useMemo(() => createStyles(theme), [theme]);
+  return { theme, styles: searchStyles };
+}
+

@@ -14,6 +14,7 @@ import { images } from '@/assets/images';
 import { AppText } from '@/components/common';
 import { CloseXIcon } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
+import { useTheme } from '@/theme';
 
 // ─── 1. Core Rules Content ───────────────────────────────────────────────────
 
@@ -23,10 +24,15 @@ export type StreakRulesContentProps = {
 
 export function StreakRulesContent({ onClose }: StreakRulesContentProps) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const { colors: c } = theme;
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
-      <StatusBar barStyle="light-content" backgroundColor="#13111C" />
+    <SafeAreaView style={[styles.container, { backgroundColor: c.canvasBase }]} edges={['top', 'left', 'right', 'bottom']}>
+      <StatusBar
+        barStyle={theme.scheme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={c.canvasBase}
+      />
 
       {/* Top Bar with Close Button (✕) */}
       <View style={styles.topBar}>
@@ -37,7 +43,7 @@ export function StreakRulesContent({ onClose }: StreakRulesContentProps) {
           accessibilityLabel="Đóng quy tắc chuỗi"
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
         >
-          <CloseXIcon size={24} color="#FFFFFF" strokeWidth={2.4} />
+          <CloseXIcon size={24} color={c.textPrimary} strokeWidth={2.4} />
         </TouchableOpacity>
       </View>
 
@@ -56,15 +62,15 @@ export function StreakRulesContent({ onClose }: StreakRulesContentProps) {
           resizeMode="contain"
         />
 
-        <AppText style={styles.sectionHeading}>Chuỗi ngày là gì?</AppText>
+        <AppText style={styles.sectionHeading} color={c.textPrimary}>Chuỗi ngày là gì?</AppText>
 
-        <AppText style={styles.bodyParagraph}>
+        <AppText style={styles.bodyParagraph} color={c.textSecondary}>
           Chuỗi ngày là số ngày bạn liên tục ghi lại bữa ăn vào nhật ký.
         </AppText>
-        <AppText style={styles.bodyParagraph}>
+        <AppText style={styles.bodyParagraph} color={c.textSecondary}>
           Bạn ghi đều mỗi ngày → chuỗi tiếp tục tăng.
         </AppText>
-        <AppText style={styles.bodyParagraph}>
+        <AppText style={styles.bodyParagraph} color={c.textSecondary}>
           Bạn bỏ quên một ngày → chuỗi sẽ quay về 0 và bắt đầu lại từ đầu.
         </AppText>
 
@@ -75,29 +81,29 @@ export function StreakRulesContent({ onClose }: StreakRulesContentProps) {
           resizeMode="contain"
         />
 
-        <AppText style={styles.sectionHeading}>Làm sao để giữ chuỗi?</AppText>
+        <AppText style={styles.sectionHeading} color={c.textPrimary}>Làm sao để giữ chuỗi?</AppText>
 
-        <AppText style={[styles.bodyParagraph, { marginBottom: 14 }]}>
+        <AppText style={[styles.bodyParagraph, { marginBottom: 14 }]} color={c.textSecondary}>
           Chuỗi ngày chỉ được tính khi bạn ghi món trong ngày hôm nay.
         </AppText>
 
         <View style={styles.bulletItem}>
-          <AppText style={styles.bulletDot}>•</AppText>
-          <AppText style={styles.bulletText}>
+          <AppText style={styles.bulletDot} color={c.brandPrimary}>•</AppText>
+          <AppText style={styles.bulletText} color={c.textSecondary}>
             Ghi bù cho hôm qua, không tính vào chuỗi.
           </AppText>
         </View>
 
         <View style={styles.bulletItem}>
-          <AppText style={styles.bulletDot}>•</AppText>
-          <AppText style={styles.bulletText}>
+          <AppText style={styles.bulletDot} color={c.brandPrimary}>•</AppText>
+          <AppText style={styles.bulletText} color={c.textSecondary}>
             Ghi trước cho ngày mai, không tính vào chuỗi.
           </AppText>
         </View>
 
         <View style={styles.bulletItem}>
-          <AppText style={styles.bulletDot}>•</AppText>
-          <AppText style={styles.bulletText}>
+          <AppText style={styles.bulletDot} color={c.brandPrimary}>•</AppText>
+          <AppText style={styles.bulletText} color={c.textSecondary}>
             Chỉ cần bạn ghi ít nhất một món trong hôm nay, chuỗi ngày sẽ tiếp tục 🔥
           </AppText>
         </View>
@@ -109,25 +115,25 @@ export function StreakRulesContent({ onClose }: StreakRulesContentProps) {
           resizeMode="contain"
         />
 
-        <AppText style={styles.sectionHeading}>Khiên Kallo là gì?</AppText>
+        <AppText style={styles.sectionHeading} color={c.textPrimary}>Khiên Kallo là gì?</AppText>
 
         <View style={styles.bulletItem}>
-          <AppText style={styles.bulletDot}>•</AppText>
-          <AppText style={styles.bulletText}>
+          <AppText style={styles.bulletDot} color={c.brandPrimary}>•</AppText>
+          <AppText style={styles.bulletText} color={c.textSecondary}>
             Giúp bạn nghỉ 1 ngày mà không làm gián đoạn cả hành trình.
           </AppText>
         </View>
 
         <View style={styles.bulletItem}>
-          <AppText style={styles.bulletDot}>•</AppText>
-          <AppText style={styles.bulletText}>
+          <AppText style={styles.bulletDot} color={c.brandPrimary}>•</AppText>
+          <AppText style={styles.bulletText} color={c.textSecondary}>
             Bạn có thể có tối đa 2 Khiên Kallo.
           </AppText>
         </View>
 
         <View style={styles.bulletItem}>
-          <AppText style={styles.bulletDot}>•</AppText>
-          <AppText style={styles.bulletText}>
+          <AppText style={styles.bulletDot} color={c.brandPrimary}>•</AppText>
+          <AppText style={styles.bulletText} color={c.textSecondary}>
             Khi Khiên được kích hoạt, chuỗi vẫn an toàn. Tự tin tiếp tục giữ chuỗi khi bạn quay lại.
           </AppText>
         </View>
@@ -214,7 +220,6 @@ const styles = StyleSheet.create({
     fontSize: 22,
     lineHeight: 28,
     fontWeight: '700',
-    color: '#FFFFFF',
     marginTop: 18,
     marginBottom: 14,
     letterSpacing: -0.2,
@@ -223,7 +228,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 23,
     fontWeight: '400',
-    color: '#A09BAE',
     marginBottom: 10,
   },
   bulletItem: {
@@ -234,7 +238,6 @@ const styles = StyleSheet.create({
   bulletDot: {
     fontSize: 18,
     lineHeight: 22,
-    color: '#A09BAE',
     marginRight: 10,
   },
   bulletText: {
@@ -242,6 +245,5 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
     fontWeight: '400',
-    color: '#A09BAE',
   },
 });

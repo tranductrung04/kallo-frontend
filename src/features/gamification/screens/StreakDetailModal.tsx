@@ -14,6 +14,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { images } from '@/assets/images';
 import { ChevronLeftIcon, InfoIcon } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
+import { useTheme } from '@/theme';
 import { useGamification } from '../GamificationProvider';
 import {
   StreakActionCardWidget,
@@ -28,6 +29,8 @@ type Props = NativeStackScreenProps<RootStackParamList, 'StreakDetail'>;
 
 export function StreakDetailModal({ navigation }: Props) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const { colors: c } = theme;
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const [heroHeight, setHeroHeight] = useState<number>(0);
   const [isRulesVisible, setIsRulesVisible] = useState(false);
@@ -96,7 +99,7 @@ export function StreakDetailModal({ navigation }: Props) {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['left', 'right']}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: c.canvasBase }]} edges={['left', 'right']}>
       <StatusBar
         barStyle="light-content"
         backgroundColor="transparent"
@@ -117,7 +120,7 @@ export function StreakDetailModal({ navigation }: Props) {
             styles.topHeroCard,
             {
               paddingTop: insets.top + 6,
-              backgroundColor: currentStreak > 0 ? '#8A5AEB' : '#1D172D',
+              backgroundColor: currentStreak > 0 ? (c.brandAction || '#8A5AEB') : (theme.scheme === 'dark' ? '#1D172D' : '#3C2E59'),
             },
           ]}
           onLayout={(e) => {

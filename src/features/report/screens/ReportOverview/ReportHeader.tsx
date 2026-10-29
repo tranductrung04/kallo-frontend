@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { ChevronLeftIcon } from '@/components/icons';
-import { styles } from './ReportOverviewScreen.styles';
+import { useReportStyles } from './ReportOverviewScreen.styles';
 
 export type ReportHeaderProps = {
   topInset: number;
@@ -16,6 +16,8 @@ export function ReportHeader({
   onTabChange,
   onBack,
 }: ReportHeaderProps) {
+  const { theme, styles } = useReportStyles();
+
   return (
     <View style={[styles.headerContainer, { paddingTop: Math.max(8, topInset) }]}>
       <View style={styles.headerTopRow}>
@@ -26,7 +28,7 @@ export function ReportHeader({
           accessibilityRole="button"
           accessibilityLabel="Quay lại"
         >
-          <ChevronLeftIcon size={20} color="#FFFFFF" />
+          <ChevronLeftIcon size={20} color={theme.colors.textPrimary} />
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Báo cáo dinh dưỡng</Text>
