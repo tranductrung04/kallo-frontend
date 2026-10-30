@@ -139,6 +139,28 @@ export function createStyles(theme: ThemeContextValue | { colors: ColorTokens })
       textAlign: 'center',
       lineHeight: 16,
     },
+    customActionCard: {
+      flex: 1,
+      backgroundColor: c.surfaceMid,
+      borderRadius: 18,
+      paddingVertical: 18,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    customActionCircle: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 10,
+    },
+    customActionCardTitle: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: c.textPrimary,
+      textAlign: 'center',
+    },
 
     // 5. Body Area & Empty State
     scrollBody: {

@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Alert,
   ScrollView,
   StatusBar,
   View,
@@ -22,6 +21,7 @@ import {
   FoodSearchHeader,
   FoodSearchTabs,
   FoodSearchActionCards,
+  NutritionistNoteModal,
   type SearchTab,
 } from './FoodSearch';
 
@@ -42,6 +42,7 @@ export function FoodSearchScreen({ navigation, route }: Props) {
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [activeTab, setActiveTab] = useState<SearchTab>('recent');
   const [hourPickerVisible, setHourPickerVisible] = useState(false);
+  const [nutritionNoteVisible, setNutritionNoteVisible] = useState(false);
 
   // Debounce search input
   useEffect(() => {
@@ -103,12 +104,7 @@ export function FoodSearchScreen({ navigation, route }: Props) {
         selectedHour={selectedHour}
         onGoBack={() => navigation.goBack()}
         onOpenPicker={() => setHourPickerVisible(true)}
-        onOpenInfo={() =>
-          Alert.alert(
-            'Hướng dẫn tìm kiếm',
-            'Nhập tên thực phẩm hoặc sử dụng tính năng Quét mã vạch, Nhận diện AI và Giọng nói để thêm món ăn nhanh chóng.'
-          )
-        }
+        onOpenInfo={() => setNutritionNoteVisible(true)}
       />
 
       {/* ── 2. Search Input Bar ────────────────────────────────────────────── */}
@@ -124,11 +120,14 @@ export function FoodSearchScreen({ navigation, route }: Props) {
         onSelectTab={setActiveTab}
       />
 
-      {/* ── 4. 3 Action Cards (Quét mã vạch | Nhận diện món | Giọng nói) ────── */}
+      {/* ── 4. Action Cards (Quét mã / AI / Giọng nói hoặc Tạo công thức / Tạo thực phẩm) ── */}
       <FoodSearchActionCards
+        activeTab={activeTab}
         onBarcodeScan={() => navigation.navigate('BarcodeScanner', { date, meal })}
         onAIMealScan={() => navigation.navigate('AIMealScan', { date, meal })}
         onVoiceLog={() => navigation.navigate('VoiceLogModal', { date, meal })}
+        onCreateRecipe={() => navigation.navigate('CreateRecipe', { date, meal })}
+        onCreateFood={() => navigation.navigate('CustomFoodForm', { date, meal })}
       />
 
       {/* ── 5. Main Content Area: Search Results or Empty State ────────────── */}
@@ -163,6 +162,12 @@ export function FoodSearchScreen({ navigation, route }: Props) {
         initialHour={selectedHour}
         onClose={() => setHourPickerVisible(false)}
         onConfirm={handleConfirmDateTime}
+      />
+
+      {/* ── 7. Nutritionist Note Modal ─────────────────────────────────────── */}
+      <NutritionistNoteModal
+        visible={nutritionNoteVisible}
+        onClose={() => setNutritionNoteVisible(false)}
       />
     </SafeAreaView>
   );

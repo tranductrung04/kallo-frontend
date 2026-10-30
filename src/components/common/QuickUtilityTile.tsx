@@ -23,13 +23,13 @@ import { AppText } from './AppText';
 
 export type QuickTileVariant = 'search' | 'barcode' | 'aiScan' | 'voice';
 
-interface TileConfig {
+export interface TileConfig {
   dark: { bg: string; glyph: string };
   light: { bg: string; border: string; glyph: string };
   label: string;
 }
 
-const TILE_CONFIG: Record<QuickTileVariant, TileConfig> = {
+export const TILE_CONFIG: Record<QuickTileVariant, TileConfig> = {
   search: {
     dark: { bg: '#FBBF24', glyph: '#12111A' },
     light: { bg: '#FEF3C7', border: '#FDE68A', glyph: '#D97706' },
