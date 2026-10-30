@@ -12,6 +12,7 @@ import { ScanPlaceholderScreen } from '@/features/system/screens/PlaceholderScre
 import { FoodSearchScreen } from '@/features/nutrition/screens/FoodSearchScreen';
 import { FoodDetailScreen } from '@/features/nutrition/screens/FoodDetailScreen';
 import { CustomFoodFormScreen } from '@/features/nutrition/screens/CustomFoodFormScreen';
+import { CreateRecipeScreen } from '@/features/nutrition/screens/CreateRecipeScreen';
 import { AIMealScanScreen } from '@/features/nutrition/screens/AIMealScanScreen';
 import { MealScanResultScreen } from '@/features/nutrition/screens/MealScanResultScreen';
 import { BarcodeScannerScreen } from '@/features/nutrition/screens/BarcodeScannerScreen';
@@ -40,7 +41,8 @@ export function RootNavigator() {
       <Stack.Screen name="AIScanPlaceholder" component={ScanPlaceholderScreen} options={{ title: 'AI Meal Scan' }} />
       <Stack.Screen name="FoodSearch" component={FoodSearchScreen} options={{ headerShown: false }} />
       <Stack.Screen name="FoodDetail" component={FoodDetailScreen} options={{ title: 'Chi tiết món ăn' }} />
-      <Stack.Screen name="CustomFoodForm" component={CustomFoodFormScreen} options={{ title: 'Món ăn tùy chỉnh' }} />
+      <Stack.Screen name="CustomFoodForm" component={CustomFoodFormScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="CreateRecipe" component={CreateRecipeScreen} options={{ headerShown: false }} />
       <Stack.Screen name="AIMealScan" component={AIMealScanScreen} options={{ headerShown: false, presentation: 'fullScreenModal' }} />
       <Stack.Screen name="MealScanResult" component={MealScanResultScreen} options={{ title: 'Kết quả nhận diện' }} />
       <Stack.Screen name="BarcodeScanner" component={BarcodeScannerScreen} options={{ headerShown: false, presentation: 'fullScreenModal' }} />

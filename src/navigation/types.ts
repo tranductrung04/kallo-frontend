@@ -43,6 +43,7 @@ export type RootStackParamList = {
   FoodSearch: { date: string; meal: MealSlot; hour?: string };
   FoodDetail: { foodId: string; date: string; meal: MealSlot; logId?: string; source?: FoodLogSource };
   CustomFoodForm: { foodId?: string; date: string; meal: MealSlot; barcode?: string };
+  CreateRecipe: { date: string; meal: MealSlot };
   AIMealScan: { date: string; meal: MealSlot };
   MealScanResult: { imageUri: string; date: string; meal: MealSlot };
   BarcodeScanner: { date: string; meal: MealSlot };
