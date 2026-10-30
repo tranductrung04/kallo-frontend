@@ -15,8 +15,8 @@ export type { EmptyStateViewProps, EmptyVariant } from './EmptyStateView';
 export { LoadingOverlay } from './LoadingOverlay';
 export type { LoadingOverlayProps } from './LoadingOverlay';
 // New DESIGN.md components
-export { QuickUtilityTile, QuickUtilityGrid } from './QuickUtilityTile';
-export type { QuickUtilityTileProps, QuickTileVariant } from './QuickUtilityTile';
+export { QuickUtilityTile, QuickUtilityGrid, TILE_CONFIG } from './QuickUtilityTile';
+export type { QuickUtilityTileProps, QuickTileVariant, TileConfig } from './QuickUtilityTile';
 export { DateSelectorStrip, buildWeekDates } from './DateSelectorStrip';
 export type { DateSelectorStripProps, DateSelectorItem } from './DateSelectorStrip';
 export { FoodLogListItem } from './FoodLogListItem';

@@ -419,6 +419,167 @@ export function BowlFoodPlusIcon({
 }
 export const BowlAddIcon = BowlFoodPlusIcon;
 
+export type RecipeBookPlusIconProps = IconProps & {
+  cutoutColor?: string;
+};
+
+/** Icon Cuốn sổ công thức thêm món (+) — Dùng cho Tạo công thức */
+export function RecipeBookPlusIcon({
+  size = 28,
+  color,
+  cutoutColor = '#22C55E',
+}: RecipeBookPlusIconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 640 640" fill="none">
+      {/* Thân cuốn sách bìa bo góc */}
+      <Rect x={110} y={80} width={420} height={480} rx={48} fill={color} />
+
+      {/* Đường gáy sách / rãnh gấp bìa */}
+      <Line
+        x1={175}
+        y1={80}
+        x2={175}
+        y2={560}
+        stroke={cutoutColor}
+        strokeWidth={16}
+        strokeLinecap="round"
+      />
+
+      {/* Mũ đầu bếp (Chef Hat) trên bìa sách */}
+      {/* Vành mũ */}
+      <Rect x={265} y={325} width={130} height={24} rx={8} fill={cutoutColor} />
+      {/* Thân mũ */}
+      <Path d="M272 290 L272 320 L388 320 L388 290 Z" fill={cutoutColor} />
+      {/* 3 múi tròn của mũ đầu bếp */}
+      <Circle cx={330} cy={235} r={48} fill={cutoutColor} />
+      <Circle cx={280} cy={260} r={38} fill={cutoutColor} />
+      <Circle cx={380} cy={260} r={38} fill={cutoutColor} />
+
+      {/* Vòng đệm cutout tách biệt huy hiệu dấu cộng và thân sách */}
+      <Circle cx={460} cy={460} r={140} fill={cutoutColor} />
+      {/* Huy hiệu tròn dấu cộng */}
+      <Circle cx={460} cy={460} r={112} fill={color} />
+      {/* Dấu cộng nét đậm bo tròn bên trong huy hiệu */}
+      <Line
+        x1={405}
+        y1={460}
+        x2={515}
+        y2={460}
+        stroke={cutoutColor}
+        strokeWidth={30}
+        strokeLinecap="round"
+      />
+      <Line
+        x1={460}
+        y1={405}
+        x2={460}
+        y2={515}
+        stroke={cutoutColor}
+        strokeWidth={30}
+        strokeLinecap="round"
+      />
+    </Svg>
+  );
+}
+export const RecipeAddIcon = RecipeBookPlusIcon;
+
+/** Icon Tia sao lấp lánh / Bật tắt flash cho máy quét mã vạch */
+export function ScannerSparkleFlashIcon({
+  size = 24,
+  color = '#FFFFFF',
+}: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      {/* 4-point diamond star */}
+      <Path
+        d="M10 2 C10 6.5 6.5 10 2 10 C6.5 10 10 13.5 10 18 C10 13.5 13.5 10 18 10 C13.5 10 10 6.5 10 2 Z"
+        fill={color}
+      />
+      {/* Tia sáng phụ góc trên phải */}
+      <Line x1="16" y1="4" x2="21" y2="4" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
+      <Line x1="18.5" y1="1.5" x2="18.5" y2="6.5" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
+      <Circle cx="19" cy="11" r="1" fill={color} />
+      <Circle cx="14" cy="16" r="0.8" fill={color} />
+    </Svg>
+  );
+}
+
+/** Icon Minh họa bát ăn kèm thìa và lá nổi — Dùng làm placeholder cho Tạo công thức & Tạo thực phẩm */
+export function RecipeBowlPlaceholderIcon({ size = 80 }: { size?: number }) {
+  return (
+    <Svg width={size} height={size * 0.85} viewBox="0 0 100 85" fill="none">
+      {/* 2 Floating leaves above bowl */}
+      <Path
+        d="M48 18 C46 12 52 8 56 12 C57 18 51 21 48 18 Z"
+        fill="#7A7398"
+      />
+      <Path
+        d="M58 20 C60 14 67 13 69 17 C68 23 62 25 58 20 Z"
+        fill="#7A7398"
+      />
+
+      {/* Spoon handle sticking out */}
+      <Line
+        x1="64"
+        y1="22"
+        x2="78"
+        y2="8"
+        stroke="#5D557B"
+        strokeWidth="4"
+        strokeLinecap="round"
+      />
+
+      {/* Food puffs in the bowl */}
+      <Circle cx="38" cy="36" r="10" fill="#7D759C" />
+      <Circle cx="50" cy="32" r="12" fill="#8F86B0" />
+      <Circle cx="64" cy="35" r="10" fill="#7D759C" />
+      <Circle cx="44" cy="40" r="10" fill="#7D759C" />
+      <Circle cx="58" cy="40" r="10" fill="#7D759C" />
+
+      {/* Bowl body */}
+      <Path
+        d="M26 42 C26 39 28 37 31 37 L71 37 C74 37 76 39 76 42 C76 60 66 70 51 70 C36 70 26 60 26 42 Z"
+        fill="#4A4266"
+      />
+
+      {/* Bowl foot */}
+      <Rect x="42" y="70" width="18" height="4" rx="2" fill="#3D3654" />
+    </Svg>
+  );
+}
+
+/** Icon Chọn ảnh từ thư viện kèm dấu cộng (+) */
+export function GalleryAddIcon({
+  size = 22,
+  color = '#FFFFFF',
+}: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      {/* Khung ảnh bo góc */}
+      <Path
+        d="M15 3.5 H6 C4.34 3.5 3 4.84 3 6.5 V15.5 C3 17.16 4.34 18.5 6 18.5 H15 C16.66 18.5 18 17.16 18 15.5 V6.5 C18 4.84 16.66 3.5 15 3.5 Z"
+        stroke={color}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Chi tiết đồi núi và mặt trời bên trong */}
+      <Circle cx="7.5" cy="8" r="1.5" fill={color} />
+      <Path
+        d="M3.5 15.5 L7.5 11.5 L10.5 14.5 L13 11 L17.5 15.5"
+        stroke={color}
+        strokeWidth={1.6}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Huy hiệu dấu cộng (+) góc trên phải */}
+      <Circle cx="19" cy="5.5" r="4.5" fill="#13121B" />
+      <Line x1="16.5" y1="5.5" x2="21.5" y2="5.5" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
+      <Line x1="19" y1="3" x2="19" y2="8" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
 // ─── Activity Icons ──────────────────────────────────────────────────────────
 
 export type ActivityIconProps = IconProps & {
@@ -1347,3 +1508,78 @@ export function StreakGoalFlagIcon({
   );
 }
 
+
+// ─── Quick Actions Sheet Icons ──────────────────────────────────────────────
+
+/** Icon Ly nước có dấu cộng (+) cho Quick Action Uống nước */
+export function WaterGlassPlusIcon({ size = 22, color = '#FFFFFF' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M6 3.5 L7.8 19 C8 20.7 9.3 22 11 22 H13 C14.7 22 16 20.7 16.2 19 L18 3.5 H6 Z"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Line x1="12" y1="9" x2="12" y2="15" stroke={color} strokeWidth="2" strokeLinecap="round" />
+      <Line x1="9" y1="12" x2="15" y2="12" stroke={color} strokeWidth="2" strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+/** Icon Quả táo trong khung scan kèm nhãn cho Gợi ý công thức */
+export function AppleScanIcon({ size = 22, color = '#FFFFFF' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M4 8 V5 C4 4.4 4.4 4 5 4 H8" stroke={color} strokeWidth="1.8" strokeLinecap="round" />
+      <Path d="M16 4 H19 C19.6 4 20 4.4 20 5 V8" stroke={color} strokeWidth="1.8" strokeLinecap="round" />
+      <Path d="M20 16 V19 C20 19.6 19.6 20 19 20 H16" stroke={color} strokeWidth="1.8" strokeLinecap="round" />
+      <Path d="M8 20 H5 C4.4 20 4 19.6 4 19 V16" stroke={color} strokeWidth="1.8" strokeLinecap="round" />
+      <Path
+        d="M12 9 C10.5 7.5 7.5 8 7.5 11.5 C7.5 15.5 11 17.5 12 17.5 C13 17.5 16.5 15.5 16.5 11.5 C16.5 8 13.5 7.5 12 9 Z"
+        fill={color}
+      />
+      <Path d="M12 9 C12 7.5 13 6.5 14 6" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+/** Icon Hình nhân người đứng cho Chỉ số sức khỏe */
+export function BodyStickFigureIcon({ size = 24, color = '#FFFFFF' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Circle cx="12" cy="4.5" r="2.5" fill={color} />
+      <Path
+        d="M12 8 V15 M12 15 L9 21.5 M12 15 L15 21.5"
+        stroke={color}
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M6 11.5 L12 9.5 L18 11.5"
+        stroke={color}
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+/** Icon Barcode khung vuông cho Quick Action Quét mã vạch */
+export function BarcodeSquareIcon({ size = 26, color = '#FFFFFF' }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M3 7 V5 C3 4 4 3 5 3 H7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M17 3 H19 C20 3 21 4 21 5 V7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M21 17 V19 C21 20 20 21 19 21 H17" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M7 21 H5 C4 21 3 20 3 19 V17" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Line x1="7" y1="7" x2="7" y2="17" stroke={color} strokeWidth="2" strokeLinecap="round" />
+      <Line x1="10.5" y1="7" x2="10.5" y2="17" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+      <Line x1="13.5" y1="7" x2="13.5" y2="17" stroke={color} strokeWidth="2.5" strokeLinecap="round" />
+      <Line x1="17" y1="7" x2="17" y2="17" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+    </Svg>
+  );
+}

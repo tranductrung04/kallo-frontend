@@ -6,12 +6,14 @@ import {
   View,
 } from 'react-native';
 import {
+  BowlFoodPlusIcon,
   ChevronLeftIcon,
   EmptyFolderIllustration,
   InfoIcon,
   QuickBarcodeIcon,
   QuickSparklesIcon,
   QuickVoiceIcon,
+  RecipeBookPlusIcon,
   SearchIcon,
   ViewfinderBarcodeIcon,
 } from '@/components/icons';
@@ -101,20 +103,20 @@ export function FoodSearchBar({
           value={query}
           onChangeText={onChangeQuery}
           placeholder="Tìm thực phẩm hoặc món ăn"
-          placeholderTextColor={c.textDisabled}
+          placeholderTextColor={c.textSecondary}
           style={styles.searchInput}
-          selectionColor={c.brandSecondary}
           returnKeyType="search"
+          clearButtonMode="while-editing"
           autoCorrect={false}
+          autoCapitalize="none"
         />
       </View>
 
-      {/* Barcode Viewfinder Icon on the right */}
+      {/* Barcode Scanner Icon Button */}
       <TouchableOpacity
         onPress={onOpenBarcode}
         style={styles.barcodeIconBtn}
         accessibilityLabel="Quét mã vạch"
-        activeOpacity={0.75}
       >
         <ViewfinderBarcodeIcon size={28} color={c.textPrimary} />
       </TouchableOpacity>
@@ -122,17 +124,13 @@ export function FoodSearchBar({
   );
 }
 
-
-// ─── 3. FoodSearchTabs ───────────────────────────────────────────────────────
+// ─── 3. FoodSearchTabs (Centered) ────────────────────────────────────────────
 export type FoodSearchTabsProps = {
   activeTab: SearchTab;
   onSelectTab: (tab: SearchTab) => void;
 };
 
-export function FoodSearchTabs({
-  activeTab,
-  onSelectTab,
-}: FoodSearchTabsProps) {
+export function FoodSearchTabs({ activeTab, onSelectTab }: FoodSearchTabsProps) {
   const { styles } = useFoodSearchStyles();
 
   return (
@@ -178,19 +176,63 @@ export function FoodSearchTabs({
 
 // ─── 4. FoodSearchActionCards ────────────────────────────────────────────────
 export type FoodSearchActionCardsProps = {
+  activeTab?: SearchTab;
   onBarcodeScan: () => void;
   onAIMealScan: () => void;
   onVoiceLog: () => void;
+  onCreateRecipe?: () => void;
+  onCreateFood?: () => void;
 };
 
 export function FoodSearchActionCards({
+  activeTab = 'recent',
   onBarcodeScan,
   onAIMealScan,
   onVoiceLog,
+  onCreateRecipe,
+  onCreateFood,
 }: FoodSearchActionCardsProps) {
   const { theme, styles } = useFoodSearchStyles();
   const { colors: c } = theme;
 
+  // Khi ở tab "Tạo bởi tôi" -> Hiển thị 2 thẻ: Tạo công thức & Tạo thực phẩm
+  if (activeTab === 'mine') {
+    return (
+      <View style={styles.actionCardsRow}>
+        {/* Card 1: Tạo công thức */}
+        <TouchableOpacity
+          style={styles.customActionCard}
+          activeOpacity={0.75}
+          onPress={onCreateRecipe ?? onCreateFood}
+          accessibilityLabel="Tạo công thức"
+        >
+          <View style={[styles.customActionCircle, { backgroundColor: c.quickScanner }]}>
+            <RecipeBookPlusIcon size={26} color="#0D0B14" cutoutColor={c.quickScanner} />
+          </View>
+          <Text style={styles.customActionCardTitle} numberOfLines={1}>
+            Tạo công thức
+          </Text>
+        </TouchableOpacity>
+
+        {/* Card 2: Tạo thực phẩm */}
+        <TouchableOpacity
+          style={styles.customActionCard}
+          activeOpacity={0.75}
+          onPress={onCreateFood ?? onCreateRecipe}
+          accessibilityLabel="Tạo thực phẩm"
+        >
+          <View style={[styles.customActionCircle, { backgroundColor: c.macroProtein }]}>
+            <BowlFoodPlusIcon size={26} color="#0D0B14" cutoutColor={c.macroProtein} />
+          </View>
+          <Text style={styles.customActionCardTitle} numberOfLines={1}>
+            Tạo thực phẩm
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  // Khi ở tab "Gần đây" hoặc "Yêu thích" -> Hiển thị 3 thẻ thao tác nhanh chuẩn
   return (
     <View style={styles.actionCardsRow}>
       {/* Card 1: Quét mã vạch */}
@@ -231,7 +273,6 @@ export function FoodSearchActionCards({
     </View>
   );
 }
-
 
 // ─── 5. FoodRowItem ──────────────────────────────────────────────────────────
 export type FoodRowItemProps = {
@@ -293,26 +334,40 @@ export function FoodSearchEmptyState({
     );
   }
 
+  // Khi ở tab "Tạo bởi tôi" chưa có món
+  if (activeTab === 'mine') {
+    return (
+      <View style={styles.emptyContainer}>
+        <EmptyFolderIllustration size={140} />
+        <Text style={styles.emptyTitle}>Tạo mới thực phẩm</Text>
+        <Text style={styles.emptySubtitle}>
+          {'Tạo mới thực phẩm của riêng mình và sử\ndụng trong quá trình theo dõi cân nặng\nmột cách dễ dàng'}
+        </Text>
+      </View>
+    );
+  }
+
+  // Khi ở tab "Yêu thích" chưa có món
+  if (activeTab === 'favorite') {
+    return (
+      <View style={styles.emptyContainer}>
+        <EmptyFolderIllustration size={140} />
+        <Text style={styles.emptyTitle}>Bạn chưa có mục yêu thích</Text>
+        <Text style={styles.emptySubtitle}>
+          {'Để truy cập nhanh hơn trong các lần tới.\nChỉ cần nhấn vào biểu tượng 💜 khi xem\nthông tin thực phẩm!'}
+        </Text>
+      </View>
+    );
+  }
+
+  // Mặc định: tab "Gần đây" chưa có thông tin
   return (
     <View style={styles.emptyContainer}>
-      <EmptyFolderIllustration size={130} />
+      <EmptyFolderIllustration size={140} />
       <Text style={styles.emptyTitle}>Chưa có thông tin</Text>
       <Text style={styles.emptySubtitle}>
-        {activeTab === 'recent'
-          ? 'Hệ thống chưa ghi nhận thông tin bạn\nđã nhập gần đây'
-          : activeTab === 'mine'
-          ? 'Bạn chưa tạo món ăn tùy chỉnh nào'
-          : 'Danh sách món ăn yêu thích hiện đang trống'}
+        {'Hệ thống chưa ghi nhận thông tin bạn\nđã nhập gần đây'}
       </Text>
-
-      {activeTab === 'mine' && (
-        <TouchableOpacity
-          style={styles.createCustomBtn}
-          onPress={onCreateCustom}
-        >
-          <Text style={styles.createCustomBtnText}>+ Tạo món ăn tùy chỉnh</Text>
-        </TouchableOpacity>
-      )}
     </View>
   );
 }
