@@ -4,22 +4,34 @@ import { AppText } from '@/components/common';
 import { useTheme } from '@/theme';
 
 interface IntroStepProps {
-  image: ImageSourcePropType;
+  image?: ImageSourcePropType;
   title: string;
   text: string;
+  renderIllustration?: () => React.ReactNode;
 }
 
-export function IntroStep({ image, title, text }: IntroStepProps) {
+export function IntroStep({
+  image,
+  title,
+  text,
+  renderIllustration,
+}: IntroStepProps) {
   const theme = useTheme();
 
   return (
     <View style={styles.intro}>
-      <Image
-        source={image}
-        style={styles.stepImage}
-        resizeMode="contain"
-        accessibilityLabel={title}
-      />
+      {renderIllustration ? (
+        <View style={styles.customIllustrationContainer}>
+          {renderIllustration()}
+        </View>
+      ) : image ? (
+        <Image
+          source={image}
+          style={styles.stepImage}
+          resizeMode="contain"
+          accessibilityLabel={title}
+        />
+      ) : null}
       <AppText variant="title" align="center">
         {title}
       </AppText>
@@ -39,5 +51,10 @@ const styles = StyleSheet.create({
   stepImage: {
     width: '100%',
     height: 180,
+  },
+  customIllustrationContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 6,
   },
 });
