@@ -3,12 +3,12 @@ import {
   Alert,
   Image,
   Modal,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -30,6 +30,7 @@ type Props = BottomTabScreenProps<MainTabParamList, 'Profile'>;
 type RootNavigation = NativeStackNavigationProp<RootStackParamList>;
 
 export function AccountProfileScreen({ navigation }: Props) {
+  const insets = useSafeAreaInsets();
   const theme = useTheme();
   const isDark = theme.scheme === 'dark';
   const { signOut } = useAuth();
@@ -109,9 +110,9 @@ export function AccountProfileScreen({ navigation }: Props) {
   };
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.canvasBase }]}>
+    <SafeAreaView edges={['bottom', 'left', 'right']} style={[styles.safe, { backgroundColor: theme.colors.canvasBase }]}>
       {/* ── Top Header Row ────────────────────────────────────────────── */}
-      <View style={styles.topHeader}>
+      <View style={[styles.topHeader, { paddingTop: Math.max(insets.top, 12) + 8 }]}>
         <AppText variant="headlineLg" style={styles.headerTitle}>
           Hồ sơ cá nhân
         </AppText>

@@ -2,13 +2,13 @@ import React, { useMemo, useState } from 'react';
 import {
   Alert,
   Image,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import { images } from '@/assets/images';
@@ -35,6 +35,7 @@ const BANNER_CTA_BG = '#FFBE3B';
 const BANNER_CTA_TEXT = '#1F1A0A';
 
 export function MealPlanOverviewScreen() {
+  const insets = useSafeAreaInsets();
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<NavigationProp>();
@@ -128,13 +129,13 @@ export function MealPlanOverviewScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.canvasBase }]}>
+    <SafeAreaView edges={['bottom', 'left', 'right']} style={[styles.safe, { backgroundColor: theme.colors.canvasBase }]}>
       <StatusBar
         barStyle={theme.scheme === 'dark' ? 'light-content' : 'dark-content'}
         backgroundColor={theme.colors.canvasBase}
       />
       {/* ── Top Header ─────────────────────────────────────────────────── */}
-      <View style={styles.topHeader}>
+      <View style={[styles.topHeader, { paddingTop: Math.max(insets.top, 12) + 8 }]}>
         <View style={styles.titleRow}>
           {navigation.canGoBack() && (
             <TouchableOpacity
