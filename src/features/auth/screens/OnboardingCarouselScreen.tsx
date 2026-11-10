@@ -15,6 +15,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { images } from '@/assets/images';
 import { AppText } from '@/components/common';
+import {
+  ChampionMascotRNPro,
+  KalloWelcome2Mascot,
+  KalloWelcome3Mascot,
+} from '@/features/onboarding/components';
 import type { AuthStackParamList } from '@/navigation/types';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Welcome'>;
@@ -72,12 +77,48 @@ export function OnboardingCarouselScreen({ navigation }: Props) {
       scrollViewRef.current?.scrollTo({ x: nextIndex * width, animated: true });
       setActiveSlide(nextIndex);
     } else {
-      navigation.navigate('Login');
+      navigation.navigate('SocialLogin');
     }
   };
 
-  // Proportionate illustration height based on screen size
+  // Chiều cao khu vực minh họa co dãn tỷ lệ theo màn hình
   const illustrationHeight = Math.min(Math.max(height * 0.34, 220), 310);
+  const mascot1Size = Math.min(illustrationHeight / 1.04, width * 0.72, 280);
+  const mascotSquareSize = Math.min(illustrationHeight, width * 0.74, 290);
+
+  const renderIllustration = (index: number) => {
+    switch (index) {
+      case 0:
+        return (
+          <ChampionMascotRNPro
+            size={mascot1Size}
+            mode="idle"
+            interactive={true}
+            accessibilityLabel="Linh vật Champion Kallo với hiệu ứng động"
+          />
+        );
+      case 1:
+        return (
+          <KalloWelcome2Mascot
+            size={mascotSquareSize}
+            mode="idle"
+            interactive={true}
+            accessibilityLabel="Linh vật Kallo tính calo và dinh dưỡng món Việt"
+          />
+        );
+      case 2:
+        return (
+          <KalloWelcome3Mascot
+            size={mascotSquareSize}
+            mode="idle"
+            interactive={true}
+            accessibilityLabel="Linh vật Kallo chuyên gia dinh dưỡng"
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <View style={styles.root}>
@@ -87,13 +128,13 @@ export function OnboardingCarouselScreen({ navigation }: Props) {
         style={styles.background}
         resizeMode="cover"
       >
-        {/* Top Header with Wao Logo */}
+        {/* Top Header with Kallo Logo */}
         <View style={[styles.header, { paddingTop: Math.max(insets.top + 8, 20) }]}>
           <Image
             source={images.logoWhite}
             style={styles.logo}
             resizeMode="contain"
-            accessibilityLabel="Wao"
+            accessibilityLabel="Kallo"
           />
         </View>
 
@@ -109,25 +150,22 @@ export function OnboardingCarouselScreen({ navigation }: Props) {
           style={styles.carousel}
           contentContainerStyle={styles.carouselContent}
         >
-          {ONBOARDING_SLIDES.map((slide) => (
-            <View key={slide.id} style={[styles.slide, { width }]}>
-              {/* Illustration Area */}
-              <View style={[styles.illustrationContainer, { height: illustrationHeight }]}>
-                <Image
-                  source={slide.image}
-                  style={styles.illustration}
-                  resizeMode="contain"
-                  accessibilityLabel={slide.title.replace('\n', ' ')}
-                />
-              </View>
+          {ONBOARDING_SLIDES.map((slide, index) => {
+            return (
+              <View key={slide.id} style={[styles.slide, { width }]}>
+                {/* Illustration Area */}
+                <View style={[styles.illustrationContainer, { height: illustrationHeight }]}>
+                  {renderIllustration(index)}
+                </View>
 
-              {/* Text Area */}
-              <View style={styles.textContainer}>
-                <AppText style={styles.title}>{slide.title}</AppText>
-                <AppText style={styles.subtitle}>{slide.subtitle}</AppText>
+                {/* Text Area */}
+                <View style={styles.textContainer}>
+                  <AppText style={styles.title}>{slide.title}</AppText>
+                  <AppText style={styles.subtitle}>{slide.subtitle}</AppText>
+                </View>
               </View>
-            </View>
-          ))}
+            );
+          })}
         </ScrollView>
 
         {/* Pagination Dots */}

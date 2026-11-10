@@ -4,3 +4,6 @@ export * from './WelcomeMascotStep';
 export * from './DependentChoiceStep';
 export * from './CalorieDeficitIntroStep';
 export * from './NotificationPermissionStep';
+export * from './ChampionMascotRNPro';
+export * from './KalloWelcome2Mascot';
+export * from './KalloWelcome3Mascot';

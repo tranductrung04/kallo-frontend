@@ -1,15 +1,15 @@
 import React from 'react';
 import {
-  Image,
   SafeAreaView,
   StyleSheet,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { images } from '@/assets/images';
 import { AppText } from '@/components/common';
 import { ChevronLeftIcon } from '@/components/icons';
+import { ChampionMascotRNPro } from '@/features/onboarding/components';
 
 interface KalloWelcomeScreenProps {
   navigation?: any;
@@ -23,6 +23,10 @@ export function KalloWelcomeScreen({
   onBack,
 }: KalloWelcomeScreenProps) {
   const insets = useSafeAreaInsets();
+  const { width, height } = useWindowDimensions();
+
+  // Tính toán kích thước mascot responsive dựa trên chiều rộng và chiều cao màn hình
+  const mascotSize = Math.min(width * 0.76, height * 0.38, 320);
 
   const handleNext = () => {
     if (onNext) {
@@ -65,13 +69,13 @@ export function KalloWelcomeScreen({
         <View style={styles.bubbleTail} />
       </View>
 
-      {/* ── Mascot Center ──────────────────────────────────────── */}
+      {/* ── Mascot Center (SVG Vector & Animation tương tác 100% Native Driver) ──── */}
       <View style={styles.mascotArea}>
-        <Image
-          source={images.onboardingMascot}
-          style={styles.mascotImage}
-          resizeMode="contain"
-          accessibilityLabel="Linh vật Kallo"
+        <ChampionMascotRNPro
+          size={mascotSize}
+          mode="idle"
+          interactive={true}
+          accessibilityLabel="Linh vật Kallo năng động"
         />
       </View>
 
@@ -144,13 +148,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     minHeight: 280,
-  },
-  mascotImage: {
-    width: '100%',
-    height: '85%',
-    maxHeight: 380,
   },
   bottomArea: {
     paddingHorizontal: 20,
