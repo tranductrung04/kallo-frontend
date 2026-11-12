@@ -16,6 +16,7 @@ export type AuthStackParamList = {
   Register: undefined;
   ForgotPassword: undefined;
   ResetPassword: { token?: string } | undefined;
+  VerifyOtp: { email: string };
 };
 export type OnboardingStackParamList = {
   KalloWelcome: undefined;
