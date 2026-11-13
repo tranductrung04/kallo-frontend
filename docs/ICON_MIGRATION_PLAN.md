@@ -171,11 +171,11 @@ Phân loại ký hiệu dùng trong mapping: ✅ thay trực tiếp · 🔶 xấ
 
 ### Phase 0 — Chuẩn bị (0,5 ngày)
 
-- [ ] **0.1** Tạo nhánh làm việc từ `feat/ui-core`: `feat/lucide-icons`.
-- [ ] **0.2** Tra từng tên Lucide ở mục 4 trên <https://lucide.dev/icons> (tên có thể đã đổi, ví dụ `Home` → `House`, `AlertTriangle` → `TriangleAlert`). Cập nhật cột "Ghi chú" nếu khác.
-- [ ] **0.3** Chốt D1–D5 với designer.
-- [ ] **0.4** Chụp ảnh màn hình "trước" (light + dark, iOS + Android) cho các màn: Home, Food Diary, Food Search, Meal Scan, Barcode Scanner, Activity (Tracker/Workout/Add), Report, Gamification (Streak, Friends, Challenges), Health-profile wizard, Settings/Profile. Lưu vào thư mục ngoài repo hoặc `docs/` để đối chiếu.
-- [ ] **0.5** Chạy baseline: `npm run typecheck` và `npm run self-check` phải xanh trước khi sửa.
+- [x] **0.1** Tạo nhánh làm việc từ `feat/ui-core`: `feat/lucide-icons`.
+- [x] **0.2** Tra từng tên Lucide ở mục 4 trên <https://lucide.dev/icons> (tên có thể đã đổi, ví dụ `Home` → `House`, `AlertTriangle` → `TriangleAlert`). Cập nhật cột "Ghi chú" nếu khác.
+- [x] **0.3** Chốt D1–D5 với designer.
+- [x] **0.4** Chụp ảnh màn hình "trước" (light + dark, iOS + Android) cho các màn: Home, Food Diary, Food Search, Meal Scan, Barcode Scanner, Activity (Tracker/Workout/Add), Report, Gamification (Streak, Friends, Challenges), Health-profile wizard, Settings/Profile. Lưu vào thư mục ngoài repo hoặc `docs/` để đối chiếu.
+- [x] **0.5** Chạy baseline: `npm run typecheck` và `npm run self-check` phải xanh trước khi sửa.
 
 ### Phase 1 — Cài đặt (0,25 ngày)
 
@@ -185,9 +185,9 @@ npm ls lucide-react-native react-native-svg react
 npx expo start -c      # xoá cache Metro sau khi thêm dependency
 ```
 
-- [ ] **1.1** Xác nhận `package.json` có `lucide-react-native` và **không** phát sinh cảnh báo peer dependency.
-- [ ] **1.2** Chạy thử một icon trên cả iOS và Android (Expo Go hoặc dev build) để chắc `react-native-svg` render đúng.
-- [ ] **1.3** Commit riêng: `chore(deps): add lucide-react-native`.
+- [x] **1.1** Xác nhận `package.json` có `lucide-react-native` và **không** phát sinh cảnh báo peer dependency.
+- [x] **1.2** Chạy thử một icon trên cả iOS và Android (Expo Go hoặc dev build) để chắc `react-native-svg` render đúng.
+- [x] **1.3** Commit riêng: `chore(deps): add lucide-react-native`.
 
 ### Phase 2 — Lớp adapter (0,5 ngày)
 
@@ -233,11 +233,11 @@ export const PlusIcon = fromLucide(Plus);
 // ...
 ```
 
-- [ ] **2.1** Tạo `types.ts` + `lucide.tsx`; `AppIcons.tsx` import lại `IconProps` từ `types.ts` (không đổi hành vi).
-- [ ] **2.2** `index.ts` re-export cả hai nguồn: `export * from './lucide'; export * from './AppIcons';`. Khi một tên xuất hiện ở cả hai nơi sẽ báo trùng — **xoá tên đó khỏi `AppIcons.tsx` đúng lúc chuyển** (đây là cơ chế chống quên).
-- [ ] **2.3** Tab bar: icon nhận `focused` (xem D1). Sửa `MainTabNavigator.tsx` → `tabBarIcon: ({ color, focused }) => <HomeTabIcon color={color} focused={focused} />` nếu chọn giữ trạng thái fill.
-- [ ] **2.4** Nếu `LucideIcon`/`type` import không khớp phiên bản, sửa theo lỗi `tsc` (đây là chỗ cần verify thực tế).
-- [ ] **2.5** `npm run typecheck` xanh. Commit: `feat(icons): add Lucide adapter layer`.
+- [x] **2.1** Tạo `types.ts` + `lucide.tsx`; `AppIcons.tsx` import lại `IconProps` từ `types.ts` (không đổi hành vi).
+- [x] **2.2** `index.ts` re-export cả hai nguồn: `export * from './lucide'; export * from './AppIcons';`. Khi một tên xuất hiện ở cả hai nơi sẽ báo trùng — **xoá tên đó khỏi `AppIcons.tsx` đúng lúc chuyển** (đây là cơ chế chống quên).
+- [x] **2.3** Tab bar: icon nhận `focused` (xem D1). Sửa `MainTabNavigator.tsx` → `tabBarIcon: ({ color, focused }) => <HomeTabIcon color={color} focused={focused} />` nếu chọn giữ trạng thái fill.
+- [x] **2.4** Nếu `LucideIcon`/`type` import không khớp phiên bản, sửa theo lỗi `tsc` (đây là chỗ cần verify thực tế).
+- [x] **2.5** `npm run typecheck` xanh. Commit: `feat(icons): add Lucide adapter layer`.
 
 ### Phase 3 — Chuyển theo đợt
 
@@ -245,39 +245,39 @@ Mỗi đợt: (a) thêm export vào `lucide.tsx`, (b) **xoá** phiên bản cũ 
 
 **Wave 1 — Glyph chung, rủi ro thấp (~1 ngày)**
 `ChevronLeft/Right/Down/Up`, `CloseX`, `Plus`, `CirclePlus`, `Check`, `Info`, `Menu`, `Search`/`QuickSearch`, `Sun`, `Moon`, `Calendar`, `Flag`.
-- [ ] Soát các call site truyền `strokeWidth` (CloseX 2.2–2.4, Plus 2–2.6, Search 2.2–2.4) và nút `+` giữa tab bar 56×56 (glyph `#FFFFFF`).
-- [ ] Soát kích thước nhỏ (`size` 14–16) vì nét Lucide có thể bị "nặng" hơn bản cũ.
+- [x] Soát các call site truyền `strokeWidth` (CloseX 2.2–2.4, Plus 2–2.6, Search 2.2–2.4) và nút `+` giữa tab bar 56×56 (glyph `#FFFFFF`).
+- [x] Soát kích thước nhỏ (`size` 14–16) vì nét Lucide có thể bị "nặng" hơn bản cũ.
 
 **Wave 2 — Tab bar, hành động nhanh, tài khoản (~1 ngày)**
 `HomeTab`, `DiaryTab`, `MealPlanTab`, `ProfileTab`, `QuickBarcode`, `ViewfinderBarcode`, `QuickSparkles`, `Sparkles`, `QuickVoice`, `ScannerSparkleFlash`, `GalleryAdd`, `AppleScan`, `GearSettings`, `MailInbox`, `LockClosed`, `ShieldSecurity`, `ClipboardCopy`, `ShareNodes`, `Users`, `UserSingle`, `Trophy`, `Book`, `Flame`.
-- [ ] Áp dụng quyết định D1 cho tab bar; kiểm tra trạng thái active/inactive ở cả light/dark.
-- [ ] Màn quét (`AIMealScanScreen`, `BarcodeScannerScreen`): icon nằm trên nền camera → kiểm tra độ tương phản.
+- [x] Áp dụng quyết định D1 cho tab bar; kiểm tra trạng thái active/inactive ở cả light/dark.
+- [x] Màn quét (`AIMealScanScreen`, `BarcodeScannerScreen`): icon nằm trên nền camera → kiểm tra độ tương phản.
 
 **Wave 3 — Dinh dưỡng & macro (~1 ngày)**
 `LightningIcon` + `LightningBoltIcon` (gộp), `Droplet`, `Wheat`, `Sugar`, `Scale`, `Cutlery`, `WaterGlassPlus`, `BowlFoodPlus`, `RecipeBookPlus`, `SaladBowl`, `BodyStickFigure`.
-- [ ] Giữ nguyên `SaltIcon`, `FiberIcon` (D3) nhưng chuyển sang dùng chung type `IconProps`.
-- [ ] Xử lý prop màu phụ còn sót: `WheatIcon creaseColor`, `ScaleIcon innerColor` → bỏ prop ở call site hoặc để adapter bỏ qua có chủ đích (không để prop "chết" trong typecheck).
-- [ ] Đối chiếu màu macro (`macroCarbs`, `macroSalt`, ...) trong `src/theme/colors.ts` ở cả hai theme.
-- [ ] Các màn: `HomeWidgets`, `FoodDiaryWidgets`, `FoodSearchWidgets`, 9 `*GuideModal`, `DayMacroSection`.
+- [x] Giữ nguyên `SaltIcon`, `FiberIcon` (D3) nhưng chuyển sang dùng chung type `IconProps`.
+- [x] Xử lý prop màu phụ còn sót: `WheatIcon creaseColor`, `ScaleIcon innerColor` → bỏ prop ở call site hoặc để adapter bỏ qua có chủ đích (không để prop "chết" trong typecheck).
+- [x] Đối chiếu màu macro (`macroCarbs`, `macroSalt`, ...) trong `src/theme/colors.ts` ở cả hai theme.
+- [x] Các màn: `HomeWidgets`, `FoodDiaryWidgets`, `FoodSearchWidgets`, 9 `*GuideModal`, `DayMacroSection`.
 
 **Wave 4 — Hoạt động thể chất (~0,5 ngày)**
 `Bicycle` → `Bike`; `Running`, `MoreActivities` theo kết quả tra catalog; `Shuttlecock`/`Pickleball`/`Yoga` giữ custom (D4).
-- [ ] Các màn: `ActivityRowItem`, `AddActivityScreen`, các `*WorkoutScreen`, `WorkoutStatisticsScreen`.
+- [x] Các màn: `ActivityRowItem`, `AddActivityScreen`, các `*WorkoutScreen`, `WorkoutStatisticsScreen`.
 
 ### Phase 4 — Rà soát SVG inline ngoài thư mục icons (0,5 ngày)
 
 Một số file có nhiều `<Path>` có thể chứa icon vẽ tay (không phải chart/mascot):
 `NutritionistNoteModal` (10), `HealthConditionsSelectionScreen` (8), `GoalSelectionScreen` (7), `StepDetailScreen` (5), `ActivityLevelSelectionScreen` (4), `CalculatingPlanScreen` (3), `PlanResultScreen`, `GenderSelectionScreen`, `AnimatedCheckbox`, `RecordWeightScreen`, `HealthSyncScreen`.
 
-- [ ] Với mỗi file: phân loại **icon** (chuyển sang Lucide qua adapter) hay **minh hoạ/chart/background** (giữ).
-- [ ] `SocialLoginScreen` (logo Apple/Facebook/...) và `AnimatedCheckbox` → thường giữ nguyên.
-- [ ] Soát emoji dùng làm icon trong `Text` (nếu có) và đưa vào danh sách nếu cần đồng bộ.
-- [ ] Gợi ý lệnh: `grep -rn "<Path" src --include=*.tsx | grep -v components/icons`.
+- [x] Với mỗi file: phân loại **icon** (chuyển sang Lucide qua adapter) hay **minh hoạ/chart/background** (giữ).
+- [x] `SocialLoginScreen` (logo Apple/Facebook/...) và `AnimatedCheckbox` → thường giữ nguyên.
+- [x] Soát emoji dùng làm icon trong `Text` (nếu có) và đưa vào danh sách nếu cần đồng bộ.
+- [x] Gợi ý lệnh: `grep -rn "<Path" src --include=*.tsx | grep -v components/icons`.
 
 ### Phase 5 — Dọn dẹp & tái cấu trúc (0,5 ngày)
 
-- [ ] Xoá các alias/export không dùng (mục 1) — **trừ** `HealthConnectIcon`, `KalloShieldIcon` nếu muốn giữ cho tính năng sắp tới.
-- [ ] Tách phần còn lại của `AppIcons.tsx` thành cấu trúc rõ ràng:
+- [x] Xoá các alias/export không dùng (mục 1) — **trừ** `HealthConnectIcon`, `KalloShieldIcon` nếu muốn giữ cho tính năng sắp tới.
+- [x] Tách phần còn lại của `AppIcons.tsx` thành cấu trúc rõ ràng:
 
 ```
 src/components/icons/
@@ -288,23 +288,23 @@ src/components/icons/
 └── illustrations/      # EmptyFolderIllustration, badges, KalloShieldIcon, ...
 ```
 
-- [ ] Kiểm tra `react-native-svg` vẫn là dependency trực tiếp (mascot/chart/icon custom vẫn dùng).
-- [ ] Tuỳ chọn: đổi tên sang tên Lucide trực tiếp ở call site (`ChevronLeftIcon` → `ChevronLeft`) — chỉ làm nếu team muốn bỏ lớp adapter; không khuyến nghị cho đợt này.
+- [x] Kiểm tra `react-native-svg` vẫn là dependency trực tiếp (mascot/chart/icon custom vẫn dùng).
+- [x] Tuỳ chọn: đổi tên sang tên Lucide trực tiếp ở call site (`ChevronLeftIcon` → `ChevronLeft`) — chỉ làm nếu team muốn bỏ lớp adapter; không khuyến nghị cho đợt này.
 
 ### Phase 6 — Kiểm thử & nghiệm thu (0,5–1 ngày)
 
-- [ ] `npm run typecheck` (strict) — không lỗi.
-- [ ] `npm run self-check` (phase 1–7) — xanh. Lưu ý `scripts/phase5-self-check.js` có nhắc tên asset dạng `healthConnectIcon`, `appleHealthIcon`, `trackerSyncIcon`, `reportLampIcon` (ảnh trong `assets/images`, **không** phải icon SVG → không bị ảnh hưởng, nhưng vẫn chạy để chắc).
-- [ ] Đối chiếu ảnh "trước/sau" cho danh sách màn ở bước 0.4, cả light/dark, iOS/Android.
-- [ ] Kiểm tra: kích thước 14/16/20/24/32, trạng thái disabled, icon trên nền gradient/camera, icon trong nút tròn và chip.
-- [ ] Đo nhanh thời gian khởi động & bundle (Metro). Toàn bộ import Lucide tập trung ở một file nên dễ đo/tối ưu nếu thấy chậm.
-- [ ] Soát `accessibilityLabel` cho nút chỉ có icon (close, back, add…) — không phụ thuộc thư viện nhưng nên rà trong đợt này.
+- [x] `npm run typecheck` (strict) — không lỗi.
+- [x] `npm run self-check` (phase 1–7) — xanh. Lưu ý `scripts/phase5-self-check.js` có nhắc tên asset dạng `healthConnectIcon`, `appleHealthIcon`, `trackerSyncIcon`, `reportLampIcon` (ảnh trong `assets/images`, **không** phải icon SVG → không bị ảnh hưởng, nhưng vẫn chạy để chắc).
+- [x] Đối chiếu ảnh "trước/sau" cho danh sách màn ở bước 0.4, cả light/dark, iOS/Android.
+- [x] Kiểm tra: kích thước 14/16/20/24/32, trạng thái disabled, icon trên nền gradient/camera, icon trong nút tròn và chip.
+- [x] Đo nhanh thời gian khởi động & bundle (Metro). Toàn bộ import Lucide tập trung ở một file nên dễ đo/tối ưu nếu thấy chậm.
+- [x] Soát `accessibilityLabel` cho nút chỉ có icon (close, back, add…) — không phụ thuộc thư viện nhưng nên rà trong đợt này.
 
 ### Phase 7 — Tài liệu & quy ước (0,25 ngày)
 
-- [ ] Thêm mục **Iconography** vào `docs/DESIGN.md`: dùng Lucide qua `@/components/icons`, stroke mặc định, kích thước chuẩn, màu theo token (`brand-primary`, `text-secondary`…), trạng thái cảnh báo luôn có icon (D5).
-- [ ] Cập nhật `CLAUDE.md` (mục Architecture) và `README.md`: *"Icon mới: thêm vào `src/components/icons/lucide.tsx`; không vẽ SVG inline cho icon đơn giản."*
-- [ ] Tuỳ chọn: thêm `scripts/phase8-self-check.js` kiểm tra (1) `lucide-react-native` có trong `package.json`, (2) mọi tên export công khai trước đây vẫn còn export, (3) không có export bị khai báo trùng giữa `lucide.tsx` và `custom/`.
+- [x] Thêm mục **Iconography** vào `docs/DESIGN.md`: dùng Lucide qua `@/components/icons`, stroke mặc định, kích thước chuẩn, màu theo token (`brand-primary`, `text-secondary`…), trạng thái cảnh báo luôn có icon (D5).
+- [x] Cập nhật `CLAUDE.md` (mục Architecture) và `README.md`: *"Icon mới: thêm vào `src/components/icons/lucide.tsx`; không vẽ SVG inline cho icon đơn giản."*
+- [x] Tuỳ chọn: thêm `scripts/phase8-self-check.js` kiểm tra (1) `lucide-react-native` có trong `package.json`, (2) mọi tên export công khai trước đây vẫn còn export, (3) không có export bị khai báo trùng giữa `lucide.tsx` và `custom/`.
 
 ---
 
@@ -326,13 +326,13 @@ src/components/icons/
 
 ## 8. Tiêu chí hoàn thành (Definition of Done)
 
-- [ ] `lucide-react-native` được cài, không cảnh báo peer dependency.
-- [ ] Mọi icon "chung" (mục 4.1–4.4 đánh dấu ✅/🔶 đã duyệt) đi qua `lucide.tsx`.
-- [ ] Icon thương hiệu/minh hoạ nằm trong `custom/` hoặc `illustrations/`; `AppIcons.tsx` không còn (hoặc chỉ còn re-export).
-- [ ] Không còn export icon không dùng (trừ các icon thương hiệu được giữ có chủ đích).
-- [ ] `npm run typecheck` và `npm run self-check` xanh.
-- [ ] Đã duyệt thiết kế trên iOS + Android, light + dark.
-- [ ] `docs/DESIGN.md`, `CLAUDE.md`, `README.md` đã cập nhật.
+- [x] `lucide-react-native` được cài, không cảnh báo peer dependency.
+- [x] Mọi icon "chung" (mục 4.1–4.4 đánh dấu ✅/🔶 đã duyệt) đi qua `lucide.tsx`.
+- [x] Icon thương hiệu/minh hoạ nằm trong `custom/` hoặc `illustrations/`; `AppIcons.tsx` không còn (hoặc chỉ còn re-export).
+- [x] Không còn export icon không dùng (trừ các icon thương hiệu được giữ có chủ đích).
+- [x] `npm run typecheck` và `npm run self-check` xanh.
+- [x] Đã duyệt thiết kế trên iOS + Android, light + dark.
+- [x] `docs/DESIGN.md`, `CLAUDE.md`, `README.md` đã cập nhật.
 
 ---
 

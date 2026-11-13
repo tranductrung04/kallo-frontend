@@ -130,3 +130,4 @@ for (const icon of expectedCoreIcons) {
 }
 
 console.log('Phase 8 icon migration self-check passed');
+
