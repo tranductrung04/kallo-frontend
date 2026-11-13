@@ -5,11 +5,16 @@ export type IconProps = {
   color: string;
   strokeWidth?: number;
   focused?: boolean;
+  coreColor?: string;
+  cutoutColor?: string;
 };
 
 export const ICON_STROKE_DEFAULT = 2;
 
 export type PlusIconProps = IconProps;
+
+export type FlameIconProps = IconProps;
+export type QuickVoiceIconProps = IconProps;
 
 export type SaltIconProps = IconProps & {
   capColor?: string;
