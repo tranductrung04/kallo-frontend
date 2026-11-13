@@ -15,11 +15,14 @@ import {
   CirclePlus,
   ClipboardCopy,
   ClipboardList,
+  Clock,
+  Cloud,
   Droplet,
   Flag,
   Flame,
   Footprints,
   GlassWater,
+  Heart,
   House,
   ImagePlus,
   Info,
@@ -209,3 +212,10 @@ export const BodyStickFigureIcon = fromLucide(PersonStanding, { defaultSize: 24 
 
 export const BicycleIcon = fromLucide(Bike, { defaultSize: 24 });
 export const FootprintsIcon = fromLucide(Footprints, { defaultSize: 20 });
+
+// ─── Health & Vitality ────────────────────────────────────────────────────────
+
+export const HeartIcon = fromLucide(Heart, { defaultSize: 22 });
+export const ClockIcon = fromLucide(Clock, { defaultSize: 22 });
+export const CloudIcon = fromLucide(Cloud, { defaultSize: 22 });
+
