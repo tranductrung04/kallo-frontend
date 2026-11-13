@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, type TextProps, type TextStyle } from 'react-native';
+import { StyleSheet, Text, type TextProps, type TextStyle } from 'react-native';
 import { useTheme, type TypographyVariant } from '@/theme';
 
 export type AppTextProps = TextProps & {
@@ -11,15 +11,31 @@ export type AppTextProps = TextProps & {
 
 export function AppText({ variant = 'bodyLg', color, align, style, testID, ...props }: AppTextProps) {
   const theme = useTheme();
+  const baseStyle = theme.typography[variant];
+  const flattened = StyleSheet.flatten(style);
+
+  // Prevent vertical text clipping on Android & iOS when custom fontSize is provided without matching lineHeight
+  const targetFontSize = flattened?.fontSize ?? baseStyle?.fontSize;
+  const targetLineHeight = flattened?.lineHeight ?? (flattened?.fontSize ? undefined : baseStyle?.lineHeight);
+
+  let safeLineHeight = targetLineHeight;
+  if (targetFontSize && (!safeLineHeight || safeLineHeight < targetFontSize * 1.15)) {
+    safeLineHeight = Math.ceil(targetFontSize * 1.28);
+  }
+
+  const resolvedColor = color ?? flattened?.color ?? theme.colors.textPrimary;
+  const resolvedAlign = align ?? flattened?.textAlign;
+
   return (
     <Text
       testID={testID}
       maxFontSizeMultiplier={1.3}
       {...props}
       style={[
-        theme.typography[variant],
-        { color: color ?? theme.colors.textPrimary, textAlign: align },
+        baseStyle,
         style,
+        { color: resolvedColor, textAlign: resolvedAlign },
+        safeLineHeight ? { lineHeight: safeLineHeight } : undefined,
       ]}
     />
   );

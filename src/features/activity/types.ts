@@ -6,6 +6,7 @@ export type ActivityType =
   | 'gym'
   | 'yoga'
   | 'badminton'
+  | 'pickleball'
   | 'football'
   | 'jump_rope'
   | 'other';
@@ -82,4 +83,5 @@ export type ActivityContextValue = {
   addBodyMetricLog: (waistCm: number, hipCm: number, gender?: 'male' | 'female' | 'other', date?: string) => BodyMetricLog | null;
   getLatestBodyMetric: () => BodyMetricLog | undefined;
   requestHealthPermission: (source: 'HEALTH_CONNECT' | 'APPLE_HEALTH') => Promise<HealthSyncStatus>;
+  updateStepGoal: (goal: number) => void;
 };

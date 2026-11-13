@@ -62,12 +62,12 @@ export function WeightForecastCard({
 
           {forecast.isCorrectDirection && forecast.estimatedDate ? (
             <View style={styles.badgeRow}>
-              <View style={[styles.badge, { backgroundColor: '#FFFFFF' }]}>
+              <View style={[styles.badge, { backgroundColor: theme.colors.surfaceMid, borderWidth: 1, borderColor: theme.colors.surfaceBorder }]}>
                 <AppText variant="caption" color={theme.colors.primary} style={{ fontWeight: '700' }}>
                   🎯 Ngày dự kiến: {forecast.estimatedDate}
                 </AppText>
               </View>
-              <View style={[styles.badge, { backgroundColor: '#FFFFFF' }]}>
+              <View style={[styles.badge, { backgroundColor: theme.colors.surfaceMid, borderWidth: 1, borderColor: theme.colors.surfaceBorder }]}>
                 <AppText variant="caption" color={theme.colors.textMuted}>
                   ⚡ {forecast.weeklyRateKg} kg/tuần
                 </AppText>

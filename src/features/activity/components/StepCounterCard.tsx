@@ -48,7 +48,7 @@ export function StepCounterCard({
           </AppText>
           <AppText variant="heading">{formatNumber(distanceKm || (steps * 0.00075), 1)} km</AppText>
         </View>
-        <View style={styles.divider} />
+        <View style={[styles.divider, { backgroundColor: theme.colors.border }]} />
         <View style={styles.stat}>
           <AppText variant="caption" color={theme.colors.textMuted}>
             Tiêu hao
@@ -96,6 +96,6 @@ const styles = StyleSheet.create({
   divider: {
     width: 1,
     height: 24,
-    backgroundColor: '#E0E0E0',
   },
 });
+

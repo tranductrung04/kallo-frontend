@@ -16,7 +16,7 @@ import { typography } from './typography';
 // Elevation object is theme-aware: dark gets glow, light gets tinted shadows
 type ThemeShadows = typeof shadows.dark | typeof shadows.light;
 
-type Theme = {
+export type Theme = {
   scheme: ColorScheme;
   colors: ColorTokens;
   spacing: typeof spacing;
@@ -25,7 +25,7 @@ type Theme = {
   typography: typeof typography;
   fontsLoaded: boolean;
 };
-type ThemeContextValue = Theme & { toggleScheme: () => void; setScheme: (scheme: ColorScheme) => void };
+export type ThemeContextValue = Theme & { toggleScheme: () => void; setScheme: (scheme: ColorScheme) => void };
 
 const THEME_KEY = '@kallo/theme';
 const ThemeContext = createContext<ThemeContextValue | null>(null);

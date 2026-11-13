@@ -1,4 +1,14 @@
-import type { Badge, Challenge, Friend, LeaderboardEntry, LeaderboardMetric, StreakInfo } from './types';
+import type {
+  Badge,
+  Challenge,
+  Friend,
+  FriendRequest,
+  GameSettings,
+  LeaderboardEntry,
+  LeaderboardMetric,
+  StreakInfo,
+  UserSearchResult,
+} from './types';
 
 // Rule per REQUIREMENT.md (line 453):
 // Daily goal achieved if >= 2 meals logged AND calories within +-10% of goal
@@ -222,3 +232,72 @@ export function buildLeaderboard(
     isCurrentUser: item.isCurrentUser,
   }));
 }
+
+export const INITIAL_GAME_SETTINGS: GameSettings = {
+  friendCode: 'KALLO888',
+  discoverable: true,
+  shareStreak: true,
+  sharePoints: true,
+  shareSteps: false,
+};
+
+export const INITIAL_INCOMING_REQUESTS: FriendRequest[] = [
+  {
+    id: 'req-in-1',
+    user: {
+      id: 'user-in-1',
+      displayName: 'Hồng Ánh',
+    },
+    status: 'PENDING',
+    createdAt: '10 phút trước',
+  },
+  {
+    id: 'req-in-2',
+    user: {
+      id: 'user-in-2',
+      displayName: 'Văn Kiên',
+    },
+    status: 'PENDING',
+    createdAt: '2 giờ trước',
+  },
+];
+
+export const INITIAL_OUTGOING_REQUESTS: FriendRequest[] = [
+  {
+    id: 'req-out-1',
+    user: {
+      id: 'user-out-1',
+      displayName: 'Bảo Trâm',
+    },
+    status: 'PENDING',
+    createdAt: 'Hôm qua',
+  },
+];
+
+export const MOCK_SEARCH_USERS: UserSearchResult[] = [
+  {
+    id: 'search-1',
+    displayName: 'Ngọc Mai',
+    relationship: 'NONE',
+  },
+  {
+    id: 'search-2',
+    displayName: 'Quốc Bảo',
+    relationship: 'PENDING_OUT',
+  },
+  {
+    id: 'search-3',
+    displayName: 'Thanh Hằng',
+    relationship: 'PENDING_IN',
+  },
+  {
+    id: 'search-4',
+    displayName: 'Hải Đăng',
+    relationship: 'NONE',
+  },
+  {
+    id: 'search-5',
+    displayName: 'Minh Hoàng',
+    relationship: 'FRIENDS',
+  },
+];

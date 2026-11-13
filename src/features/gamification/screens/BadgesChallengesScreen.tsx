@@ -11,6 +11,7 @@ import {
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { images } from '@/assets/images';
 import { AppButton, AppCard, AppText, ProgressBar } from '@/components/common';
+import { ChevronLeftIcon } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
 import type { Badge } from '../types';
@@ -24,9 +25,33 @@ export function BadgesChallengesScreen({ navigation }: Props) {
 
   const [activeTab, setActiveTab] = useState<'badges' | 'challenges'>('badges');
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
+  const [challengeFilter, setChallengeFilter] = useState<'all' | 'joined' | 'available'>('all');
+
+  const filteredChallenges = challenges.filter((c) => {
+    if (challengeFilter === 'joined') return c.isJoined;
+    if (challengeFilter === 'available') return !c.isJoined;
+    return true;
+  });
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.canvasBase }]}>
+      {/* ── Top Bar ─────────────────────────────────────────────────── */}
+      <View style={[styles.topBar, { borderBottomColor: theme.colors.surfaceBorder }]}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          accessibilityRole="button"
+          accessibilityLabel="Quay lại"
+        >
+          <ChevronLeftIcon size={24} color={theme.colors.textPrimary} />
+        </TouchableOpacity>
+        <AppText variant="headlineSm" color={theme.colors.textPrimary} numberOfLines={1} style={styles.topBarTitle}>
+          Huy hiệu & Thử thách
+        </AppText>
+        <View style={styles.backButtonPlaceholder} />
+      </View>
+
       {/* ── Tabs Header ─────────────────────────────────────────────── */}
       <View style={[styles.tabBar, { borderBottomColor: theme.colors.border }]}>
         <TouchableOpacity
@@ -148,59 +173,121 @@ export function BadgesChallengesScreen({ navigation }: Props) {
               </View>
             </View>
 
-            {challenges.map((challenge) => {
+            {/* ── Filter Chips ────────────────────────────────────────── */}
+            <View style={styles.filterChipsRow}>
+              <TouchableOpacity
+                style={[
+                  styles.filterChip,
+                  { backgroundColor: theme.colors.surfaceHigh },
+                  challengeFilter === 'all' && { backgroundColor: theme.colors.brandPrimary },
+                ]}
+                onPress={() => setChallengeFilter('all')}
+              >
+                <AppText
+                  variant="caption"
+                  color={challengeFilter === 'all' ? '#FFFFFF' : theme.colors.textSecondary}
+                  style={styles.bold}
+                >
+                  Tất cả ({challenges.length})
+                </AppText>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.filterChip,
+                  { backgroundColor: theme.colors.surfaceHigh },
+                  challengeFilter === 'joined' && { backgroundColor: theme.colors.brandPrimary },
+                ]}
+                onPress={() => setChallengeFilter('joined')}
+              >
+                <AppText
+                  variant="caption"
+                  color={challengeFilter === 'joined' ? '#FFFFFF' : theme.colors.textSecondary}
+                  style={styles.bold}
+                >
+                  Đang tham gia ({challenges.filter((c) => c.isJoined).length})
+                </AppText>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.filterChip,
+                  { backgroundColor: theme.colors.surfaceHigh },
+                  challengeFilter === 'available' && { backgroundColor: theme.colors.brandPrimary },
+                ]}
+                onPress={() => setChallengeFilter('available')}
+              >
+                <AppText
+                  variant="caption"
+                  color={challengeFilter === 'available' ? '#FFFFFF' : theme.colors.textSecondary}
+                  style={styles.bold}
+                >
+                  Mới ({challenges.filter((c) => !c.isJoined).length})
+                </AppText>
+              </TouchableOpacity>
+            </View>
+
+            {filteredChallenges.map((challenge) => {
               const progressRatio = Math.min(
                 1,
                 challenge.currentProgress / (challenge.targetProgress || 1)
               );
               return (
-                <AppCard key={challenge.id} style={styles.challengeCard}>
-                  <View style={styles.challengeHeader}>
-                    <View style={styles.flex}>
-                      <AppText variant="headlineSm">{challenge.title}</AppText>
-                      <AppText variant="bodySm" color={theme.colors.textSecondary}>
-                        {challenge.description}
-                      </AppText>
-                    </View>
-                    <View style={styles.rewardPill}>
-                      <AppText variant="caption" color={theme.colors.calorieBurned}>
-                        +{challenge.rewardPoints} đ
-                      </AppText>
-                    </View>
-                  </View>
-
-                  <View style={styles.progressRow}>
-                    <View style={styles.flex}>
-                      <AppText variant="caption" color={theme.colors.textSecondary}>
-                        Tiến độ: {challenge.currentProgress.toLocaleString()} /{' '}
-                        {challenge.targetProgress.toLocaleString()} {challenge.unit}
-                      </AppText>
-                      <ProgressBar
-                        value={progressRatio}
-                        color={theme.colors.brandPrimary}
-                      />
-                    </View>
-                  </View>
-
-                  <View style={styles.challengeFooter}>
-                    <AppText variant="caption" color={theme.colors.textSecondary}>
-                      Thời hạn: {challenge.durationDays} ngày
-                    </AppText>
-                    {challenge.isJoined ? (
-                      <View style={styles.joinedBadge}>
-                        <AppText variant="caption" color={theme.colors.brandPrimary}>
-                          Đang tham gia ✓
+                <TouchableOpacity
+                  key={challenge.id}
+                  activeOpacity={0.85}
+                  onPress={() =>
+                    navigation.navigate('ChallengeDetail', { challengeId: challenge.id })
+                  }
+                >
+                  <AppCard style={styles.challengeCard}>
+                    <View style={styles.challengeHeader}>
+                      <View style={styles.flex}>
+                        <AppText variant="headlineSm">{challenge.title}</AppText>
+                        <AppText variant="bodySm" color={theme.colors.textSecondary}>
+                          {challenge.description}
                         </AppText>
                       </View>
-                    ) : (
-                      <AppButton
-                        label="Tham gia ngay"
-                        variant="primary"
-                        onPress={() => joinChallenge(challenge.id)}
-                      />
-                    )}
-                  </View>
-                </AppCard>
+                      <View style={styles.rewardPill}>
+                        <AppText variant="caption" color={theme.colors.calorieBurned}>
+                          +{challenge.rewardPoints} đ
+                        </AppText>
+                      </View>
+                    </View>
+
+                    <View style={styles.progressRow}>
+                      <View style={styles.flex}>
+                        <AppText variant="caption" color={theme.colors.textSecondary}>
+                          Tiến độ: {challenge.currentProgress.toLocaleString()} /{' '}
+                          {challenge.targetProgress.toLocaleString()} {challenge.unit}
+                        </AppText>
+                        <ProgressBar
+                          value={progressRatio}
+                          color={theme.colors.brandPrimary}
+                        />
+                      </View>
+                    </View>
+
+                    <View style={styles.challengeFooter}>
+                      <AppText variant="caption" color={theme.colors.textSecondary}>
+                        Thời hạn: {challenge.durationDays} ngày • Chi tiết →
+                      </AppText>
+                      {challenge.isJoined ? (
+                        <View style={styles.joinedBadge}>
+                          <AppText variant="caption" color={theme.colors.brandPrimary}>
+                            Đang tham gia ✓
+                          </AppText>
+                        </View>
+                      ) : (
+                        <AppButton
+                          label="Tham gia"
+                          variant="primary"
+                          onPress={() => joinChallenge(challenge.id)}
+                        />
+                      )}
+                    </View>
+                  </AppCard>
+                </TouchableOpacity>
               );
             })}
           </View>
@@ -279,6 +366,27 @@ export function BadgesChallengesScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  topBarTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  backButtonPlaceholder: {
+    width: 40,
+  },
   tabBar: {
     flexDirection: 'row',
     borderBottomWidth: 1,
@@ -334,6 +442,18 @@ const styles = StyleSheet.create({
   challengesSection: {
     gap: 14,
   },
+  filterChipsRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  filterChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  bold: {
+    fontWeight: '700',
+  },
   courseBannerWrap: {
     height: 140,
     borderRadius: 18,
@@ -346,7 +466,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   courseBannerOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(20, 18, 30, 0.45)',
     padding: 16,
     justifyContent: 'flex-end',
@@ -400,7 +520,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   awardBg: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     opacity: 0.15,
   },
   trophyIcon: {
