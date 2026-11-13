@@ -26,4 +26,7 @@ export { StatusBanner } from './StatusBanner';
 export type { StatusBannerProps, StatusBannerType } from './StatusBanner';
 export { MonthCalendarModal, DatePickerModal, formatFullCalendarTitle } from './MonthCalendarModal';
 export type { MonthCalendarModalProps, DatePickerModalProps } from './MonthCalendarModal';
+export { AppSwitch, ToggleSwitch } from './AppSwitch';
+export type { AppSwitchProps } from './AppSwitch';
+
 
