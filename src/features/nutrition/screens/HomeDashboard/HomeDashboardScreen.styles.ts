@@ -580,6 +580,34 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       marginTop: 4,
     },
 
+    // 10. Community & Gamification Cards
+    communityGrid: {
+      gap: 12,
+    },
+    communityCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: s.md,
+      gap: s.md,
+    },
+    communityIconBox: {
+      width: 44,
+      height: 44,
+      borderRadius: 14,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    communityEmoji: {
+      fontSize: 22,
+    },
+    communityTextWrap: {
+      flex: 1,
+      gap: 2,
+    },
+    bold: {
+      fontWeight: '700',
+    },
+
     // 10. Floating "Quay lại hôm nay" Button
     floatingTodayWrapper: {
       position: 'absolute',
