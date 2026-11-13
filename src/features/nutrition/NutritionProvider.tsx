@@ -66,7 +66,50 @@ export function NutritionProvider({ children }: React.PropsWithChildren) {
   }) })), []);
   const deleteFoodLog = useCallback((logId: string) => setState((current) => ({ ...current, foodLogs: current.foodLogs.filter((log) => log.id !== logId) })), []);
   const copyMeal = useCallback((sourceDate: string, targetDate: string, meal: MealSlot) => setState((current) => ({ ...current, foodLogs: [...current.foodLogs, ...current.foodLogs.filter((log) => log.date === sourceDate && log.meal === meal).map((log) => ({ ...log, id: id('food'), date: targetDate }))] })), []);
-  const addWater = useCallback((date: string, amountMl: number) => { if (!Number.isFinite(amountMl) || amountMl <= 0 || amountMl > 5000) return false; setState((current) => ({ ...current, waterLogs: [...current.waterLogs, { id: id('water'), date, amountMl }] })); void api.post('/water-logs', { date, amountMl }).catch(() => undefined); return true; }, []);
+  const addWater = useCallback((date: string, amountMl: number) => {
+    if (!Number.isFinite(amountMl) || amountMl === 0 || Math.abs(amountMl) > 5000) return false;
+    if (amountMl < 0) {
+      let toRemove = Math.abs(amountMl);
+      const deletedIds: string[] = [];
+      setState((current) => {
+        const logsForDate = current.waterLogs.filter((log) => log.date === date);
+        const totalWater = logsForDate.reduce((sum, log) => sum + log.amountMl, 0);
+        if (totalWater <= 0) return current;
+
+        let rem = Math.min(totalWater, toRemove);
+        const remainingDateLogs: typeof current.waterLogs = [];
+        const reversed = [...logsForDate].reverse();
+
+        for (const log of reversed) {
+          if (rem <= 0) {
+            remainingDateLogs.unshift(log);
+          } else if (log.amountMl <= rem) {
+            rem -= log.amountMl;
+            deletedIds.push(log.id);
+          } else {
+            remainingDateLogs.unshift({ ...log, amountMl: log.amountMl - rem });
+            rem = 0;
+          }
+        }
+
+        return {
+          ...current,
+          waterLogs: [
+            ...current.waterLogs.filter((log) => log.date !== date),
+            ...remainingDateLogs,
+          ],
+        };
+      });
+      deletedIds.forEach((logId) => {
+        void api.delete(`/water-logs/${logId}`).catch(() => undefined);
+      });
+      return true;
+    }
+
+    setState((current) => ({ ...current, waterLogs: [...current.waterLogs, { id: id('water'), date, amountMl }] }));
+    void api.post('/water-logs', { date, amountMl }).catch(() => undefined);
+    return true;
+  }, []);
   const addWeight = useCallback((date: string, weightKg: number) => { if (!Number.isFinite(weightKg) || weightKg < 20 || weightKg > 300) return false; setState((current) => ({ ...current, weightLogs: [...current.weightLogs.filter((log) => log.date !== date), { id: id('weight'), date, weightKg }] })); void api.post('/weight-logs', { date, weightKg }).catch(() => undefined); return true; }, []);
   const saveCustomFood = useCallback((food: Omit<Food, 'id' | 'isCustom'> & { id?: string }) => { const foodId = food.id ?? id('custom'); setState((current) => ({ ...current, customFoods: [...current.customFoods.filter((item) => item.id !== foodId), { ...food, id: foodId, isCustom: true }] })); void api.post('/foods/custom', { ...food, id: foodId }).catch(() => undefined); return foodId; }, []);
   const value = useMemo<NutritionContextValue>(() => ({ state, ready, foods, findFood, getSummary, getLogs, addFoodLog, addMultipleFoodLogs, updateFoodLog, deleteFoodLog, copyMeal, addWater, addWeight, saveCustomFood, setSelectedDate: (date) => setState((current) => ({ ...current, selectedDate: date })), setWalkthroughSeen: () => setState((current) => ({ ...current, walkthroughSeen: true })) }), [state, ready, foods, findFood, getSummary, getLogs, addFoodLog, addMultipleFoodLogs, updateFoodLog, deleteFoodLog, copyMeal, addWater, addWeight, saveCustomFood]);

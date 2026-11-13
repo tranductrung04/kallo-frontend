@@ -14,6 +14,15 @@ import {
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { images } from '@/assets/images';
 import { AppButton, AppCard, AppText } from '@/components/common';
+import {
+  ChevronLeftIcon,
+  FlameIcon,
+  GearSettingsIcon,
+  MailInboxIcon,
+  RunningIcon,
+  TrophyIcon,
+  UserSingleIcon,
+} from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
 import type { LeaderboardMetric } from '../types';
@@ -28,27 +37,12 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
     isSharingPrivacy,
     toggleSharingPrivacy,
     getLeaderboard,
-    sendFriendRequest,
     acceptFriendRequest,
+    incomingRequests,
   } = useGamification();
 
   const [metric, setMetric] = useState<LeaderboardMetric>('streak');
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [friendUsername, setFriendUsername] = useState('');
-
   const leaderboard = getLeaderboard(metric);
-
-  const handleSendRequest = () => {
-    if (!friendUsername.trim()) return;
-    const ok = sendFriendRequest(friendUsername);
-    if (ok) {
-      Alert.alert('Đã gửi lời mời', `Đã gửi lời mời kết bạn tới @${friendUsername}`);
-      setFriendUsername('');
-      setShowAddModal(false);
-    } else {
-      Alert.alert('Thông báo', 'Tài khoản này đã có trong danh sách bạn bè hoặc đã gửi lời mời.');
-    }
-  };
 
   const getRankBadge = (rank: number) => {
     if (rank === 1) return '🥇';
@@ -59,6 +53,29 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.canvasBase }]}>
+      {/* ── Top Bar ─────────────────────────────────────────────────── */}
+      <View style={[styles.topBar, { borderBottomColor: theme.colors.surfaceBorder }]}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          accessibilityRole="button"
+          accessibilityLabel="Quay lại"
+        >
+          <ChevronLeftIcon size={24} color={theme.colors.textPrimary} />
+        </TouchableOpacity>
+        <AppText variant="headlineSm" color={theme.colors.textPrimary} numberOfLines={1} style={styles.topBarTitle}>
+          Bảng xếp hạng bạn bè
+        </AppText>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.navigate('GameSettings')}
+          accessibilityLabel="Cài đặt trò chơi"
+        >
+          <GearSettingsIcon size={22} color={theme.colors.textPrimary} />
+        </TouchableOpacity>
+      </View>
+
       <ScrollView contentContainerStyle={styles.content}>
         {/* ── Community Hero Banner ─────────────────────────────────── */}
         <View style={styles.bannerContainer}>
@@ -69,19 +86,43 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
           />
           <View style={styles.bannerOverlay}>
             <View style={styles.bannerTopRow}>
-              <Image
-                source={images.groupUsers}
-                style={styles.groupUsersIcon}
-                resizeMode="contain"
-              />
-              <TouchableOpacity
-                style={styles.addFriendBtn}
-                onPress={() => setShowAddModal(true)}
-              >
-                <AppText variant="caption" color="#FFFFFF">
-                  + Thêm bạn
-                </AppText>
-              </TouchableOpacity>
+              <View style={styles.bannerLeftActions}>
+                <Image
+                  source={images.groupUsers}
+                  style={styles.groupUsersIcon}
+                  resizeMode="contain"
+                />
+                {incomingRequests.length > 0 && (
+                  <TouchableOpacity
+                    style={[styles.requestCountBadge, { backgroundColor: theme.colors.brandPrimary }]}
+                    onPress={() => navigation.navigate('FriendRequests')}
+                  >
+                    <MailInboxIcon size={14} color={theme.colors.onBrand} />
+                    <AppText variant="caption" color={theme.colors.onBrand} style={styles.bold}>
+                      {incomingRequests.length}
+                    </AppText>
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              <View style={styles.bannerRightActions}>
+                <TouchableOpacity
+                  style={styles.settingsIconBtn}
+                  onPress={() => navigation.navigate('GameSettings')}
+                  accessibilityLabel="Cài đặt trò chơi"
+                >
+                  <GearSettingsIcon size={20} color={theme.colors.onBrand} />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.addFriendBtn}
+                  onPress={() => navigation.navigate('FriendSearch')}
+                >
+                  <AppText variant="caption" color={theme.colors.onBrand} style={styles.bold}>
+                    + Thêm bạn
+                  </AppText>
+                </TouchableOpacity>
+              </View>
             </View>
             <AppText variant="headlineSm" color="#FFFFFF">
               Bảng xếp hạng Bạn bè
@@ -107,11 +148,14 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
               trackColor={{ false: 'rgba(128,128,128,0.3)', true: theme.colors.brandPrimary }}
             />
           </View>
-          <View style={styles.privacyNotice}>
+          <TouchableOpacity
+            style={styles.privacyNotice}
+            onPress={() => navigation.navigate('GameSettings')}
+          >
             <AppText variant="caption" color={theme.colors.brandPrimary}>
-              🔒 Bảo mật: Tuyệt đối không bao giờ hiển thị cân nặng cá nhân lên bảng xếp hạng.
+              🔒 Bảo mật: Tuyệt đối không hiển thị cân nặng. Xem cài đặt chi tiết →
             </AppText>
-          </View>
+          </TouchableOpacity>
         </AppCard>
 
         {/* ── Metric Tabs ────────────────────────────────────────────── */}
@@ -125,11 +169,16 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
             ]}
             onPress={() => setMetric('streak')}
           >
+            <FlameIcon
+              size={16}
+              color={metric === 'streak' ? theme.colors.onBrand : theme.colors.macroProtein}
+            />
             <AppText
               variant="bodySm"
-              color={metric === 'streak' ? '#FFFFFF' : theme.colors.textPrimary}
+              color={metric === 'streak' ? theme.colors.onBrand : theme.colors.textPrimary}
+              style={styles.bold}
             >
-              🔥 Chuỗi Streak
+              Chuỗi Streak
             </AppText>
           </TouchableOpacity>
 
@@ -142,11 +191,16 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
             ]}
             onPress={() => setMetric('challenge')}
           >
+            <TrophyIcon
+              size={16}
+              color={metric === 'challenge' ? theme.colors.onBrand : theme.colors.vipStreak}
+            />
             <AppText
               variant="bodySm"
-              color={metric === 'challenge' ? '#FFFFFF' : theme.colors.textPrimary}
+              color={metric === 'challenge' ? theme.colors.onBrand : theme.colors.textPrimary}
+              style={styles.bold}
             >
-              🏆 Thử thách
+              Thử thách
             </AppText>
           </TouchableOpacity>
 
@@ -159,11 +213,16 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
             ]}
             onPress={() => setMetric('steps')}
           >
+            <RunningIcon
+              size={16}
+              color={metric === 'steps' ? theme.colors.onBrand : theme.colors.brandPrimary}
+            />
             <AppText
               variant="bodySm"
-              color={metric === 'steps' ? '#FFFFFF' : theme.colors.textPrimary}
+              color={metric === 'steps' ? theme.colors.onBrand : theme.colors.textPrimary}
+              style={styles.bold}
             >
-              👟 Bước chân
+              Bước chân
             </AppText>
           </TouchableOpacity>
         </View>
@@ -227,7 +286,7 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
         <View style={styles.friendsSection}>
           <View style={styles.sectionTitleRow}>
             <AppText variant="headlineSm">Danh sách bạn bè ({friends.length})</AppText>
-            <TouchableOpacity onPress={() => setShowAddModal(true)}>
+            <TouchableOpacity onPress={() => navigation.navigate('FriendSearch')}>
               <AppText variant="bodySm" color={theme.colors.brandPrimary}>
                 + Kết bạn mới
               </AppText>
@@ -235,86 +294,68 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
           </View>
 
           {friends.map((friend) => (
-            <AppCard key={friend.id} style={styles.friendCard}>
-              <View style={styles.friendInfo}>
-                <View style={[styles.friendAvatar, { backgroundColor: theme.colors.brandSoftTint }]}>
-                  <AppText variant="bodyMd">{friend.avatarGlyph}</AppText>
+            <TouchableOpacity
+              key={friend.id}
+              activeOpacity={0.8}
+              onPress={() => navigation.navigate('FriendProfile', { friendUserId: friend.id })}
+            >
+              <AppCard style={styles.friendCard}>
+                <View style={styles.friendInfo}>
+                  <View style={[styles.friendAvatar, { backgroundColor: theme.colors.brandSoftTint }]}>
+                    <UserSingleIcon size={20} color={theme.colors.brandPrimary} />
+                  </View>
+                  <View>
+                    <AppText variant="bodyMd">{friend.name}</AppText>
+                    <AppText variant="caption" color={theme.colors.textSecondary}>
+                      @{friend.username} • {friend.streak} ngày streak
+                    </AppText>
+                  </View>
                 </View>
-                <View>
-                  <AppText variant="bodyMd">{friend.name}</AppText>
-                  <AppText variant="caption" color={theme.colors.textSecondary}>
-                    @{friend.username} • {friend.streak} ngày streak
-                  </AppText>
-                </View>
-              </View>
 
-              {friend.status === 'pending_received' ? (
-                <AppButton
-                  label="Chấp nhận"
-                  variant="primary"
-                  onPress={() => acceptFriendRequest(friend.id)}
-                />
-              ) : friend.status === 'pending_sent' ? (
-                <AppText variant="caption" color={theme.colors.textSecondary}>
-                  Đã gửi lời mời
-                </AppText>
-              ) : (
-                <AppText variant="caption" color={theme.colors.brandPrimary}>
-                  Bạn bè ✓
-                </AppText>
-              )}
-            </AppCard>
+                {friend.status === 'pending_received' ? (
+                  <AppButton
+                    label="Chấp nhận"
+                    variant="primary"
+                    onPress={() => acceptFriendRequest(friend.id)}
+                  />
+                ) : friend.status === 'pending_sent' ? (
+                  <AppText variant="caption" color={theme.colors.textSecondary}>
+                    Đã gửi lời mời
+                  </AppText>
+                ) : (
+                  <AppText variant="caption" color={theme.colors.brandPrimary}>
+                    Bạn bè ✓
+                  </AppText>
+                )}
+              </AppCard>
+            </TouchableOpacity>
           ))}
         </View>
       </ScrollView>
-
-      {/* ── Add Friend Modal ─────────────────────────────────────────── */}
-      <Modal
-        visible={showAddModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowAddModal(false)}
-      >
-        <View style={styles.modalBackdrop}>
-          <View style={[styles.modalBox, { backgroundColor: theme.colors.surface }]}>
-            <View style={styles.modalHeader}>
-              <AppText variant="headlineSm">Kết nối bạn bè mới</AppText>
-              <TouchableOpacity onPress={() => setShowAddModal(false)}>
-                <AppText variant="headlineSm">✕</AppText>
-              </TouchableOpacity>
-            </View>
-
-            <AppText variant="bodySm" color={theme.colors.textSecondary}>
-              Nhập tên tài khoản hoặc email của bạn bè để cùng thi đua duy trì thói quen sống khỏe.
-            </AppText>
-
-            <TextInput
-              style={[
-                styles.friendInput,
-                { color: theme.colors.textPrimary, borderColor: theme.colors.border },
-              ]}
-              placeholder="Nhập tên đăng nhập (ví dụ: nam_fitness)"
-              placeholderTextColor={theme.colors.textSecondary}
-              value={friendUsername}
-              onChangeText={setFriendUsername}
-              autoCapitalize="none"
-            />
-
-            <AppButton
-              label="Gửi lời mời kết bạn"
-              variant="primary"
-              onPress={handleSendRequest}
-              disabled={!friendUsername.trim()}
-            />
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  topBarTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
   content: { padding: 16, gap: 16, paddingBottom: 40 },
   bannerContainer: {
     height: 140,
@@ -328,7 +369,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   bannerOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(20, 18, 30, 0.45)',
     padding: 16,
     justifyContent: 'space-between',
@@ -337,6 +378,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  bannerLeftActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  bannerRightActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  requestCountBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 10,
+  },
+  settingsIconBtn: {
+    width: 30,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  settingsEmoji: {
+    fontSize: 18,
   },
   groupUsersIcon: {
     width: 60,
@@ -372,11 +437,14 @@ const styles = StyleSheet.create({
   },
   metricTab: {
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
     paddingVertical: 10,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: 'rgba(128,128,128,0.2)',
-    alignItems: 'center',
   },
   tableCard: {
     gap: 8,

@@ -45,7 +45,7 @@ export function MealPlanProvider({ children }: React.PropsWithChildren) {
   const generatePlan = useCallback(async (goal: MealPlanGoal): Promise<MealPlan> => {
     setIsGenerating(true);
     // Simulate AI generation delay 600ms for smooth UX
-    await new Promise((resolve) => setTimeout(resolve, 600));
+    await new Promise<void>((resolve) => setTimeout(() => resolve(), 600));
     const newPlan = generateMealPlan(goal, VIETNAMESE_RECIPES);
     setCurrentPlan(newPlan);
     setIsGenerating(false);
@@ -135,6 +135,18 @@ export function MealPlanProvider({ children }: React.PropsWithChildren) {
     }
   }, [currentPlan]);
 
+  const clearCurrentPlan = useCallback(() => {
+    setCurrentPlan(null);
+  }, []);
+
+  const setActivePlan = useCallback((plan: MealPlan) => {
+    setCurrentPlan(plan);
+    setSavedPlans((current) => [
+      plan,
+      ...current.filter((p) => p.id !== plan.id),
+    ]);
+  }, []);
+
   const applyPlanToDiary = useCallback((dayIndex = 0, targetDate?: string): number => {
     if (!currentPlan) return 0;
     const day = currentPlan.days[dayIndex];
@@ -173,6 +185,8 @@ export function MealPlanProvider({ children }: React.PropsWithChildren) {
     swapItem,
     savePlan,
     deletePlan,
+    clearCurrentPlan,
+    setActivePlan,
     applyPlanToDiary,
   };
 

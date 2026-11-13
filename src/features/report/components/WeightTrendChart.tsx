@@ -211,7 +211,7 @@ export function WeightTrendChart({
           </Svg>
 
           {/* Touch Overlay */}
-          <View style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
+          <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
             <View style={styles.touchRow}>
               {validPoints.map((_, i) => (
                 <Pressable

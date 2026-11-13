@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
   SafeAreaView,
   ScrollView,
+  StatusBar,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -13,7 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import { images } from '@/assets/images';
 import { AppButton, AppCard, AppText } from '@/components/common';
 import type { RootStackParamList } from '@/navigation/types';
-import { useTheme } from '@/theme';
+import { useTheme, type ThemeContextValue } from '@/theme';
 import { useNutrition } from '@/features/nutrition/NutritionProvider';
 import { useMealPlan } from '../MealPlanProvider';
 import { formatVnd } from '../utils';
@@ -34,6 +35,7 @@ const BUDGET_OPTIONS = [50000, 80000, 100000, 150000, 200000];
 
 export function MealPlanWizardScreen() {
   const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<NavigationProp>();
   const { state: nutritionState } = useNutrition();
   const { generatePlan, isGenerating } = useMealPlan();
@@ -74,6 +76,10 @@ export function MealPlanWizardScreen() {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.canvasBase }]}>
+      <StatusBar
+        barStyle={theme.scheme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={theme.colors.canvasBase}
+      />
       <ScrollView contentContainerStyle={styles.content}>
         {/* ── Step Progress Indicator ─────────────────────────────────── */}
         <View style={styles.stepIndicator}>
@@ -84,13 +90,15 @@ export function MealPlanWizardScreen() {
                   styles.stepDot,
                   {
                     backgroundColor:
-                      s <= step ? theme.colors.brandPrimary : 'rgba(128,128,128,0.25)',
+                      s <= step ? theme.colors.brandPrimary : theme.colors.surfaceHigh,
+                    borderColor:
+                      s <= step ? theme.colors.brandPrimary : theme.colors.surfaceBorder,
                   },
                 ]}
               >
                 <AppText
                   variant="caption"
-                  color={s <= step ? '#FFFFFF' : theme.colors.textSecondary}
+                  color={s <= step ? theme.colors.onBrand : theme.colors.textSecondary}
                 >
                   {s}
                 </AppText>
@@ -127,14 +135,23 @@ export function MealPlanWizardScreen() {
                 <TouchableOpacity
                   style={[
                     styles.durationOption,
-                    durationDays === 1 && {
-                      borderColor: theme.colors.brandPrimary,
-                      backgroundColor: theme.colors.brandSoftTint,
-                    },
+                    durationDays === 1
+                      ? {
+                          borderColor: theme.colors.brandPrimary,
+                          backgroundColor: theme.colors.brandSoftTint,
+                        }
+                      : {
+                          borderColor: theme.colors.surfaceBorder,
+                          backgroundColor: theme.colors.surfaceMid,
+                        },
                   ]}
                   onPress={() => setDurationDays(1)}
                 >
-                  <AppText variant="headlineSm" align="center">
+                  <AppText
+                    variant="headlineSm"
+                    align="center"
+                    color={durationDays === 1 ? theme.colors.brandPrimary : theme.colors.textPrimary}
+                  >
                     1 Ngày
                   </AppText>
                   <AppText variant="caption" color={theme.colors.textSecondary} align="center">
@@ -145,14 +162,23 @@ export function MealPlanWizardScreen() {
                 <TouchableOpacity
                   style={[
                     styles.durationOption,
-                    durationDays === 7 && {
-                      borderColor: theme.colors.brandPrimary,
-                      backgroundColor: theme.colors.brandSoftTint,
-                    },
+                    durationDays === 7
+                      ? {
+                          borderColor: theme.colors.brandPrimary,
+                          backgroundColor: theme.colors.brandSoftTint,
+                        }
+                      : {
+                          borderColor: theme.colors.surfaceBorder,
+                          backgroundColor: theme.colors.surfaceMid,
+                        },
                   ]}
                   onPress={() => setDurationDays(7)}
                 >
-                  <AppText variant="headlineSm" align="center">
+                  <AppText
+                    variant="headlineSm"
+                    align="center"
+                    color={durationDays === 7 ? theme.colors.brandPrimary : theme.colors.textPrimary}
+                  >
                     7 Ngày
                   </AppText>
                   <AppText variant="caption" color={theme.colors.textSecondary} align="center">
@@ -166,7 +192,13 @@ export function MealPlanWizardScreen() {
               <AppText variant="headlineSm">Calo mục tiêu mỗi ngày</AppText>
               <View style={styles.calorieAdjuster}>
                 <TouchableOpacity
-                  style={[styles.adjustBtn, { backgroundColor: theme.colors.surface }]}
+                  style={[
+                    styles.adjustBtn,
+                    {
+                      backgroundColor: theme.colors.surfaceHigh,
+                      borderColor: theme.colors.surfaceBorder,
+                    },
+                  ]}
                   onPress={() => setTargetCalories((c) => Math.max(1200, c - 100))}
                 >
                   <AppText variant="headlineMd">-</AppText>
@@ -180,7 +212,13 @@ export function MealPlanWizardScreen() {
                   </AppText>
                 </View>
                 <TouchableOpacity
-                  style={[styles.adjustBtn, { backgroundColor: theme.colors.surface }]}
+                  style={[
+                    styles.adjustBtn,
+                    {
+                      backgroundColor: theme.colors.surfaceHigh,
+                      borderColor: theme.colors.surfaceBorder,
+                    },
+                  ]}
                   onPress={() => setTargetCalories((c) => Math.min(4000, c + 100))}
                 >
                   <AppText variant="headlineMd">+</AppText>
@@ -224,16 +262,21 @@ export function MealPlanWizardScreen() {
                     key={val}
                     style={[
                       styles.chip,
-                      dailyBudgetVnd === val && {
-                        backgroundColor: theme.colors.brandPrimary,
-                        borderColor: theme.colors.brandPrimary,
-                      },
+                      dailyBudgetVnd === val
+                        ? {
+                            backgroundColor: theme.colors.brandPrimary,
+                            borderColor: theme.colors.brandPrimary,
+                          }
+                        : {
+                            backgroundColor: theme.colors.surfaceHigh,
+                            borderColor: theme.colors.surfaceBorder,
+                          },
                     ]}
                     onPress={() => setDailyBudgetVnd(val)}
                   >
                     <AppText
                       variant="bodySm"
-                      color={dailyBudgetVnd === val ? '#FFFFFF' : theme.colors.textPrimary}
+                      color={dailyBudgetVnd === val ? theme.colors.onBrand : theme.colors.textPrimary}
                     >
                       {formatVnd(val)}
                     </AppText>
@@ -285,16 +328,21 @@ export function MealPlanWizardScreen() {
                       key={allergen}
                       style={[
                         styles.chip,
-                        isSelected && {
-                          backgroundColor: theme.colors.calorieIn,
-                          borderColor: theme.colors.calorieIn,
-                        },
+                        isSelected
+                          ? {
+                              backgroundColor: theme.colors.calorieIn,
+                              borderColor: theme.colors.calorieIn,
+                            }
+                          : {
+                              backgroundColor: theme.colors.surfaceHigh,
+                              borderColor: theme.colors.surfaceBorder,
+                            },
                       ]}
                       onPress={() => toggleAllergen(allergen)}
                     >
                       <AppText
                         variant="bodySm"
-                        color={isSelected ? '#FFFFFF' : theme.colors.textPrimary}
+                        color={isSelected ? theme.colors.onBrand : theme.colors.textPrimary}
                       >
                         {isSelected ? `✕ ${allergen}` : `+ ${allergen}`}
                       </AppText>
@@ -357,92 +405,102 @@ export function MealPlanWizardScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1 },
-  content: { padding: 16, gap: 16, paddingBottom: 40 },
-  stepIndicator: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 8,
-  },
-  stepItem: {
-    alignItems: 'center',
-    gap: 4,
-  },
-  stepDot: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stepContainer: {
-    gap: 16,
-  },
-  stepImage: {
-    width: '100%',
-    height: 140,
-    alignSelf: 'center',
-  },
-  card: {
-    gap: 12,
-  },
-  durationRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  durationOption: {
-    flex: 1,
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: 'rgba(128,128,128,0.25)',
-    alignItems: 'center',
-    gap: 4,
-  },
-  calorieAdjuster: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 8,
-  },
-  adjustBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: 'rgba(128,128,128,0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  calorieDisplay: {
-    alignItems: 'center',
-  },
-  chipsWrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(128,128,128,0.3)',
-  },
-  summaryList: {
-    gap: 6,
-  },
-  btnRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  btnFlex: {
-    flex: 1,
-  },
-  loadingBox: {
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 8,
-  },
-});
+function createStyles(theme: ThemeContextValue) {
+  const { colors: c } = theme;
+
+  return StyleSheet.create({
+    safe: { flex: 1, backgroundColor: c.canvasBase },
+    content: { padding: 16, gap: 16, paddingBottom: 40 },
+    stepIndicator: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      paddingVertical: 8,
+    },
+    stepItem: {
+      alignItems: 'center',
+      gap: 4,
+    },
+    stepDot: {
+      width: 26,
+      height: 26,
+      borderRadius: 13,
+      borderWidth: 1,
+      borderColor: c.surfaceBorder,
+      backgroundColor: c.surfaceHigh,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    stepContainer: {
+      gap: 16,
+    },
+    stepImage: {
+      width: '100%',
+      height: 140,
+      alignSelf: 'center',
+    },
+    card: {
+      gap: 12,
+    },
+    durationRow: {
+      flexDirection: 'row',
+      gap: 12,
+    },
+    durationOption: {
+      flex: 1,
+      padding: 16,
+      borderRadius: 12,
+      borderWidth: 1.5,
+      borderColor: c.surfaceBorder,
+      backgroundColor: c.surfaceMid,
+      alignItems: 'center',
+      gap: 4,
+    },
+    calorieAdjuster: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 8,
+    },
+    adjustBtn: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      borderWidth: 1,
+      borderColor: c.surfaceBorder,
+      backgroundColor: c.surfaceHigh,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    calorieDisplay: {
+      alignItems: 'center',
+    },
+    chipsWrap: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+    },
+    chip: {
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: c.surfaceBorder,
+      backgroundColor: c.surfaceHigh,
+    },
+    summaryList: {
+      gap: 6,
+    },
+    btnRow: {
+      flexDirection: 'row',
+      gap: 12,
+    },
+    btnFlex: {
+      flex: 1,
+    },
+    loadingBox: {
+      alignItems: 'center',
+      gap: 8,
+      marginTop: 8,
+    },
+  });
+}

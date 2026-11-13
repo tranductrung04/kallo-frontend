@@ -53,5 +53,7 @@ export type MealPlanContextValue = {
   swapItem: (dayIndex: number, itemId: string, candidateFoodId?: string) => boolean;
   savePlan: (plan: MealPlan) => void;
   deletePlan: (planId: string) => void;
+  clearCurrentPlan?: () => void;
+  setActivePlan?: (plan: MealPlan) => void;
   applyPlanToDiary: (dayIndex?: number, targetDate?: string) => number;
 };

@@ -121,7 +121,7 @@ export function ActivityTrackerScreen({ navigation, route }: Props) {
                     <AppText>{item.icon}</AppText>
                     <AppText
                       variant="caption"
-                      color={isSelected ? '#FFFFFF' : theme.colors.text}
+                      color={isSelected ? theme.colors.onBrand : theme.colors.text}
                       style={{ fontWeight: isSelected ? '700' : '400' }}
                     >
                       {item.name}
