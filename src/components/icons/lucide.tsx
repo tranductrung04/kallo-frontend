@@ -3,6 +3,7 @@ import {
   AlertTriangle,
   BookOpen,
   Calendar,
+  Candy,
   Check,
   ChevronDown,
   ChevronLeft,
@@ -13,8 +14,10 @@ import {
   CirclePlus,
   ClipboardCopy,
   ClipboardList,
+  Droplet,
   Flag,
   Flame,
+  GlassWater,
   House,
   ImagePlus,
   Info,
@@ -23,6 +26,7 @@ import {
   Menu,
   Mic,
   Moon,
+  PersonStanding,
   Plus,
   ScanBarcode,
   ScanSearch,
@@ -37,6 +41,7 @@ import {
   User,
   Users,
   Utensils,
+  Wheat,
   X,
   Zap,
   type LucideIcon,
@@ -62,6 +67,9 @@ export function fromLucide<P extends Partial<IconProps> = IconProps>(
     focused,
     coreColor: _coreColor,
     cutoutColor: _cutoutColor,
+    creaseColor: _creaseColor,
+    innerColor: _innerColor,
+    capColor: _capColor,
     ...rest
   }: P) => {
     const effectiveStrokeWidth =
@@ -183,3 +191,14 @@ export const TrophyIcon = fromLucide(Trophy, { defaultSize: 22, defaultColor: '#
 export const BookIcon = fromLucide(BookOpen, { defaultSize: 16, defaultColor: '#A59EBD' });
 export const BookOpenIcon = BookIcon;
 export const KnowledgeBookIcon = BookIcon;
+
+// ─── Wave 3: Nutrition & Macros ──────────────────────────────────────────────
+
+export const CutleryIcon = fromLucide(Utensils, { defaultSize: 14 });
+export const LightningIcon = fromLucide(Zap, { defaultSize: 13 });
+export const LightningBoltIcon = fromLucide(Zap, { defaultSize: 22, defaultColor: '#F59E0B' });
+export const DropletIcon = fromLucide(Droplet, { defaultSize: 13 });
+export const WheatIcon = fromLucide(Wheat, { defaultSize: 15, defaultColor: '#3B82F6' });
+export const SugarIcon = fromLucide(Candy, { defaultSize: 15 });
+export const WaterGlassPlusIcon = fromLucide(GlassWater, { defaultSize: 22 });
+export const BodyStickFigureIcon = fromLucide(PersonStanding, { defaultSize: 24 });

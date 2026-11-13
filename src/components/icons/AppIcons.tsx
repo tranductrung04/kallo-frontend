@@ -28,79 +28,11 @@ import type {
   SaltIconProps,
   ScaleIconProps,
   WaoShieldIconProps,
-  WheatIconProps,
 } from './types';
 
 // ─── Navigation & Tab Icons ──────────────────────────────────────────────────
 
 // ─── Header, Macro & Metabolic Icons ─────────────────────────────────────────
-
-export function CutleryIcon({ size = 14, color }: IconProps) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-      <Path d="M7.5 2c-1.9 0-3 1.9-3 4.5 0 2.4 1.1 3.9 1.9 4.8v9.7c0 .6.4 1 1 1s1-.4 1-1v-9.7c.8-.9 1.9-2.4 1.9-4.8C10.3 3.9 9.2 2 7.5 2z" />
-      <Path d="M13.8 2.5v4.2c0 .4.3.7.6.7s.6-.3.6-.7V2.5c0-.3.3-.5.6-.5s.6.2.6.5v4.2c0 .4.3.7.6.7s.6-.3.6-.7V2.5c0-.3.3-.5.6-.5s.6.2.6.5v4.8c0 1.9-1 3.1-1.7 3.9v9.8c0 .6-.4 1-1 1s-1-.4-1-1v-9.8c-.7-.8-1.7-2-1.7-3.9v-4.8c0-.3.3-.5.6-.5s.7.2.7.5z" />
-    </Svg>
-  );
-}
-
-/** Icon Chất đạm (Protein) — tia sét */
-export function LightningIcon({ size = 13, color }: IconProps) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-      <Path d="M13 2L4.5 13h5.5l-1 9 9.5-11.5h-5.5L13 2z" />
-    </Svg>
-  );
-}
-
-/** Icon Đường bột (Carbs) — bông lúa mì nghiêng 45°, các hạt tách rời */
-export function WheatIcon({ size = 15, color = '#3B82F6', creaseColor }: WheatIconProps) {
-  const crease = creaseColor || '#1D4ED8';
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <G transform="rotate(45, 12, 12)">
-        {/* Cuống + trục bông */}
-        <Path d="M 12 8.5 L 12 21.8" stroke={color} strokeWidth={1.4} strokeLinecap="round" />
-
-        {/* Hạt trên cùng (chóp) */}
-        <Path
-          d="M 12 2.2 C 13.5 3.8 13.7 6 12 8.2 C 10.3 6 10.5 3.8 12 2.2 Z"
-          fill={color}
-        />
-
-        {/* Cặp hạt 1 */}
-        <Path d="M 11.5 10.6 C 8.8 10.2 7.6 8 7.8 6 C 10.2 6.4 11.7 8.2 11.5 10.6 Z" fill={color} />
-        <Path d="M 12.5 10.6 C 15.2 10.2 16.4 8 16.2 6 C 13.8 6.4 12.3 8.2 12.5 10.6 Z" fill={color} />
-
-        {/* Cặp hạt 2 */}
-        <Path d="M 11.5 14 C 8.8 13.6 7.6 11.4 7.8 9.4 C 10.2 9.8 11.7 11.6 11.5 14 Z" fill={color} />
-        <Path d="M 12.5 14 C 15.2 13.6 16.4 11.4 16.2 9.4 C 13.8 9.8 12.3 11.6 12.5 14 Z" fill={color} />
-
-        {/* Cặp hạt 3 */}
-        <Path d="M 11.5 17.4 C 8.8 17 7.6 14.8 7.8 12.8 C 10.2 13.2 11.7 15 11.5 17.4 Z" fill={color} />
-        <Path d="M 12.5 17.4 C 15.2 17 16.4 14.8 16.2 12.8 C 13.8 13.2 12.3 15 12.5 17.4 Z" fill={color} />
-
-        {/* Gân mảnh trong từng hạt */}
-        <Path d="M 12 3.6 L 12 7" stroke={crease} strokeWidth={0.6} strokeLinecap="round" />
-        <Path d="M 11 10 L 8.8 7" stroke={crease} strokeWidth={0.6} strokeLinecap="round" />
-        <Path d="M 13 10 L 15.2 7" stroke={crease} strokeWidth={0.6} strokeLinecap="round" />
-        <Path d="M 11 13.4 L 8.8 10.4" stroke={crease} strokeWidth={0.6} strokeLinecap="round" />
-        <Path d="M 13 13.4 L 15.2 10.4" stroke={crease} strokeWidth={0.6} strokeLinecap="round" />
-        <Path d="M 11 16.8 L 8.8 13.8" stroke={crease} strokeWidth={0.6} strokeLinecap="round" />
-        <Path d="M 13 16.8 L 15.2 13.8" stroke={crease} strokeWidth={0.6} strokeLinecap="round" />
-      </G>
-    </Svg>
-  );
-}
-
-/** Icon Chất béo (Fats) — giọt dầu */
-export function DropletIcon({ size = 13, color }: IconProps) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-      <Path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
-    </Svg>
-  );
-}
 
 /** Icon Muối (Salt) — lọ rắc muối nghiêng với nắp và hạt muối rơi */
 export function SaltIcon({ size = 15, color, capColor = '#FFFFFF' }: SaltIconProps) {
@@ -115,26 +47,6 @@ export function SaltIcon({ size = 15, color, capColor = '#FFFFFF' }: SaltIconPro
         <Circle cx="9.6" cy="21.0" r="0.95" fill={capColor} />
         <Circle cx="14.4" cy="21.0" r="0.95" fill={capColor} />
         <Circle cx="12.0" cy="23.4" r="1.05" fill={capColor} />
-      </G>
-    </Svg>
-  );
-}
-
-/** Icon Đường (Sugar) — viên kẹo bọc giấy xoắn hai đầu */
-export function SugarIcon({ size = 15, color }: IconProps) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-      <G transform="rotate(-45, 12, 12)">
-        {/* Xoắn giấy bên trái */}
-        <Path
-          d="M 6.8 10.8 C 5.8 10.2 4.2 9.0 3.0 8.4 C 2.4 8.1 1.8 8.6 2.0 9.2 L 2.4 10.6 C 1.8 11.2 1.8 12.8 2.4 13.4 L 2.0 14.8 C 1.8 15.4 2.4 15.9 3.0 15.6 C 4.2 15.0 5.8 13.8 6.8 13.2 Z"
-        />
-        {/* Xoắn giấy bên phải */}
-        <Path
-          d="M 17.2 10.8 C 18.2 10.2 19.8 9.0 21.0 8.4 C 21.6 8.1 22.2 8.6 22.0 9.2 L 21.6 10.6 C 22.2 11.2 22.2 12.8 21.6 13.4 L 22.0 14.8 C 22.2 15.4 21.6 15.9 21.0 15.6 C 19.8 15.0 18.2 13.8 17.2 13.2 Z"
-        />
-        {/* Thân viên kẹo bo tròn */}
-        <Rect x="6.0" y="7.4" width="12.0" height="9.2" rx="4.6" />
       </G>
     </Svg>
   );
@@ -1012,63 +924,6 @@ export function StreakGoalFlagIcon({
         d="M 11.8 16.5 L 14.2 19 L 18.8 13.5"
         stroke="#2D293E"
         strokeWidth={2.2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
-}
-
-
-// ─── Quick Actions Sheet Icons ──────────────────────────────────────────────
-
-/** Icon Ly nước có dấu cộng (+) cho Quick Action Uống nước */
-export function WaterGlassPlusIcon({ size = 22, color = '#FFFFFF' }: IconProps) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Path
-        d="M6 3.5 L7.8 19 C8 20.7 9.3 22 11 22 H13 C14.7 22 16 20.7 16.2 19 L18 3.5 H6 Z"
-        stroke={color}
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <Line x1="12" y1="9" x2="12" y2="15" stroke={color} strokeWidth="2" strokeLinecap="round" />
-      <Line x1="9" y1="12" x2="15" y2="12" stroke={color} strokeWidth="2" strokeLinecap="round" />
-    </Svg>
-  );
-}
-
-/** Icon Hình nhân người đứng cho Chỉ số sức khỏe */
-export function BodyStickFigureIcon({ size = 24, color = '#FFFFFF' }: IconProps) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Circle cx="12" cy="4.5" r="2.5" fill={color} />
-      <Path
-        d="M12 8 V15 M12 15 L9 21.5 M12 15 L15 21.5"
-        stroke={color}
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <Path
-        d="M6 11.5 L12 9.5 L18 11.5"
-        stroke={color}
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
-}
-
-export function LightningBoltIcon({ size = 22, color = '#F59E0B' }: Partial<IconProps>) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Path
-        d="M13 2L3 14H12L11 22L21 10H12L13 2Z"
-        stroke={color}
-        strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
