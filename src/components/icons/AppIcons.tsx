@@ -952,6 +952,25 @@ export function ChevronUpIcon({ size = 20, color = '#FFFFFF' }: IconProps) {
   );
 }
 
+/** Icon Mặt trời Sun ☀️ */
+export function SunIcon({ size = 20, color = '#FACC15' }: Partial<IconProps>) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <Circle cx="12" cy="12" r="4" />
+      <Path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+    </Svg>
+  );
+}
+
+/** Icon Mặt trăng Moon 🌙 */
+export function MoonIcon({ size = 20, color = '#9E64F7' }: Partial<IconProps>) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <Path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+    </Svg>
+  );
+}
+
 /** Icon Dấu tích Check ✓ */
 export function CheckIcon({ size = 20, color = '#9E64F7', strokeWidth = 2.4 }: IconProps & { strokeWidth?: number }) {
   return (

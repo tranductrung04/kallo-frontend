@@ -31,6 +31,19 @@ export async function register(email: string, password: string, displayName: str
   return payload;
 }
 
+export async function verifyEmailOtp(email: string, otp: string) {
+  const response = await api.post<AuthResponse>('/auth/verify-otp', { email, otp });
+  const payload = unwrapAuthResponse(response.data);
+  if (payload.accessToken) {
+    await setTokens({ accessToken: payload.accessToken, refreshToken: payload.refreshToken });
+  }
+  return payload;
+}
+
+export async function resendEmailOtp(email: string) {
+  return api.post('/auth/resend-otp', { email });
+}
+
 export async function requestPasswordReset(email: string) {
   await api.post('/auth/forgot-password', { email });
 }
