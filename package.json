@@ -25,6 +25,7 @@
     "expo-image-manipulator": "~57.0.21",
     "expo-image-picker": "~57.0.20",
     "expo-status-bar": "~57.0.1",
+    "lucide-react-native": "^1.72.0",
     "react": "19.2.3",
     "react-native": "0.86.3",
     "react-native-gesture-handler": "~2.32.0",
