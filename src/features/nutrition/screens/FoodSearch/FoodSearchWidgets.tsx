@@ -354,7 +354,7 @@ export function FoodSearchEmptyState({
         <EmptyFolderIllustration size={140} />
         <Text style={styles.emptyTitle}>Bạn chưa có mục yêu thích</Text>
         <Text style={styles.emptySubtitle}>
-          {'Để truy cập nhanh hơn trong các lần tới.\nChỉ cần nhấn vào biểu tượng 💜 khi xem\nthông tin thực phẩm!'}
+          {'Để truy cập nhanh hơn trong các lần tới.\nChỉ cần nhấn vào biểu tượng Trái tim khi xem\nthông tin thực phẩm!'}
         </Text>
       </View>
     );

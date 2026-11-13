@@ -13,9 +13,19 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import Svg, { Circle, Line, Path, Rect } from 'react-native-svg';
 import type { RootStackParamList } from '@/navigation/types';
-import { ChevronLeftIcon, ChevronRightIcon, CloseXIcon, InfoIcon } from '@/components/icons';
+import {
+  ArmchairIcon,
+  BodyStickFigureIcon,
+  CheckIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CloseXIcon,
+  FlameIcon,
+  FootprintsIcon,
+  InfoIcon,
+  RunningIcon,
+} from '@/components/icons';
 import { images } from '@/assets/images';
 import { useTheme, type ThemeContextValue } from '@/theme';
 import { formatNumber } from '@/features/nutrition/utils';
@@ -25,29 +35,6 @@ import { StepConnectModal } from '../components/StepConnectModal';
 type Props = NativeStackScreenProps<RootStackParamList, 'StepDetail'>;
 
 type TimeTab = 'week' | 'month' | 'six_months';
-
-// Footprints SVG icon for Step Statistics
-function FootprintsIcon({ size = 20, color }: { size?: number; color: string }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-      {/* Left footprint */}
-      <Path d="M7 14c-1.3 0-2.3 1-2.3 2.3 0 2 1 3.7 2.3 3.7s2.3-1.7 2.3-3.7C9.3 15 8.3 14 7 14z" />
-      <Path d="M7.5 4.5C6.1 4.5 5 6.2 5 8.2c0 1.8.8 3.3 1.9 3.7.3.1.7.1 1 0 1.1-.4 2.1-1.9 2.1-3.7 0-2-1.1-3.7-2.5-3.7z" />
-      {/* Right footprint */}
-      <Path d="M16.5 15.5c-1.3 0-2.3 1-2.3 2.3 0 2 1 3.7 2.3 3.7s2.3-1.7 2.3-3.7c0-1.3-1-2.3-2.3-2.3z" />
-      <Path d="M16 6c-1.4 0-2.5 1.7-2.5 3.7 0 1.8.8 3.3 1.9 3.7.3.1.7.1 1 0 1.1-.4 2.1-1.9 2.1-3.7 0-2-1.1-3.7-2.5-3.7z" />
-    </Svg>
-  );
-}
-
-// Green checkmark
-function CheckmarkIcon({ size = 12, color = '#FFFFFF' }: { size?: number; color?: string }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={3.5} strokeLinecap="round" strokeLinejoin="round">
-      <Path d="M20 6L9 17l-5-5" />
-    </Svg>
-  );
-}
 
 const STEP_GOAL_PRESETS = [3000, 5000, 6000, 8000, 10000, 12500];
 
@@ -374,7 +361,7 @@ export function StepDetailScreen({ navigation, route }: Props) {
                   ]}
                 >
                   {d.achieved ? (
-                    <CheckmarkIcon size={12} color={c.onBrand} />
+                    <CheckIcon size={12} color={c.onBrand} strokeWidth={3} />
                   ) : null}
                 </View>
                 <Text style={styles.circleDayValue}>
@@ -407,7 +394,7 @@ export function StepDetailScreen({ navigation, route }: Props) {
           activeOpacity={0.9}
         >
           <Text style={styles.tipNoticeText}>
-            👉 Wao có thể tự động bộ bước chân từ Health Connect.{' '}
+            Wao có thể tự động bộ bước chân từ Health Connect.{' '}
             <Text style={styles.tipNoticeLink}>Kết nối ngay</Text> để ghi lại bước chân mỗi ngày.
           </Text>
         </TouchableOpacity>
@@ -424,7 +411,7 @@ export function StepDetailScreen({ navigation, route }: Props) {
             {/* Level 1: Ít vận động */}
             <View style={styles.activityTierRow}>
               <View style={[styles.activityPill, { backgroundColor: c.surfaceHigh, borderColor: c.macroProtein, borderWidth: 1 }]}>
-                <Text style={styles.activityPillIcon}>🪑</Text>
+                <ArmchairIcon size={14} color={c.macroProtein} />
                 <Text style={[styles.activityPillText, { color: c.macroProtein }]}>ÍT VẬN ĐỘNG</Text>
               </View>
               <Text style={styles.activityTierRange}>{'< 3,000'}</Text>
@@ -433,7 +420,7 @@ export function StepDetailScreen({ navigation, route }: Props) {
             {/* Level 2: Nhẹ nhàng */}
             <View style={styles.activityTierRow}>
               <View style={[styles.activityPill, { backgroundColor: c.surfaceHigh, borderColor: c.macroFats, borderWidth: 1 }]}>
-                <Text style={styles.activityPillIcon}>🧍</Text>
+                <BodyStickFigureIcon size={14} color={c.macroFats} />
                 <Text style={[styles.activityPillText, { color: c.macroFats }]}>NHẸ NHÀNG</Text>
               </View>
               <Text style={styles.activityTierRange}>3,000 - 6,499</Text>
@@ -442,7 +429,7 @@ export function StepDetailScreen({ navigation, route }: Props) {
             {/* Level 3: Trung bình */}
             <View style={styles.activityTierRow}>
               <View style={[styles.activityPill, { backgroundColor: c.surfaceHigh, borderColor: c.macroCarbs, borderWidth: 1 }]}>
-                <Text style={styles.activityPillIcon}>🚶</Text>
+                <FootprintsIcon size={14} color={c.macroCarbs} />
                 <Text style={[styles.activityPillText, { color: c.macroCarbs }]}>TRUNG BÌNH</Text>
               </View>
               <Text style={styles.activityTierRange}>6,500 - 9,999</Text>
@@ -451,7 +438,7 @@ export function StepDetailScreen({ navigation, route }: Props) {
             {/* Level 4: Rất năng động */}
             <View style={styles.activityTierRow}>
               <View style={[styles.activityPill, { backgroundColor: c.surfaceHigh, borderColor: c.macroFiber, borderWidth: 1 }]}>
-                <Text style={styles.activityPillIcon}>🏃</Text>
+                <RunningIcon size={14} color={c.macroFiber} />
                 <Text style={[styles.activityPillText, { color: c.macroFiber }]}>RẤT NĂNG ĐỘNG</Text>
               </View>
               <Text style={styles.activityTierRange}>10,000 - 12,499</Text>
@@ -460,7 +447,7 @@ export function StepDetailScreen({ navigation, route }: Props) {
             {/* Level 5: Cực kỳ năng động */}
             <View style={styles.activityTierRow}>
               <View style={[styles.activityPill, { backgroundColor: c.surfaceHigh, borderColor: c.brandSecondary, borderWidth: 1 }]}>
-                <Text style={styles.activityPillIcon}>🏃‍♂️</Text>
+                <FlameIcon size={14} color={c.brandSecondary} />
                 <Text style={[styles.activityPillText, { color: c.brandSecondary }]}>CỰC KỲ NĂNG ĐỘNG</Text>
               </View>
               <Text style={styles.activityTierRange}>{'> 12,500'}</Text>
@@ -549,7 +536,7 @@ export function StepDetailScreen({ navigation, route }: Props) {
                   >
                     {formatNumber(preset)} bước / ngày
                   </Text>
-                  {stepGoal === preset && <CheckmarkIcon size={14} color={c.brandSecondary} />}
+                  {stepGoal === preset && <CheckIcon size={14} color={c.brandSecondary} strokeWidth={3} />}
                 </TouchableOpacity>
               ))}
             </View>

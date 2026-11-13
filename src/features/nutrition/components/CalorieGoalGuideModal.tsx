@@ -128,7 +128,7 @@ export function CalorieGoalGuideModal({ visible, onClose }: CalorieGoalGuideModa
 
             {/* Thông điệp đồng hành của Kallo */}
             <Text style={[styles.calloutItem, { color: bodyColor }]}>
-              👉 Kallo sẽ đồng hành cùng bạn mỗi ngày để giữ calo ở mức phù hợp với mục tiêu.
+              Kallo sẽ đồng hành cùng bạn mỗi ngày để giữ calo ở mức phù hợp với mục tiêu.
             </Text>
           </ScrollView>
         </View>

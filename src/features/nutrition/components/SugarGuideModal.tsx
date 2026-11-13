@@ -12,7 +12,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BookIcon, CloseXIcon } from '@/components/icons';
+import { BookIcon, CloseXIcon, TriangleAlertIcon } from '@/components/icons';
 import { images } from '@/assets/images';
 import { useTheme } from '@/theme';
 
@@ -172,9 +172,12 @@ export function SugarGuideModal({ visible, onClose, onOpenArticle }: SugarGuideM
             <View style={[styles.divider, { backgroundColor: dividerColor }]} />
 
             {/* Cảnh báo ở cuối */}
-            <Text style={[styles.warningText, { color: bodyColor }]}>
-              ❌ Người Việt hiện đang tiêu thụ gần gấp đôi mức này.
-            </Text>
+            <View style={styles.warningRow}>
+              <TriangleAlertIcon size={16} color="#EF4444" />
+              <Text style={[styles.warningText, { color: bodyColor }]}>
+                Người Việt hiện đang tiêu thụ gần gấp đôi mức này.
+              </Text>
+            </View>
           </ScrollView>
         </View>
       </View>
@@ -316,11 +319,17 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     lineHeight: 22,
   },
+  warningRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 6,
+    marginBottom: 24,
+  },
   warningText: {
+    flex: 1,
     fontFamily: 'PlusJakartaSans_500Medium',
     fontSize: 15.5,
     lineHeight: 24,
-    marginTop: 6,
-    marginBottom: 24,
   },
 });

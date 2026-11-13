@@ -151,7 +151,9 @@ export function MainTabNavigator() {
           options={{
             title: 'Trang chủ',
             tabBarLabel: 'Trang chủ',
-            tabBarIcon: ({ color }) => <HomeTabIcon color={color} />,
+            tabBarIcon: ({ color, focused }) => (
+              <HomeTabIcon color={color} focused={focused} />
+            ),
           }}
         />
 
@@ -162,7 +164,9 @@ export function MainTabNavigator() {
           options={{
             title: 'Nhật ký',
             tabBarLabel: 'Nhật ký',
-            tabBarIcon: ({ color }) => <DiaryTabIcon color={color} />,
+            tabBarIcon: ({ color, focused }) => (
+              <DiaryTabIcon color={color} focused={focused} />
+            ),
           }}
         />
 
@@ -185,7 +189,9 @@ export function MainTabNavigator() {
           options={{
             title: 'Thực đơn',
             tabBarLabel: 'Thực đơn',
-            tabBarIcon: ({ color }) => <MealPlanTabIcon color={color} />,
+            tabBarIcon: ({ color, focused }) => (
+              <MealPlanTabIcon color={color} focused={focused} />
+            ),
           }}
         />
 
@@ -196,7 +202,9 @@ export function MainTabNavigator() {
           options={{
             title: 'Tài khoản',
             tabBarLabel: 'Tài khoản',
-            tabBarIcon: ({ color }) => <ProfileTabIcon color={color} />,
+            tabBarIcon: ({ color, focused }) => (
+              <ProfileTabIcon color={color} focused={focused} />
+            ),
           }}
         />
       </Tab.Navigator>

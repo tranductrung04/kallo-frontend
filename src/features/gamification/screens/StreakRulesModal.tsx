@@ -108,7 +108,7 @@ export function StreakRulesContent({ onClose }: StreakRulesContentProps) {
         <View style={styles.bulletItem}>
           <AppText style={styles.bulletDot} color={c.brandPrimary}>•</AppText>
           <AppText style={styles.bulletText} color={c.textSecondary}>
-            Chỉ cần bạn ghi ít nhất một món trong hôm nay, chuỗi ngày sẽ tiếp tục 🔥
+            Chỉ cần bạn ghi ít nhất một món trong hôm nay, chuỗi ngày sẽ tiếp tục.
           </AppText>
         </View>
 

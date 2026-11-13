@@ -5,12 +5,11 @@ import {
   ScrollView,
   Share,
   StyleSheet,
-  Switch,
   TouchableOpacity,
   View,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AppCard, AppText } from '@/components/common';
+import { AppCard, AppSwitch, AppText } from '@/components/common';
 import {
   ChevronLeftIcon,
   ClipboardCopyIcon,
@@ -122,10 +121,10 @@ export function GameSettingsScreen({ navigation }: Props) {
                 Người dùng khác có thể tìm thấy bạn qua tên hiển thị
               </AppText>
             </View>
-            <Switch
+            <AppSwitch
               value={gameSettings.discoverable}
               onValueChange={(val) => updateGameSettings({ discoverable: val })}
-              trackColor={{ false: 'rgba(128,128,128,0.3)', true: c.brandPrimary }}
+              accessibilityLabel="Cho phép tìm kiếm qua tên"
             />
           </View>
 
@@ -141,10 +140,10 @@ export function GameSettingsScreen({ navigation }: Props) {
                 Hiển thị số ngày duy trì chuỗi trên bảng xếp hạng bạn bè
               </AppText>
             </View>
-            <Switch
+            <AppSwitch
               value={gameSettings.shareStreak}
               onValueChange={(val) => updateGameSettings({ shareStreak: val })}
-              trackColor={{ false: 'rgba(128,128,128,0.3)', true: c.brandPrimary }}
+              accessibilityLabel="Chia sẻ chuỗi Streak"
             />
           </View>
 
@@ -160,10 +159,10 @@ export function GameSettingsScreen({ navigation }: Props) {
                 Hiển thị điểm tích lũy tuần trên bảng xếp hạng
               </AppText>
             </View>
-            <Switch
+            <AppSwitch
               value={gameSettings.sharePoints}
               onValueChange={(val) => updateGameSettings({ sharePoints: val })}
-              trackColor={{ false: 'rgba(128,128,128,0.3)', true: c.brandPrimary }}
+              accessibilityLabel="Chia sẻ điểm Thử thách"
             />
           </View>
 
@@ -179,10 +178,10 @@ export function GameSettingsScreen({ navigation }: Props) {
                 Hiển thị số bước chân đồng bộ trên bảng xếp hạng
               </AppText>
             </View>
-            <Switch
+            <AppSwitch
               value={gameSettings.shareSteps}
               onValueChange={(val) => updateGameSettings({ shareSteps: val })}
-              trackColor={{ false: 'rgba(128,128,128,0.3)', true: c.brandPrimary }}
+              accessibilityLabel="Chia sẻ số bước chân tuần"
             />
           </View>
         </AppCard>

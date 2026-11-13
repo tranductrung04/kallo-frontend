@@ -13,9 +13,19 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import Svg, { Circle, Line, Path, Rect } from 'react-native-svg';
 import type { RootStackParamList } from '@/navigation/types';
-import { ChevronLeftIcon, ChevronRightIcon, CloseXIcon, InfoIcon, PlusIcon } from '@/components/icons';
+import {
+  CheckIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CloseXIcon,
+  DropletIcon,
+  DumbbellIcon,
+  FlameIcon,
+  InfoIcon,
+  PlusIcon,
+  SparklesIcon,
+} from '@/components/icons';
 import { images } from '@/assets/images';
 import { useTheme, type ThemeContextValue } from '@/theme';
 import { formatNumber } from '@/features/nutrition/utils';
@@ -25,24 +35,6 @@ import { StepConnectModal } from '../components/StepConnectModal';
 type Props = NativeStackScreenProps<RootStackParamList, 'WorkoutStatistics'>;
 
 type TimeTab = 'week' | 'month' | 'six_months';
-
-// Flame SVG icon
-function FlameIconSvg({ size = 20, color = '#FFFFFF' }: { size?: number; color?: string }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-      <Path d="M12 2c-.3 0-.6.2-.8.5C9.7 5 7.5 8 7.5 11.5c0 2.5 1.5 4.6 3.7 5.5-.2-.7-.2-1.5 0-2.2.3-.9 1-1.6 1.8-2.3 1.2-1 2-2.3 2-3.8 0-.4-.4-.8-.8-.8s-.7.3-.8.7c-.4 1.3-1.6 2.2-3 2-.6-.1-1.1-.4-1.5-.8 1.4-2.8 3.2-5 3.9-6.3.2-.5 0-1-.8-1zM12 14c-1.7 0-3 1.3-3 3 0 2.2 1.8 4 4 4s4-1.8 4-4c0-1.7-1.3-3-3-3h-2z" />
-    </Svg>
-  );
-}
-
-// Checkmark SVG
-function CheckmarkIcon({ size = 12, color = '#FFFFFF' }: { size?: number; color?: string }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={3.5} strokeLinecap="round" strokeLinejoin="round">
-      <Path d="M20 6L9 17l-5-5" />
-    </Svg>
-  );
-}
 
 export function WorkoutStatisticsScreen({ navigation, route }: Props) {
   const insets = useSafeAreaInsets();
@@ -336,7 +328,7 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
           {/* Section Header */}
           <View style={styles.sectionHeaderRow}>
             <View style={styles.flameBadge}>
-              <FlameIconSvg size={22} color={c.onBrand} />
+              <FlameIcon size={22} color={c.onBrand} />
             </View>
 
             <View style={styles.sectionHeaderInfo}>
@@ -378,7 +370,7 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
                   ]}
                 >
                   {d.hasData ? (
-                    <CheckmarkIcon size={12} color={c.onBrand} />
+                    <CheckIcon size={12} color={c.onBrand} strokeWidth={3} />
                   ) : null}
                 </View>
                 <Text style={styles.circleDayValue}>
@@ -403,9 +395,12 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
 
           {/* Tip Card */}
           <View style={styles.sectionTipCard}>
-            <Text style={styles.sectionTipText}>
-              ✨ Một tuần chưa có dữ liệu - thử dành 15 phút vận động mỗi ngày để làm nóng cơ thể lên nha.
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
+              <SparklesIcon size={16} color="#9E64F7" />
+              <Text style={[styles.sectionTipText, { flex: 1 }]}>
+                Một tuần chưa có dữ liệu - thử dành 15 phút vận động mỗi ngày để làm nóng cơ thể lên nha.
+              </Text>
+            </View>
           </View>
         </View>
 
@@ -417,7 +412,7 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
           <View style={styles.trendBlock}>
             <Text style={styles.trendLabelRed}>CALO TẬP LUYỆN TUẦN NÀY</Text>
             <View style={styles.trendValRow}>
-              <Text style={styles.trendFlameIcon}>🔥</Text>
+              <FlameIcon size={18} color="#F44E42" />
               <Text style={styles.trendValText}>
                 {formatNumber(totalCaloriesThisWeek)} calo/tuần
               </Text>
@@ -431,7 +426,7 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
           <View style={styles.trendBlock}>
             <Text style={styles.trendLabelMuted}>CALO TẬP LUYỆN TUẦN TRƯỚC</Text>
             <View style={styles.trendValRow}>
-              <Text style={styles.trendFlameMutedIcon}>💧</Text>
+              <DropletIcon size={18} color={c.textMuted} />
               <Text style={styles.trendValText}>
                 {formatNumber(totalCaloriesLastWeek)} calo/tuần
               </Text>
@@ -443,9 +438,12 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
 
           {/* Trend Notice Card */}
           <View style={styles.trendNoticeCard}>
-            <Text style={styles.trendNoticeText}>
-              💪 Chưa ghi nhận hoạt động. Bạn có thể vận động một chút để cải thiện xu hướng tập luyện nhé.
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
+              <DumbbellIcon size={16} color={c.textMuted} />
+              <Text style={[styles.trendNoticeText, { flex: 1 }]}>
+                Chưa ghi nhận hoạt động. Bạn có thể vận động một chút để cải thiện xu hướng tập luyện nhé.
+              </Text>
+            </View>
           </View>
         </View>
 

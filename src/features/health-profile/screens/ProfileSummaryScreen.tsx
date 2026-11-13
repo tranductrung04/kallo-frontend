@@ -10,7 +10,16 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { images } from '@/assets/images';
 import { AppButton, AppText } from '@/components/common';
-import { ChevronLeftIcon } from '@/components/icons';
+import {
+  ChevronLeftIcon,
+  CutleryIcon,
+  FlagIcon,
+  FlameIcon,
+  ScaleIcon,
+  ShieldSecurityIcon,
+  TriangleAlertIcon,
+  UserSingleIcon,
+} from '@/components/icons';
 import { useHealthProfileDraft } from '../hooks/useHealthProfileDraft';
 import { calculateBmi, bmiCategory } from '../utils/calculations';
 
@@ -210,13 +219,19 @@ export function ProfileSummaryScreen({
             <View style={styles.metricsCol}>
               {/* Mục tiêu */}
               <View style={styles.metricItem}>
-                <AppText style={styles.metricLabel}>🎯 MỤC TIÊU</AppText>
+                <View style={styles.metricLabelRow}>
+                  <FlagIcon size={12} color="#AEA6CC" />
+                  <AppText style={styles.metricLabel}>MỤC TIÊU</AppText>
+                </View>
                 <AppText style={styles.metricValue}>{goalLabel}</AppText>
               </View>
 
               {/* Cân nặng mục tiêu */}
               <View style={styles.metricItem}>
-                <AppText style={styles.metricLabel}>📍 CÂN NẶNG MỤC TIÊU</AppText>
+                <View style={styles.metricLabelRow}>
+                  <ScaleIcon size={12} color="#AEA6CC" />
+                  <AppText style={styles.metricLabel}>CÂN NẶNG MỤC TIÊU</AppText>
+                </View>
                 <AppText style={styles.metricValue}>
                   {Math.round(targetWeight)} kg
                 </AppText>
@@ -224,7 +239,10 @@ export function ProfileSummaryScreen({
 
               {/* Cường độ tập luyện */}
               <View style={styles.metricItem}>
-                <AppText style={styles.metricLabel}>🔥 CƯỜNG ĐỘ TẬP LUYỆN</AppText>
+                <View style={styles.metricLabelRow}>
+                  <FlameIcon size={12} color="#AEA6CC" />
+                  <AppText style={styles.metricLabel}>CƯỜNG ĐỘ TẬP LUYỆN</AppText>
+                </View>
                 <AppText style={styles.metricValue}>{activityLabel}</AppText>
               </View>
             </View>
@@ -244,7 +262,10 @@ export function ProfileSummaryScreen({
           <View style={styles.detailsDivider} />
           <View style={styles.detailsSection}>
             <View style={styles.detailRow}>
-              <AppText style={styles.detailLabel}>👤 Người dùng:</AppText>
+              <View style={styles.detailLabelRow}>
+                <UserSingleIcon size={14} color="#AEA6CC" />
+                <AppText style={styles.detailLabel}>Người dùng:</AppText>
+              </View>
               <AppText style={styles.detailVal}>
                 {draft.nickname ? `${draft.nickname} • ` : ''}
                 {draft.gender === 'female' ? 'Nữ' : 'Nam'} ({draft.height} cm, {draft.weight} kg)
@@ -252,12 +273,18 @@ export function ProfileSummaryScreen({
             </View>
 
             <View style={styles.detailRow}>
-              <AppText style={styles.detailLabel}>🥗 Chế độ ăn:</AppText>
+              <View style={styles.detailLabelRow}>
+                <CutleryIcon size={14} color="#AEA6CC" />
+                <AppText style={styles.detailLabel}>Chế độ ăn:</AppText>
+              </View>
               <AppText style={styles.detailVal}>{dietPrefLabel}</AppText>
             </View>
 
             <View style={styles.detailRow}>
-              <AppText style={styles.detailLabel}>⚠️ Dị ứng:</AppText>
+              <View style={styles.detailLabelRow}>
+                <TriangleAlertIcon size={14} color="#AEA6CC" />
+                <AppText style={styles.detailLabel}>Dị ứng:</AppText>
+              </View>
               <AppText style={styles.detailVal}>
                 {draft.allergies.length > 0
                   ? draft.allergies.join(', ')
@@ -266,7 +293,10 @@ export function ProfileSummaryScreen({
             </View>
 
             <View style={styles.detailRow}>
-              <AppText style={styles.detailLabel}>🩺 Tiền sử bệnh:</AppText>
+              <View style={styles.detailLabelRow}>
+                <ShieldSecurityIcon size={14} color="#AEA6CC" />
+                <AppText style={styles.detailLabel}>Tiền sử bệnh:</AppText>
+              </View>
               <AppText style={styles.detailVal}>{conditionLabels}</AppText>
             </View>
           </View>
@@ -445,6 +475,11 @@ const styles = StyleSheet.create({
   metricItem: {
     gap: 2,
   },
+  metricLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
   metricLabel: {
     fontSize: 11.5,
     fontWeight: '700',
@@ -478,6 +513,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 8,
+  },
+  detailLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    width: 105,
   },
   detailLabel: {
     fontSize: 12.5,

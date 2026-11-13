@@ -11,13 +11,42 @@ import {
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { images } from '@/assets/images';
 import { AppButton, AppCard, AppText, ProgressBar } from '@/components/common';
-import { ChevronLeftIcon } from '@/components/icons';
+import {
+  CheckIcon,
+  ChevronLeftIcon,
+  DropletIcon,
+  FlameIcon,
+  FootprintsIcon,
+  LockClosedIcon,
+  ScaleIcon,
+  SparklesIcon,
+  TrophyIcon,
+} from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
 import type { Badge } from '../types';
 import { useGamification } from '../GamificationProvider';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'BadgesChallenges'>;
+
+function BadgeVisual({ id, size = 28 }: { id: string; size?: number }) {
+  switch (id) {
+    case 'first_log':
+      return <SparklesIcon size={size} color="#10B981" />;
+    case 'streak_7':
+      return <FlameIcon size={size} color="#F44E42" />;
+    case 'streak_30':
+      return <TrophyIcon size={size} color="#F59E0B" />;
+    case 'water_target':
+      return <DropletIcon size={size} color="#3B82F6" />;
+    case 'step_master':
+      return <FootprintsIcon size={size} color="#8B5CF6" />;
+    case 'weight_logger':
+      return <ScaleIcon size={size} color="#EC4899" />;
+    default:
+      return <TrophyIcon size={size} color="#F59E0B" />;
+  }
+}
 
 export function BadgesChallengesScreen({ navigation }: Props) {
   const theme = useTheme();
@@ -124,7 +153,7 @@ export function BadgesChallengesScreen({ navigation }: Props) {
                         },
                       ]}
                     >
-                      <AppText variant="headlineLg">{badge.iconGlyph}</AppText>
+                      <BadgeVisual id={badge.id} size={30} />
                     </View>
                     <AppText variant="bodySm" align="center" style={styles.badgeTitle}>
                       {badge.title}
@@ -139,12 +168,19 @@ export function BadgesChallengesScreen({ navigation }: Props) {
                         },
                       ]}
                     >
-                      <AppText
-                        variant="caption"
-                        color={isUnlocked ? theme.colors.brandPrimary : theme.colors.textSecondary}
-                      >
-                        {isUnlocked ? '✓ Đã mở' : '🔒 Khóa'}
-                      </AppText>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                        {isUnlocked ? (
+                          <CheckIcon size={12} color={theme.colors.brandPrimary} />
+                        ) : (
+                          <LockClosedIcon size={12} color={theme.colors.textSecondary} />
+                        )}
+                        <AppText
+                          variant="caption"
+                          color={isUnlocked ? theme.colors.brandPrimary : theme.colors.textSecondary}
+                        >
+                          {isUnlocked ? 'Đã mở' : 'Khóa'}
+                        </AppText>
+                      </View>
                     </View>
                   </TouchableOpacity>
                 );
@@ -273,9 +309,10 @@ export function BadgesChallengesScreen({ navigation }: Props) {
                         Thời hạn: {challenge.durationDays} ngày • Chi tiết →
                       </AppText>
                       {challenge.isJoined ? (
-                        <View style={styles.joinedBadge}>
+                        <View style={[styles.joinedBadge, { flexDirection: 'row', alignItems: 'center', gap: 4 }]}>
+                          <CheckIcon size={12} color={theme.colors.brandPrimary} />
                           <AppText variant="caption" color={theme.colors.brandPrimary}>
-                            Đang tham gia ✓
+                            Đang tham gia
                           </AppText>
                         </View>
                       ) : (
