@@ -8,7 +8,7 @@ const REMINDERS_KEY = '@kallo/reminders-v1';
 export const INITIAL_NOTIFICATIONS: AppNotification[] = [
   {
     id: 'notif-1',
-    title: 'Nhắc nhở uống nước 💧',
+    title: 'Nhắc nhở uống nước',
     message: 'Đã đến giờ nạp thêm một ly nước 250ml để thanh lọc cơ thể và duy trì năng lượng!',
     category: 'NUTRITION',
     timestamp: '10 phút trước',
@@ -17,7 +17,7 @@ export const INITIAL_NOTIFICATIONS: AppNotification[] = [
   },
   {
     id: 'notif-2',
-    title: 'Cảnh báo Calo mục tiêu ⚠️',
+    title: 'Cảnh báo Calo mục tiêu',
     message: 'Bạn đã đạt 92% mức calo mục tiêu hôm nay. Hãy ưu tiên rau củ cho bữa tối nhé!',
     category: 'NUTRITION',
     timestamp: '2 giờ trước',
@@ -26,7 +26,7 @@ export const INITIAL_NOTIFICATIONS: AppNotification[] = [
   },
   {
     id: 'notif-3',
-    title: 'Chuỗi Streak ấn tượng 🔥',
+    title: 'Chuỗi Streak ấn tượng',
     message: 'Chúc mừng bạn đã duy trì chuỗi 7 ngày sống khỏe cùng Kallo! Nhận ngay huy hiệu mới.',
     category: 'COMMUNITY',
     timestamp: 'Hôm qua',
@@ -35,7 +35,7 @@ export const INITIAL_NOTIFICATIONS: AppNotification[] = [
   },
   {
     id: 'notif-4',
-    title: 'Đồng bộ sức khỏe hoàn tất 👟',
+    title: 'Đồng bộ sức khỏe hoàn tất',
     message: 'Đã đồng bộ 6.540 bước chân từ Health Connect. Calo tiêu hao đã được cập nhật.',
     category: 'ACTIVITY',
     timestamp: 'Hôm qua',

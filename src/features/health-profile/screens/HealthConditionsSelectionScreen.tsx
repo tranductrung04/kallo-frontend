@@ -21,6 +21,7 @@ import {
   CloudIcon,
   DropletIcon,
   HeartIcon,
+  LightbulbIcon,
   ShieldSecurityIcon,
 } from '@/components/icons';
 import { AnimatedCard, AnimatedCheckbox } from '../components';
@@ -247,9 +248,12 @@ export function HealthConditionsSelectionScreen({
               {/* Smooth Animated Nutrition Advice */}
               {isSelected && (
                 <View style={styles.adviceContainer}>
-                  <AppText style={styles.adviceHeading}>
-                    💡 Lưu ý dinh dưỡng từ Kallo:
-                  </AppText>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                    <LightbulbIcon size={14} color="#FACC15" />
+                    <AppText style={styles.adviceHeading}>
+                      Lưu ý dinh dưỡng từ Kallo:
+                    </AppText>
+                  </View>
                   {item.dietAdvice.map((advice, idx) => (
                     <View key={idx} style={styles.adviceRow}>
                       <AppText style={styles.bulletDot}>•</AppText>

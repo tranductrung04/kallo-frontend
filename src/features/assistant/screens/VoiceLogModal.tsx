@@ -14,7 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { images } from '@/assets/images';
 import { AppButton, AppCard, AppText } from '@/components/common';
-import { ChevronLeftIcon, InfoIcon } from '@/components/icons';
+import { ChevronLeftIcon, InfoIcon, QuickVoiceIcon, SquareIcon } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
 import { useNutrition } from '@/features/nutrition/NutritionProvider';
@@ -125,7 +125,7 @@ export function VoiceLogModal({ navigation, route }: Props) {
     });
 
     Alert.alert(
-      'Ghi nhận thành công! 🎙️',
+      'Ghi nhận thành công!',
       `Đã thêm ${currentResult.foodName} (${currentResult.grams}g - ${currentResult.calories} kcal) vào nhật ký.`,
       [{ text: 'Đóng', onPress: () => navigation.goBack() }]
     );
@@ -296,9 +296,11 @@ export function VoiceLogModal({ navigation, route }: Props) {
             accessibilityRole="button"
             accessibilityLabel="Ghi âm"
           >
-            <AppText variant="headlineLg" color="#FFFFFF">
-              {isRecording ? '⏹' : '🎙️'}
-            </AppText>
+            {isRecording ? (
+              <SquareIcon size={26} color="#FFFFFF" strokeWidth={2.4} />
+            ) : (
+              <QuickVoiceIcon size={32} color="#FFFFFF" />
+            )}
           </TouchableOpacity>
         </View>
       </View>

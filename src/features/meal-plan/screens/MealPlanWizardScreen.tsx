@@ -13,6 +13,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import { images } from '@/assets/images';
 import { AppButton, AppCard, AppText } from '@/components/common';
+import { CloseXIcon, PlusIcon } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme, type ThemeContextValue } from '@/theme';
 import { useNutrition } from '@/features/nutrition/NutritionProvider';
@@ -328,6 +329,7 @@ export function MealPlanWizardScreen() {
                       key={allergen}
                       style={[
                         styles.chip,
+                        { flexDirection: 'row', alignItems: 'center', gap: 6 },
                         isSelected
                           ? {
                               backgroundColor: theme.colors.calorieIn,
@@ -340,11 +342,16 @@ export function MealPlanWizardScreen() {
                       ]}
                       onPress={() => toggleAllergen(allergen)}
                     >
+                      {isSelected ? (
+                        <CloseXIcon size={12} color={theme.colors.onBrand} strokeWidth={2.4} />
+                      ) : (
+                        <PlusIcon size={12} color={theme.colors.textPrimary} strokeWidth={2.4} />
+                      )}
                       <AppText
                         variant="bodySm"
                         color={isSelected ? theme.colors.onBrand : theme.colors.textPrimary}
                       >
-                        {isSelected ? `✕ ${allergen}` : `+ ${allergen}`}
+                        {allergen}
                       </AppText>
                     </TouchableOpacity>
                   );

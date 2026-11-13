@@ -12,7 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 import { AppText } from '@/components/common';
-import { CircleCheckIcon } from '@/components/icons';
+import { CircleCheckIcon, StarIcon } from '@/components/icons';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -315,9 +315,7 @@ export function CalculatingPlanScreen({
                 <View style={styles.testimonialTopRow}>
                   <View style={styles.starsRow}>
                     {[...Array(item.rating)].map((_, i) => (
-                      <AppText key={i} style={styles.starText}>
-                        ★
-                      </AppText>
+                      <StarIcon key={i} size={15} color="#FACC15" fill="#FACC15" />
                     ))}
                   </View>
                   <AppText style={styles.reviewerName}>{item.name}</AppText>

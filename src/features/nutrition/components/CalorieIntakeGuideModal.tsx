@@ -124,7 +124,7 @@ export function CalorieIntakeGuideModal({ visible, onClose }: CalorieIntakeGuide
 
             {/* Lời kêu gọi hành động / Đồng hành */}
             <Text style={[styles.calloutItem, { color: bodyColor }]}>
-              👉 Ghi lại món ăn mỗi ngày để theo dõi chính xác lượng calo nạp vào cùng Kallo
+              Ghi lại món ăn mỗi ngày để theo dõi chính xác lượng calo nạp vào cùng Kallo.
             </Text>
           </ScrollView>
         </View>

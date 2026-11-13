@@ -15,12 +15,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '@/navigation/types';
 import {
+  ArmchairIcon,
+  BodyStickFigureIcon,
   CheckIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   CloseXIcon,
+  FlameIcon,
   FootprintsIcon,
   InfoIcon,
+  RunningIcon,
 } from '@/components/icons';
 import { images } from '@/assets/images';
 import { useTheme, type ThemeContextValue } from '@/theme';
@@ -390,7 +394,7 @@ export function StepDetailScreen({ navigation, route }: Props) {
           activeOpacity={0.9}
         >
           <Text style={styles.tipNoticeText}>
-            👉 Wao có thể tự động bộ bước chân từ Health Connect.{' '}
+            Wao có thể tự động bộ bước chân từ Health Connect.{' '}
             <Text style={styles.tipNoticeLink}>Kết nối ngay</Text> để ghi lại bước chân mỗi ngày.
           </Text>
         </TouchableOpacity>
@@ -407,7 +411,7 @@ export function StepDetailScreen({ navigation, route }: Props) {
             {/* Level 1: Ít vận động */}
             <View style={styles.activityTierRow}>
               <View style={[styles.activityPill, { backgroundColor: c.surfaceHigh, borderColor: c.macroProtein, borderWidth: 1 }]}>
-                <Text style={styles.activityPillIcon}>🪑</Text>
+                <ArmchairIcon size={14} color={c.macroProtein} />
                 <Text style={[styles.activityPillText, { color: c.macroProtein }]}>ÍT VẬN ĐỘNG</Text>
               </View>
               <Text style={styles.activityTierRange}>{'< 3,000'}</Text>
@@ -416,7 +420,7 @@ export function StepDetailScreen({ navigation, route }: Props) {
             {/* Level 2: Nhẹ nhàng */}
             <View style={styles.activityTierRow}>
               <View style={[styles.activityPill, { backgroundColor: c.surfaceHigh, borderColor: c.macroFats, borderWidth: 1 }]}>
-                <Text style={styles.activityPillIcon}>🧍</Text>
+                <BodyStickFigureIcon size={14} color={c.macroFats} />
                 <Text style={[styles.activityPillText, { color: c.macroFats }]}>NHẸ NHÀNG</Text>
               </View>
               <Text style={styles.activityTierRange}>3,000 - 6,499</Text>
@@ -425,7 +429,7 @@ export function StepDetailScreen({ navigation, route }: Props) {
             {/* Level 3: Trung bình */}
             <View style={styles.activityTierRow}>
               <View style={[styles.activityPill, { backgroundColor: c.surfaceHigh, borderColor: c.macroCarbs, borderWidth: 1 }]}>
-                <Text style={styles.activityPillIcon}>🚶</Text>
+                <FootprintsIcon size={14} color={c.macroCarbs} />
                 <Text style={[styles.activityPillText, { color: c.macroCarbs }]}>TRUNG BÌNH</Text>
               </View>
               <Text style={styles.activityTierRange}>6,500 - 9,999</Text>
@@ -434,7 +438,7 @@ export function StepDetailScreen({ navigation, route }: Props) {
             {/* Level 4: Rất năng động */}
             <View style={styles.activityTierRow}>
               <View style={[styles.activityPill, { backgroundColor: c.surfaceHigh, borderColor: c.macroFiber, borderWidth: 1 }]}>
-                <Text style={styles.activityPillIcon}>🏃</Text>
+                <RunningIcon size={14} color={c.macroFiber} />
                 <Text style={[styles.activityPillText, { color: c.macroFiber }]}>RẤT NĂNG ĐỘNG</Text>
               </View>
               <Text style={styles.activityTierRange}>10,000 - 12,499</Text>
@@ -443,7 +447,7 @@ export function StepDetailScreen({ navigation, route }: Props) {
             {/* Level 5: Cực kỳ năng động */}
             <View style={styles.activityTierRow}>
               <View style={[styles.activityPill, { backgroundColor: c.surfaceHigh, borderColor: c.brandSecondary, borderWidth: 1 }]}>
-                <Text style={styles.activityPillIcon}>🏃‍♂️</Text>
+                <FlameIcon size={14} color={c.brandSecondary} />
                 <Text style={[styles.activityPillText, { color: c.brandSecondary }]}>CỰC KỲ NĂNG ĐỘNG</Text>
               </View>
               <Text style={styles.activityTierRange}>{'> 12,500'}</Text>

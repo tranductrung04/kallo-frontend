@@ -15,9 +15,11 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { images } from '@/assets/images';
 import { AppButton, AppCard, AppText } from '@/components/common';
 import {
+  CheckIcon,
   ChevronLeftIcon,
   FlameIcon,
   GearSettingsIcon,
+  LockClosedIcon,
   MailInboxIcon,
   RunningIcon,
   TrophyIcon,
@@ -44,11 +46,11 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
   const [metric, setMetric] = useState<LeaderboardMetric>('streak');
   const leaderboard = getLeaderboard(metric);
 
-  const getRankBadge = (rank: number) => {
-    if (rank === 1) return '🥇';
-    if (rank === 2) return '🥈';
-    if (rank === 3) return '🥉';
-    return `#${rank}`;
+  const renderRankBadge = (rank: number) => {
+    if (rank === 1) return <TrophyIcon size={20} color="#F59E0B" />;
+    if (rank === 2) return <TrophyIcon size={20} color="#94A3B8" />;
+    if (rank === 3) return <TrophyIcon size={20} color="#CD7F32" />;
+    return <AppText variant="headlineSm">#{rank}</AppText>;
   };
 
   return (
@@ -152,9 +154,12 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
             style={styles.privacyNotice}
             onPress={() => navigation.navigate('GameSettings')}
           >
-            <AppText variant="caption" color={theme.colors.brandPrimary}>
-              🔒 Bảo mật: Tuyệt đối không hiển thị cân nặng. Xem cài đặt chi tiết →
-            </AppText>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <LockClosedIcon size={12} color={theme.colors.brandPrimary} />
+              <AppText variant="caption" color={theme.colors.brandPrimary}>
+                Bảo mật: Tuyệt đối không hiển thị cân nặng. Xem cài đặt chi tiết →
+              </AppText>
+            </View>
           </TouchableOpacity>
         </AppCard>
 
@@ -253,7 +258,7 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
               ]}
             >
               <View style={styles.rankBadgeBox}>
-                <AppText variant="headlineSm">{getRankBadge(entry.rank)}</AppText>
+                {renderRankBadge(entry.rank)}
               </View>
 
               <View style={[styles.avatarBox, { backgroundColor: theme.colors.surface }]}>
@@ -323,9 +328,12 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
                     Đã gửi lời mời
                   </AppText>
                 ) : (
-                  <AppText variant="caption" color={theme.colors.brandPrimary}>
-                    Bạn bè ✓
-                  </AppText>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <CheckIcon size={12} color={theme.colors.brandPrimary} />
+                    <AppText variant="caption" color={theme.colors.brandPrimary}>
+                      Bạn bè
+                    </AppText>
+                  </View>
                 )}
               </AppCard>
             </TouchableOpacity>

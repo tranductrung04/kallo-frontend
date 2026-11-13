@@ -12,6 +12,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { images } from '@/assets/images';
 import { AppButton, AppCard, AppText, ProgressBar } from '@/components/common';
 import {
+  CheckIcon,
   ChevronLeftIcon,
   LightningBoltIcon,
   LockClosedIcon,
@@ -57,7 +58,7 @@ export function ChallengeDetailScreen({ route, navigation }: Props) {
   const handleJoin = () => {
     joinChallenge(challenge.id);
     Alert.alert(
-      'Tham gia thành công! 🎉',
+      'Tham gia thành công!',
       `Bạn đã tham gia thử thách "${challenge.title}". Hãy cố gắng hoàn thành mỗi ngày nhé!`
     );
     triggerGameEvent({
@@ -211,16 +212,20 @@ export function ChallengeDetailScreen({ route, navigation }: Props) {
         {/* ── CTA Action ────────────────────────────────────────────── */}
         <View style={styles.actionWrap}>
           {challenge.isCompleted ? (
-            <View style={[styles.statusBox, { backgroundColor: 'rgba(34, 197, 94, 0.15)' }]}>
+            <View style={[styles.statusBox, { backgroundColor: 'rgba(34, 197, 94, 0.15)', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }]}>
+              <CheckIcon size={16} color={c.quickScanner} />
               <AppText variant="bodyMd" color={c.quickScanner} style={styles.bold}>
-                ✓ Bạn đã hoàn thành thử thách này!
+                Bạn đã hoàn thành thử thách này!
               </AppText>
             </View>
           ) : challenge.isJoined ? (
             <View style={[styles.statusBox, { backgroundColor: c.brandSoftTint }]}>
-              <AppText variant="bodyMd" color={c.brandPrimary} style={styles.bold}>
-                ✓ Bạn đang tham gia thử thách này
-              </AppText>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 4 }}>
+                <CheckIcon size={16} color={c.brandPrimary} />
+                <AppText variant="bodyMd" color={c.brandPrimary} style={styles.bold}>
+                  Bạn đang tham gia thử thách này
+                </AppText>
+              </View>
               <AppText variant="caption" color={c.textSecondary} align="center">
                 Hãy tiếp tục ghi chép để hoàn thành mục tiêu!
               </AppText>

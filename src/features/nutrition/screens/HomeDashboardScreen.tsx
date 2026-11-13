@@ -885,7 +885,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
                 <View style={styles.communityTextWrap}>
                   <AppText variant="labelLg" color={colors.textPrimary}>Bảng xếp hạng Bạn bè</AppText>
                   <AppText variant="caption" color={colors.textSecondary}>
-                    {friends.length} bạn bè {incomingRequests.length > 0 ? `• 📬 ${incomingRequests.length} lời mời` : ''}
+                    {friends.length} bạn bè {incomingRequests.length > 0 ? `• ${incomingRequests.length} lời mời mới` : ''}
                   </AppText>
                 </View>
                 <AppText variant="caption" color={colors.brandPrimary} style={styles.bold}>

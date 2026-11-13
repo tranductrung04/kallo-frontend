@@ -14,6 +14,29 @@ import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { images } from '@/assets/images';
 import { AppButton, AppCard, AppText } from '@/components/common';
+import {
+  BellIcon,
+  CalendarIcon,
+  ClockIcon,
+  CloseXIcon,
+  CutleryIcon,
+  DropletIcon,
+  DumbbellIcon,
+  FlameIcon,
+  FootprintsIcon,
+  GearSettingsIcon,
+  GlobeIcon,
+  LightningIcon,
+  LockClosedIcon,
+  LogOutIcon,
+  MoonIcon,
+  RefreshCwIcon,
+  ScaleIcon,
+  SearchIcon,
+  SunIcon,
+  TriangleAlertIcon,
+  WheatIcon,
+} from '@/components/icons';
 import type { MainTabParamList, RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
 import { useAuth } from '@/features/auth/AuthProvider';
@@ -83,7 +106,7 @@ export function AccountProfileScreen({ navigation }: Props) {
 
   const handleDeleteAccount = () => {
     Alert.alert(
-      'Xóa vĩnh viễn tài khoản? ⚠️',
+      'Xóa vĩnh viễn tài khoản?',
       'Hành động này sẽ xóa toàn bộ nhật ký bữa ăn, chỉ số cân nặng và dữ liệu sức khỏe của bạn khỏi hệ thống Kallo theo yêu cầu FR-AUTH-07. Bạn không thể hoàn tác sau khi xác nhận.',
       [
         { text: 'Hủy bỏ', style: 'cancel' },
@@ -106,7 +129,7 @@ export function AccountProfileScreen({ navigation }: Props) {
       return;
     }
     setShowCustomizeGoalsModal(false);
-    Alert.alert('Cập nhật thành công! 🎉', 'Mục tiêu dinh dưỡng của bạn đã được cập nhật.');
+    Alert.alert('Cập nhật thành công!', 'Mục tiêu dinh dưỡng của bạn đã được cập nhật.');
   };
 
   return (
@@ -123,9 +146,7 @@ export function AccountProfileScreen({ navigation }: Props) {
           accessibilityRole="button"
           accessibilityLabel="Cài đặt tài khoản"
         >
-          <AppText variant="headlineSm" color={theme.colors.textPrimary}>
-            ⚙
-          </AppText>
+          <GearSettingsIcon size={20} color={theme.colors.textPrimary} />
         </TouchableOpacity>
       </View>
 
@@ -178,7 +199,7 @@ export function AccountProfileScreen({ navigation }: Props) {
               style={styles.vipBannerButton}
               onPress={() =>
                 Alert.alert(
-                  'Kallo Premium VIP 🌟',
+                  'Kallo Premium VIP',
                   'Kích hoạt 14 ngày dùng thử miễn phí toàn bộ tính năng: Quét AI không giới hạn, phân tích thực đơn chuyên sâu và mở khóa toàn bộ huy hiệu!'
                 )
               }
@@ -206,21 +227,30 @@ export function AccountProfileScreen({ navigation }: Props) {
             ]}
           >
             <View style={styles.metricItemCol}>
-              <AppText variant="caption" color={theme.colors.textSecondary}>
-                🗓️ {age} tuổi
-              </AppText>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <CalendarIcon size={14} color={theme.colors.textSecondary} />
+                <AppText variant="caption" color={theme.colors.textSecondary}>
+                  {age} tuổi
+                </AppText>
+              </View>
             </View>
             <View style={[styles.capsuleDivider, { backgroundColor: theme.colors.surfaceBorder }]} />
             <View style={styles.metricItemCol}>
-              <AppText variant="caption" color={theme.colors.textSecondary}>
-                🚶 {heightCm} cm
-              </AppText>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <FootprintsIcon size={14} color={theme.colors.textSecondary} />
+                <AppText variant="caption" color={theme.colors.textSecondary}>
+                  {heightCm} cm
+                </AppText>
+              </View>
             </View>
             <View style={[styles.capsuleDivider, { backgroundColor: theme.colors.surfaceBorder }]} />
             <View style={styles.metricItemCol}>
-              <AppText variant="caption" color={theme.colors.textSecondary}>
-                ⚖️ {weightKg} kg
-              </AppText>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <ScaleIcon size={14} color={theme.colors.textSecondary} />
+                <AppText variant="caption" color={theme.colors.textSecondary}>
+                  {weightKg} kg
+                </AppText>
+              </View>
             </View>
           </View>
 
@@ -385,9 +415,7 @@ export function AccountProfileScreen({ navigation }: Props) {
 
                 {/* Center of Ring: Flame + Calorie Number */}
                 <View style={styles.ringCenterContent}>
-                  <AppText variant="headlineSm" color={theme.colors.macroProtein}>
-                    🔥
-                  </AppText>
+                  <FlameIcon size={18} color={theme.colors.macroProtein} />
                   <AppText variant="headlineSm" style={styles.calorieNumberText}>
                     {targetCalories.toLocaleString('vi-VN')}
                   </AppText>
@@ -397,9 +425,7 @@ export function AccountProfileScreen({ navigation }: Props) {
               {/* Right: Macro breakdown list */}
               <View style={styles.macroListCol}>
                 <View style={styles.macroItemRow}>
-                  <AppText variant="bodyMd" color={theme.colors.macroProtein}>
-                    ⚡
-                  </AppText>
+                  <LightningIcon size={16} color={theme.colors.macroProtein} />
                   <AppText variant="bodyMd" color={theme.colors.textSecondary} style={styles.flex}>
                     Chất đạm{' '}
                     <AppText variant="labelLg" color={theme.colors.textPrimary}>
@@ -410,9 +436,7 @@ export function AccountProfileScreen({ navigation }: Props) {
                 </View>
 
                 <View style={styles.macroItemRow}>
-                  <AppText variant="bodyMd" color={theme.colors.macroCarbs}>
-                    🌾
-                  </AppText>
+                  <WheatIcon size={16} color={theme.colors.macroCarbs} />
                   <AppText variant="bodyMd" color={theme.colors.textSecondary} style={styles.flex}>
                     Đường bột{' '}
                     <AppText variant="labelLg" color={theme.colors.textPrimary}>
@@ -423,9 +447,7 @@ export function AccountProfileScreen({ navigation }: Props) {
                 </View>
 
                 <View style={styles.macroItemRow}>
-                  <AppText variant="bodyMd" color={theme.colors.macroFats}>
-                    💧
-                  </AppText>
+                  <DropletIcon size={16} color={theme.colors.macroFats} />
                   <AppText variant="bodyMd" color={theme.colors.textSecondary} style={styles.flex}>
                     Chất béo{' '}
                     <AppText variant="labelLg" color={theme.colors.textPrimary}>
@@ -461,7 +483,7 @@ export function AccountProfileScreen({ navigation }: Props) {
               onPress={() => navigation.navigate('Report')}
             >
               <View style={[styles.statIconCircle, { backgroundColor: isDark ? '#2E2619' : '#FEF3C7' }]}>
-                <AppText style={styles.statEmoji}>🥣</AppText>
+                <CutleryIcon size={20} color="#F59E0B" />
               </View>
               <AppText variant="caption" color={theme.colors.textSecondary}>
                 Dinh dưỡng
@@ -475,7 +497,7 @@ export function AccountProfileScreen({ navigation }: Props) {
               onPress={() => root?.navigate('ActivityTracker')}
             >
               <View style={[styles.statIconCircle, { backgroundColor: isDark ? '#30182C' : '#FFE4E6' }]}>
-                <AppText style={styles.statEmoji}>🏋️</AppText>
+                <DumbbellIcon size={20} color="#EC4899" />
               </View>
               <AppText variant="caption" color={theme.colors.textSecondary}>
                 Tập luyện
@@ -489,7 +511,7 @@ export function AccountProfileScreen({ navigation }: Props) {
               onPress={() => root?.navigate('HealthSync')}
             >
               <View style={[styles.statIconCircle, { backgroundColor: isDark ? '#162C22' : '#DCFCE7' }]}>
-                <AppText style={styles.statEmoji}>👟</AppText>
+                <FootprintsIcon size={20} color="#10B981" />
               </View>
               <AppText variant="caption" color={theme.colors.textSecondary}>
                 Số bước
@@ -503,7 +525,7 @@ export function AccountProfileScreen({ navigation }: Props) {
               onPress={() => navigation.navigate('Report')}
             >
               <View style={[styles.statIconCircle, { backgroundColor: isDark ? '#1C2538' : '#E0F2FE' }]}>
-                <AppText style={styles.statEmoji}>⚖️</AppText>
+                <ScaleIcon size={20} color="#3B82F6" />
               </View>
               <AppText variant="caption" color={theme.colors.textSecondary}>
                 Cân nặng
@@ -524,7 +546,7 @@ export function AccountProfileScreen({ navigation }: Props) {
             activeOpacity={0.88}
             onPress={() =>
               Alert.alert(
-                'Cộng đồng Kallo 🎉',
+                'Cộng đồng Kallo',
                 'Đang kết nối tới nhóm Facebook và Zalo Cộng đồng Healthy Kallo Việt Nam!'
               )
             }
@@ -541,9 +563,12 @@ export function AccountProfileScreen({ navigation }: Props) {
           {/* Social media tiles */}
           <AppCard style={styles.socialCard}>
             <View style={styles.socialSearchHeader}>
-              <AppText variant="caption" color={theme.colors.textSecondary}>
-                🔍 Tìm Kallo trên trang mạng xã hội
-              </AppText>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <SearchIcon size={14} color={theme.colors.textSecondary} />
+                <AppText variant="caption" color={theme.colors.textSecondary}>
+                  Tìm Kallo trên trang mạng xã hội
+                </AppText>
+              </View>
             </View>
 
             <View style={styles.socialTilesRow}>
@@ -597,7 +622,10 @@ export function AccountProfileScreen({ navigation }: Props) {
                 )
               }
             >
-              <AppText variant="bodyMd">🌐 Trung tâm hỗ trợ</AppText>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <GlobeIcon size={18} color={theme.colors.brandPrimary} />
+                <AppText variant="bodyMd">Trung tâm hỗ trợ</AppText>
+              </View>
               <AppText variant="bodySm" color={theme.colors.textSecondary}>
                 ›
               </AppText>
@@ -642,9 +670,7 @@ export function AccountProfileScreen({ navigation }: Props) {
             <View style={styles.modalHeaderRow}>
               <AppText variant="headlineSm">Cài đặt & Tài khoản</AppText>
               <TouchableOpacity onPress={() => setShowSettingsModal(false)}>
-                <AppText variant="headlineSm" color={theme.colors.textSecondary}>
-                  ✕
-                </AppText>
+                <CloseXIcon size={20} color={theme.colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
@@ -654,9 +680,16 @@ export function AccountProfileScreen({ navigation }: Props) {
                 style={styles.settingsRowItem}
                 onPress={theme.toggleScheme}
               >
-                <AppText variant="bodyMd">
-                  {theme.scheme === 'dark' ? '🌙 Chế độ ban đêm (Tối)' : '☀️ Chế độ ban ngày (Sáng)'}
-                </AppText>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  {theme.scheme === 'dark' ? (
+                    <MoonIcon size={18} color={theme.colors.brandPrimary} />
+                  ) : (
+                    <SunIcon size={18} color="#FACC15" />
+                  )}
+                  <AppText variant="bodyMd">
+                    {theme.scheme === 'dark' ? 'Chế độ ban đêm (Tối)' : 'Chế độ ban ngày (Sáng)'}
+                  </AppText>
+                </View>
                 <AppText variant="caption" color={theme.colors.brandPrimary}>
                   Đổi
                 </AppText>
@@ -670,7 +703,10 @@ export function AccountProfileScreen({ navigation }: Props) {
                   root?.navigate('ReminderSettings');
                 }}
               >
-                <AppText variant="bodyMd">⏰ Cài đặt nhắc nhở thông minh</AppText>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <ClockIcon size={18} color={theme.colors.brandPrimary} />
+                  <AppText variant="bodyMd">Cài đặt nhắc nhở thông minh</AppText>
+                </View>
                 <AppText variant="bodySm" color={theme.colors.textSecondary}>
                   ›
                 </AppText>
@@ -684,7 +720,10 @@ export function AccountProfileScreen({ navigation }: Props) {
                   root?.navigate('NotificationCenter');
                 }}
               >
-                <AppText variant="bodyMd">🔔 Trung tâm thông báo</AppText>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <BellIcon size={18} color={theme.colors.brandPrimary} />
+                  <AppText variant="bodyMd">Trung tâm thông báo</AppText>
+                </View>
                 <AppText variant="bodySm" color={theme.colors.textSecondary}>
                   ›
                 </AppText>
@@ -698,7 +737,10 @@ export function AccountProfileScreen({ navigation }: Props) {
                   Alert.alert('Đồng bộ dữ liệu', isOnline ? 'Đang trực tuyến. Đã gửi các bản ghi.' : 'Đang ở chế độ ngoại tuyến.');
                 }}
               >
-                <AppText variant="bodyMd">🔄 Trạng thái đồng bộ ngoại tuyến</AppText>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <RefreshCwIcon size={18} color={theme.colors.brandPrimary} />
+                  <AppText variant="bodyMd">Trạng thái đồng bộ ngoại tuyến</AppText>
+                </View>
                 <AppText variant="caption" color={isOnline ? theme.colors.quickScanner : theme.colors.macroProtein}>
                   {isOnline ? 'Trực tuyến' : 'Ngoại tuyến'}
                 </AppText>
@@ -711,7 +753,10 @@ export function AccountProfileScreen({ navigation }: Props) {
                   Alert.alert('Đổi mật khẩu', 'Nhập mật khẩu hiện tại và mật khẩu mới tối thiểu 8 ký tự.')
                 }
               >
-                <AppText variant="bodyMd">🔒 Đổi mật khẩu</AppText>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <LockClosedIcon size={18} color={theme.colors.brandPrimary} />
+                  <AppText variant="bodyMd">Đổi mật khẩu</AppText>
+                </View>
                 <AppText variant="bodySm" color={theme.colors.textSecondary}>
                   ›
                 </AppText>
@@ -725,9 +770,12 @@ export function AccountProfileScreen({ navigation }: Props) {
                   void signOut();
                 }}
               >
-                <AppText variant="bodyMd" color={theme.colors.brandPrimary}>
-                  🚪 Đăng xuất tài khoản
-                </AppText>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <LogOutIcon size={18} color={theme.colors.brandPrimary} />
+                  <AppText variant="bodyMd" color={theme.colors.brandPrimary}>
+                    Đăng xuất tài khoản
+                  </AppText>
+                </View>
               </TouchableOpacity>
 
               {/* Delete Account */}
@@ -735,9 +783,12 @@ export function AccountProfileScreen({ navigation }: Props) {
                 style={styles.settingsRowItem}
                 onPress={handleDeleteAccount}
               >
-                <AppText variant="bodyMd" color={theme.colors.macroProtein}>
-                  ⚠️ Xóa vĩnh viễn tài khoản
-                </AppText>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <TriangleAlertIcon size={18} color={theme.colors.macroProtein} />
+                  <AppText variant="bodyMd" color={theme.colors.macroProtein}>
+                    Xóa vĩnh viễn tài khoản
+                  </AppText>
+                </View>
               </TouchableOpacity>
             </View>
           </View>
@@ -756,9 +807,7 @@ export function AccountProfileScreen({ navigation }: Props) {
             <View style={styles.modalHeaderRow}>
               <AppText variant="headlineSm">Chỉ số sức khỏe cá nhân</AppText>
               <TouchableOpacity onPress={() => setShowHealthMetricsModal(false)}>
-                <AppText variant="headlineSm" color={theme.colors.textSecondary}>
-                  ✕
-                </AppText>
+                <CloseXIcon size={20} color={theme.colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
@@ -833,9 +882,7 @@ export function AccountProfileScreen({ navigation }: Props) {
             <View style={styles.modalHeaderRow}>
               <AppText variant="headlineSm">Tuỳ chỉnh mục tiêu dinh dưỡng</AppText>
               <TouchableOpacity onPress={() => setShowCustomizeGoalsModal(false)}>
-                <AppText variant="headlineSm" color={theme.colors.textSecondary}>
-                  ✕
-                </AppText>
+                <CloseXIcon size={20} color={theme.colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
@@ -870,9 +917,12 @@ export function AccountProfileScreen({ navigation }: Props) {
 
                 {/* Protein */}
                 <View style={styles.macroAdjustRow}>
-                  <AppText variant="bodyMd" color={theme.colors.macroProtein}>
-                    ⚡ Chất đạm: {proteinPercent}% ({proteinGrams}g)
-                  </AppText>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <LightningIcon size={14} color={theme.colors.macroProtein} />
+                    <AppText variant="bodyMd" color={theme.colors.macroProtein}>
+                      Chất đạm: {proteinPercent}% ({proteinGrams}g)
+                    </AppText>
+                  </View>
                   <View style={styles.stepperSmallWrap}>
                     <TouchableOpacity
                       style={styles.stepperSmallBtn}
@@ -891,9 +941,12 @@ export function AccountProfileScreen({ navigation }: Props) {
 
                 {/* Carbs */}
                 <View style={styles.macroAdjustRow}>
-                  <AppText variant="bodyMd" color={theme.colors.macroCarbs}>
-                    🌾 Đường bột: {carbsPercent}% ({carbsGrams}g)
-                  </AppText>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <WheatIcon size={14} color={theme.colors.macroCarbs} />
+                    <AppText variant="bodyMd" color={theme.colors.macroCarbs}>
+                      Đường bột: {carbsPercent}% ({carbsGrams}g)
+                    </AppText>
+                  </View>
                   <View style={styles.stepperSmallWrap}>
                     <TouchableOpacity
                       style={styles.stepperSmallBtn}
@@ -912,9 +965,12 @@ export function AccountProfileScreen({ navigation }: Props) {
 
                 {/* Fat */}
                 <View style={styles.macroAdjustRow}>
-                  <AppText variant="bodyMd" color={theme.colors.macroFats}>
-                    💧 Chất béo: {fatPercent}% ({fatGrams}g)
-                  </AppText>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <DropletIcon size={14} color={theme.colors.macroFats} />
+                    <AppText variant="bodyMd" color={theme.colors.macroFats}>
+                      Chất béo: {fatPercent}% ({fatGrams}g)
+                    </AppText>
+                  </View>
                   <View style={styles.stepperSmallWrap}>
                     <TouchableOpacity
                       style={styles.stepperSmallBtn}

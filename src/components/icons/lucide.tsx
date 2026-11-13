@@ -1,6 +1,8 @@
 import React from 'react';
 import {
   AlertTriangle,
+  Armchair,
+  Bell,
   Bike,
   BookOpen,
   Calendar,
@@ -18,21 +20,28 @@ import {
   Clock,
   Cloud,
   Droplet,
+  Dumbbell,
   Flag,
   Flame,
   Footprints,
   GlassWater,
+  Globe,
   Heart,
   House,
   ImagePlus,
   Info,
+  Lightbulb,
   Lock,
+  LogOut,
   Mail,
   Menu,
+  MessageSquare,
   Mic,
   Moon,
+  PenLine,
   PersonStanding,
   Plus,
+  RefreshCw,
   ScanBarcode,
   ScanSearch,
   Search,
@@ -40,12 +49,16 @@ import {
   Share2,
   ShieldCheck,
   Sparkles,
+  Square,
+  SquareCheck,
+  Star,
   Sun,
   TriangleAlert,
   Trophy,
   User,
   Users,
   Utensils,
+  Waves,
   Wheat,
   X,
   Zap,
@@ -57,6 +70,7 @@ export interface LucideAdapterOptions {
   strokeWidth?: number;
   defaultSize?: number;
   defaultColor?: string;
+  defaultFill?: string;
   fillOnFocused?: boolean;
   activeStrokeWidth?: number;
 }
@@ -83,7 +97,9 @@ export function fromLucide<P extends Partial<IconProps> = IconProps>(
         ? options.activeStrokeWidth
         : options?.strokeWidth ?? ICON_STROKE_DEFAULT);
 
-    const fill = options?.fillOnFocused && focused ? color : 'none';
+    const fill =
+      (rest as any).fill ??
+      (options?.fillOnFocused && focused ? color : options?.defaultFill ?? 'none');
 
     return (
       <Icon
@@ -212,10 +228,28 @@ export const BodyStickFigureIcon = fromLucide(PersonStanding, { defaultSize: 24 
 
 export const BicycleIcon = fromLucide(Bike, { defaultSize: 24 });
 export const FootprintsIcon = fromLucide(Footprints, { defaultSize: 20 });
+export const WavesIcon = fromLucide(Waves, { defaultSize: 22 });
 
 // ─── Health & Vitality ────────────────────────────────────────────────────────
 
 export const HeartIcon = fromLucide(Heart, { defaultSize: 22 });
 export const ClockIcon = fromLucide(Clock, { defaultSize: 22 });
 export const CloudIcon = fromLucide(Cloud, { defaultSize: 22 });
+export const ArmchairIcon = fromLucide(Armchair, { defaultSize: 22 });
+export const DumbbellIcon = fromLucide(Dumbbell, { defaultSize: 22 });
+
+// ─── System & UI Utility Glyphs ──────────────────────────────────────────────
+
+export const BellIcon = fromLucide(Bell, { defaultSize: 20 });
+export const GlobeIcon = fromLucide(Globe, { defaultSize: 20 });
+export const LightbulbIcon = fromLucide(Lightbulb, { defaultSize: 20 });
+export const LogOutIcon = fromLucide(LogOut, { defaultSize: 20 });
+export const MessageSquareIcon = fromLucide(MessageSquare, { defaultSize: 20 });
+export const PenLineIcon = fromLucide(PenLine, { defaultSize: 20 });
+export const RefreshCwIcon = fromLucide(RefreshCw, { defaultSize: 20 });
+export const SquareIcon = fromLucide(Square, { defaultSize: 20 });
+export const SquareCheckIcon = fromLucide(SquareCheck, { defaultSize: 20 });
+export const CheckSquareIcon = SquareCheckIcon;
+export const StarIcon = fromLucide(Star, { defaultSize: 14, defaultColor: '#FACC15', defaultFill: '#FACC15' });
+
 

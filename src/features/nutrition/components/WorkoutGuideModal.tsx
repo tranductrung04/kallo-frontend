@@ -138,7 +138,7 @@ export function WorkoutGuideModal({ visible, onClose }: WorkoutGuideModalProps) 
 
             {/* Lời khuyên đồng hành của Kallo */}
             <Text style={[styles.calloutItem, { color: bodyColor }]}>
-              👉 Kallo giúp bạn theo dõi cả calo nạp và tiêu hao - để chủ động điều chỉnh phù hợp với nhịp sống thực tế.
+              Kallo giúp bạn theo dõi cả calo nạp và tiêu hao - để chủ động điều chỉnh phù hợp với nhịp sống thực tế.
             </Text>
           </ScrollView>
         </View>

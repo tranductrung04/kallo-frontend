@@ -10,6 +10,7 @@ export type IconProps = {
   creaseColor?: string;
   innerColor?: string;
   capColor?: string;
+  fill?: string;
 };
 
 export const ICON_STROKE_DEFAULT = 2;

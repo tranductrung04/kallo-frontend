@@ -20,7 +20,14 @@ import Svg, {
   Line,
 } from 'react-native-svg';
 import { AppText } from '@/components/common';
-import { ChevronLeftIcon } from '@/components/icons';
+import {
+  ChevronLeftIcon,
+  DropletIcon,
+  FlameIcon,
+  InfoIcon,
+  LightningIcon,
+  WheatIcon,
+} from '@/components/icons';
 import { useHealthProfileDraft } from '../hooks/useHealthProfileDraft';
 import {
   calculateDailyCalorieGoal,
@@ -349,12 +356,12 @@ export function PlanResultScreen({
               Lượng calo mục tiêu bạn cần nạp
             </AppText>
             <View style={styles.infoBadge}>
-              <AppText style={styles.infoBadgeText}>ℹ</AppText>
+              <InfoIcon size={14} color="#BCA4FA" />
             </View>
           </View>
 
           <AppText style={styles.calorieSubtitle}>
-            🔥🔥🔥 Để {goalActionPhrase} chúng tôi ước tính lượng calo cần thiết
+            Để {goalActionPhrase} chúng tôi ước tính lượng calo cần thiết
             cho hoạt động mỗi ngày của bạn là
           </AppText>
 
@@ -501,7 +508,7 @@ export function PlanResultScreen({
 
               {/* Donut Inner Text */}
               <View style={styles.donutCenter}>
-                <AppText style={styles.flameEmoji}>🔥</AppText>
+                <FlameIcon size={18} color="#F97316" />
                 <AppText style={styles.donutCalorieText}>
                   {dailyCalorieGoal.toLocaleString('vi-VN')}
                 </AppText>
@@ -512,7 +519,7 @@ export function PlanResultScreen({
             <View style={styles.macroLegend}>
               {/* Protein */}
               <View style={styles.legendRow}>
-                <AppText style={styles.legendEmoji}>⚡</AppText>
+                <LightningIcon size={14} color="#F59E0B" />
                 <AppText style={styles.legendLabel}>Chất đạm</AppText>
                 <AppText style={styles.legendVal}>
                   {proteinPercent}% ({proteinGrams}g)
@@ -521,7 +528,7 @@ export function PlanResultScreen({
 
               {/* Carbs */}
               <View style={styles.legendRow}>
-                <AppText style={styles.legendEmoji}>🌾</AppText>
+                <WheatIcon size={14} color="#3B82F6" />
                 <AppText style={styles.legendLabel}>Đường bột</AppText>
                 <AppText style={styles.legendVal}>
                   {carbsPercent}% ({carbsGrams}g)
@@ -530,7 +537,7 @@ export function PlanResultScreen({
 
               {/* Fat */}
               <View style={styles.legendRow}>
-                <AppText style={styles.legendEmoji}>💧</AppText>
+                <DropletIcon size={14} color="#10B981" />
                 <AppText style={styles.legendLabel}>Chất béo</AppText>
                 <AppText style={styles.legendVal}>
                   {fatPercent}% ({fatGrams}g)
@@ -566,7 +573,7 @@ export function PlanResultScreen({
               <ActivityIndicator color="#FFFFFF" />
             ) : (
               <AppText style={styles.ctaButtonText}>
-                Bắt đầu hành trình 💪
+                Bắt đầu hành trình
               </AppText>
             )}
           </TouchableOpacity>

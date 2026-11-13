@@ -107,7 +107,7 @@ export function HealthSyncScreen({ navigation }: Props) {
       {/* ── Main Content Section ───────────────────────────── */}
       <View style={styles.contentSection}>
         <Text style={[styles.headlineText, { color: c.textPrimary }]}>
-          Wao muốn giúp bạn theo dõi vận động chính xác hơn! 🚀
+          Wao muốn giúp bạn theo dõi vận động chính xác hơn!
         </Text>
 
         {/* Benefit 1 */}
