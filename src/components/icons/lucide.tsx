@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   AlertTriangle,
+  Bike,
   BookOpen,
   Calendar,
   Candy,
@@ -202,3 +203,7 @@ export const WheatIcon = fromLucide(Wheat, { defaultSize: 15, defaultColor: '#3B
 export const SugarIcon = fromLucide(Candy, { defaultSize: 15 });
 export const WaterGlassPlusIcon = fromLucide(GlassWater, { defaultSize: 22 });
 export const BodyStickFigureIcon = fromLucide(PersonStanding, { defaultSize: 24 });
+
+// ─── Wave 4: Physical Activities ─────────────────────────────────────────────
+
+export const BicycleIcon = fromLucide(Bike, { defaultSize: 24 });
