@@ -7,6 +7,9 @@ export type IconProps = {
   focused?: boolean;
   coreColor?: string;
   cutoutColor?: string;
+  creaseColor?: string;
+  innerColor?: string;
+  capColor?: string;
 };
 
 export const ICON_STROKE_DEFAULT = 2;
