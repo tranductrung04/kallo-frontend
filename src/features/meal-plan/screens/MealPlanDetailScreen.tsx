@@ -12,6 +12,7 @@ import {
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import { AppButton, AppCard, AppText } from '@/components/common';
+import { CheckIcon, CloseXIcon } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme, type ThemeContextValue } from '@/theme';
 import type { MealPlanItem } from '../types';
@@ -55,7 +56,7 @@ export function MealPlanDetailScreen() {
   const handleApplyToDiary = () => {
     const count = applyPlanToDiary(selectedDayIndex);
     Alert.alert(
-      'Áp dụng thành công! 🎉',
+      'Áp dụng thành công!',
       `Đã thêm ${count} món ăn của ${activeDay.dayLabel} vào Nhật ký dinh dưỡng hôm nay.`,
       [
         {
@@ -146,12 +147,17 @@ export function MealPlanDetailScreen() {
                 },
               ]}
             >
-              <AppText
-                variant="caption"
-                color={isWithinTolerance ? theme.colors.brandPrimary : theme.colors.statusDanger}
-              >
-                {isWithinTolerance ? '✓ Chuẩn ±5%' : 'Chênh lệch'}
-              </AppText>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                {isWithinTolerance ? (
+                  <CheckIcon size={12} color={theme.colors.brandPrimary} />
+                ) : null}
+                <AppText
+                  variant="caption"
+                  color={isWithinTolerance ? theme.colors.brandPrimary : theme.colors.statusDanger}
+                >
+                  {isWithinTolerance ? 'Chuẩn ±5%' : 'Chênh lệch'}
+                </AppText>
+              </View>
             </View>
           </View>
 
@@ -284,7 +290,7 @@ export function MealPlanDetailScreen() {
                 </AppText>
               </View>
               <TouchableOpacity onPress={() => setSwappingItem(null)}>
-                <AppText variant="headlineSm">✕</AppText>
+                <CloseXIcon size={20} color={theme.colors.textSecondary} />
               </TouchableOpacity>
             </View>
 

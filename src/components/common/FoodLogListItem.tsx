@@ -18,6 +18,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { useTheme } from '@/theme';
+import { CutleryIcon } from '@/components/icons';
 import { AppText } from './AppText';
 
 export type FoodLogListItemProps = {
@@ -74,7 +75,7 @@ export function FoodLogListItem({
           />
         ) : (
           <View style={[styles.thumbnail, styles.thumbnailPlaceholder, { backgroundColor: theme.colors.surfaceBorder }]}>
-            <AppText variant="labelMd" color={theme.colors.textSecondary} align="center">🍽</AppText>
+            <CutleryIcon size={20} color={theme.colors.textSecondary} />
           </View>
         )}
       </View>

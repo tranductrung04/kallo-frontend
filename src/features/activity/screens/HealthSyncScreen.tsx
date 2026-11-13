@@ -11,9 +11,8 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import Svg, { Path } from 'react-native-svg';
 import type { RootStackParamList } from '@/navigation/types';
-import { ChevronLeftIcon } from '@/components/icons';
+import { CheckIcon, ChevronLeftIcon } from '@/components/icons';
 import { images } from '@/assets/images';
 import { useTheme } from '@/theme';
 import { useActivity } from '../ActivityProvider';
@@ -24,9 +23,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'HealthSync'>;
 function GreenCheckIcon({ color }: { color: string }) {
   return (
     <View style={[styles.greenCheckBadge, { backgroundColor: color }]}>
-      <Svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={3.5} strokeLinecap="round" strokeLinejoin="round">
-        <Path d="M20 6L9 17l-5-5" />
-      </Svg>
+      <CheckIcon size={12} color="#FFFFFF" strokeWidth={3.5} />
     </View>
   );
 }
@@ -110,7 +107,7 @@ export function HealthSyncScreen({ navigation }: Props) {
       {/* ── Main Content Section ───────────────────────────── */}
       <View style={styles.contentSection}>
         <Text style={[styles.headlineText, { color: c.textPrimary }]}>
-          Wao muốn giúp bạn theo dõi vận động chính xác hơn! 🚀
+          Wao muốn giúp bạn theo dõi vận động chính xác hơn!
         </Text>
 
         {/* Benefit 1 */}

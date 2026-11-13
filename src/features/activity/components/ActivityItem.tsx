@@ -1,7 +1,9 @@
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppCard, AppText } from '@/components/common';
+import { CloseXIcon } from '@/components/icons';
 import { useTheme } from '@/theme';
+import { ActivityTypeIcon } from './ActivityTypeIcon';
 import { findActivityMeta } from '../catalog';
 import type { ActivityLog } from '../types';
 
@@ -19,7 +21,7 @@ export function ActivityItem({
     <AppCard style={styles.card}>
       <View style={styles.row}>
         <View style={[styles.iconBox, { backgroundColor: theme.colors.primarySurface }]}>
-          <AppText variant="title">{meta.icon}</AppText>
+          <ActivityTypeIcon type={log.type} size={22} color={theme.colors.brandPrimary} />
         </View>
 
         <View style={styles.details}>
@@ -54,9 +56,7 @@ export function ActivityItem({
             onPress={() => onDelete(log.id)}
             style={styles.deleteButton}
           >
-            <AppText color={theme.colors.danger} variant="caption">
-              ✕
-            </AppText>
+            <CloseXIcon size={14} color={theme.colors.danger} />
           </Pressable>
         ) : null}
       </View>

@@ -15,7 +15,13 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import * as ImagePicker from 'expo-image-picker';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '@/navigation/types';
-import { ChevronLeftIcon } from '@/components/icons';
+import {
+  ChevronLeftIcon,
+  CloseXIcon,
+  DropletIcon,
+  LightningIcon,
+  WheatIcon,
+} from '@/components/icons';
 import { images } from '@/assets/images';
 import { useNutrition } from '../NutritionProvider';
 import { useTheme } from '@/theme';
@@ -398,7 +404,10 @@ export function CreateRecipeScreen({ navigation, route }: Props) {
               >
                 {perServing.protein} g
               </Text>
-              <Text style={styles.macroLabelText}>⚡ CHẤT ĐẠM</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, justifyContent: 'center' }}>
+                <LightningIcon size={12} color="#EF4444" />
+                <Text style={styles.macroLabelText}>CHẤT ĐẠM</Text>
+              </View>
             </View>
 
             {/* Carbs */}
@@ -414,7 +423,10 @@ export function CreateRecipeScreen({ navigation, route }: Props) {
               >
                 {perServing.carbs} g
               </Text>
-              <Text style={styles.macroLabelText}>🌾 ĐƯỜNG BỘT</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, justifyContent: 'center' }}>
+                <WheatIcon size={12} color="#3B82F6" />
+                <Text style={styles.macroLabelText}>ĐƯỜNG BỘT</Text>
+              </View>
             </View>
 
             {/* Fat */}
@@ -430,7 +442,10 @@ export function CreateRecipeScreen({ navigation, route }: Props) {
               >
                 {perServing.fat} g
               </Text>
-              <Text style={styles.macroLabelText}>💧 CHẤT BÉO</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, justifyContent: 'center' }}>
+                <DropletIcon size={12} color="#F59E0B" />
+                <Text style={styles.macroLabelText}>CHẤT BÉO</Text>
+              </View>
             </View>
           </View>
 
@@ -645,7 +660,7 @@ export function CreateRecipeScreen({ navigation, route }: Props) {
                     style={styles.ingredientDeleteBtn}
                     accessibilityLabel="Xóa nguyên liệu"
                   >
-                    <Text style={styles.ingredientDeleteText}>✕</Text>
+                    <CloseXIcon size={14} color="#EF4444" />
                   </TouchableOpacity>
                 </View>
               ))}

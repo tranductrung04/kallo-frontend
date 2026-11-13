@@ -10,8 +10,9 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Circle, Path } from 'react-native-svg';
+import Svg, { Circle } from 'react-native-svg';
 import { AppText } from '@/components/common';
+import { CircleCheckIcon, StarIcon } from '@/components/icons';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -200,16 +201,7 @@ export function CalculatingPlanScreen({
               <AppText style={styles.stepLabel}>Phân tích hồ sơ thể chất</AppText>
               {step1Done ? (
                 <View style={styles.checkCircle}>
-                  <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                    <Circle cx="12" cy="12" r="10" fill="#22C55E" />
-                    <Path
-                      d="M8 12.5l2.8 2.8 5.2-5.6"
-                      stroke="#FFFFFF"
-                      strokeWidth="2.4"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </Svg>
+                  <CircleCheckIcon size={20} color="#22C55E" />
                 </View>
               ) : (
                 <View style={styles.emptyCircle} />
@@ -236,16 +228,7 @@ export function CalculatingPlanScreen({
               <AppText style={styles.stepLabel}>Tính toán quá trình trao đổi chất</AppText>
               {step2Done ? (
                 <View style={styles.checkCircle}>
-                  <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                    <Circle cx="12" cy="12" r="10" fill="#22C55E" />
-                    <Path
-                      d="M8 12.5l2.8 2.8 5.2-5.6"
-                      stroke="#FFFFFF"
-                      strokeWidth="2.4"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </Svg>
+                  <CircleCheckIcon size={20} color="#22C55E" />
                 </View>
               ) : (
                 <View style={styles.emptyCircle} />
@@ -272,16 +255,7 @@ export function CalculatingPlanScreen({
               <AppText style={styles.stepLabel}>Tính toán calo mục tiêu</AppText>
               {step3Done ? (
                 <View style={styles.checkCircle}>
-                  <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                    <Circle cx="12" cy="12" r="10" fill="#22C55E" />
-                    <Path
-                      d="M8 12.5l2.8 2.8 5.2-5.6"
-                      stroke="#FFFFFF"
-                      strokeWidth="2.4"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </Svg>
+                  <CircleCheckIcon size={20} color="#22C55E" />
                 </View>
               ) : step2Done ? (
                 <View style={styles.spinCircle}>
@@ -341,9 +315,7 @@ export function CalculatingPlanScreen({
                 <View style={styles.testimonialTopRow}>
                   <View style={styles.starsRow}>
                     {[...Array(item.rating)].map((_, i) => (
-                      <AppText key={i} style={styles.starText}>
-                        ★
-                      </AppText>
+                      <StarIcon key={i} size={15} color="#FACC15" fill="#FACC15" />
                     ))}
                   </View>
                   <AppText style={styles.reviewerName}>{item.name}</AppText>

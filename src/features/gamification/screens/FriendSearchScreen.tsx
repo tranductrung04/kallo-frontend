@@ -12,6 +12,7 @@ import {
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppButton, AppCard, AppText } from '@/components/common';
 import {
+  CheckIcon,
   ChevronLeftIcon,
   CloseXIcon,
   SearchIcon,
@@ -110,9 +111,10 @@ export function FriendSearchScreen({ navigation }: Props) {
 
         <View style={styles.actionWrap}>
           {item.relationship === 'FRIENDS' ? (
-            <View style={[styles.badgePill, { backgroundColor: c.brandSoftTint }]}>
+            <View style={[styles.badgePill, { backgroundColor: c.brandSoftTint, flexDirection: 'row', alignItems: 'center', gap: 4 }]}>
+              <CheckIcon size={12} color={c.brandPrimary} />
               <AppText variant="caption" color={c.brandPrimary} style={styles.bold}>
-                Bạn bè ✓
+                Bạn bè
               </AppText>
             </View>
           ) : item.relationship === 'PENDING_OUT' ? (

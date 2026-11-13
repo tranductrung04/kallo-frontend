@@ -60,8 +60,12 @@ npm run ios
 
 - [REQUIREMENT.md](docs/REQUIREMENT.md): Tài liệu Đặc tả Yêu cầu Nghiệp vụ Phần mềm (SRS v1.1).
 - [UI_IMPLEMENTATION_PLAN.md](docs/UI_IMPLEMENTATION_PLAN.md): Lộ trình 13 tuần triển khai giao diện người dùng qua 7 Phase.
+- [DESIGN.md](docs/DESIGN.md): Hệ thống thiết kế (Design System, Typography, Colors, Iconography).
+- [ICON_MIGRATION_PLAN.md](docs/ICON_MIGRATION_PLAN.md): Kế hoạch và quy ước chuyển đổi icon sang `lucide-react-native`.
 - [Expo Documentation](https://docs.expo.dev/): Hướng dẫn sử dụng Expo SDK 52.
 - [React Navigation 7 Docs](https://reactnavigation.org/docs/getting-started): Hướng dẫn cấu trúc điều hướng React Navigation.
+
+> **Quy ước Icon:** Mọi icon chuẩn được import tập trung qua `@/components/icons` (được adapter từ `lucide-react-native` tại `src/components/icons/lucide.tsx`). Không tự vẽ SVG inline cho các icon đơn giản. Icon đặc thù/thương hiệu đặt trong `src/components/icons/custom/` hoặc `illustrations/`.
 
 ---
 

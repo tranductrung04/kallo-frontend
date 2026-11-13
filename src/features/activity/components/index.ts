@@ -4,4 +4,5 @@ export * from './CreateCustomActivityModal';
 export * from './AutoTrackBanner';
 export * from './AlphabetIndexSidebar';
 export * from './ActivityRowItem';
+export * from './ActivityTypeIcon';
 export * from './StepConnectModal';
