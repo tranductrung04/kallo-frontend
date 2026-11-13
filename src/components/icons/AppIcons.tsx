@@ -330,54 +330,6 @@ export function RunningIcon({ size = 24, color }: IconProps) {
   );
 }
 
-/** Icon Đạp xe — Người đạp xe duỗi một tay về phía trước, hai bánh tròn lớn */
-export function BicycleIcon({ size = 24, color }: IconProps) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      {/* Đầu */}
-      <Circle cx="12.6" cy="4.8" r="1.8" fill={color} />
-      {/* Thân nghiêng ra trước */}
-      <Path
-        d="M10.6 12.4 L12 8 L14 10"
-        stroke={color}
-        strokeWidth={2.2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* Tay duỗi thẳng về phía trước */}
-      <Path
-        d="M12.4 8.4 L16 8.2 L20.2 8.2"
-        stroke={color}
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* Tay còn lại nắm ghi-đông */}
-      <Path
-        d="M14 10 L16.4 11.2"
-        stroke={color}
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* Khung xe nối hai bánh */}
-      <Path
-        d="M6.4 17.6 L10.6 12.4 L12.4 17.6 L16.4 11.2 L17.6 17.6"
-        stroke={color}
-        strokeWidth={1.5}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* Bánh sau */}
-      <Circle cx="6.4" cy="17.6" r="3.6" stroke={color} strokeWidth={1.9} />
-      <Circle cx="6.4" cy="17.6" r="0.9" fill={color} />
-      {/* Bánh trước */}
-      <Circle cx="17.6" cy="17.6" r="3.6" stroke={color} strokeWidth={1.9} />
-      <Circle cx="17.6" cy="17.6" r="0.9" fill={color} />
-    </Svg>
-  );
-}
-
 /** Icon Cầu lông — Quả cầu lông nghiêng: đế bấc ở dưới trái, tán lông vũ xòe lên phải */
 export function ShuttlecockIcon({
   size = 24,
