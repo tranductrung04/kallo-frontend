@@ -10,11 +10,14 @@ import {
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Line, Path } from 'react-native-svg';
+import Svg, { Line, Path, Rect } from 'react-native-svg';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { images } from '@/assets/images';
 import { AppText } from '@/components/common';
+import { MoonIcon, SunIcon } from '@/components/icons';
+import { AuthLightBackground } from './AuthLightBackground';
 import type { AuthStackParamList } from '@/navigation/types';
+import { useTheme } from '@/theme';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'SocialLogin'>;
 
@@ -22,20 +25,20 @@ const isIOS = Platform.OS === 'ios';
 
 // ─── Vector Icons matching design ────────────────────────────────────────────
 
-function CloseIcon() {
+function CloseIcon({ color = '#FFFFFF' }: { color?: string }) {
   return (
-    <Svg width={18} height={18} viewBox="0 0 24 24" stroke="#FFFFFF" strokeWidth={2.2} strokeLinecap="round">
+    <Svg width={18} height={18} viewBox="0 0 24 24" stroke={color} strokeWidth={2.2} strokeLinecap="round">
       <Line x1="18" y1="6" x2="6" y2="18" />
       <Line x1="6" y1="6" x2="18" y2="18" />
     </Svg>
   );
 }
 
-function AppleIcon() {
+function AppleIcon({ isDark }: { isDark: boolean }) {
   return (
     <Image
       source={images.appleIcon}
-      style={styles.brandIcon}
+      style={[styles.brandIcon, { tintColor: isDark ? '#FFFFFF' : '#000000' }]}
       resizeMode="contain"
     />
   );
@@ -64,13 +67,21 @@ function GoogleIcon() {
   );
 }
 
-function FacebookIcon() {
+function EmailIcon({ color = '#FFFFFF' }: { color?: string }) {
   return (
-    <Image
-      source={images.facebookIcon}
-      style={styles.brandIcon}
-      resizeMode="contain"
-    />
+    <Svg
+      width={20}
+      height={20}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <Rect width={20} height={16} x={2} y={4} rx={2} />
+      <Path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+    </Svg>
   );
 }
 
@@ -78,6 +89,8 @@ function FacebookIcon() {
 
 export function SocialLoginScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const isDark = theme.scheme === 'dark';
 
   const handleAppleLogin = () => {
     Alert.alert(
@@ -101,165 +114,210 @@ export function SocialLoginScreen({ navigation }: Props) {
     );
   };
 
-  const handleFacebookLogin = () => {
-    Alert.alert(
-      'Đăng nhập với Facebook',
-      'Tính năng đăng nhập với mạng xã hội đang được hoàn thiện. Bạn có muốn chuyển sang đăng nhập bằng tài khoản email/mật khẩu?',
-      [
-        { text: 'Huỷ', style: 'cancel' },
-        { text: 'Đăng nhập ngay', onPress: () => navigation.navigate('Login') },
-      ]
-    );
+  const handleEmailLogin = () => {
+    navigation.navigate('Login');
   };
 
   const handleClose = () => {
     navigation.goBack();
   };
 
-  return (
-    <View style={styles.root}>
-      <StatusBar style="light" />
-      <ImageBackground
-        source={images.loginBackground}
-        style={styles.background}
-        resizeMode="cover"
-      >
-        {/* Top Header with Close Button */}
-        <View style={[styles.header, { paddingTop: Math.max(insets.top + 8, 20) }]}>
-          <Pressable
-            onPress={handleClose}
-            hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
-            accessibilityRole="button"
-            accessibilityLabel="Đóng"
-            style={({ pressed }) => [styles.closeButton, pressed && styles.pressed]}
-          >
-            <CloseIcon />
-          </Pressable>
-        </View>
+  const renderContent = () => (
+    <>
+      {/* Top Header with Theme Toggle & Close Button */}
+      <View style={[styles.header, { paddingTop: Math.max(insets.top + 8, 20) }]}>
+        <Pressable
+          onPress={theme.toggleScheme}
+          hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
+          accessibilityRole="button"
+          accessibilityLabel={isDark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}
+          style={({ pressed }) => [styles.headerIconButton, pressed && styles.pressed]}
+        >
+          {isDark ? <SunIcon size={20} color="#FACC15" /> : <MoonIcon size={20} color={theme.colors.brandPrimary} />}
+        </Pressable>
+        <Pressable
+          onPress={handleClose}
+          hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
+          accessibilityRole="button"
+          accessibilityLabel="Đóng"
+          style={({ pressed }) => [styles.closeButton, pressed && styles.pressed]}
+        >
+          <CloseIcon color={isDark ? '#FFFFFF' : theme.colors.textPrimary} />
+        </Pressable>
+      </View>
 
-        {/* Center Content Body */}
-        <View style={styles.content}>
-          {/* Title Section */}
-          <View style={styles.titleSection}>
-            <AppText style={styles.title} color="#FFFFFF">
-              Bắt đầu hành trình chăm sóc sức khoẻ{'\n'}của bạn với Kallo
-            </AppText>
-            <AppText style={styles.subtitle} color="rgba(255, 255, 255, 0.72)">
-              Đăng nhập vào Kallo thông qua tài khoản{'\n'}mạng xã hội dưới đây
-            </AppText>
-          </View>
-
-          {/* Social Buttons Stack */}
-          <View style={styles.buttonsContainer}>
-            {/* Apple Sign In — iOS only (Android excluded per requirement) */}
-            {isIOS && (
-              <Pressable
-                onPress={handleAppleLogin}
-                accessibilityRole="button"
-                accessibilityLabel="Tiếp tục với Apple"
-                style={({ pressed }) => [
-                  styles.socialButton,
-                  pressed && styles.buttonPressed,
-                ]}
-              >
-                <AppleIcon />
-                <AppText style={styles.socialButtonText} color="#FFFFFF">
-                  Tiếp tục với Apple
-                </AppText>
-              </Pressable>
-            )}
-
-            {/* Google Sign In */}
-            <Pressable
-              onPress={handleGoogleLogin}
-              accessibilityRole="button"
-              accessibilityLabel="Tiếp tục với Google"
-              style={({ pressed }) => [
-                styles.socialButton,
-                pressed && styles.buttonPressed,
-              ]}
-            >
-              <GoogleIcon />
-              <AppText style={styles.socialButtonText} color="#FFFFFF">
-                Tiếp tục với Google
-              </AppText>
-            </Pressable>
-
-            {/* Facebook Sign In */}
-            <Pressable
-              onPress={handleFacebookLogin}
-              accessibilityRole="button"
-              accessibilityLabel="Tiếp tục với Facebook"
-              style={({ pressed }) => [
-                styles.socialButton,
-                pressed && styles.buttonPressed,
-              ]}
-            >
-              <FacebookIcon />
-              <AppText style={styles.socialButtonText} color="#FFFFFF">
-                Tiếp tục với Facebook
-              </AppText>
-            </Pressable>
-          </View>
-
-          {/* Terms & Privacy */}
-          <View style={styles.termsContainer}>
-            <AppText style={styles.termsText} color="rgba(255, 255, 255, 0.65)">
-              Bằng việc tiếp tục, bạn đã đồng ý với
-            </AppText>
-            <View style={styles.termsLinks}>
-              <Pressable
-                onPress={() => {/* Open Terms */}}
-                accessibilityRole="link"
-                accessibilityLabel="Điều khoản sử dụng"
-                style={({ pressed }) => pressed && styles.pressed}
-              >
-                <AppText style={styles.termsLink} color="#A57BF5">
-                  Điều khoản sử dụng
-                </AppText>
-              </Pressable>
-              <AppText style={styles.termsText} color="rgba(255, 255, 255, 0.65)">
-                {' '}và{' '}
-              </AppText>
-              <Pressable
-                onPress={() => {/* Open Privacy Policy */}}
-                accessibilityRole="link"
-                accessibilityLabel="Chính sách bảo mật"
-                style={({ pressed }) => pressed && styles.pressed}
-              >
-                <AppText style={styles.termsLink} color="#A57BF5">
-                  Chính sách bảo mật
-                </AppText>
-              </Pressable>
-            </View>
-          </View>
-
-          {/* Already have an account -> Navigate to old login screen */}
-          <Pressable
-            onPress={() => navigation.navigate('Login')}
-            accessibilityRole="button"
-            accessibilityLabel="Đã có tài khoản? Đăng nhập"
-            style={({ pressed }) => [
-              styles.existingAccountButton,
-              pressed && styles.pressed,
-            ]}
-          >
-            <AppText style={styles.existingAccountText} color="rgba(255, 255, 255, 0.75)">
-              Đã có tài khoản?{' '}
-              <AppText style={styles.existingAccountLink} color="#B488FC">
-                Đăng nhập
-              </AppText>
-            </AppText>
-          </Pressable>
-        </View>
-
-        {/* App Version at Bottom */}
-        <View style={[styles.versionContainer, { paddingBottom: Math.max(insets.bottom + 8, 18) }]}>
-          <AppText style={styles.versionText} color="rgba(255, 255, 255, 0.42)">
-            Phiên bản: 1.6.11 (394)
+      {/* Center Content Body */}
+      <View style={styles.content}>
+        {/* Title Section */}
+        <View style={styles.titleSection}>
+          <AppText style={styles.title} color={isDark ? '#FFFFFF' : theme.colors.textPrimary}>
+            Bắt đầu hành trình chăm sóc sức khoẻ{'\n'}của bạn với Kallo
+          </AppText>
+          <AppText style={styles.subtitle} color={isDark ? 'rgba(255, 255, 255, 0.72)' : theme.colors.textSecondary}>
+            Đăng nhập vào Kallo thông qua các{'\n'}phương thức dưới đây
           </AppText>
         </View>
-      </ImageBackground>
+
+        {/* Social Buttons Stack */}
+        <View style={styles.buttonsContainer}>
+          {/* Apple Sign In — iOS only */}
+          {isIOS && (
+            <Pressable
+              onPress={handleAppleLogin}
+              accessibilityRole="button"
+              accessibilityLabel="Tiếp tục với Apple"
+              style={({ pressed }) => [
+                styles.socialButton,
+                isDark
+                  ? styles.socialButtonDark
+                  : [
+                      styles.socialButtonLight,
+                      {
+                        backgroundColor: theme.colors.surfaceMid,
+                        borderColor: theme.colors.surfaceBorder,
+                      },
+                      theme.shadows.level1,
+                    ],
+                pressed && styles.buttonPressed,
+              ]}
+            >
+              <AppleIcon isDark={isDark} />
+              <AppText style={styles.socialButtonText} color={isDark ? '#FFFFFF' : theme.colors.textPrimary}>
+                Tiếp tục với Apple
+              </AppText>
+            </Pressable>
+          )}
+
+          {/* Google Sign In */}
+          <Pressable
+            onPress={handleGoogleLogin}
+            accessibilityRole="button"
+            accessibilityLabel="Tiếp tục với Google"
+            style={({ pressed }) => [
+              styles.socialButton,
+              isDark
+                ? styles.socialButtonDark
+                : [
+                    styles.socialButtonLight,
+                    {
+                      backgroundColor: theme.colors.surfaceMid,
+                      borderColor: theme.colors.surfaceBorder,
+                    },
+                    theme.shadows.level1,
+                  ],
+              pressed && styles.buttonPressed,
+            ]}
+          >
+            <GoogleIcon />
+            <AppText style={styles.socialButtonText} color={isDark ? '#FFFFFF' : theme.colors.textPrimary}>
+              Tiếp tục với Google
+            </AppText>
+          </Pressable>
+
+          {/* Email Sign In */}
+          <Pressable
+            onPress={handleEmailLogin}
+            accessibilityRole="button"
+            accessibilityLabel="Tiếp tục với Email"
+            style={({ pressed }) => [
+              styles.socialButton,
+              isDark
+                ? styles.socialButtonDark
+                : [
+                    styles.socialButtonLight,
+                    {
+                      backgroundColor: theme.colors.surfaceMid,
+                      borderColor: theme.colors.surfaceBorder,
+                    },
+                    theme.shadows.level1,
+                  ],
+              pressed && styles.buttonPressed,
+            ]}
+          >
+            <EmailIcon color={isDark ? '#FFFFFF' : theme.colors.textPrimary} />
+            <AppText style={styles.socialButtonText} color={isDark ? '#FFFFFF' : theme.colors.textPrimary}>
+              Tiếp tục với Email
+            </AppText>
+          </Pressable>
+        </View>
+
+        {/* Terms & Privacy */}
+        <View style={styles.termsContainer}>
+          <AppText style={styles.termsText} color={isDark ? 'rgba(255, 255, 255, 0.65)' : theme.colors.textSecondary}>
+            Bằng việc tiếp tục, bạn đã đồng ý với
+          </AppText>
+          <View style={styles.termsLinks}>
+            <Pressable
+              onPress={() => {/* Open Terms */}}
+              accessibilityRole="link"
+              accessibilityLabel="Điều khoản sử dụng"
+              style={({ pressed }) => pressed && styles.pressed}
+            >
+              <AppText style={styles.termsLink} color={isDark ? '#B488FC' : theme.colors.brandPrimary}>
+                Điều khoản sử dụng
+              </AppText>
+            </Pressable>
+            <AppText style={styles.termsText} color={isDark ? 'rgba(255, 255, 255, 0.65)' : theme.colors.textSecondary}>
+              {' '}và{' '}
+            </AppText>
+            <Pressable
+              onPress={() => {/* Open Privacy Policy */}}
+              accessibilityRole="link"
+              accessibilityLabel="Chính sách bảo mật"
+              style={({ pressed }) => pressed && styles.pressed}
+            >
+              <AppText style={styles.termsLink} color={isDark ? '#B488FC' : theme.colors.brandPrimary}>
+                Chính sách bảo mật
+              </AppText>
+            </Pressable>
+          </View>
+        </View>
+
+        {/* Don't have an account -> Navigate to Register screen */}
+        <Pressable
+          onPress={() => navigation.navigate('Register')}
+          accessibilityRole="button"
+          accessibilityLabel="Chưa có tài khoản? Đăng ký ngay"
+          style={({ pressed }) => [
+            styles.existingAccountButton,
+            pressed && styles.pressed,
+          ]}
+        >
+          <AppText style={styles.existingAccountText} color={isDark ? 'rgba(255, 255, 255, 0.75)' : theme.colors.textSecondary}>
+            Chưa có tài khoản?{' '}
+            <AppText style={styles.existingAccountLink} color={isDark ? '#B488FC' : theme.colors.brandPrimary}>
+              Đăng ký ngay
+            </AppText>
+          </AppText>
+        </Pressable>
+      </View>
+
+      {/* App Version at Bottom */}
+      <View style={[styles.versionContainer, { paddingBottom: Math.max(insets.bottom + 8, 18) }]}>
+        <AppText style={styles.versionText} color={isDark ? 'rgba(255, 255, 255, 0.42)' : theme.colors.textDisabled}>
+          Phiên bản: 1.6.11 (394)
+        </AppText>
+      </View>
+    </>
+  );
+
+  return (
+    <View style={[styles.root, { backgroundColor: isDark ? '#13101F' : '#EDE9FA' }]}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      {isDark ? (
+        <ImageBackground
+          source={images.loginBackground}
+          style={styles.background}
+          resizeMode="cover"
+        >
+          {renderContent()}
+        </ImageBackground>
+      ) : (
+        <View style={styles.background}>
+          <AuthLightBackground />
+          {renderContent()}
+        </View>
+      )}
     </View>
   );
 }
@@ -269,7 +327,6 @@ export function SocialLoginScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#13101F',
   },
   background: {
     flex: 1,
@@ -277,11 +334,20 @@ const styles = StyleSheet.create({
     height: '100%',
   },
 
-  // Close button (clean minimalist cross matching design)
+  // Header with Theme Toggle & Close button
   header: {
-    alignItems: 'flex-end',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 22,
     zIndex: 10,
+  },
+  headerIconButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   closeButton: {
     padding: 6,
@@ -323,12 +389,17 @@ const styles = StyleSheet.create({
   socialButton: {
     height: 54,
     borderRadius: 27,
-    backgroundColor: '#272338',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 20,
     gap: 12,
+  },
+  socialButtonDark: {
+    backgroundColor: '#272338',
+  },
+  socialButtonLight: {
+    borderWidth: 1,
   },
   buttonPressed: {
     opacity: 0.82,

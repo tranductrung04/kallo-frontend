@@ -15,12 +15,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { images } from '@/assets/images';
 import { AppText } from '@/components/common';
+import { MoonIcon, SunIcon } from '@/components/icons';
+import { AuthLightBackground } from './AuthLightBackground';
 import {
   ChampionMascotRNPro,
   KalloWelcome2Mascot,
   KalloWelcome3Mascot,
 } from '@/features/onboarding/components';
 import type { AuthStackParamList } from '@/navigation/types';
+import { useTheme } from '@/theme';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Welcome'>;
 
@@ -54,6 +57,8 @@ export const ONBOARDING_SLIDES: OnboardingSlideItem[] = [
 
 export function OnboardingCarouselScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const isDark = theme.scheme === 'dark';
   const { width, height } = useWindowDimensions();
   const [activeSlide, setActiveSlide] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
@@ -120,89 +125,125 @@ export function OnboardingCarouselScreen({ navigation }: Props) {
     }
   };
 
-  return (
-    <View style={styles.root}>
-      <StatusBar style="light" />
-      <ImageBackground
-        source={images.onboardingV2Bg}
-        style={styles.background}
-        resizeMode="cover"
-      >
-        {/* Top Header with Kallo Logo */}
-        <View style={[styles.header, { paddingTop: Math.max(insets.top + 8, 20) }]}>
-          <Image
-            source={images.logoWhite}
-            style={styles.logo}
-            resizeMode="contain"
-            accessibilityLabel="Kallo"
-          />
-        </View>
+  const isLastSlide = activeSlide === ONBOARDING_SLIDES.length - 1;
+  const buttonLabel = isLastSlide ? 'Bắt đầu ngay' : 'Tiếp tục';
 
-        {/* Horizontal Carousel */}
-        <ScrollView
-          ref={scrollViewRef}
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          bounces={false}
-          scrollEventThrottle={16}
-          onMomentumScrollEnd={handleMomentumScrollEnd}
-          style={styles.carousel}
-          contentContainerStyle={styles.carouselContent}
+  const renderContent = () => (
+    <>
+      {/* Top Header with Kallo Logo & Theme Toggle */}
+      <View style={[styles.header, { paddingTop: Math.max(insets.top + 8, 20) }]}>
+        <View style={styles.headerSpacer} />
+        <Image
+          source={isDark ? images.logoWhite : images.kalloLogo}
+          style={styles.logo}
+          resizeMode="contain"
+          accessibilityLabel="Kallo"
+        />
+        <Pressable
+          onPress={theme.toggleScheme}
+          hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
+          accessibilityRole="button"
+          accessibilityLabel={isDark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}
+          style={({ pressed }) => [styles.themeButton, pressed && styles.pressed]}
         >
-          {ONBOARDING_SLIDES.map((slide, index) => {
-            return (
-              <View key={slide.id} style={[styles.slide, { width }]}>
-                {/* Illustration Area */}
-                <View style={[styles.illustrationContainer, { height: illustrationHeight }]}>
-                  {renderIllustration(index)}
-                </View>
+          {isDark ? <SunIcon size={20} color="#FACC15" /> : <MoonIcon size={20} color={theme.colors.brandPrimary} />}
+        </Pressable>
+      </View>
 
-                {/* Text Area */}
-                <View style={styles.textContainer}>
-                  <AppText style={styles.title}>{slide.title}</AppText>
-                  <AppText style={styles.subtitle}>{slide.subtitle}</AppText>
-                </View>
+      {/* Horizontal Carousel */}
+      <ScrollView
+        ref={scrollViewRef}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        bounces={false}
+        scrollEventThrottle={16}
+        onMomentumScrollEnd={handleMomentumScrollEnd}
+        style={styles.carousel}
+        contentContainerStyle={styles.carouselContent}
+      >
+        {ONBOARDING_SLIDES.map((slide, index) => {
+          return (
+            <View key={slide.id} style={[styles.slide, { width }]}>
+              {/* Illustration Area */}
+              <View style={[styles.illustrationContainer, { height: illustrationHeight }]}>
+                {renderIllustration(index)}
               </View>
-            );
-          })}
-        </ScrollView>
 
-        {/* Pagination Dots */}
-        <View style={styles.dotsContainer}>
-          {ONBOARDING_SLIDES.map((slide, index) => {
-            const isActive = index === activeSlide;
-            return (
-              <Pressable
-                key={slide.id}
-                onPress={() => handleDotPress(index)}
-                hitSlop={{ top: 12, bottom: 12, left: 10, right: 10 }}
-                accessibilityRole="button"
-                accessibilityLabel={`Chuyển đến trang ${index + 1}`}
-                style={[
-                  styles.dot,
-                  isActive ? styles.dotActive : styles.dotInactive,
-                ]}
-              />
-            );
-          })}
-        </View>
+              {/* Text Area */}
+              <View style={styles.textContainer}>
+                <AppText style={[styles.title, { color: isDark ? '#FFFFFF' : theme.colors.textPrimary }]}>
+                  {slide.title}
+                </AppText>
+                <AppText style={[styles.subtitle, { color: isDark ? 'rgba(255, 255, 255, 0.72)' : theme.colors.textSecondary }]}>
+                  {slide.subtitle}
+                </AppText>
+              </View>
+            </View>
+          );
+        })}
+      </ScrollView>
 
-        {/* Primary CTA Button */}
-        <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom + 12, 28) }]}>
-          <Pressable
-            onPress={handleNext}
-            accessibilityRole="button"
-            accessibilityLabel="Bắt đầu ngay"
-            style={({ pressed }) => [
-              styles.primaryButton,
-              pressed && styles.buttonPressed,
-            ]}
-          >
-            <AppText style={styles.buttonText}>Bắt đầu ngay</AppText>
-          </Pressable>
+      {/* Pagination Dots */}
+      <View style={styles.dotsContainer}>
+        {ONBOARDING_SLIDES.map((slide, index) => {
+          const isActive = index === activeSlide;
+          return (
+            <Pressable
+              key={slide.id}
+              onPress={() => handleDotPress(index)}
+              hitSlop={{ top: 12, bottom: 12, left: 10, right: 10 }}
+              accessibilityRole="button"
+              accessibilityLabel={`Chuyển đến trang ${index + 1}`}
+              style={[
+                styles.dot,
+                isActive
+                  ? { backgroundColor: isDark ? '#FFFFFF' : theme.colors.brandPrimary }
+                  : { backgroundColor: isDark ? 'rgba(255, 255, 255, 0.26)' : theme.colors.surfaceBorder },
+              ]}
+            />
+          );
+        })}
+      </View>
+
+      {/* Primary CTA Button */}
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom + 12, 28) }]}>
+        <Pressable
+          onPress={handleNext}
+          accessibilityRole="button"
+          accessibilityLabel={buttonLabel}
+          style={({ pressed }) => [
+            styles.primaryButton,
+            {
+              backgroundColor: theme.colors.brandAction,
+              shadowColor: theme.colors.brandPrimary,
+            },
+            pressed && styles.buttonPressed,
+          ]}
+        >
+          <AppText style={styles.buttonText}>{buttonLabel}</AppText>
+        </Pressable>
+      </View>
+    </>
+  );
+
+  return (
+    <View style={[styles.root, { backgroundColor: isDark ? '#0D0B14' : theme.colors.canvasBase }]}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      {isDark ? (
+        <ImageBackground
+          source={images.onboardingV2Bg}
+          style={styles.background}
+          resizeMode="cover"
+        >
+          {renderContent()}
+        </ImageBackground>
+      ) : (
+        <View style={styles.background}>
+          <AuthLightBackground />
+          {renderContent()}
         </View>
-      </ImageBackground>
+      )}
     </View>
   );
 }
@@ -210,7 +251,6 @@ export function OnboardingCarouselScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#0D0B14',
   },
   background: {
     flex: 1,
@@ -218,10 +258,25 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   header: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingBottom: 8,
+  },
+  headerSpacer: {
+    width: 36,
+    height: 36,
+  },
+  themeButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pressed: {
+    opacity: 0.65,
   },
   logo: {
     width: 108,
