@@ -12,7 +12,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { images } from '@/assets/images';
 import { AppText } from '@/components/common';
-import { CloseXIcon } from '@/components/icons';
+import { ChevronLeftIcon } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
 
@@ -34,17 +34,21 @@ export function StreakRulesContent({ onClose }: StreakRulesContentProps) {
         backgroundColor={c.canvasBase}
       />
 
-      {/* Top Bar with Close Button (✕) */}
-      <View style={styles.topBar}>
+      {/* Top Bar with Back Button */}
+      <View style={[styles.topBar, { borderBottomColor: c.surfaceBorder }]}>
         <TouchableOpacity
-          style={styles.closeBtn}
+          style={styles.backButton}
           onPress={onClose}
           accessibilityRole="button"
-          accessibilityLabel="Đóng quy tắc chuỗi"
+          accessibilityLabel="Quay lại"
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
         >
-          <CloseXIcon size={24} color={c.textPrimary} strokeWidth={2.4} />
+          <ChevronLeftIcon size={24} color={c.textPrimary} />
         </TouchableOpacity>
+        <AppText variant="headlineSm" color={c.textPrimary} style={styles.topBarTitle}>
+          Quy tắc chuỗi ngày
+        </AppText>
+        <View style={styles.backButtonPlaceholder} />
       </View>
 
       <ScrollView
@@ -180,16 +184,24 @@ const styles = StyleSheet.create({
   },
   topBar: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
   },
-  closeBtn: {
+  backButton: {
     width: 40,
     height: 40,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  topBarTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  backButtonPlaceholder: {
+    width: 40,
   },
   scrollView: {
     flex: 1,

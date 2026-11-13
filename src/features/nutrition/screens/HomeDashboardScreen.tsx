@@ -58,6 +58,8 @@ import {
   PlusIcon,
   SaltIcon,
   SugarIcon,
+  TrophyIcon,
+  UsersIcon,
 } from '@/components/icons';
 import { ActivityGrid, MacroColumn, WeightChart } from './HomeDashboard/HomeWidgets';
 
@@ -74,7 +76,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
 
   const { state, getSummary, addWater, setSelectedDate } = useNutrition();
   const { getTotalCaloriesBurnedForDate, getTotalStepsForDate, state: activityState } = useActivity();
-  const { streak } = useGamification();
+  const { streak, badges, challenges, friends, incomingRequests } = useGamification();
   const [calendarModalVisible, setCalendarModalVisible] = useState(false);
   const [calorieGoalModalVisible, setCalorieGoalModalVisible] = useState(false);
   const [calorieIntakeModalVisible, setCalorieIntakeModalVisible] = useState(false);
@@ -847,6 +849,51 @@ export function HomeDashboardScreen({ navigation }: Props) {
               <WeightChart width={weightChartWidth} weight={currentWeight} />
             </View>
           </AppCard>
+
+          {/* ── 10. Thử thách & Cộng đồng (Gamification Cards) ─────────── */}
+          <View style={styles.sectionBlock}>
+            <View style={styles.sectionHeaderRow}>
+              <AppText variant="headlineSm">Thử thách & Cộng đồng</AppText>
+            </View>
+
+            <View style={styles.communityGrid}>
+              <AppCard
+                style={styles.communityCard}
+                onPress={() => root?.navigate('BadgesChallenges')}
+              >
+                <View style={[styles.communityIconBox, { backgroundColor: colors.brandSoftTint }]}>
+                  <TrophyIcon size={22} color={colors.vipStreak} />
+                </View>
+                <View style={styles.communityTextWrap}>
+                  <AppText variant="labelLg" color={colors.textPrimary}>Huy hiệu & Thử thách</AppText>
+                  <AppText variant="caption" color={colors.textSecondary}>
+                    {badges.filter((b) => b.isUnlocked).length}/{badges.length} huy hiệu • {challenges.filter((c) => c.isJoined).length} đang tham gia
+                  </AppText>
+                </View>
+                <AppText variant="caption" color={colors.brandPrimary} style={styles.bold}>
+                  Xem →
+                </AppText>
+              </AppCard>
+
+              <AppCard
+                style={styles.communityCard}
+                onPress={() => root?.navigate('FriendsLeaderboard')}
+              >
+                <View style={[styles.communityIconBox, { backgroundColor: colors.brandSoftTint }]}>
+                  <UsersIcon size={22} color={colors.brandPrimary} />
+                </View>
+                <View style={styles.communityTextWrap}>
+                  <AppText variant="labelLg" color={colors.textPrimary}>Bảng xếp hạng Bạn bè</AppText>
+                  <AppText variant="caption" color={colors.textSecondary}>
+                    {friends.length} bạn bè {incomingRequests.length > 0 ? `• 📬 ${incomingRequests.length} lời mời` : ''}
+                  </AppText>
+                </View>
+                <AppText variant="caption" color={colors.brandPrimary} style={styles.bold}>
+                  Xem →
+                </AppText>
+              </AppCard>
+            </View>
+          </View>
         </View>
       </ScrollView>
 
