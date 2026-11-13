@@ -71,7 +71,12 @@ export type RootStackParamList = {
   StreakDetail: undefined;
   StreakRules: undefined;
   BadgesChallenges: undefined;
+  ChallengeDetail: { challengeId: string };
   FriendsLeaderboard: undefined;
+  FriendSearch: undefined;
+  FriendRequests: undefined;
+  FriendProfile: { friendUserId: string };
+  GameSettings: undefined;
   NotificationCenter: undefined;
   ReminderSettings: undefined;
   ReportOverview: { date?: string; metric?: string } | undefined;
