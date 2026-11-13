@@ -350,3 +350,13 @@ The interface embraces organic, smooth curvatures aligned with standard iOS squi
 
 ### Splash & Brand Mark
 - Splash background is `brand-action` (Dark `#8B57E8`; Light uses the same Dark value so the launch screen is identical in both themes) with a white Kallo wordmark centered. The wordmark, mascot, and illustrations must be original Kallo assets, not assets taken from any reference app.
+
+### Iconography
+- **Icon Library:** [`lucide-react-native`](https://lucide.dev) thông qua adapter tập trung tại `@/components/icons`.
+- **Quy tắc sử dụng:**
+  - Import mọi icon từ `@/components/icons` (không tự vẽ SVG inline cho các icon glyph chuẩn).
+  - Nét vẽ mặc định: `strokeWidth = 2` (`ICON_STROKE_DEFAULT`). Các nút nhấn hành động nổi bật (ví dụ nút `+` chính giữa tab bar) dùng `strokeWidth = 2.4 - 2.6`.
+  - Kích thước chuẩn: `14px` / `16px` (inline / chip / badge), `20px` (nút bấm nhỏ / chevron / check), `24px` (tab bar / navigation / form action), `26px` / `28px` (quick dock tile).
+  - Màu sắc: Luôn truyền màu qua token ngữ nghĩa (`brandPrimary`, `textPrimary`, `textSecondary`, `macroProtein`, ...).
+  - Trạng thái cảnh báo: Luôn đi kèm icon (`TriangleAlertIcon`, `CircleAlertIcon`, `CircleCheckIcon`).
+  - Icon thương hiệu và minh hoạ đặc thù (KalloShield, Mascot, EmptyFolderIllustration, ...) được lưu giữ riêng tại `src/components/icons/custom/` và `src/components/icons/illustrations/`.
