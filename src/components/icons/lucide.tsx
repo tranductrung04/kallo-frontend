@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   AlertTriangle,
+  BookOpen,
   Calendar,
   Check,
   ChevronDown,
@@ -10,15 +11,34 @@ import {
   CircleAlert,
   CircleCheck,
   CirclePlus,
+  ClipboardCopy,
+  ClipboardList,
   Flag,
+  Flame,
+  House,
+  ImagePlus,
   Info,
+  Lock,
+  Mail,
   Menu,
+  Mic,
   Moon,
   Plus,
+  ScanBarcode,
+  ScanSearch,
   Search,
+  Settings,
+  Share2,
+  ShieldCheck,
+  Sparkles,
   Sun,
   TriangleAlert,
+  Trophy,
+  User,
+  Users,
+  Utensils,
   X,
+  Zap,
   type LucideIcon,
 } from 'lucide-react-native';
 import { ICON_STROKE_DEFAULT, type CirclePlusIconProps, type IconProps } from './types';
@@ -40,6 +60,8 @@ export function fromLucide<P extends Partial<IconProps> = IconProps>(
     color = options?.defaultColor ?? '#FFFFFF',
     strokeWidth,
     focused,
+    coreColor: _coreColor,
+    cutoutColor: _cutoutColor,
     ...rest
   }: P) => {
     const effectiveStrokeWidth =
@@ -105,3 +127,59 @@ export const MoonIcon = fromLucide(Moon, { defaultSize: 20, defaultColor: '#9E64
 
 export const CalendarIcon = fromLucide(Calendar, { defaultSize: 18 });
 export const FlagIcon = fromLucide(Flag, { defaultSize: 13 });
+
+// ─── Wave 2: Tab Bar, Quick Actions, Scanner & Account ───────────────────────
+
+export const HomeTabIcon = fromLucide(House, {
+  defaultSize: 24,
+  fillOnFocused: true,
+  activeStrokeWidth: 2.4,
+});
+export const HomeIcon = HomeTabIcon;
+
+export const DiaryTabIcon = fromLucide(Utensils, {
+  defaultSize: 24,
+  activeStrokeWidth: 2.4,
+});
+export const DiaryIcon = DiaryTabIcon;
+
+export const MealPlanTabIcon = fromLucide(ClipboardList, {
+  defaultSize: 24,
+  activeStrokeWidth: 2.4,
+});
+export const MealPlanIcon = MealPlanTabIcon;
+
+export const ProfileTabIcon = fromLucide(User, {
+  defaultSize: 24,
+  fillOnFocused: true,
+  activeStrokeWidth: 2.4,
+});
+export const ProfileIcon = ProfileTabIcon;
+
+export const FlameIcon = fromLucide(Flame, { defaultSize: 16, defaultColor: '#F44E42' });
+
+export const QuickBarcodeIcon = fromLucide(ScanBarcode, { defaultSize: 26 });
+export const ViewfinderBarcodeIcon = fromLucide(ScanBarcode, { defaultSize: 26 });
+export const BarcodeSquareIcon = fromLucide(ScanBarcode, { defaultSize: 24 });
+
+export const QuickSparklesIcon = fromLucide(Sparkles, { defaultSize: 26, defaultColor: '#9E64F7' });
+export const SparklesIcon = fromLucide(Sparkles, { defaultSize: 18, defaultColor: '#9E64F7' });
+
+export const QuickVoiceIcon = fromLucide(Mic, { defaultSize: 26 });
+export const ScannerSparkleFlashIcon = fromLucide(Zap, { defaultSize: 22 });
+export const GalleryAddIcon = fromLucide(ImagePlus, { defaultSize: 22 });
+export const AppleScanIcon = fromLucide(ScanSearch, { defaultSize: 22 });
+
+export const GearSettingsIcon = fromLucide(Settings, { defaultSize: 22 });
+export const MailInboxIcon = fromLucide(Mail, { defaultSize: 22 });
+export const LockClosedIcon = fromLucide(Lock, { defaultSize: 22 });
+export const ShieldSecurityIcon = fromLucide(ShieldCheck, { defaultSize: 22 });
+export const ClipboardCopyIcon = fromLucide(ClipboardCopy, { defaultSize: 22 });
+export const ShareNodesIcon = fromLucide(Share2, { defaultSize: 22 });
+export const UsersIcon = fromLucide(Users, { defaultSize: 22 });
+export const UserSingleIcon = fromLucide(User, { defaultSize: 22 });
+export const TrophyIcon = fromLucide(Trophy, { defaultSize: 22, defaultColor: '#F59E0B' });
+
+export const BookIcon = fromLucide(BookOpen, { defaultSize: 16, defaultColor: '#A59EBD' });
+export const BookOpenIcon = BookIcon;
+export const KnowledgeBookIcon = BookIcon;
