@@ -7,7 +7,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Path } from 'react-native-svg';
+import { MoveHorizontal, TrendingDown, TrendingUp } from 'lucide-react-native';
 import { images } from '@/assets/images';
 import { AppText } from '@/components/common';
 import { ChevronLeftIcon } from '@/components/icons';
@@ -35,77 +35,19 @@ const GOAL_ITEMS: GoalOption[] = [
     key: 'lose',
     title: 'Giảm cân',
     subtitle: 'Tập trung vào giảm mỡ',
-    renderIcon: (color) => (
-      <Svg width={26} height={26} viewBox="0 0 24 24" fill="none">
-        <Path
-          d="M23 18l-9.5-9.5-5 5L1 6"
-          stroke={color}
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <Path
-          d="M17 18h6v-6"
-          stroke={color}
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </Svg>
-    ),
+    renderIcon: (color) => <TrendingDown size={26} color={color} strokeWidth={2.5} />,
   },
   {
     key: 'gain',
     title: 'Tăng cân',
     subtitle: 'Xây dựng cơ bắp, khỏe mạnh từ bên trong',
-    renderIcon: (color) => (
-      <Svg width={26} height={26} viewBox="0 0 24 24" fill="none">
-        <Path
-          d="M23 6l-9.5 9.5-5-5L1 18"
-          stroke={color}
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <Path
-          d="M17 6h6v6"
-          stroke={color}
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </Svg>
-    ),
+    renderIcon: (color) => <TrendingUp size={26} color={color} strokeWidth={2.5} />,
   },
   {
     key: 'maintain',
     title: 'Duy trì cân nặng',
     subtitle: 'Vừa đốt mỡ, vừa tăng cơ để có body săn chắc.',
-    renderIcon: (color) => (
-      <Svg width={26} height={26} viewBox="0 0 24 24" fill="none">
-        <Path
-          d="M5 12h14"
-          stroke={color}
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <Path
-          d="M8 8l-4 4 4 4"
-          stroke={color}
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <Path
-          d="M16 8l4 4-4 4"
-          stroke={color}
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </Svg>
-    ),
+    renderIcon: (color) => <MoveHorizontal size={26} color={color} strokeWidth={2.5} />,
   },
 ];
 

@@ -18,6 +18,7 @@ import {
   Droplet,
   Flag,
   Flame,
+  Footprints,
   GlassWater,
   House,
   ImagePlus,
@@ -207,3 +208,4 @@ export const BodyStickFigureIcon = fromLucide(PersonStanding, { defaultSize: 24 
 // ─── Wave 4: Physical Activities ─────────────────────────────────────────────
 
 export const BicycleIcon = fromLucide(Bike, { defaultSize: 24 });
+export const FootprintsIcon = fromLucide(Footprints, { defaultSize: 20 });
