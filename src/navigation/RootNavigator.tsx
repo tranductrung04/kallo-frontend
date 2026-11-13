@@ -19,7 +19,18 @@ import { BarcodeScannerScreen } from '@/features/nutrition/screens/BarcodeScanne
 import { ActivityTrackerScreen, HealthSyncScreen, StepDetailScreen, WorkoutStatisticsScreen, WeightStatisticsScreen, RecordWeightScreen, BodyMetricScreen, RunningWorkoutScreen, CyclingWorkoutScreen, BadmintonWorkoutScreen, PickleballWorkoutScreen, YogaWorkoutScreen, AddActivityScreen, ActivityWorkoutScreen } from '@/features/activity';
 import { MealPlanOverviewScreen, MealPlanWizardScreen, MealPlanDetailScreen } from '@/features/meal-plan';
 import { NutritionChatScreen, VoiceLogModal } from '@/features/assistant';
-import { StreakDetailModal, StreakRulesScreen, BadgesChallengesScreen, FriendsLeaderboardScreen } from '@/features/gamification';
+import {
+  StreakDetailModal,
+  StreakRulesScreen,
+  BadgesChallengesScreen,
+  FriendsLeaderboardScreen,
+  ChallengeDetailScreen,
+  FriendSearchScreen,
+  FriendRequestsScreen,
+  FriendProfileScreen,
+  GameSettingsScreen,
+  GameEventToast,
+} from '@/features/gamification';
 import { NotificationCenterScreen, ReminderSettingsScreen } from '@/features/system';
 import { ReportOverviewScreen } from '@/features/report/screens/ReportOverviewScreen';
 import { useTheme } from '@/theme';
@@ -34,7 +45,9 @@ export function RootNavigator() {
   if (status === 'loading') return <SplashScreen />;
   const baseTheme = theme.scheme === 'dark' ? DarkTheme : DefaultTheme;
   const navigationTheme = { ...baseTheme, colors: { ...baseTheme.colors, background: theme.colors.background, card: theme.colors.surface, text: theme.colors.text, border: theme.colors.border, primary: theme.colors.primary } };
-  return <NavigationContainer theme={navigationTheme}><Stack.Navigator screenOptions={{ headerStyle: { backgroundColor: theme.colors.surface }, headerTintColor: theme.colors.text, contentStyle: { backgroundColor: theme.colors.background } }}>
+  return <NavigationContainer theme={navigationTheme}>
+    <GameEventToast />
+    <Stack.Navigator screenOptions={{ headerStyle: { backgroundColor: theme.colors.surface }, headerTintColor: theme.colors.text, contentStyle: { backgroundColor: theme.colors.background } }}>
     {status === 'signedOut' ? <Stack.Screen name="Auth" component={AuthNavigator} options={{ headerShown: false }} /> : status === 'needsProfile' ? <Stack.Screen name="Onboarding" component={OnboardingNavigator} options={{ headerShown: false }} /> : <>
       <Stack.Screen name="MainTabs" component={MainTabNavigator} options={{ headerShown: false }} />
       <Stack.Screen name="ComponentShowcase" component={ComponentShowcaseScreen} options={{ title: 'Bộ UI Kit' }} />
@@ -67,8 +80,13 @@ export function RootNavigator() {
       <Stack.Screen name="VoiceLogModal" component={VoiceLogModal} options={{ headerShown: false, presentation: 'modal' }} />
       <Stack.Screen name="StreakDetail" component={StreakDetailModal} options={{ headerShown: false, presentation: 'fullScreenModal' }} />
       <Stack.Screen name="StreakRules" component={StreakRulesScreen} options={{ headerShown: false, presentation: 'fullScreenModal' }} />
-      <Stack.Screen name="BadgesChallenges" component={BadgesChallengesScreen} options={{ title: 'Huy hiệu & Thử thách' }} />
-      <Stack.Screen name="FriendsLeaderboard" component={FriendsLeaderboardScreen} options={{ title: 'Bảng xếp hạng bạn bè' }} />
+      <Stack.Screen name="BadgesChallenges" component={BadgesChallengesScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="ChallengeDetail" component={ChallengeDetailScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="FriendsLeaderboard" component={FriendsLeaderboardScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="FriendSearch" component={FriendSearchScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="FriendRequests" component={FriendRequestsScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="FriendProfile" component={FriendProfileScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="GameSettings" component={GameSettingsScreen} options={{ headerShown: false }} />
       <Stack.Screen name="NotificationCenter" component={NotificationCenterScreen} options={{ title: 'Trung tâm thông báo' }} />
       <Stack.Screen name="ReminderSettings" component={ReminderSettingsScreen} options={{ title: 'Cài đặt nhắc nhở' }} />
       <Stack.Screen name="ReportOverview" component={ReportOverviewScreen} options={{ headerShown: false }} />

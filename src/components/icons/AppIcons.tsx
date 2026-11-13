@@ -1602,3 +1602,149 @@ export function BarcodeSquareIcon({ size = 26, color = '#FFFFFF' }: IconProps) {
     </Svg>
   );
 }
+
+// ─── Gamification & Community Vector Icons ───────────────────────────────────
+
+export function TrophyIcon({ size = 22, color = '#F59E0B' }: Partial<IconProps>) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M8 21H16M12 17V21M6 4H18V9C18 12.3137 15.3137 15 12 15C8.68629 15 6 12.3137 6 9V4ZM6 6H3C2.44772 6 2 6.44772 2 7V8C2 9.65685 3.34315 11 5 11H6.17071M18 6H21C21.5523 6 22 6.44772 22 7V8C22 9.65685 20.6569 11 19 11H17.8293"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+export function UsersIcon({ size = 22, color = '#FFFFFF' }: Partial<IconProps>) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21M23 21V19C22.9986 18.1068 22.7093 17.2373 22.1742 16.5186C21.6391 15.7999 20.8872 15.2697 20.03 15.01M16 3.13C16.8604 3.3853 17.6139 3.91776 18.1499 4.63989C18.6859 5.36202 18.9749 6.23467 18.9749 7.13C18.9749 8.02533 18.6859 8.89798 18.1499 9.62011C17.6139 10.3422 16.8604 10.8747 16 11.13M9 11C11.2091 11 13 9.20914 13 7C13 4.79086 11.2091 3 9 3C6.79086 3 5 4.79086 5 7C5 9.20914 6.79086 11 9 11Z"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+export function UserSingleIcon({ size = 22, color = '#FFFFFF' }: Partial<IconProps>) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+export function GearSettingsIcon({ size = 22, color = '#FFFFFF' }: Partial<IconProps>) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M10.325 4.317C10.751 2.56 13.249 2.56 13.675 4.317C13.863 5.092 14.654 5.568 15.419 5.37C17.135 4.927 18.9 6.692 18.457 8.408C18.259 9.173 18.735 9.964 19.51 10.152C21.267 10.578 21.267 13.076 19.51 13.502C18.735 13.69 18.259 14.481 18.457 15.246C18.9 16.962 17.135 18.727 15.419 18.284C14.654 18.086 13.863 18.562 13.675 19.337C13.249 21.094 10.751 21.094 10.325 19.337C10.137 18.562 9.346 18.086 8.581 18.284C6.865 18.727 5.1 16.962 5.543 15.246C5.741 14.481 5.265 13.69 4.49 13.502C2.733 13.076 2.733 10.578 4.49 10.152C5.265 9.964 5.741 9.173 5.543 8.408C5.1 6.692 6.865 4.927 8.581 5.37C9.346 5.568 10.137 5.092 10.325 4.317Z"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Circle cx="12" cy="12" r="3" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+export function MailInboxIcon({ size = 22, color = '#FFFFFF' }: Partial<IconProps>) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M22 6L12 13L2 6"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+export function LockClosedIcon({ size = 22, color = '#FFFFFF' }: Partial<IconProps>) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M7 11V7C7 4.23858 9.23858 2 12 2C14.7614 2 17 4.23858 17 7V11" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+export function ShieldSecurityIcon({ size = 22, color = '#FFFFFF' }: Partial<IconProps>) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M12 22S20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M9 12L11 14L15 10"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+export function ClipboardCopyIcon({ size = 22, color = '#FFFFFF' }: Partial<IconProps>) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M5 15H4C2.89543 15 2 14.1046 2 13V4C2 2.89543 2.89543 2 4 2H13C14.1046 2 15 2.89543 15 4V5" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+export function ShareNodesIcon({ size = 22, color = '#FFFFFF' }: Partial<IconProps>) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Circle cx="18" cy="5" r="3" stroke={color} strokeWidth="2" />
+      <Circle cx="6" cy="12" r="3" stroke={color} strokeWidth="2" />
+      <Circle cx="18" cy="19" r="3" stroke={color} strokeWidth="2" />
+      <Line x1="8.59" y1="13.51" x2="15.42" y2="17.49" stroke={color} strokeWidth="2" strokeLinecap="round" />
+      <Line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke={color} strokeWidth="2" strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+export function LightningBoltIcon({ size = 22, color = '#F59E0B' }: Partial<IconProps>) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M13 2L3 14H12L11 22L21 10H12L13 2Z"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
