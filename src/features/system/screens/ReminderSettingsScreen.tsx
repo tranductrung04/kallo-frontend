@@ -4,11 +4,10 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
-  Switch,
   View,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AppCard, AppText } from '@/components/common';
+import { AppCard, AppSwitch, AppText } from '@/components/common';
 import {
   CutleryIcon,
   DropletIcon,
@@ -53,10 +52,10 @@ export function ReminderSettingsScreen({}: Props) {
                 Mỗi 2 giờ trong khung giờ {reminders.waterStartHour} - {reminders.waterEndHour}
               </AppText>
             </View>
-            <Switch
+            <AppSwitch
               value={reminders.waterReminderEnabled}
               onValueChange={(val) => handleToggle('waterReminderEnabled', val)}
-              trackColor={{ false: 'rgba(128,128,128,0.3)', true: theme.colors.brandPrimary }}
+              accessibilityLabel="Nhắc nhở uống nước"
             />
           </View>
         </AppCard>
@@ -77,10 +76,10 @@ export function ReminderSettingsScreen({}: Props) {
               <AppText variant="bodyMd">Bữa sáng</AppText>
               <AppText variant="caption" color={theme.colors.brandPrimary}>{reminders.breakfastTime}</AppText>
             </View>
-            <Switch
+            <AppSwitch
               value={reminders.breakfastReminderEnabled}
               onValueChange={(val) => handleToggle('breakfastReminderEnabled', val)}
-              trackColor={{ false: 'rgba(128,128,128,0.3)', true: theme.colors.brandPrimary }}
+              accessibilityLabel="Nhắc nhở bữa sáng"
             />
           </View>
 
@@ -90,10 +89,10 @@ export function ReminderSettingsScreen({}: Props) {
               <AppText variant="bodyMd">Bữa trưa</AppText>
               <AppText variant="caption" color={theme.colors.brandPrimary}>{reminders.lunchTime}</AppText>
             </View>
-            <Switch
+            <AppSwitch
               value={reminders.lunchReminderEnabled}
               onValueChange={(val) => handleToggle('lunchReminderEnabled', val)}
-              trackColor={{ false: 'rgba(128,128,128,0.3)', true: theme.colors.brandPrimary }}
+              accessibilityLabel="Nhắc nhở bữa trưa"
             />
           </View>
 
@@ -103,10 +102,10 @@ export function ReminderSettingsScreen({}: Props) {
               <AppText variant="bodyMd">Bữa tối</AppText>
               <AppText variant="caption" color={theme.colors.brandPrimary}>{reminders.dinnerTime}</AppText>
             </View>
-            <Switch
+            <AppSwitch
               value={reminders.dinnerReminderEnabled}
               onValueChange={(val) => handleToggle('dinnerReminderEnabled', val)}
-              trackColor={{ false: 'rgba(128,128,128,0.3)', true: theme.colors.brandPrimary }}
+              accessibilityLabel="Nhắc nhở bữa tối"
             />
           </View>
         </AppCard>
@@ -123,10 +122,11 @@ export function ReminderSettingsScreen({}: Props) {
                 Gửi cảnh báo tức thì khi tổng năng lượng nạp trong ngày vượt 100% Calo mục tiêu (FR-SYS-02).
               </AppText>
             </View>
-            <Switch
+            <AppSwitch
               value={reminders.overCalorieWarningEnabled}
               onValueChange={(val) => handleToggle('overCalorieWarningEnabled', val)}
-              trackColor={{ false: 'rgba(128,128,128,0.3)', true: theme.colors.calorieIn }}
+              activeTrackColor={theme.colors.calorieIn}
+              accessibilityLabel="Cảnh báo vượt Calo"
             />
           </View>
         </AppCard>
@@ -143,10 +143,10 @@ export function ReminderSettingsScreen({}: Props) {
                 Nhắc vào lúc 21:00 nếu hôm nay bạn chưa hoàn thành mục tiêu ngày
               </AppText>
             </View>
-            <Switch
+            <AppSwitch
               value={reminders.streakReminderEnabled}
               onValueChange={(val) => handleToggle('streakReminderEnabled', val)}
-              trackColor={{ false: 'rgba(128,128,128,0.3)', true: theme.colors.brandPrimary }}
+              accessibilityLabel="Nhắc nhở duy trì Streak"
             />
           </View>
         </AppCard>
@@ -163,10 +163,10 @@ export function ReminderSettingsScreen({}: Props) {
                 Tắt toàn bộ âm thanh và rung thông báo trong khung giờ {reminders.dndStartTime} - {reminders.dndEndTime}
               </AppText>
             </View>
-            <Switch
+            <AppSwitch
               value={reminders.dndEnabled}
               onValueChange={(val) => handleToggle('dndEnabled', val)}
-              trackColor={{ false: 'rgba(128,128,128,0.3)', true: theme.colors.brandPrimary }}
+              accessibilityLabel="Chế độ Không làm phiền"
             />
           </View>
         </AppCard>

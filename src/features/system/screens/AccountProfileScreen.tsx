@@ -13,7 +13,7 @@ import Svg, { Circle } from 'react-native-svg';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { images } from '@/assets/images';
-import { AppButton, AppCard, AppText } from '@/components/common';
+import { AppButton, AppCard, AppSwitch, AppText } from '@/components/common';
 import {
   BellIcon,
   CalendarIcon,
@@ -676,10 +676,7 @@ export function AccountProfileScreen({ navigation }: Props) {
 
             <View style={styles.modalList}>
               {/* Theme Toggle */}
-              <TouchableOpacity
-                style={styles.settingsRowItem}
-                onPress={theme.toggleScheme}
-              >
+              <View style={styles.settingsRowItem}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                   {theme.scheme === 'dark' ? (
                     <MoonIcon size={18} color={theme.colors.brandPrimary} />
@@ -690,10 +687,12 @@ export function AccountProfileScreen({ navigation }: Props) {
                     {theme.scheme === 'dark' ? 'Chế độ ban đêm (Tối)' : 'Chế độ ban ngày (Sáng)'}
                   </AppText>
                 </View>
-                <AppText variant="caption" color={theme.colors.brandPrimary}>
-                  Đổi
-                </AppText>
-              </TouchableOpacity>
+                <AppSwitch
+                  value={theme.scheme === 'dark'}
+                  onValueChange={theme.toggleScheme}
+                  accessibilityLabel="Chế độ ban đêm"
+                />
+              </View>
 
               {/* Reminders */}
               <TouchableOpacity

@@ -47,6 +47,7 @@ import {
   WaterGlassPlusIcon,
   WheatIcon,
 } from '@/components/icons';
+import { AppSwitch } from '@/components/common';
 
 
 // ─── 1. Header Bar ──────────────────────────────────────────────────────────
@@ -650,40 +651,7 @@ export function QuickAddModal({
 }
 
 // ─── Custom Toggle Switch ───────────────────────────────────────────────────
-function ToggleSwitch({
-  value,
-  onValueChange,
-  accessibilityLabel,
-}: {
-  value: boolean;
-  onValueChange: (val: boolean) => void;
-  accessibilityLabel?: string;
-}) {
-  const theme = useTheme();
-  const { colors: c } = theme;
-  const styles = useFoodDiaryStyles();
-
-  return (
-    <TouchableOpacity
-      activeOpacity={0.8}
-      onPress={() => onValueChange(!value)}
-      accessibilityRole="switch"
-      accessibilityState={{ checked: value }}
-      accessibilityLabel={accessibilityLabel}
-      style={[
-        styles.toggleSwitchContainer,
-        { backgroundColor: value ? c.brandPrimary : c.surfaceBorder },
-      ]}
-    >
-      <View
-        style={[
-          styles.toggleSwitchThumb,
-          { alignSelf: value ? 'flex-end' : 'flex-start' },
-        ]}
-      />
-    </TouchableOpacity>
-  );
-}
+const ToggleSwitch = AppSwitch;
 
 // ─── 5. Settings / Drawer Menu Modal ─────────────────────────────────────────
 export type DiaryMenuModalProps = {

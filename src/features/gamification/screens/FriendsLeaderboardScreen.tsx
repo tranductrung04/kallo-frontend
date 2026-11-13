@@ -6,14 +6,13 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
-  Switch,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { images } from '@/assets/images';
-import { AppButton, AppCard, AppText } from '@/components/common';
+import { AppButton, AppCard, AppSwitch, AppText } from '@/components/common';
 import {
   CheckIcon,
   ChevronLeftIcon,
@@ -144,10 +143,10 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
                 Cho phép bạn bè thấy thứ hạng của tôi trên bảng xếp hạng
               </AppText>
             </View>
-            <Switch
+            <AppSwitch
               value={isSharingPrivacy}
               onValueChange={toggleSharingPrivacy}
-              trackColor={{ false: 'rgba(128,128,128,0.3)', true: theme.colors.brandPrimary }}
+              accessibilityLabel="Chia sẻ thành tích"
             />
           </View>
           <TouchableOpacity
