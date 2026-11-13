@@ -11,10 +11,18 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Circle, Path, Rect } from 'react-native-svg';
+import Svg, { Path, Rect } from 'react-native-svg';
 import { images } from '@/assets/images';
 import { AppText } from '@/components/common';
-import { ChevronLeftIcon } from '@/components/icons';
+import {
+  ChevronLeftIcon,
+  CirclePlusIcon,
+  ClockIcon,
+  CloudIcon,
+  DropletIcon,
+  HeartIcon,
+  ShieldSecurityIcon,
+} from '@/components/icons';
 import { AnimatedCard, AnimatedCheckbox } from '../components';
 import { useHealthProfileDraft } from '../hooks/useHealthProfileDraft';
 
@@ -46,24 +54,7 @@ const CONDITION_ITEMS: ConditionItem[] = [
       'Bạn có thể linh hoạt áp dụng đa dạng chế độ ăn uống và rèn luyện thể thao.',
       'Kallo sẽ tập trung tối ưu hóa lượng calo và đa lượng theo mục tiêu vóc dáng của bạn.',
     ],
-    renderIcon: (color) => (
-      <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-        <Path
-          d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
-          stroke={color}
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <Path
-          d="M9 12l2 2 4-4"
-          stroke={color}
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </Svg>
-    ),
+    renderIcon: (color) => <ShieldSecurityIcon size={24} color={color} />,
   },
   {
     key: 'gerd',
@@ -74,17 +65,7 @@ const CONDITION_ITEMS: ConditionItem[] = [
       'Chia nhỏ 4–5 bữa/ngày, tránh ăn quá no hoặc để bụng quá đói.',
       'Hạn chế cà phê, rượu bia, đồ uống có ga gây kích ứng niêm mạc.',
     ],
-    renderIcon: (color) => (
-      <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-        <Path
-          d="M12 4v16m-4-8h8"
-          stroke={color}
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-        <Circle cx="12" cy="12" r="9" stroke={color} strokeWidth="2" />
-      </Svg>
-    ),
+    renderIcon: (color) => <CirclePlusIcon size={24} color={color} strokeWidth={2} />,
   },
   {
     key: 'diabetes',
@@ -95,17 +76,7 @@ const CONDITION_ITEMS: ConditionItem[] = [
       'Cắt giảm tối đa đường tinh luyện, nước ngọt có ga và bánh kẹo.',
       'Phân bổ lượng carbs đều đặn giữa các bữa ăn trong ngày.',
     ],
-    renderIcon: (color) => (
-      <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-        <Path
-          d="M12 2.7l7.1 7.1a7.5 7.5 0 11-10.6 0L12 2.7z"
-          stroke={color}
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </Svg>
-    ),
+    renderIcon: (color) => <DropletIcon size={24} color={color} />,
   },
   {
     key: 'hypertension',
@@ -116,17 +87,7 @@ const CONDITION_ITEMS: ConditionItem[] = [
       'Tăng cường kali từ chuối, khoai lang, rau bina để điều hòa huyết áp.',
       'Hạn chế mỡ động vật và thức ăn chiên rán nhiều dầu mỡ.',
     ],
-    renderIcon: (color) => (
-      <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-        <Path
-          d="M20.4 4.6a5.5 5.5 0 00-7.8 0L12 5.2l-.6-.6a5.5 5.5 0 00-7.8 7.8l.6.6L12 20.8l7.8-7.8.6-.6a5.5 5.5 0 000-7.8z"
-          stroke={color}
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </Svg>
-    ),
+    renderIcon: (color) => <HeartIcon size={24} color={color} />,
   },
   {
     key: 'hyperlipidemia',
@@ -137,17 +98,7 @@ const CONDITION_ITEMS: ConditionItem[] = [
       'Tăng cường chất béo tốt Omega-3 từ cá béo, dầu ô liu và các loại hạt.',
       'Bổ sung nhiều chất xơ hòa tan từ rau củ để giảm hấp thụ cholesterol.',
     ],
-    renderIcon: (color) => (
-      <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-        <Circle cx="12" cy="12" r="9" stroke={color} strokeWidth="2" />
-        <Path
-          d="M12 7v5l3 3"
-          stroke={color}
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-      </Svg>
-    ),
+    renderIcon: (color) => <ClockIcon size={24} color={color} />,
   },
   {
     key: 'gout',
@@ -174,17 +125,7 @@ const CONDITION_ITEMS: ConditionItem[] = [
       'Bổ sung rau xanh họ cải (súp lơ, cải xoăn) chứa hợp chất hỗ trợ giải độc gan.',
       'Duy trì vận động thể chất đều đặn tối thiểu 30 phút mỗi ngày.',
     ],
-    renderIcon: (color) => (
-      <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-        <Path
-          d="M4 12c0-4.4 3.6-8 8-8 3 0 5.6 1.7 7 4.2 1.8.8 3 2.6 3 4.8 0 2.8-2.2 5-5 5H6c-2.2 0-4-1.8-4-4 0-1.1.5-2.2 1.3-3"
-          stroke={color}
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </Svg>
-    ),
+    renderIcon: (color) => <CloudIcon size={24} color={color} />,
   },
 ];
 
