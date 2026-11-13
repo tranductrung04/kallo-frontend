@@ -17,7 +17,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Svg, { Circle, Line, Path, Rect } from 'react-native-svg';
 import type { RootStackParamList } from '@/navigation/types';
-import { ChevronLeftIcon, ChevronRightIcon, CloseXIcon, InfoIcon, PlusIcon } from '@/components/icons';
+import {
+  CircleAlertIcon,
+  CircleCheckIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CloseXIcon,
+  InfoIcon,
+  PlusIcon,
+  TriangleAlertIcon,
+} from '@/components/icons';
 import { images } from '@/assets/images';
 import { useTheme, type ThemeContextValue } from '@/theme';
 import { formatNumber, todayKey } from '@/features/nutrition/utils';
@@ -70,10 +79,10 @@ export function WeightStatisticsScreen({ navigation }: Props) {
   const bmiValue = Number((latestWeight / (heightM * heightM)).toFixed(1));
 
   const bmiStatus = useMemo(() => {
-    if (bmiValue < 18.5) return { label: 'Thiếu cân', color: c.statusWarning, icon: '⚠️' };
-    if (bmiValue <= 24.9) return { label: 'Bình thường', color: c.quickScanner, icon: '✅' };
-    if (bmiValue <= 29.9) return { label: 'Thừa cân', color: c.statusWarning, icon: '⚠️' };
-    return { label: 'Béo phì', color: c.statusDanger, icon: '🚨' };
+    if (bmiValue < 18.5) return { label: 'Thiếu cân', color: c.statusWarning, type: 'warning' as const };
+    if (bmiValue <= 24.9) return { label: 'Bình thường', color: c.quickScanner, type: 'normal' as const };
+    if (bmiValue <= 29.9) return { label: 'Thừa cân', color: c.statusWarning, type: 'warning' as const };
+    return { label: 'Béo phì', color: c.statusDanger, type: 'danger' as const };
   }, [bmiValue, c]);
 
   // Y-axis ticks for weight chart: 61, 58, 55, 52, 49
@@ -336,9 +345,18 @@ export function WeightStatisticsScreen({ navigation }: Props) {
           <View style={styles.bmiMetricRow}>
             <View style={styles.bmiMetricCol}>
               <Text style={styles.bmiColLabel}>BMI</Text>
-              <Text style={[styles.bmiStatusText, { color: bmiStatus.color }]}>
-                {bmiStatus.icon} {bmiStatus.label}
-              </Text>
+              <View style={styles.bmiStatusRow}>
+                {bmiStatus.type === 'normal' ? (
+                  <CircleCheckIcon size={18} color={bmiStatus.color} />
+                ) : bmiStatus.type === 'danger' ? (
+                  <CircleAlertIcon size={18} color={bmiStatus.color} />
+                ) : (
+                  <TriangleAlertIcon size={18} color={bmiStatus.color} />
+                )}
+                <Text style={[styles.bmiStatusText, { color: bmiStatus.color }]}>
+                  {bmiStatus.label}
+                </Text>
+              </View>
             </View>
 
             <View style={styles.bmiTrendCol}>
@@ -772,6 +790,11 @@ function createStyles(theme: ThemeContextValue) {
       marginBottom: 18,
     },
     bmiMetricCol: {},
+    bmiStatusRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
     bmiColLabel: {
       color: c.textSecondary,
       fontSize: 13,

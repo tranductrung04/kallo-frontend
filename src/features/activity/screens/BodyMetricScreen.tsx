@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { images } from '@/assets/images';
 import { AppButton, AppCard, AppInput, AppText } from '@/components/common';
+import { CheckIcon } from '@/components/icons';
 import { useTheme } from '@/theme';
 import { todayKey } from '@/features/nutrition/utils';
 import { calculateWhr, classifyWhrRisk } from '../utils';
@@ -144,9 +145,12 @@ export function BodyMetricScreen() {
           ) : null}
 
           {savedSuccess ? (
-            <AppText color={theme.colors.primary} align="center" variant="caption">
-              ✓ Đã lưu kết quả đo hôm nay!
-            </AppText>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+              <CheckIcon size={14} color={theme.colors.primary} />
+              <AppText color={theme.colors.primary} align="center" variant="caption">
+                Đã lưu kết quả đo hôm nay!
+              </AppText>
+            </View>
           ) : null}
 
           <AppButton

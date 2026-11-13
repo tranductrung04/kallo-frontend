@@ -24,20 +24,27 @@ import {
 } from './diaryUtils';
 import { useFoodDiaryStyles } from './FoodDiaryScreen.styles';
 import {
+  BarcodeSquareIcon,
   CalendarIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  ClipboardCopyIcon,
+  CloseXIcon,
   DropletIcon,
   FiberIcon,
   FlagIcon,
   FlameIcon,
   LightningIcon,
   MenuIcon,
+  PenLineIcon,
   PlusIcon,
+  QuickSearchIcon,
+  QuickSparklesIcon,
   SaltIcon,
   ScaleIcon,
   SugarIcon,
   TimelineDiaryPhoneIllustration,
+  WaterGlassPlusIcon,
   WheatIcon,
 } from '@/components/icons';
 
@@ -501,7 +508,7 @@ export function TimelineHourRow({
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   style={styles.deleteLogButton}
                 >
-                  <Text style={styles.deleteLogText}>✕</Text>
+                  <CloseXIcon size={14} color="#EF4444" />
                 </TouchableOpacity>
               </TouchableOpacity>
             );
@@ -566,7 +573,7 @@ export function QuickAddModal({
               onPress={() => onSelectSearch(activeMealSlot)}
             >
               <View style={[styles.actionIconBox, { backgroundColor: 'rgba(158, 100, 247, 0.15)' }]}>
-                <Text style={styles.actionEmoji}>🔍</Text>
+                <QuickSearchIcon size={22} color="#9E64F7" />
               </View>
               <View style={styles.actionTextWrap}>
                 <Text style={styles.actionOptionTitle}>Tìm kiếm thực phẩm</Text>
@@ -580,7 +587,7 @@ export function QuickAddModal({
               onPress={() => onSelectScan(activeMealSlot)}
             >
               <View style={[styles.actionIconBox, { backgroundColor: 'rgba(239, 68, 68, 0.15)' }]}>
-                <Text style={styles.actionEmoji}>✨</Text>
+                <QuickSparklesIcon size={22} color="#EF4444" />
               </View>
               <View style={styles.actionTextWrap}>
                 <Text style={styles.actionOptionTitle}>Quét ảnh bằng AI</Text>
@@ -594,7 +601,7 @@ export function QuickAddModal({
               onPress={() => onSelectBarcode(activeMealSlot)}
             >
               <View style={[styles.actionIconBox, { backgroundColor: 'rgba(59, 130, 246, 0.15)' }]}>
-                <Text style={styles.actionEmoji}>📷</Text>
+                <BarcodeSquareIcon size={22} color="#3B82F6" />
               </View>
               <View style={styles.actionTextWrap}>
                 <Text style={styles.actionOptionTitle}>Quét mã vạch</Text>
@@ -608,7 +615,7 @@ export function QuickAddModal({
               onPress={() => onSelectCustom(activeMealSlot)}
             >
               <View style={[styles.actionIconBox, { backgroundColor: 'rgba(245, 158, 11, 0.15)' }]}>
-                <Text style={styles.actionEmoji}>✍️</Text>
+                <PenLineIcon size={22} color="#F59E0B" />
               </View>
               <View style={styles.actionTextWrap}>
                 <Text style={styles.actionOptionTitle}>Thêm món tùy chỉnh</Text>
@@ -622,7 +629,7 @@ export function QuickAddModal({
               onPress={() => onCopyYesterday(activeMealSlot)}
             >
               <View style={[styles.actionIconBox, { backgroundColor: 'rgba(16, 185, 129, 0.15)' }]}>
-                <Text style={styles.actionEmoji}>📋</Text>
+                <ClipboardCopyIcon size={22} color="#10B981" />
               </View>
               <View style={styles.actionTextWrap}>
                 <Text style={styles.actionOptionTitle}>Sao chép từ hôm qua</Text>
@@ -825,17 +832,17 @@ export function WaterLoggerModal({
 
           <View style={styles.waterButtonsRow}>
             <TouchableOpacity style={styles.waterQuickBtn} onPress={() => onAddWater(250)}>
-              <Text style={styles.waterQuickEmoji}>🥛</Text>
+              <WaterGlassPlusIcon size={24} color="#3B82F6" />
               <Text style={styles.waterQuickLabel}>+250 ml</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.waterQuickBtn} onPress={() => onAddWater(500)}>
-              <Text style={styles.waterQuickEmoji}>🍶</Text>
+              <WaterGlassPlusIcon size={28} color="#2563EB" />
               <Text style={styles.waterQuickLabel}>+500 ml</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.waterQuickBtn} onPress={() => onAddWater(750)}>
-              <Text style={styles.waterQuickEmoji}>🧃</Text>
+              <WaterGlassPlusIcon size={32} color="#1D4ED8" />
               <Text style={styles.waterQuickLabel}>+750 ml</Text>
             </TouchableOpacity>
           </View>

@@ -55,7 +55,7 @@ export function MealPlanOverviewScreen() {
       setActivePlan(newPlan);
     }
     Alert.alert(
-      'Áp dụng thực đơn thành công! 🎉',
+      'Áp dụng thực đơn thành công!',
       `Đã chọn "${curated.title}" làm thực đơn hiện tại của bạn. Bạn có thể theo dõi và áp dụng các bữa ăn vào Nhật ký dinh dưỡng.`,
       [
         {
@@ -82,7 +82,7 @@ export function MealPlanOverviewScreen() {
     if (!currentPlan) return;
     const count = applyPlanToDiary(0);
     Alert.alert(
-      'Áp dụng thành công! 🎉',
+      'Áp dụng thành công!',
       `Đã thêm ${count} món ăn của hôm nay vào Nhật ký dinh dưỡng.`,
       [
         {

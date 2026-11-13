@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppText } from '@/components/common';
+import { MessageSquareIcon, QuickVoiceIcon, TriangleAlertIcon } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
 import { useNutrition } from '@/features/nutrition/NutritionProvider';
@@ -119,9 +120,12 @@ export function NutritionChatScreen({ route, navigation }: Props) {
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.canvasBase }]}>
       {/* ── FR-CHAT-06: Medical Disclaimer Banner ───────────────────── */}
       <View style={[styles.disclaimerBanner, { backgroundColor: theme.colors.surface }]}>
-        <AppText variant="caption" color={theme.colors.calorieIn}>
-          ⚠️ LƯU Ý Y TẾ
-        </AppText>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <TriangleAlertIcon size={14} color={theme.colors.calorieIn} />
+          <AppText variant="caption" color={theme.colors.calorieIn}>
+            LƯU Ý Y TẾ
+          </AppText>
+        </View>
         <AppText variant="caption" color={theme.colors.textSecondary}>
           Trợ lý AI dựa trên dữ liệu dinh dưỡng tham khảo, không thay thế chẩn đoán hoặc chỉ định của bác sĩ.
         </AppText>
@@ -193,9 +197,12 @@ export function NutritionChatScreen({ route, navigation }: Props) {
               onPress={() => handleSend(item)}
               disabled={isTyping}
             >
-              <AppText variant="caption" color={theme.colors.textPrimary}>
-                💬 {item}
-              </AppText>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <MessageSquareIcon size={12} color={theme.colors.textSecondary} />
+                <AppText variant="caption" color={theme.colors.textPrimary}>
+                  {item}
+                </AppText>
+              </View>
             </TouchableOpacity>
           )}
         />
@@ -213,7 +220,7 @@ export function NutritionChatScreen({ route, navigation }: Props) {
             accessibilityRole="button"
             accessibilityLabel="Mở ghi nhật ký bằng giọng nói"
           >
-            <AppText variant="headlineSm">🎙️</AppText>
+            <QuickVoiceIcon size={20} color={theme.colors.brandPrimary} />
           </TouchableOpacity>
 
           <TextInput

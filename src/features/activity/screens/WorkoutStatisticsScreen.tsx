@@ -19,9 +19,12 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   CloseXIcon,
+  DropletIcon,
+  DumbbellIcon,
   FlameIcon,
   InfoIcon,
   PlusIcon,
+  SparklesIcon,
 } from '@/components/icons';
 import { images } from '@/assets/images';
 import { useTheme, type ThemeContextValue } from '@/theme';
@@ -392,9 +395,12 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
 
           {/* Tip Card */}
           <View style={styles.sectionTipCard}>
-            <Text style={styles.sectionTipText}>
-              ✨ Một tuần chưa có dữ liệu - thử dành 15 phút vận động mỗi ngày để làm nóng cơ thể lên nha.
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
+              <SparklesIcon size={16} color="#9E64F7" />
+              <Text style={[styles.sectionTipText, { flex: 1 }]}>
+                Một tuần chưa có dữ liệu - thử dành 15 phút vận động mỗi ngày để làm nóng cơ thể lên nha.
+              </Text>
+            </View>
           </View>
         </View>
 
@@ -406,7 +412,7 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
           <View style={styles.trendBlock}>
             <Text style={styles.trendLabelRed}>CALO TẬP LUYỆN TUẦN NÀY</Text>
             <View style={styles.trendValRow}>
-              <Text style={styles.trendFlameIcon}>🔥</Text>
+              <FlameIcon size={18} color="#F44E42" />
               <Text style={styles.trendValText}>
                 {formatNumber(totalCaloriesThisWeek)} calo/tuần
               </Text>
@@ -420,7 +426,7 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
           <View style={styles.trendBlock}>
             <Text style={styles.trendLabelMuted}>CALO TẬP LUYỆN TUẦN TRƯỚC</Text>
             <View style={styles.trendValRow}>
-              <Text style={styles.trendFlameMutedIcon}>💧</Text>
+              <DropletIcon size={18} color={c.textMuted} />
               <Text style={styles.trendValText}>
                 {formatNumber(totalCaloriesLastWeek)} calo/tuần
               </Text>
@@ -432,9 +438,12 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
 
           {/* Trend Notice Card */}
           <View style={styles.trendNoticeCard}>
-            <Text style={styles.trendNoticeText}>
-              💪 Chưa ghi nhận hoạt động. Bạn có thể vận động một chút để cải thiện xu hướng tập luyện nhé.
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
+              <DumbbellIcon size={16} color={c.textMuted} />
+              <Text style={[styles.trendNoticeText, { flex: 1 }]}>
+                Chưa ghi nhận hoạt động. Bạn có thể vận động một chút để cải thiện xu hướng tập luyện nhé.
+              </Text>
+            </View>
           </View>
         </View>
 

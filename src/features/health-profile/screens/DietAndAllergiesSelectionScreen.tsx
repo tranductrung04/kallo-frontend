@@ -13,7 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { images } from '@/assets/images';
 import { AppText } from '@/components/common';
-import { ChevronLeftIcon } from '@/components/icons';
+import { CheckIcon, ChevronLeftIcon, CloseXIcon, PlusIcon } from '@/components/icons';
 import { AnimatedCard, AnimatedRadio } from '../components';
 import { useHealthProfileDraft } from '../hooks/useHealthProfileDraft';
 import { COMMON_ALLERGIES } from '../types';
@@ -190,14 +190,21 @@ export function DietAndAllergiesSelectionScreen({
                   accessibilityRole="checkbox"
                   accessibilityLabel={allergy}
                 >
-                  <AppText
-                    style={[
-                      styles.allergyPillText,
-                      isSelected && styles.allergyPillTextSelected,
-                    ]}
-                  >
-                    {isSelected ? `✓ ${allergy}` : `+ ${allergy}`}
-                  </AppText>
+                  <View style={styles.allergyPillInner}>
+                    {isSelected ? (
+                      <CheckIcon size={13} color="#FFFFFF" strokeWidth={2.4} />
+                    ) : (
+                      <PlusIcon size={12} color="#CBD5E1" strokeWidth={2.4} />
+                    )}
+                    <AppText
+                      style={[
+                        styles.allergyPillText,
+                        isSelected && styles.allergyPillTextSelected,
+                      ]}
+                    >
+                      {allergy}
+                    </AppText>
+                  </View>
                 </AnimatedCard>
               );
             })}
@@ -241,8 +248,9 @@ export function DietAndAllergiesSelectionScreen({
                       activeOpacity={0.8}
                       style={styles.customAddedPill}
                     >
+                      <CloseXIcon size={12} color="#FFFFFF" strokeWidth={2.4} />
                       <AppText style={styles.customAddedPillText}>
-                        ✕ {customAllergy}
+                        {customAllergy}
                       </AppText>
                     </TouchableOpacity>
                   ))}
@@ -439,6 +447,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 20,
   },
+  allergyPillInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   allergyPillText: {
     fontSize: 13.5,
     fontWeight: '600',
@@ -487,6 +500,9 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   customAddedPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     backgroundColor: '#7C3AED',
     paddingHorizontal: 14,
     paddingVertical: 8,

@@ -10,6 +10,7 @@ import {
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppButton, AppCard, AppText } from '@/components/common';
 import {
+  CheckIcon,
   ChevronLeftIcon,
   FlameIcon,
   LockClosedIcon,
@@ -95,9 +96,10 @@ export function FriendProfileScreen({ route, navigation }: Props) {
             @{friend.username} • Bạn bè {friend.since || 'gần đây'}
           </AppText>
 
-          <View style={[styles.friendTag, { backgroundColor: c.brandSoftTint }]}>
+          <View style={[styles.friendTag, { backgroundColor: c.brandSoftTint, flexDirection: 'row', alignItems: 'center', gap: 4 }]}>
+            <CheckIcon size={12} color={c.brandPrimary} />
             <AppText variant="caption" color={c.brandPrimary} style={styles.bold}>
-              ✓ Bạn bè chính thức
+              Bạn bè chính thức
             </AppText>
           </View>
         </AppCard>

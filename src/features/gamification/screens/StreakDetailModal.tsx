@@ -66,7 +66,7 @@ export function StreakDetailModal({ navigation }: Props) {
   const handleShieldPress = () => {
     if (streak.isFrozenToday) {
       Alert.alert(
-        'Khiên Kallo đang bật 🛡️',
+        'Khiên Kallo đang bật',
         'Chuỗi Streak của bạn hôm nay đã được bảo vệ an toàn!'
       );
       return;
@@ -81,7 +81,7 @@ export function StreakDetailModal({ navigation }: Props) {
     }
 
     Alert.alert(
-      'Kích hoạt Khiên Kallo 🛡️',
+      'Kích hoạt Khiên Kallo',
       `Bạn còn ${streak.freezeDaysRemaining} lượt khiên. Kích hoạt để bảo vệ chuỗi hôm nay ngay cả khi bạn chưa kịp ghi món?`,
       [
         { text: 'Hủy', style: 'cancel' },
@@ -90,7 +90,7 @@ export function StreakDetailModal({ navigation }: Props) {
           onPress: () => {
             const ok = freezeStreak();
             if (ok) {
-              Alert.alert('Thành công 🎉', 'Chuỗi của bạn hôm nay đã được bảo vệ!');
+              Alert.alert('Thành công', 'Chuỗi của bạn hôm nay đã được bảo vệ!');
             }
           },
         },

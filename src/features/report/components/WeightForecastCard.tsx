@@ -2,6 +2,7 @@ import React from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 import { images } from '@/assets/images';
 import { AppCard, AppText, ProgressBar } from '@/components/common';
+import { FlagIcon, LightbulbIcon, LightningIcon } from '@/components/icons';
 import { useTheme } from '@/theme';
 import type { WeightForecast } from '../types';
 
@@ -56,20 +57,25 @@ export function WeightForecastCard({
         </View>
       ) : (
         <View style={styles.forecastContent}>
-          <AppText style={styles.messageText}>
-            💡 {forecast.message}
-          </AppText>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
+            <LightbulbIcon size={18} color={theme.colors.primary} />
+            <AppText style={[styles.messageText, { flex: 1 }]}>
+              {forecast.message}
+            </AppText>
+          </View>
 
           {forecast.isCorrectDirection && forecast.estimatedDate ? (
             <View style={styles.badgeRow}>
               <View style={[styles.badge, { backgroundColor: theme.colors.surfaceMid, borderWidth: 1, borderColor: theme.colors.surfaceBorder }]}>
+                <FlagIcon size={12} color={theme.colors.primary} />
                 <AppText variant="caption" color={theme.colors.primary} style={{ fontWeight: '700' }}>
-                  🎯 Ngày dự kiến: {forecast.estimatedDate}
+                  Ngày dự kiến: {forecast.estimatedDate}
                 </AppText>
               </View>
               <View style={[styles.badge, { backgroundColor: theme.colors.surfaceMid, borderWidth: 1, borderColor: theme.colors.surfaceBorder }]}>
+                <LightningIcon size={12} color={theme.colors.textMuted} />
                 <AppText variant="caption" color={theme.colors.textMuted}>
-                  ⚡ {forecast.weeklyRateKg} kg/tuần
+                  {forecast.weeklyRateKg} kg/tuần
                 </AppText>
               </View>
             </View>
@@ -115,6 +121,9 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 8,

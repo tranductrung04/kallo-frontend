@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppButton, AppCard, AppText, EmptyStateView } from '@/components/common';
+import { CloseXIcon } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
 import type { NotificationCategory } from '../types';
@@ -145,7 +146,7 @@ export function NotificationCenterScreen({ navigation }: Props) {
                     onPress={() => deleteNotification(notif.id)}
                     style={styles.deleteBtn}
                   >
-                    <AppText variant="caption" color={theme.colors.textSecondary}>✕</AppText>
+                    <CloseXIcon size={14} color={theme.colors.textSecondary} />
                   </TouchableOpacity>
                 </View>
 

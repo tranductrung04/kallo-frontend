@@ -8,6 +8,7 @@
 import React from 'react';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { useTheme } from '@/theme';
+import { CircleAlertIcon, TriangleAlertIcon } from '@/components/icons';
 import { AppText } from './AppText';
 
 export type StatusBannerType = 'warning' | 'danger';
@@ -40,8 +41,6 @@ export function StatusBanner({
       ? 'rgba(255, 90, 95, 0.15)'
       : 'rgba(217, 45, 32, 0.12)';
 
-  const icon = isWarning ? '⚠️' : '🚨';
-
   return (
     <View
       testID={testID}
@@ -56,7 +55,13 @@ export function StatusBanner({
         style,
       ]}
     >
-      <AppText style={styles.icon}>{icon}</AppText>
+      <View style={styles.iconWrapper}>
+        {isWarning ? (
+          <TriangleAlertIcon size={20} color={statusColor} />
+        ) : (
+          <CircleAlertIcon size={20} color={statusColor} />
+        )}
+      </View>
       <View style={styles.textContainer}>
         <AppText variant="labelLg" color={statusColor} style={styles.title}>
           {title}
@@ -78,9 +83,8 @@ const styles = StyleSheet.create({
     borderRadius: 16, // rounded-lg per DESIGN.md
     borderWidth: 1,
   },
-  icon: {
-    fontSize: 20,
-    lineHeight: 24,
+  iconWrapper: {
+    paddingTop: 2,
   },
   textContainer: {
     flex: 1,

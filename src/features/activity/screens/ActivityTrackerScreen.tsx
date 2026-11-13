@@ -8,11 +8,12 @@ import {
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppButton, AppCard, AppInput, AppText } from '@/components/common';
+import { CloseXIcon, FlameIcon } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
 import { todayKey } from '@/features/nutrition/utils';
 import { ACTIVITY_CATALOG, findActivityMeta } from '../catalog';
-import { ActivityItem, StepCounterCard } from '../components';
+import { ActivityItem, ActivityTypeIcon, StepCounterCard } from '../components';
 import { calculateCaloriesBurned } from '../utils';
 import { useActivity } from '../ActivityProvider';
 import type { ActivityType } from '../types';
@@ -96,7 +97,7 @@ export function ActivityTrackerScreen({ navigation, route }: Props) {
             <View style={styles.formHeader}>
               <AppText variant="heading">Ghi nhận bài tập</AppText>
               <Pressable onPress={() => setShowForm(false)} accessibilityLabel="Đóng biểu mẫu">
-                <AppText color={theme.colors.textMuted}>✕</AppText>
+                <CloseXIcon size={18} color={theme.colors.textMuted} />
               </Pressable>
             </View>
 
@@ -118,7 +119,11 @@ export function ActivityTrackerScreen({ navigation, route }: Props) {
                       },
                     ]}
                   >
-                    <AppText>{item.icon}</AppText>
+                    <ActivityTypeIcon
+                      type={item.type}
+                      size={18}
+                      color={isSelected ? theme.colors.onBrand : theme.colors.textMuted}
+                    />
                     <AppText
                       variant="caption"
                       color={isSelected ? theme.colors.onBrand : theme.colors.text}
@@ -179,9 +184,12 @@ export function ActivityTrackerScreen({ navigation, route }: Props) {
               <AppText variant="caption" color={theme.colors.textMuted}>
                 Ước tính tiêu hao (MET {currentMeta.met}):
               </AppText>
-              <AppText variant="heading" color={theme.colors.primary}>
-                🔥 {estimatedCalories} kcal
-              </AppText>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                <FlameIcon size={18} color={theme.colors.primary} />
+                <AppText variant="heading" color={theme.colors.primary}>
+                  {estimatedCalories} kcal
+                </AppText>
+              </View>
             </View>
 
             <AppButton

@@ -9,6 +9,13 @@ import {
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppCard, AppText } from '@/components/common';
+import {
+  CutleryIcon,
+  DropletIcon,
+  FlameIcon,
+  MoonIcon,
+  TriangleAlertIcon,
+} from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
 import { useSystem } from '../SystemProvider';
@@ -38,7 +45,10 @@ export function ReminderSettingsScreen({}: Props) {
         <AppCard style={styles.card}>
           <View style={styles.settingRow}>
             <View style={styles.flex}>
-              <AppText variant="headlineSm">Nhắc nhở uống nước 💧</AppText>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <DropletIcon size={18} color={theme.colors.brandPrimary} />
+                <AppText variant="headlineSm">Nhắc nhở uống nước</AppText>
+              </View>
               <AppText variant="caption" color={theme.colors.textSecondary}>
                 Mỗi 2 giờ trong khung giờ {reminders.waterStartHour} - {reminders.waterEndHour}
               </AppText>
@@ -53,7 +63,10 @@ export function ReminderSettingsScreen({}: Props) {
 
         {/* ── Meals Reminders Card ────────────────────────────────────── */}
         <AppCard style={styles.card}>
-          <AppText variant="headlineSm">Nhắc nhở ghi 3 bữa chính 🍽️</AppText>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <CutleryIcon size={18} color={theme.colors.brandPrimary} />
+            <AppText variant="headlineSm">Nhắc nhở ghi 3 bữa chính</AppText>
+          </View>
           <AppText variant="caption" color={theme.colors.textSecondary}>
             Thông báo đẩy nhẹ nhàng khi đến giờ ăn hàng ngày
           </AppText>
@@ -102,7 +115,10 @@ export function ReminderSettingsScreen({}: Props) {
         <AppCard style={styles.card}>
           <View style={styles.settingRow}>
             <View style={styles.flex}>
-              <AppText variant="headlineSm">Cảnh báo vượt Calo ⚠️</AppText>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <TriangleAlertIcon size={18} color={theme.colors.calorieIn} />
+                <AppText variant="headlineSm">Cảnh báo vượt Calo</AppText>
+              </View>
               <AppText variant="caption" color={theme.colors.textSecondary}>
                 Gửi cảnh báo tức thì khi tổng năng lượng nạp trong ngày vượt 100% Calo mục tiêu (FR-SYS-02).
               </AppText>
@@ -119,7 +135,10 @@ export function ReminderSettingsScreen({}: Props) {
         <AppCard style={styles.card}>
           <View style={styles.settingRow}>
             <View style={styles.flex}>
-              <AppText variant="headlineSm">Nhắc nhở duy trì Streak 🔥</AppText>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <FlameIcon size={18} color={theme.colors.brandPrimary} />
+                <AppText variant="headlineSm">Nhắc nhở duy trì Streak</AppText>
+              </View>
               <AppText variant="caption" color={theme.colors.textSecondary}>
                 Nhắc vào lúc 21:00 nếu hôm nay bạn chưa hoàn thành mục tiêu ngày
               </AppText>
@@ -136,7 +155,10 @@ export function ReminderSettingsScreen({}: Props) {
         <AppCard style={styles.card}>
           <View style={styles.settingRow}>
             <View style={styles.flex}>
-              <AppText variant="headlineSm">Chế độ Không làm phiền 🌙</AppText>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <MoonIcon size={18} color={theme.colors.brandPrimary} />
+                <AppText variant="headlineSm">Chế độ Không làm phiền</AppText>
+              </View>
               <AppText variant="caption" color={theme.colors.textSecondary}>
                 Tắt toàn bộ âm thanh và rung thông báo trong khung giờ {reminders.dndStartTime} - {reminders.dndEndTime}
               </AppText>
