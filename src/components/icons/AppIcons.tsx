@@ -14,34 +14,24 @@ import Svg, {
   Stop,
   Text as SvgText,
 } from 'react-native-svg';
-
-// ─── Shared Props ────────────────────────────────────────────────────────────
-
-export type IconProps = {
-  size?: number;
-  color: string;
-};
-
-export type PlusIconProps = IconProps & {
-  strokeWidth?: number;
-};
-
-export type SaltIconProps = IconProps & {
-  capColor?: string;
-};
-
-export type WheatIconProps = IconProps & {
-  creaseColor?: string;
-};
-
-export type FiberIconProps = IconProps & {
-  stalkColor?: string;
-  creaseColor?: string;
-};
-
-export type ScaleIconProps = IconProps & {
-  innerColor: string;
-};
+import type {
+  ActivityIconProps,
+  BowlFoodPlusIconProps,
+  CelebrationPopperBadgeProps,
+  CirclePlusIconProps,
+  EmptyFolderIllustrationProps,
+  FiberIconProps,
+  IconProps,
+  KalloShieldIconProps,
+  MilestoneCalendarBadgeProps,
+  PlusIconProps,
+  RecipeBookPlusIconProps,
+  SaladBowlIconProps,
+  SaltIconProps,
+  ScaleIconProps,
+  WaoShieldIconProps,
+  WheatIconProps,
+} from './types';
 
 // ─── Navigation & Tab Icons ──────────────────────────────────────────────────
 
@@ -369,10 +359,6 @@ export function CloudAddIcon({ size = 38, color }: IconProps) {
   );
 }
 
-export type BowlFoodPlusIconProps = IconProps & {
-  cutoutColor?: string;
-};
-
 /** Icon Bát cơm thêm món (+) — Dùng cho trạng thái trống của Nhật ký gần đây (Recent Diary) */
 export function BowlFoodPlusIcon({
   size = 40,
@@ -418,10 +404,6 @@ export function BowlFoodPlusIcon({
   );
 }
 export const BowlAddIcon = BowlFoodPlusIcon;
-
-export type RecipeBookPlusIconProps = IconProps & {
-  cutoutColor?: string;
-};
 
 /** Icon Cuốn sổ công thức thêm món (+) — Dùng cho Tạo công thức */
 export function RecipeBookPlusIcon({
@@ -581,10 +563,6 @@ export function GalleryAddIcon({
 }
 
 // ─── Activity Icons ──────────────────────────────────────────────────────────
-
-export type ActivityIconProps = IconProps & {
-  cutoutColor?: string;
-};
 
 /** Icon Chạy bộ — Người chạy nghiêng về phía trước kèm 3 vạch gió tốc độ bên trái */
 export function RunningIcon({ size = 24, color }: IconProps) {
@@ -1054,13 +1032,6 @@ export function ViewfinderBarcodeIcon({ size = 26, color = '#FFFFFF' }: IconProp
   );
 }
 
-export type EmptyFolderIllustrationProps = {
-  size?: number;
-  folderBack?: string;
-  folderFront?: string;
-  accentColor?: string;
-};
-
 /** Minh họa thư mục trống kèm 2 lá và nét xoắn tím bay (chuẩn thiết kế, tự động thích ứng Sáng / Tối) */
 export function EmptyFolderIllustration({
   size = 140,
@@ -1252,11 +1223,6 @@ export function CampfireFlameIcon({
   );
 }
 
-export type SaladBowlIconProps = {
-  size?: number;
-  bgCircleColor?: string;
-};
-
 /** Icon Bát Salad / Ghi nhận món ăn */
 export function SaladBowlIcon({
   size = 56,
@@ -1292,10 +1258,6 @@ export function SaladBowlIcon({
   );
 }
 
-export type CelebrationPopperBadgeProps = {
-  size?: number;
-};
-
 /** Huy hiệu pháo giấy ăn mừng duy trì chuỗi Streak thành công */
 export function CelebrationPopperBadge({ size = 56 }: CelebrationPopperBadgeProps) {
   return (
@@ -1309,10 +1271,6 @@ export function CelebrationPopperBadge({ size = 56 }: CelebrationPopperBadgeProp
 }
 
 export const PartyPopperBadge = CelebrationPopperBadge;
-
-export type KalloShieldIconProps = {
-  size?: number;
-};
 
 /** Icon Khiên Kallo (bảo vệ đóng băng streak) */
 export function KalloShieldIcon({ size = 30 }: KalloShieldIconProps) {
@@ -1363,14 +1321,6 @@ export function KalloShieldIcon({ size = 30 }: KalloShieldIconProps) {
 }
 
 export const WaoShieldIcon = KalloShieldIcon;
-export type WaoShieldIconProps = KalloShieldIconProps;
-
-export type CirclePlusIconProps = {
-  size?: number;
-  circleColor?: string;
-  plusColor?: string;
-  strokeWidth?: number;
-};
 
 /** Icon Dấu cộng trong vòng tròn (+) */
 export function CirclePlusIcon({
@@ -1391,14 +1341,6 @@ export function CirclePlusIcon({
     </Svg>
   );
 }
-
-export type MilestoneCalendarBadgeProps = {
-  days: number;
-  isActive?: boolean;
-  isAchieved?: boolean;
-  width?: number;
-  height?: number;
-};
 
 /** Huy hiệu cuốn lịch mốc ngày phong cách sticker viền trắng / xám (3, 7, 14 ngày) */
 export function MilestoneCalendarBadge({
