@@ -13,6 +13,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import { images } from '@/assets/images';
 import { AppButton, AppCard, AppText } from '@/components/common';
+import { ChevronLeftIcon } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme, type ThemeContextValue } from '@/theme';
 import { useMealPlan } from '../MealPlanProvider';
@@ -148,9 +149,7 @@ export function MealPlanOverviewScreen() {
               accessibilityRole="button"
               accessibilityLabel="Quay lại"
             >
-              <AppText variant="headlineSm" color={theme.colors.textPrimary}>
-                ‹
-              </AppText>
+              <ChevronLeftIcon size={22} color={theme.colors.textPrimary} />
             </TouchableOpacity>
           )}
           <AppText variant="headlineLg" style={styles.mainTitle}>

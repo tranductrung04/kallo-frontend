@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavigationContainer, DarkTheme, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -35,6 +35,7 @@ import { NotificationCenterScreen, ReminderSettingsScreen } from '@/features/sys
 import { ReportOverviewScreen } from '@/features/report/screens/ReportOverviewScreen';
 import { useTheme } from '@/theme';
 import { AppText } from '@/components/common';
+import { ChevronLeftIcon } from '@/components/icons';
 import { useAuth } from '@/features/auth/AuthProvider';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -47,7 +48,25 @@ export function RootNavigator() {
   const navigationTheme = { ...baseTheme, colors: { ...baseTheme.colors, background: theme.colors.background, card: theme.colors.surface, text: theme.colors.text, border: theme.colors.border, primary: theme.colors.primary } };
   return <NavigationContainer theme={navigationTheme}>
     <GameEventToast />
-    <Stack.Navigator screenOptions={{ headerStyle: { backgroundColor: theme.colors.surface }, headerTintColor: theme.colors.text, contentStyle: { backgroundColor: theme.colors.background } }}>
+    <Stack.Navigator
+      screenOptions={({ navigation }) => ({
+        headerStyle: { backgroundColor: theme.colors.surface },
+        headerTintColor: theme.colors.text,
+        contentStyle: { backgroundColor: theme.colors.background },
+        headerLeft: ({ canGoBack, tintColor }) =>
+          canGoBack ? (
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              accessibilityRole="button"
+              accessibilityLabel="Quay lại"
+              style={{ marginRight: 12, paddingVertical: 4, paddingRight: 4 }}
+            >
+              <ChevronLeftIcon size={22} color={tintColor || theme.colors.text} />
+            </TouchableOpacity>
+          ) : null,
+      })}
+    >
       {status === 'signedOut' ? <Stack.Screen name="Auth" component={AuthNavigator} options={{ headerShown: false }} /> : status === 'needsProfile' ? <Stack.Screen name="Onboarding" component={OnboardingNavigator} options={{ headerShown: false }} /> : <>
         <Stack.Screen name="MainTabs" component={MainTabNavigator} options={{ headerShown: false }} />
         <Stack.Screen name="ComponentShowcase" component={ComponentShowcaseScreen} options={{ title: 'Bộ UI Kit' }} />
