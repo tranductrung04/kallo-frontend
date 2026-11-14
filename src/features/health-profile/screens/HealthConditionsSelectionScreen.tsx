@@ -24,6 +24,7 @@ import {
   LightbulbIcon,
   ShieldSecurityIcon,
 } from '@/components/icons';
+import { useTheme } from '@/theme';
 import { AnimatedCard, AnimatedCheckbox } from '../components';
 import { useHealthProfileDraft } from '../hooks/useHealthProfileDraft';
 
@@ -137,6 +138,8 @@ export function HealthConditionsSelectionScreen({
   hideHeader = false,
 }: HealthConditionsSelectionScreenProps) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const isDark = theme.scheme === 'dark';
   const { draft, toggleHealthCondition } = useHealthProfileDraft();
 
   const [selectedConditions, setSelectedConditions] = useState<string[]>(
@@ -184,7 +187,15 @@ export function HealthConditionsSelectionScreen({
     >
       {/* ── Avatar & Speech Bubble Row ─────────────────────────── */}
       <View style={styles.bubbleRow}>
-        <View style={styles.avatarWrap}>
+        <View
+          style={[
+            styles.avatarWrap,
+            {
+              backgroundColor: isDark ? '#302657' : '#EDE5FF',
+              borderColor: isDark ? '#9D6CFA' : '#D4C7F8',
+            },
+          ]}
+        >
           <Image
             source={images.mascotAvatar}
             style={styles.avatarImage}
@@ -192,15 +203,41 @@ export function HealthConditionsSelectionScreen({
             accessibilityLabel="Mascot Kallo"
           />
         </View>
-        <View style={styles.bubble}>
-          <View style={styles.bubbleTail} />
-          <AppText style={styles.bubbleText}>
+        <View
+          style={[
+            styles.bubble,
+            {
+              backgroundColor: '#FFFFFF',
+              borderColor: isDark ? '#382D61' : theme.colors.surfaceBorder,
+              borderWidth: 1,
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.bubbleTail,
+              {
+                borderRightColor: '#FFFFFF',
+              },
+            ]}
+          />
+          <AppText
+            style={[
+              styles.bubbleText,
+              { color: '#111827' },
+            ]}
+          >
             Tiền sử bệnh lý của bạn là...
           </AppText>
         </View>
       </View>
 
-      <AppText style={styles.hintNotice}>
+      <AppText
+        style={[
+          styles.hintNotice,
+          { color: isDark ? '#CBD5E1' : theme.colors.textSecondary },
+        ]}
+      >
         Kallo sẽ tự động tinh chỉnh khẩu phần dinh dưỡng và cảnh báo món ăn không an toàn cho bạn.
       </AppText>
 
@@ -208,7 +245,13 @@ export function HealthConditionsSelectionScreen({
       <View style={styles.cardsContainer}>
         {CONDITION_ITEMS.map((item) => {
           const isSelected = selectedConditions.includes(item.key);
-          const iconColor = isSelected ? '#C084FC' : '#8E87AA';
+          const iconColor = isSelected
+            ? isDark
+              ? '#C084FC'
+              : theme.colors.brandPrimary
+            : isDark
+            ? '#8E87AA'
+            : theme.colors.textSecondary;
 
           return (
             <AnimatedCard
@@ -216,10 +259,10 @@ export function HealthConditionsSelectionScreen({
               selected={isSelected}
               onPress={() => handleToggle(item.key)}
               style={styles.conditionCard}
-              selectedBorderColor="#9D6CFA"
-              selectedBgColor="#231742"
-              unselectedBorderColor="#2E2352"
-              unselectedBgColor="#1A1433"
+              selectedBorderColor={theme.colors.brandPrimary}
+              selectedBgColor={isDark ? '#231742' : theme.colors.brandSoftTint}
+              unselectedBorderColor={isDark ? '#2E2352' : theme.colors.surfaceBorder}
+              unselectedBgColor={isDark ? '#1A1433' : theme.colors.surfaceMid}
               activeScale={0.97}
               accessibilityLabel={item.title}
               accessibilityRole="checkbox"
@@ -229,35 +272,102 @@ export function HealthConditionsSelectionScreen({
                 <View
                   style={[
                     styles.iconWrap,
-                    isSelected ? styles.iconWrapSelected : styles.iconWrapUnselected,
+                    isSelected
+                      ? {
+                          backgroundColor: isDark
+                            ? 'rgba(167, 139, 250, 0.22)'
+                            : '#EDE5FF',
+                        }
+                      : {
+                          backgroundColor: isDark
+                            ? 'rgba(255, 255, 255, 0.05)'
+                            : '#F1EFF9',
+                        },
                   ]}
                 >
                   {item.renderIcon(iconColor)}
                 </View>
                 <View style={styles.titleWrap}>
-                  <AppText style={[styles.cardTitle, isSelected && styles.cardTitleSelected]}>
+                  <AppText
+                    style={[
+                      styles.cardTitle,
+                      {
+                        color: isSelected
+                          ? isDark
+                            ? '#E9D5FF'
+                            : theme.colors.brandPrimary
+                          : isDark
+                          ? '#FFFFFF'
+                          : theme.colors.textPrimary,
+                      },
+                    ]}
+                  >
                     {item.title}
                   </AppText>
-                  <AppText style={styles.cardSubtitle}>{item.subtitle}</AppText>
+                  <AppText
+                    style={[
+                      styles.cardSubtitle,
+                      { color: isDark ? '#A098BD' : theme.colors.textSecondary },
+                    ]}
+                  >
+                    {item.subtitle}
+                  </AppText>
                 </View>
                 <View style={styles.checkWrap}>
-                  <AnimatedCheckbox selected={isSelected} activeColor="#9D6CFA" size={24} />
+                  <AnimatedCheckbox
+                    selected={isSelected}
+                    activeColor={theme.colors.brandPrimary}
+                    inactiveColor={isDark ? '#3D3161' : theme.colors.surfaceBorder}
+                    size={24}
+                  />
                 </View>
               </View>
 
               {/* Smooth Animated Nutrition Advice */}
               {isSelected && (
-                <View style={styles.adviceContainer}>
+                <View
+                  style={[
+                    styles.adviceContainer,
+                    {
+                      borderTopColor: isDark
+                        ? 'rgba(167, 139, 250, 0.25)'
+                        : theme.colors.surfaceBorder,
+                    },
+                  ]}
+                >
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                    <LightbulbIcon size={14} color="#FACC15" />
-                    <AppText style={styles.adviceHeading}>
+                    <LightbulbIcon size={14} color={isDark ? '#FACC15' : '#D97706'} />
+                    <AppText
+                      style={[
+                        styles.adviceHeading,
+                        { color: isDark ? '#FDE047' : '#D97706' },
+                      ]}
+                    >
                       Lưu ý dinh dưỡng từ Kallo:
                     </AppText>
                   </View>
                   {item.dietAdvice.map((advice, idx) => (
                     <View key={idx} style={styles.adviceRow}>
-                      <AppText style={styles.bulletDot}>•</AppText>
-                      <AppText style={styles.adviceText}>{advice}</AppText>
+                      <AppText
+                        style={[
+                          styles.bulletDot,
+                          {
+                            color: isDark
+                              ? '#C084FC'
+                              : theme.colors.brandPrimary,
+                          },
+                        ]}
+                      >
+                        •
+                      </AppText>
+                      <AppText
+                        style={[
+                          styles.adviceText,
+                          { color: isDark ? '#E2E8F0' : theme.colors.textSecondary },
+                        ]}
+                      >
+                        {advice}
+                      </AppText>
                     </View>
                   ))}
                 </View>
@@ -268,14 +378,25 @@ export function HealthConditionsSelectionScreen({
       </View>
 
       {/* ── Footnote Hint ──────────────────────────────────────── */}
-      <AppText style={styles.footnote}>
+      <AppText
+        style={[
+          styles.footnote,
+          { color: isDark ? '#8E87AA' : theme.colors.textSecondary },
+        ]}
+      >
         *** Bạn có thể chọn nhiều bệnh lý cùng lúc nếu có. Dữ liệu này được mã hóa bảo mật để chăm sóc sức khỏe của bạn.
       </AppText>
 
       {/* ── Bottom Action Button ───────────────────────────────── */}
       <View style={[styles.bottomArea, { paddingBottom: Math.max(insets.bottom, 16) }]}>
         <TouchableOpacity
-          style={styles.actionButton}
+          style={[
+            styles.actionButton,
+            {
+              backgroundColor: theme.colors.brandAction,
+              shadowColor: theme.colors.brandPrimary,
+            },
+          ]}
           onPress={handleNext}
           activeOpacity={0.85}
           accessibilityRole="button"
@@ -292,7 +413,15 @@ export function HealthConditionsSelectionScreen({
   }
 
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        {
+          paddingTop: insets.top,
+          backgroundColor: isDark ? '#120E29' : theme.colors.canvasBase,
+        },
+      ]}
+    >
       {/* ── Top Bar ────────────────────────────────────────────── */}
       <View style={styles.topBar}>
         <TouchableOpacity
@@ -302,13 +431,31 @@ export function HealthConditionsSelectionScreen({
           accessibilityRole="button"
           accessibilityLabel="Quay lại"
         >
-          <ChevronLeftIcon size={26} color="#FFFFFF" />
+          <ChevronLeftIcon
+            size={26}
+            color={isDark ? '#FFFFFF' : theme.colors.textPrimary}
+          />
         </TouchableOpacity>
       </View>
 
       {/* ── Progress Bar: 97% ────────────────────────────────── */}
-      <View style={styles.progressTrack}>
-        <View style={[styles.progressFill, { width: '97%' }]} />
+      <View
+        style={[
+          styles.progressTrack,
+          {
+            backgroundColor: isDark ? '#261F45' : theme.colors.surfaceBorder,
+          },
+        ]}
+      >
+        <View
+          style={[
+            styles.progressFill,
+            {
+              backgroundColor: theme.colors.brandPrimary,
+              width: '97%',
+            },
+          ]}
+        />
       </View>
 
       {content}

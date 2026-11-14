@@ -1,6 +1,7 @@
 export * from './types';
 export * from './SystemProvider';
 export * from './screens/AccountProfileScreen';
+export * from './screens/ChangePasswordScreen';
 export * from './screens/NotificationCenterScreen';
 export * from './screens/ReminderSettingsScreen';
 export * from './screens/ComponentShowcaseScreen';

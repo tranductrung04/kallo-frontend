@@ -6,10 +6,12 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '@/components/common';
-import { ChevronLeftIcon } from '@/components/icons';
+import { ChevronLeftIcon, MoonIcon, SunIcon } from '@/components/icons';
 import { ChampionMascotRNPro } from '@/features/onboarding/components';
+import { useTheme } from '@/theme';
 
 interface KalloWelcomeScreenProps {
   navigation?: any;
@@ -23,6 +25,8 @@ export function KalloWelcomeScreen({
   onBack,
 }: KalloWelcomeScreenProps) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const isDark = theme.scheme === 'dark';
   const { width, height } = useWindowDimensions();
 
   // Tính toán kích thước mascot responsive dựa trên chiều rộng và chiều cao màn hình
@@ -45,7 +49,17 @@ export function KalloWelcomeScreen({
   };
 
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        {
+          paddingTop: insets.top,
+          backgroundColor: isDark ? '#120E29' : theme.colors.canvasBase,
+        },
+      ]}
+    >
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+
       {/* ── Top Bar ────────────────────────────────────────────── */}
       <View style={styles.topBar}>
         <TouchableOpacity
@@ -55,18 +69,56 @@ export function KalloWelcomeScreen({
           accessibilityRole="button"
           accessibilityLabel="Quay lại"
         >
-          <ChevronLeftIcon size={26} color="#FFFFFF" />
+          <ChevronLeftIcon
+            size={26}
+            color={isDark ? '#FFFFFF' : theme.colors.textPrimary}
+          />
+        </TouchableOpacity>
+
+        <View style={styles.topBarSpacer} />
+
+        <TouchableOpacity
+          onPress={theme.toggleScheme}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          accessibilityRole="button"
+          accessibilityLabel={
+            isDark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'
+          }
+          style={styles.themeToggleBtn}
+        >
+          {isDark ? (
+            <SunIcon size={20} color="#FACC15" />
+          ) : (
+            <MoonIcon size={20} color={theme.colors.brandPrimary} />
+          )}
         </TouchableOpacity>
       </View>
 
       {/* ── Speech Bubble ──────────────────────────────────────── */}
       <View style={styles.bubbleContainer}>
-        <View style={styles.bubble}>
+        <View
+          style={[
+            styles.bubble,
+            !isDark && {
+              borderWidth: 1,
+              borderColor: theme.colors.surfaceBorder,
+            },
+          ]}
+        >
           <AppText style={styles.bubbleText}>
             Xin chào! Mình là Kallo - từ hôm nay,{'\n'}mình sẽ đồng hành cùng bạn
           </AppText>
         </View>
-        <View style={styles.bubbleTail} />
+        <View
+          style={[
+            styles.bubbleTail,
+            !isDark && {
+              borderRightWidth: 1,
+              borderBottomWidth: 1,
+              borderColor: theme.colors.surfaceBorder,
+            },
+          ]}
+        />
       </View>
 
       {/* ── Mascot Center (SVG Vector & Animation tương tác 100% Native Driver) ──── */}
@@ -82,7 +134,10 @@ export function KalloWelcomeScreen({
       {/* ── Bottom Action ──────────────────────────────────────── */}
       <View style={[styles.bottomArea, { paddingBottom: Math.max(insets.bottom, 20) }]}>
         <TouchableOpacity
-          style={styles.actionButton}
+          style={[
+            styles.actionButton,
+            { backgroundColor: theme.colors.brandAction },
+          ]}
           onPress={handleNext}
           activeOpacity={0.85}
           accessibilityRole="button"
@@ -110,6 +165,16 @@ const styles = StyleSheet.create({
   backButton: {
     width: 40,
     height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  topBarSpacer: {
+    flex: 1,
+  },
+  themeToggleBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },

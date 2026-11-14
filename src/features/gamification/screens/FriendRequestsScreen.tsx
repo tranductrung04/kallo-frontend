@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import {
   Alert,
   FlatList,
-  SafeAreaView,
   StyleSheet,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppButton, AppCard, AppText } from '@/components/common';
 import {
@@ -136,7 +136,7 @@ export function FriendRequestsScreen({ navigation }: Props) {
   const currentList = activeTab === 'incoming' ? incomingRequests : outgoingRequests;
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: c.canvasBase }]}>
+    <SafeAreaView edges={['top']} style={[styles.safe, { backgroundColor: c.canvasBase }]}>
       {/* ── Top Bar ─────────────────────────────────────────────────── */}
       <View style={[styles.topBar, { borderBottomColor: c.surfaceBorder }]}>
         <TouchableOpacity

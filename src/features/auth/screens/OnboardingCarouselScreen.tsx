@@ -228,7 +228,7 @@ export function OnboardingCarouselScreen({ navigation }: Props) {
   );
 
   return (
-    <View style={[styles.root, { backgroundColor: isDark ? '#0D0B14' : theme.colors.canvasBase }]}>
+    <View style={[styles.root, { backgroundColor: isDark ? '#0D0B14' : '#FFFFFF' }]}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       {isDark ? (
         <ImageBackground
@@ -239,7 +239,7 @@ export function OnboardingCarouselScreen({ navigation }: Props) {
           {renderContent()}
         </ImageBackground>
       ) : (
-        <View style={styles.background}>
+        <View style={[styles.background, { backgroundColor: '#FFFFFF' }]}>
           <AuthLightBackground />
           {renderContent()}
         </View>

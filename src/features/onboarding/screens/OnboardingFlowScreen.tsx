@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppButton, AppText, ProgressBar } from '@/components/common';
 import { useTheme } from '@/theme';
 import {
@@ -31,6 +32,7 @@ interface OnboardingFlowScreenProps {
 }
 
 export function OnboardingFlowScreen({ route, navigation }: OnboardingFlowScreenProps) {
+  const insets = useSafeAreaInsets();
   const theme = useTheme();
   const [step, setStep] = useState(0);
 
@@ -90,7 +92,7 @@ export function OnboardingFlowScreen({ route, navigation }: OnboardingFlowScreen
   return (
     <ScrollView
       style={[styles.safe, { backgroundColor: theme.colors.background }]}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, { paddingTop: Math.max(insets.top, 16) + 8 }]}
     >
       <ProgressBar value={(step + 1) / 10} />
       <AppText variant="caption" color={theme.colors.textMuted}>
