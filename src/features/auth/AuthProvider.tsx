@@ -36,6 +36,7 @@ type AuthContextValue = {
   signUp: (email: string, password: string, displayName: string) => Promise<AuthResponse | void>;
   verifyOtp: (email: string, otp: string) => Promise<void>;
   resendOtp: (email: string) => Promise<void>;
+  completeOnboarding: () => Promise<void>;
   signOut: () => Promise<void>;
   loginAsDemo: () => Promise<void>;
   refreshProfileStatus: () => Promise<void>;
@@ -95,7 +96,10 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
         const isSessionActive = (await AsyncStorage.getItem(LOCAL_SESSION_KEY)) === 'true';
         if (isSessionActive) {
           await refreshUser();
-          if (mountedRef.current) setStatus('signedIn');
+          const pendingOnboarding = await AsyncStorage.getItem('@kallo/pending-onboarding');
+          if (mountedRef.current) {
+            setStatus(pendingOnboarding === 'true' ? 'needsProfile' : 'signedIn');
+          }
         } else {
           if (mountedRef.current) {
             setUser(null);
@@ -119,24 +123,18 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
       // Fetch user profile info
       await refreshUser();
 
-      // Check health profile completion
-      try {
-        const response = await getHealthProfile();
-        const profile = response.data.data ?? response.data;
-        const healthProfile = profile as HealthProfile | null;
-        const hasProfile = Boolean(healthProfile?.heightCm && healthProfile?.weightKg);
-        if (mountedRef.current) setStatus(hasProfile ? 'signedIn' : 'needsProfile');
-      } catch (healthErr: any) {
-        const statusCode = healthErr?.response?.status;
-        if (statusCode === 404) {
-          if (mountedRef.current) setStatus('needsProfile');
-        } else if (statusCode === 401) {
-          if (mountedRef.current) setStatus('signedOut');
-        } else {
-          if (mountedRef.current) setStatus('signedIn');
-        }
+      // Chỉ điều hướng đến Onboarding nếu vừa đăng ký mới (chưa hoàn thành bước thiết lập hồ sơ)
+      const pendingOnboarding = await AsyncStorage.getItem('@kallo/pending-onboarding');
+      if (pendingOnboarding === 'true') {
+        if (mountedRef.current) setStatus('needsProfile');
+        return;
       }
-    } catch (requestError: any) {
+
+      // Mọi phiên đã đăng nhập trước đó: vào thẳng màn hình chính (signedIn)
+      if (mountedRef.current) {
+        setStatus('signedIn');
+      }
+    } catch {
       if (!mountedRef.current) return;
       setUser(null);
       setStatus('signedOut');
@@ -168,6 +166,7 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
           role: 'USER',
         };
         await AsyncStorage.setItem(LOCAL_SESSION_KEY, 'true');
+        await AsyncStorage.removeItem('@kallo/pending-onboarding');
         if (mountedRef.current) {
           setUser(demoUser);
           setStatus('signedIn');
@@ -179,18 +178,17 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
       const result = await login(email, password);
       await refreshUser();
       if (!mountedRef.current) return;
-      if (result.profileCompleted === false || result.needsProfile === true) {
-        setStatus('needsProfile');
-      } else {
-        await refreshProfileStatus();
-      }
+
+      // Người dùng đăng nhập bằng email & password: luôn vào thẳng MainTabs (signedIn), không vào Onboarding
+      await AsyncStorage.removeItem('@kallo/pending-onboarding');
+      setStatus('signedIn');
       return result;
     } catch (requestError) {
       const errorMsg = getApiErrorMessage(requestError);
       if (mountedRef.current) setError(errorMsg);
       throw requestError;
     }
-  }, [refreshProfileStatus, refreshUser]);
+  }, [refreshUser]);
 
   const signInWithGoogle = useCallback(async (idToken: string) => {
     try {
@@ -206,6 +204,7 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
           role: 'USER',
         };
         await AsyncStorage.setItem(LOCAL_SESSION_KEY, 'true');
+        await AsyncStorage.removeItem('@kallo/pending-onboarding');
         if (mountedRef.current) {
           setUser(demoUser);
           setStatus('signedIn');
@@ -216,10 +215,19 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
       const result = await loginWithGoogle(idToken);
       await refreshUser();
       if (!mountedRef.current) return;
-      if (result.profileCompleted === false) {
+
+      // Lần đầu đăng ký bằng Google thành công -> điều hướng đến Onboarding
+      const isNewUser = Boolean(
+        (result as any)?.isNewUser ?? (result as any)?.newUser
+      );
+
+      if (isNewUser) {
+        await AsyncStorage.setItem('@kallo/pending-onboarding', 'true');
         setStatus('needsProfile');
       } else {
-        await refreshProfileStatus();
+        // Đăng nhập Google bằng tài khoản đã có -> vào thẳng màn hình chính (signedIn)
+        await AsyncStorage.removeItem('@kallo/pending-onboarding');
+        setStatus('signedIn');
       }
       return result;
     } catch (requestError) {
@@ -227,7 +235,7 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
       if (mountedRef.current) setError(errorMsg);
       throw requestError;
     }
-  }, [refreshProfileStatus, refreshUser]);
+  }, [refreshUser]);
 
   const signUp = useCallback(async (email: string, password: string, displayName: string) => {
     try {
@@ -249,19 +257,33 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
       setError(null);
       if (IS_DEMO_MODE) {
         await AsyncStorage.setItem(LOCAL_SESSION_KEY, 'true');
+        await AsyncStorage.setItem('@kallo/pending-onboarding', 'true');
         await refreshUser();
-        if (mountedRef.current) setStatus('signedIn');
+        if (mountedRef.current) setStatus('needsProfile');
         return;
       }
       await verifyEmail(otp);
       if (!mountedRef.current) return;
-      await refreshProfileStatus();
+      await refreshUser();
+      // Lần đầu đăng ký bằng email thành công -> điều hướng đến Onboarding
+      await AsyncStorage.setItem('@kallo/pending-onboarding', 'true');
+      if (mountedRef.current) {
+        setStatus('needsProfile');
+      }
     } catch (requestError) {
       const errorMsg = getApiErrorMessage(requestError);
       if (mountedRef.current) setError(errorMsg);
       throw requestError;
     }
-  }, [refreshProfileStatus, refreshUser]);
+  }, [refreshUser]);
+
+  const completeOnboarding = useCallback(async () => {
+    await AsyncStorage.removeItem('@kallo/pending-onboarding');
+    await AsyncStorage.setItem('@kallo/onboarding-completed', 'true');
+    if (mountedRef.current) {
+      setStatus('signedIn');
+    }
+  }, []);
 
   const resendOtp = useCallback(async (_email: string) => {
     try {
@@ -288,6 +310,7 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
       role: 'USER',
     };
     await AsyncStorage.setItem(LOCAL_SESSION_KEY, 'true');
+    await AsyncStorage.removeItem('@kallo/pending-onboarding');
     if (mountedRef.current) {
       setUser(demoUser);
       setStatus('signedIn');
@@ -296,6 +319,8 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
 
   const signOut = useCallback(async () => {
     await AsyncStorage.removeItem(LOCAL_SESSION_KEY);
+    await AsyncStorage.removeItem('@kallo/health-profile');
+    await AsyncStorage.removeItem('@kallo/pending-onboarding');
     if (!IS_DEMO_MODE) {
       await logout();
     }
@@ -321,12 +346,28 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
       signUp,
       verifyOtp,
       resendOtp,
+      completeOnboarding,
       signOut,
       loginAsDemo,
       refreshProfileStatus,
       refreshUser,
     }),
-    [status, user, error, clearError, signIn, signInWithGoogle, signUp, verifyOtp, resendOtp, signOut, loginAsDemo, refreshProfileStatus, refreshUser]
+    [
+      status,
+      user,
+      error,
+      clearError,
+      signIn,
+      signInWithGoogle,
+      signUp,
+      verifyOtp,
+      resendOtp,
+      completeOnboarding,
+      signOut,
+      loginAsDemo,
+      refreshProfileStatus,
+      refreshUser,
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

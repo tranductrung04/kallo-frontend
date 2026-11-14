@@ -15,6 +15,7 @@ import { Armchair, Flame, Footprints, Star } from 'lucide-react-native';
 import { images } from '@/assets/images';
 import { AppText } from '@/components/common';
 import { ChevronLeftIcon } from '@/components/icons';
+import { useTheme } from '@/theme';
 import { AnimatedCard, AnimatedRadio } from '../components';
 import { useHealthProfileDraft } from '../hooks/useHealthProfileDraft';
 import type { ActivityLevel } from '../types';
@@ -88,6 +89,8 @@ export function ActivityLevelSelectionScreen({
   hideHeader = false,
 }: ActivityLevelSelectionScreenProps) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const isDark = theme.scheme === 'dark';
   const { draft, updateDraft } = useHealthProfileDraft();
   const [selectedActivity, setSelectedActivity] = useState<ActivityLevel>(
     draft.activity || 'light'
@@ -123,7 +126,15 @@ export function ActivityLevelSelectionScreen({
     >
       {/* ── Avatar & Speech Bubble Row ─────────────────────────── */}
       <View style={styles.bubbleRow}>
-        <View style={styles.avatarWrap}>
+        <View
+          style={[
+            styles.avatarWrap,
+            {
+              backgroundColor: isDark ? '#302657' : '#EDE5FF',
+              borderColor: isDark ? '#9D6CFA' : '#D4C7F8',
+            },
+          ]}
+        >
           <Image
             source={images.mascotAvatar}
             style={styles.avatarImage}
@@ -131,9 +142,30 @@ export function ActivityLevelSelectionScreen({
             accessibilityLabel="Mascot Kallo"
           />
         </View>
-        <View style={styles.bubble}>
-          <View style={styles.bubbleTail} />
-          <AppText style={styles.bubbleText}>
+        <View
+          style={[
+            styles.bubble,
+            {
+              backgroundColor: '#FFFFFF',
+              borderColor: isDark ? '#382D61' : theme.colors.surfaceBorder,
+              borderWidth: 1,
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.bubbleTail,
+              {
+                borderRightColor: '#FFFFFF',
+              },
+            ]}
+          />
+          <AppText
+            style={[
+              styles.bubbleText,
+              { color: '#111827' },
+            ]}
+          >
             Cường độ tập luyện của bạn?
           </AppText>
         </View>
@@ -143,7 +175,13 @@ export function ActivityLevelSelectionScreen({
       <View style={styles.cardsContainer}>
         {ACTIVITY_ITEMS.map((item) => {
           const isSelected = selectedActivity === item.key;
-          const iconColor = isSelected ? '#C084FC' : '#8E87AA';
+          const iconColor = isSelected
+            ? isDark
+              ? '#C084FC'
+              : theme.colors.brandPrimary
+            : isDark
+            ? '#8E87AA'
+            : theme.colors.textSecondary;
 
           return (
             <AnimatedCard
@@ -151,10 +189,10 @@ export function ActivityLevelSelectionScreen({
               selected={isSelected}
               onPress={() => handleSelect(item.key)}
               style={styles.activityCard}
-              selectedBorderColor="#A78BFA"
-              selectedBgColor="#231742"
-              unselectedBorderColor="#2E2352"
-              unselectedBgColor="#1A1433"
+              selectedBorderColor={theme.colors.brandPrimary}
+              selectedBgColor={isDark ? '#231742' : theme.colors.brandSoftTint}
+              unselectedBorderColor={isDark ? '#2E2352' : theme.colors.surfaceBorder}
+              unselectedBgColor={isDark ? '#1A1433' : theme.colors.surfaceMid}
               activeScale={0.97}
               accessibilityLabel={item.title}
               accessibilityRole="radio"
@@ -163,26 +201,85 @@ export function ActivityLevelSelectionScreen({
                 <View
                   style={[
                     styles.iconWrap,
-                    isSelected ? styles.iconWrapSelected : styles.iconWrapUnselected,
+                    isSelected
+                      ? {
+                          backgroundColor: isDark
+                            ? 'rgba(167, 139, 250, 0.22)'
+                            : '#EDE5FF',
+                        }
+                      : {
+                          backgroundColor: isDark
+                            ? 'rgba(255, 255, 255, 0.05)'
+                            : '#F1EFF9',
+                        },
                   ]}
                 >
                   {item.renderIcon(iconColor)}
                 </View>
                 <View style={styles.titleWrap}>
-                  <AppText style={[styles.cardTitle, isSelected && styles.cardTitleSelected]}>
+                  <AppText
+                    style={[
+                      styles.cardTitle,
+                      {
+                        color: isSelected
+                          ? isDark
+                            ? '#E9D5FF'
+                            : theme.colors.brandPrimary
+                          : isDark
+                          ? '#FFFFFF'
+                          : theme.colors.textPrimary,
+                      },
+                    ]}
+                  >
                     {item.title}
                   </AppText>
                 </View>
-                <AnimatedRadio selected={isSelected} activeColor="#A78BFA" size={24} />
+                <AnimatedRadio
+                  selected={isSelected}
+                  activeColor={theme.colors.brandPrimary}
+                  inactiveColor={isDark ? '#473B6B' : theme.colors.surfaceBorder}
+                  size={24}
+                />
               </View>
 
               {/* Expandable Bullets with Smooth LayoutAnimation */}
               {isSelected && (
-                <View style={styles.bulletsWrap}>
+                <View
+                  style={[
+                    styles.bulletsWrap,
+                    {
+                      borderTopColor: isDark
+                        ? 'rgba(167, 139, 250, 0.2)'
+                        : theme.colors.surfaceBorder,
+                    },
+                  ]}
+                >
                   {item.bullets.map((bullet, idx) => (
                     <View key={idx} style={styles.bulletRow}>
-                      <AppText style={styles.bulletDot}>•</AppText>
-                      <AppText style={styles.bulletText}>{bullet}</AppText>
+                      <AppText
+                        style={[
+                          styles.bulletDot,
+                          {
+                            color: isDark
+                              ? '#C084FC'
+                              : theme.colors.brandPrimary,
+                          },
+                        ]}
+                      >
+                        •
+                      </AppText>
+                      <AppText
+                        style={[
+                          styles.bulletText,
+                          {
+                            color: isDark
+                              ? '#CBD5E1'
+                              : theme.colors.textSecondary,
+                          },
+                        ]}
+                      >
+                        {bullet}
+                      </AppText>
                     </View>
                   ))}
                 </View>
@@ -195,7 +292,13 @@ export function ActivityLevelSelectionScreen({
       {/* ── Bottom Action Button ───────────────────────────────── */}
       <View style={[styles.bottomArea, { paddingBottom: Math.max(insets.bottom, 16) }]}>
         <TouchableOpacity
-          style={styles.actionButton}
+          style={[
+            styles.actionButton,
+            {
+              backgroundColor: theme.colors.brandAction,
+              shadowColor: theme.colors.brandPrimary,
+            },
+          ]}
           onPress={handleNext}
           activeOpacity={0.85}
           accessibilityRole="button"
@@ -212,7 +315,15 @@ export function ActivityLevelSelectionScreen({
   }
 
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        {
+          paddingTop: insets.top,
+          backgroundColor: isDark ? '#120E29' : theme.colors.canvasBase,
+        },
+      ]}
+    >
       {/* ── Top Bar ────────────────────────────────────────────── */}
       <View style={styles.topBar}>
         <TouchableOpacity
@@ -222,13 +333,31 @@ export function ActivityLevelSelectionScreen({
           accessibilityRole="button"
           accessibilityLabel="Quay lại"
         >
-          <ChevronLeftIcon size={26} color="#FFFFFF" />
+          <ChevronLeftIcon
+            size={26}
+            color={isDark ? '#FFFFFF' : theme.colors.textPrimary}
+          />
         </TouchableOpacity>
       </View>
 
       {/* ── Progress Bar: 85% ────────────────────────────────── */}
-      <View style={styles.progressTrack}>
-        <View style={[styles.progressFill, { width: '85%' }]} />
+      <View
+        style={[
+          styles.progressTrack,
+          {
+            backgroundColor: isDark ? '#261F45' : theme.colors.surfaceBorder,
+          },
+        ]}
+      >
+        <View
+          style={[
+            styles.progressFill,
+            {
+              backgroundColor: theme.colors.brandPrimary,
+              width: '85%',
+            },
+          ]}
+        />
       </View>
 
       {content}

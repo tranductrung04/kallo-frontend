@@ -28,6 +28,7 @@ import {
   LightningIcon,
   WheatIcon,
 } from '@/components/icons';
+import { useTheme } from '@/theme';
 import { useHealthProfileDraft } from '../hooks/useHealthProfileDraft';
 import {
   calculateDailyCalorieGoal,
@@ -49,6 +50,8 @@ export function PlanResultScreen({
   onBack,
 }: PlanResultScreenProps) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const isDark = theme.scheme === 'dark';
   const {
     draft,
     result: contextResult,
@@ -198,25 +201,37 @@ export function PlanResultScreen({
   const handleStartJourney = async () => {
     setSavingPlan(true);
     try {
-      const ok = await saveProfile();
-      if (ok) {
+      const res = await saveProfile(result);
+      if (res.ok) {
         if (onFinish) {
           onFinish();
-        } else if (navigation?.navigate) {
-          // If in Onboarding navigator, try reset to MainTabs or Onboarding completion
+        } else {
+          // If in Onboarding navigator, try reset to MainTabs via RootNavigator
           try {
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'MainTabs' as any }],
-            });
+            const parent = navigation?.getParent?.();
+            if (parent?.reset) {
+              parent.reset({
+                index: 0,
+                routes: [{ name: 'MainTabs' as any }],
+              });
+            } else if (parent?.navigate) {
+              parent.navigate('MainTabs' as any);
+            } else if (navigation?.reset) {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'MainTabs' as any }],
+              });
+            } else if (navigation?.navigate) {
+              navigation.navigate('MainTabs' as any);
+            }
           } catch {
-            navigation.navigate('MainTabs' as any);
+            // RootNavigator switch via auth status automatically transitions
           }
         }
       } else {
         Alert.alert(
           'Lưu kế hoạch',
-          error || 'Chưa thể lưu hồ sơ sức khỏe. Vui lòng thử lại!'
+          res.error || error || 'Chưa thể lưu hồ sơ sức khỏe. Vui lòng thử lại!'
         );
       }
     } catch (e: any) {
@@ -235,7 +250,15 @@ export function PlanResultScreen({
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        {
+          paddingTop: insets.top,
+          backgroundColor: isDark ? '#0F0B1E' : theme.colors.canvasBase,
+        },
+      ]}
+    >
       {/* ── Top Navigation Bar ──────────────────────────────────── */}
       <View style={styles.topBar}>
         <TouchableOpacity
@@ -245,7 +268,10 @@ export function PlanResultScreen({
           accessibilityRole="button"
           accessibilityLabel="Quay lại"
         >
-          <ChevronLeftIcon size={24} color="#FFFFFF" />
+          <ChevronLeftIcon
+            size={24}
+            color={isDark ? '#FFFFFF' : theme.colors.textPrimary}
+          />
         </TouchableOpacity>
       </View>
 
@@ -258,9 +284,9 @@ export function PlanResultScreen({
           <Svg width={chartWidth} height={chartHeight} viewBox={`0 0 ${chartWidth} ${chartHeight}`}>
             <Defs>
               <LinearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                <Stop offset="0%" stopColor="#9D6CFA" stopOpacity="0.55" />
-                <Stop offset="70%" stopColor="#9D6CFA" stopOpacity="0.15" />
-                <Stop offset="100%" stopColor="#9D6CFA" stopOpacity="0" />
+                <Stop offset="0%" stopColor={theme.colors.brandPrimary} stopOpacity={isDark ? 0.55 : 0.4} />
+                <Stop offset="70%" stopColor={theme.colors.brandPrimary} stopOpacity={isDark ? 0.15 : 0.08} />
+                <Stop offset="100%" stopColor={theme.colors.brandPrimary} stopOpacity={0} />
               </LinearGradient>
             </Defs>
 
@@ -270,7 +296,7 @@ export function PlanResultScreen({
               y1={16}
               x2={chartWidth * 0.28}
               y2={bottomY}
-              stroke="#2E234D"
+              stroke={isDark ? '#2E234D' : '#E4E0F0'}
               strokeWidth="1.2"
               strokeDasharray="4 4"
             />
@@ -279,7 +305,7 @@ export function PlanResultScreen({
               y1={16}
               x2={chartWidth * 0.54}
               y2={bottomY}
-              stroke="#2E234D"
+              stroke={isDark ? '#2E234D' : '#E4E0F0'}
               strokeWidth="1.2"
               strokeDasharray="4 4"
             />
@@ -288,7 +314,7 @@ export function PlanResultScreen({
               y1={16}
               x2={chartWidth * 0.8}
               y2={bottomY}
-              stroke="#2E234D"
+              stroke={isDark ? '#2E234D' : '#E4E0F0'}
               strokeWidth="1.2"
               strokeDasharray="4 4"
             />
@@ -299,7 +325,7 @@ export function PlanResultScreen({
             {/* Main Smooth S-Curve Line */}
             <Path
               d={curvePath}
-              stroke="#BCA4FA"
+              stroke={theme.colors.brandPrimary}
               strokeWidth="3.2"
               strokeLinecap="round"
               fill="none"
@@ -311,40 +337,99 @@ export function PlanResultScreen({
               y1={bottomY}
               x2={endX}
               y2={bottomY}
-              stroke="#3D3063"
+              stroke={isDark ? '#3D3063' : '#D1CBDD'}
               strokeWidth="1.8"
             />
             <Polygon
               points={`${endX},${bottomY - 4} ${endX + 8},${bottomY} ${endX},${bottomY + 4}`}
-              fill="#3D3063"
+              fill={isDark ? '#3D3063' : '#D1CBDD'}
             />
 
             {/* Start point marker */}
-            <Circle cx={startX} cy={startY} r="8" fill="rgba(188, 164, 250, 0.35)" />
-            <Circle cx={startX} cy={startY} r="4.5" fill="#BCA4FA" stroke="#FFFFFF" strokeWidth="1.5" />
+            <Circle
+              cx={startX}
+              cy={startY}
+              r="8"
+              fill={isDark ? 'rgba(188, 164, 250, 0.35)' : 'rgba(123, 79, 224, 0.18)'}
+            />
+            <Circle
+              cx={startX}
+              cy={startY}
+              r="4.5"
+              fill={isDark ? '#BCA4FA' : theme.colors.brandPrimary}
+              stroke="#FFFFFF"
+              strokeWidth="1.5"
+            />
 
             {/* End point marker */}
-            <Circle cx={endX} cy={endY} r="9" fill="rgba(157, 108, 250, 0.45)" />
-            <Circle cx={endX} cy={endY} r="5" fill="#FFFFFF" stroke="#9D6CFA" strokeWidth="2" />
+            <Circle
+              cx={endX}
+              cy={endY}
+              r="9"
+              fill={isDark ? 'rgba(157, 108, 250, 0.45)' : 'rgba(123, 79, 224, 0.25)'}
+            />
+            <Circle
+              cx={endX}
+              cy={endY}
+              r="5"
+              fill="#FFFFFF"
+              stroke={theme.colors.brandPrimary}
+              strokeWidth="2"
+            />
           </Svg>
 
           {/* Floating Target Badge above End Point */}
           <View style={[styles.targetBadgeWrap, { top: Math.max(4, endY - 32), right: 12 }]}>
-            <View style={styles.targetBadge}>
-              <AppText style={styles.targetBadgeText}>Mục tiêu</AppText>
+            <View
+              style={[
+                styles.targetBadge,
+                {
+                  backgroundColor: isDark
+                    ? '#BCA4FA'
+                    : theme.colors.brandPrimary,
+                },
+              ]}
+            >
+              <AppText
+                style={[
+                  styles.targetBadgeText,
+                  { color: isDark ? '#1E1538' : '#FFFFFF' },
+                ]}
+              >
+                Mục tiêu
+              </AppText>
             </View>
-            <AppText style={styles.goalLabelText}>{goalTitle}</AppText>
+            <AppText
+              style={[
+                styles.goalLabelText,
+                { color: isDark ? '#D8B4FE' : theme.colors.brandPrimary },
+              ]}
+            >
+              {goalTitle}
+            </AppText>
           </View>
 
           {/* Bottom Left "BÂY GIỜ" Label */}
           <View style={[styles.startLabelWrap, { top: bottomY + 5, left: startX - 8 }]}>
-            <AppText style={styles.startLabelText}>BÂY GIỜ</AppText>
+            <AppText
+              style={[
+                styles.startLabelText,
+                { color: isDark ? '#94A3B8' : theme.colors.textSecondary },
+              ]}
+            >
+              BÂY GIỜ
+            </AppText>
           </View>
         </View>
 
         {/* ── Section 2: Main Plan Ready Announcement ─────────────── */}
         <View style={styles.announcementSection}>
-          <AppText style={styles.mainTitle}>
+          <AppText
+            style={[
+              styles.mainTitle,
+              { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+            ]}
+          >
             Kế hoạch sức khỏe của bạn đã sẵn sàng!
           </AppText>
         </View>
@@ -352,90 +437,257 @@ export function PlanResultScreen({
         {/* ── Section 3: Target Calorie Highlight (Image 2 mid-bottom) ─ */}
         <View style={styles.calorieSection}>
           <View style={styles.sectionHeaderRow}>
-            <AppText style={styles.sectionHeaderTitle}>
+            <AppText
+              style={[
+                styles.sectionHeaderTitle,
+                { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+              ]}
+            >
               Lượng calo mục tiêu bạn cần nạp
             </AppText>
-            <View style={styles.infoBadge}>
-              <InfoIcon size={14} color="#BCA4FA" />
+            <View
+              style={[
+                styles.infoBadge,
+                { backgroundColor: isDark ? '#34265E' : '#EDE5FF' },
+              ]}
+            >
+              <InfoIcon
+                size={14}
+                color={isDark ? '#BCA4FA' : theme.colors.brandPrimary}
+              />
             </View>
           </View>
 
-          <AppText style={styles.calorieSubtitle}>
+          <AppText
+            style={[
+              styles.calorieSubtitle,
+              { color: isDark ? '#CBD5E1' : theme.colors.textSecondary },
+            ]}
+          >
             Để {goalActionPhrase} chúng tôi ước tính lượng calo cần thiết
             cho hoạt động mỗi ngày của bạn là
           </AppText>
 
           {/* Dual Highlight Tile */}
-          <View style={styles.dualTile}>
+          <View
+            style={[
+              styles.dualTile,
+              {
+                backgroundColor: isDark
+                  ? '#BCA4FA'
+                  : theme.colors.brandSoftTint,
+              },
+            ]}
+          >
             {/* Daily */}
             <View style={styles.tileCol}>
-              <AppText style={styles.tileNumber}>
+              <AppText
+                style={[
+                  styles.tileNumber,
+                  { color: isDark ? '#180E2B' : theme.colors.brandPrimary },
+                ]}
+              >
                 {dailyCalorieGoal.toLocaleString('vi-VN')}
               </AppText>
-              <AppText style={styles.tileUnit}>calo/ngày</AppText>
+              <AppText
+                style={[
+                  styles.tileUnit,
+                  { color: isDark ? '#34265E' : '#5B37A4' },
+                ]}
+              >
+                calo/ngày
+              </AppText>
             </View>
 
             {/* Vertical Divider */}
-            <View style={styles.tileDivider} />
+            <View
+              style={[
+                styles.tileDivider,
+                {
+                  backgroundColor: isDark
+                    ? 'rgba(24, 14, 43, 0.2)'
+                    : 'rgba(123, 79, 224, 0.2)',
+                },
+              ]}
+            />
 
             {/* Weekly */}
             <View style={styles.tileCol}>
-              <AppText style={styles.tileNumber}>
+              <AppText
+                style={[
+                  styles.tileNumber,
+                  { color: isDark ? '#180E2B' : theme.colors.brandPrimary },
+                ]}
+              >
                 {weeklyCalorieGoal.toLocaleString('vi-VN')}
               </AppText>
-              <AppText style={styles.tileUnit}>calo/tuần</AppText>
+              <AppText
+                style={[
+                  styles.tileUnit,
+                  { color: isDark ? '#34265E' : '#5B37A4' },
+                ]}
+              >
+                calo/tuần
+              </AppText>
             </View>
           </View>
         </View>
 
         {/* ── Section 4: Formula Breakdown (Image 3 top) ───────────── */}
         <View style={styles.breakdownSection}>
-          <AppText style={styles.breakdownHeading}>Trong đó bao gồm:</AppText>
+          <AppText
+            style={[
+              styles.breakdownHeading,
+              { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+            ]}
+          >
+            Trong đó bao gồm:
+          </AppText>
 
           {/* Box 1: TDEE */}
-          <View style={styles.breakdownBox}>
+          <View
+            style={[
+              styles.breakdownBox,
+              {
+                backgroundColor: isDark
+                  ? '#1E163B'
+                  : theme.colors.surfaceMid,
+                borderColor: isDark
+                  ? '#34265E'
+                  : theme.colors.surfaceBorder,
+              },
+            ]}
+          >
             <View style={styles.boxTitleRow}>
-              <AppText style={styles.boxTitleText}>
+              <AppText
+                style={[
+                  styles.boxTitleText,
+                  { color: isDark ? '#CBD5E1' : theme.colors.textSecondary },
+                ]}
+              >
                 TDEE bạn cần nạp trong ngày
               </AppText>
-              <AppText style={styles.boxInfoIcon}>ℹ</AppText>
+              <AppText
+                style={[
+                  styles.boxInfoIcon,
+                  { color: isDark ? '#94A3B8' : theme.colors.textDisabled },
+                ]}
+              >
+                ℹ
+              </AppText>
             </View>
-            <AppText style={styles.boxBigValue}>
+            <AppText
+              style={[
+                styles.boxBigValue,
+                { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+              ]}
+            >
               {tdeeVal.toLocaleString('vi-VN')}{' '}
-              <AppText style={styles.boxValueUnit}>calo</AppText>
+              <AppText
+                style={[
+                  styles.boxValueUnit,
+                  { color: isDark ? '#CBD5E1' : theme.colors.textSecondary },
+                ]}
+              >
+                calo
+              </AppText>
             </AppText>
           </View>
 
           {/* Operator Circle */}
-          <View style={styles.operatorCircle}>
-            <AppText style={styles.operatorText}>
+          <View
+            style={[
+              styles.operatorCircle,
+              {
+                backgroundColor: isDark ? '#2A1F4D' : '#EDE5FF',
+                borderColor: isDark ? '#3D2F6B' : '#D4C7F8',
+              },
+            ]}
+          >
+            <AppText
+              style={[
+                styles.operatorText,
+                { color: isDark ? '#FFFFFF' : theme.colors.brandPrimary },
+              ]}
+            >
               {isGain ? '+' : isLose ? '-' : '='}
             </AppText>
           </View>
 
           {/* Box 2: Deficit/Surplus */}
-          <View style={styles.breakdownBox}>
-            <AppText style={styles.boxTitleText}>
+          <View
+            style={[
+              styles.breakdownBox,
+              {
+                backgroundColor: isDark
+                  ? '#1E163B'
+                  : theme.colors.surfaceMid,
+                borderColor: isDark
+                  ? '#34265E'
+                  : theme.colors.surfaceBorder,
+              },
+            ]}
+          >
+            <AppText
+              style={[
+                styles.boxTitleText,
+                { color: isDark ? '#CBD5E1' : theme.colors.textSecondary },
+              ]}
+            >
               {isGain
                 ? 'Calo cộng thêm từ ăn uống'
                 : isLose
                 ? 'Calo thâm hụt từ ăn uống'
                 : 'Calo cân bằng duy trì'}
             </AppText>
-            <AppText style={styles.boxBigValue}>
+            <AppText
+              style={[
+                styles.boxBigValue,
+                { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+              ]}
+            >
               {calorieDelta.toLocaleString('vi-VN')}{' '}
-              <AppText style={styles.boxValueUnit}>calo</AppText>
+              <AppText
+                style={[
+                  styles.boxValueUnit,
+                  { color: isDark ? '#CBD5E1' : theme.colors.textSecondary },
+                ]}
+              >
+                calo
+              </AppText>
             </AppText>
           </View>
         </View>
 
         {/* ── Section 5: Projected Date Card (Image 3 mid) ────────── */}
         <View style={styles.projectedSection}>
-          <AppText style={styles.projectedSubtitle}>
+          <AppText
+            style={[
+              styles.projectedSubtitle,
+              { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+            ]}
+          >
             Dựa trên thông tin trên, bạn sẽ đạt mục tiêu
           </AppText>
-          <View style={styles.projectedCard}>
-            <AppText style={styles.projectedCardText}>
+          <View
+            style={[
+              styles.projectedCard,
+              {
+                backgroundColor: isDark
+                  ? '#1E163B'
+                  : theme.colors.surfaceMid,
+                borderColor: isDark
+                  ? '#34265E'
+                  : theme.colors.surfaceBorder,
+              },
+            ]}
+          >
+            <AppText
+              style={[
+                styles.projectedCardText,
+                { color: isDark ? '#FFFFFF' : theme.colors.brandPrimary },
+              ]}
+            >
               {projectedTargetText}
             </AppText>
           </View>
@@ -443,16 +695,45 @@ export function PlanResultScreen({
 
         {/* ── Section 6: Recommended Nutrition Macro Ratio (Image 3 bot / Image 4) */}
         <View style={styles.nutritionSection}>
-          <AppText style={styles.nutritionHeading}>
+          <AppText
+            style={[
+              styles.nutritionHeading,
+              { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+            ]}
+          >
             Tỷ lệ dinh dưỡng khuyến nghị
           </AppText>
-          <AppText style={styles.nutritionSubtitle}>
+          <AppText
+            style={[
+              styles.nutritionSubtitle,
+              { color: isDark ? '#CBD5E1' : theme.colors.textSecondary },
+            ]}
+          >
             Kallo gợi ý bạn theo{' '}
-            <AppText style={styles.boldText}>chế độ ăn cân bằng</AppText>, giúp
-            duy trì năng lượng, kiểm soát cân nặng và hỗ trợ sức khỏe lâu dài.
+            <AppText
+              style={[
+                styles.boldText,
+                { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+              ]}
+            >
+              chế độ ăn cân bằng
+            </AppText>
+            , giúp duy trì năng lượng, kiểm soát cân nặng và hỗ trợ sức khỏe lâu dài.
           </AppText>
 
-          <View style={styles.macroCard}>
+          <View
+            style={[
+              styles.macroCard,
+              {
+                backgroundColor: isDark
+                  ? '#1E163B'
+                  : theme.colors.surfaceMid,
+                borderColor: isDark
+                  ? '#34265E'
+                  : theme.colors.surfaceBorder,
+              },
+            ]}
+          >
             {/* Left: Donut Chart */}
             <View style={styles.donutWrap}>
               <Svg width={110} height={110} viewBox="0 0 110 110">
@@ -461,7 +742,7 @@ export function PlanResultScreen({
                   cx="55"
                   cy="55"
                   r={donutRadius}
-                  stroke="#281F4A"
+                  stroke={isDark ? '#281F4A' : '#E4E0F0'}
                   strokeWidth={donutStrokeWidth}
                   fill="none"
                 />
@@ -509,7 +790,12 @@ export function PlanResultScreen({
               {/* Donut Inner Text */}
               <View style={styles.donutCenter}>
                 <FlameIcon size={18} color="#F97316" />
-                <AppText style={styles.donutCalorieText}>
+                <AppText
+                  style={[
+                    styles.donutCalorieText,
+                    { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+                  ]}
+                >
                   {dailyCalorieGoal.toLocaleString('vi-VN')}
                 </AppText>
               </View>
@@ -520,8 +806,20 @@ export function PlanResultScreen({
               {/* Protein */}
               <View style={styles.legendRow}>
                 <LightningIcon size={14} color="#F59E0B" />
-                <AppText style={styles.legendLabel}>Chất đạm</AppText>
-                <AppText style={styles.legendVal}>
+                <AppText
+                  style={[
+                    styles.legendLabel,
+                    { color: isDark ? '#E2E8F0' : theme.colors.textSecondary },
+                  ]}
+                >
+                  Chất đạm
+                </AppText>
+                <AppText
+                  style={[
+                    styles.legendVal,
+                    { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+                  ]}
+                >
                   {proteinPercent}% ({proteinGrams}g)
                 </AppText>
               </View>
@@ -529,8 +827,20 @@ export function PlanResultScreen({
               {/* Carbs */}
               <View style={styles.legendRow}>
                 <WheatIcon size={14} color="#3B82F6" />
-                <AppText style={styles.legendLabel}>Đường bột</AppText>
-                <AppText style={styles.legendVal}>
+                <AppText
+                  style={[
+                    styles.legendLabel,
+                    { color: isDark ? '#E2E8F0' : theme.colors.textSecondary },
+                  ]}
+                >
+                  Đường bột
+                </AppText>
+                <AppText
+                  style={[
+                    styles.legendVal,
+                    { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+                  ]}
+                >
                   {carbsPercent}% ({carbsGrams}g)
                 </AppText>
               </View>
@@ -538,8 +848,20 @@ export function PlanResultScreen({
               {/* Fat */}
               <View style={styles.legendRow}>
                 <DropletIcon size={14} color="#10B981" />
-                <AppText style={styles.legendLabel}>Chất béo</AppText>
-                <AppText style={styles.legendVal}>
+                <AppText
+                  style={[
+                    styles.legendLabel,
+                    { color: isDark ? '#E2E8F0' : theme.colors.textSecondary },
+                  ]}
+                >
+                  Chất béo
+                </AppText>
+                <AppText
+                  style={[
+                    styles.legendVal,
+                    { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+                  ]}
+                >
                   {fatPercent}% ({fatGrams}g)
                 </AppText>
               </View>
@@ -548,13 +870,48 @@ export function PlanResultScreen({
         </View>
 
         {/* ── Section 7: Notice Banner (Image 4 mid) ──────────────── */}
-        <View style={styles.noticeBanner}>
-          <View style={styles.noticeIconWrap}>
-            <AppText style={styles.noticeIconText}>ℹ</AppText>
+        <View
+          style={[
+            styles.noticeBanner,
+            {
+              backgroundColor: isDark ? '#9A6B00' : '#FEF3C7',
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.noticeIconWrap,
+              {
+                backgroundColor: isDark
+                  ? 'rgba(255, 255, 255, 0.25)'
+                  : 'rgba(245, 158, 11, 0.25)',
+              },
+            ]}
+          >
+            <AppText
+              style={[
+                styles.noticeIconText,
+                { color: isDark ? '#FFFFFF' : '#B45309' },
+              ]}
+            >
+              ℹ
+            </AppText>
           </View>
-          <AppText style={styles.noticeText}>
+          <AppText
+            style={[
+              styles.noticeText,
+              { color: isDark ? '#FFFFFF' : '#92400E' },
+            ]}
+          >
             Bạn có thể tuỳ chỉnh chế độ ăn tại mục{' '}
-            <AppText style={styles.boldNoticeText}>“Tuỳ chỉnh mục tiêu”</AppText>{' '}
+            <AppText
+              style={[
+                styles.boldNoticeText,
+                { color: isDark ? '#FFFFFF' : '#78350F' },
+              ]}
+            >
+              “Tuỳ chỉnh mục tiêu”
+            </AppText>{' '}
             dựa theo nhu cầu của bạn.
           </AppText>
         </View>
@@ -562,7 +919,13 @@ export function PlanResultScreen({
         {/* ── Section 8: CTA Action Button (Image 4 bottom) ───────── */}
         <View style={[styles.bottomCtaWrap, { paddingBottom: Math.max(insets.bottom, 20) }]}>
           <TouchableOpacity
-            style={styles.ctaButton}
+            style={[
+              styles.ctaButton,
+              {
+                backgroundColor: theme.colors.brandAction,
+                shadowColor: theme.colors.brandPrimary,
+              },
+            ]}
             onPress={handleStartJourney}
             disabled={savingPlan || saving}
             activeOpacity={0.88}

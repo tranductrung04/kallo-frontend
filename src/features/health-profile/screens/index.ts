@@ -2,6 +2,7 @@ export * from './HealthProfileSetupScreen';
 export * from './KalloWelcomeScreen';
 export * from './NicknameScreen';
 export * from './GenderSelectionScreen';
+export * from './AgeSelectionScreen';
 export * from './HeightSelectionScreen';
 export * from './CurrentWeightSelectionScreen';
 export * from './GoalSelectionScreen';

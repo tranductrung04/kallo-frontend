@@ -1,11 +1,13 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from './types';
+import { useTheme } from '@/theme';
 import { OnboardingScreen } from '@/features/profile/screens/OnboardingScreen';
 import {
   KalloWelcomeScreen,
   NicknameScreen,
   GenderSelectionScreen,
+  AgeSelectionScreen,
   HeightSelectionScreen,
   CurrentWeightSelectionScreen,
   GoalSelectionScreen,
@@ -22,12 +24,15 @@ import {
 const Stack = createNativeStackNavigator<OnboardingStackParamList>();
 
 export function OnboardingNavigator() {
+  const theme = useTheme();
+  const isDark = theme.scheme === 'dark';
+
   return (
     <Stack.Navigator
       initialRouteName="KalloWelcome"
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: '#120E29' },
+        contentStyle: { backgroundColor: isDark ? '#120E29' : theme.colors.canvasBase },
       }}
     >
       <Stack.Screen
@@ -48,6 +53,11 @@ export function OnboardingNavigator() {
       <Stack.Screen
         name="GenderSelection"
         component={GenderSelectionScreen}
+        options={{ animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="AgeSelection"
+        component={AgeSelectionScreen}
         options={{ animation: 'slide_from_right' }}
       />
       <Stack.Screen

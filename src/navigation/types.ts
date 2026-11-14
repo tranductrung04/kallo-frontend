@@ -23,6 +23,7 @@ export type OnboardingStackParamList = {
   HealthProfileWizard: { initialStep?: number } | undefined;
   Nickname: undefined;
   GenderSelection: undefined;
+  AgeSelection: undefined;
   HeightSelection: undefined;
   CurrentWeightSelection: undefined;
   GoalSelection: undefined;
