@@ -265,6 +265,7 @@ export function PlanResultScreen({
           onPress={handleBack}
           style={styles.backButton}
           activeOpacity={0.7}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           accessibilityRole="button"
           accessibilityLabel="Quay lại"
         >

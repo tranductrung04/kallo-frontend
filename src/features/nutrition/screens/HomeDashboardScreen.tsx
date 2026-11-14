@@ -7,13 +7,13 @@ import {
   NativeSyntheticEvent,
   Platform,
   Pressable,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
   View,
   useWindowDimensions,
 } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -73,6 +73,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const { colors, spacing } = theme;
   const { width: screenWidth } = useWindowDimensions();
   const styles = useMemo(() => createStyles(theme, screenWidth), [theme, screenWidth]);
+  const insets = useSafeAreaInsets();
 
   const { state, getSummary, addWater, setSelectedDate } = useNutrition();
   const { getTotalCaloriesBurnedForDate, getTotalStepsForDate, state: activityState } = useActivity();
@@ -266,76 +267,80 @@ export function HomeDashboardScreen({ navigation }: Props) {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView edges={['top']} style={styles.safe}>
       <StatusBar
         barStyle={theme.scheme === 'dark' ? 'light-content' : 'dark-content'}
         backgroundColor={colors.surfaceMid}
       />
 
       {/* ── Sticky Top Header khi cuộn xuống: Ngày + Nâng cấp gói ── */}
-      <Animated.View
-        style={[
-          styles.stickyHeader,
-          {
-            opacity: stickyOpacity,
-            transform: [{ translateY: stickyTranslateY }],
-          },
-        ]}
-        pointerEvents={isStickyVisible ? 'auto' : 'none'}
-      >
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Mở lịch chọn ngày"
-          onPress={() => setCalendarModalVisible(true)}
-          style={({ pressed }) => [styles.stickyDateBtn, pressed && styles.pressedOpacity]}
+      {isStickyVisible && (
+        <Animated.View
+          style={[
+            styles.stickyHeader,
+            {
+              paddingTop: insets.top,
+              height: 54 + insets.top,
+              opacity: stickyOpacity,
+              transform: [{ translateY: stickyTranslateY }],
+            },
+          ]}
+          pointerEvents="auto"
         >
-          <AppText style={styles.stickyDateText}>
-            {dateTitle}
-          </AppText>
-        </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Mở lịch chọn ngày"
+            onPress={() => setCalendarModalVisible(true)}
+            style={({ pressed }) => [styles.stickyDateBtn, pressed && styles.pressedOpacity]}
+          >
+            <AppText style={styles.stickyDateText}>
+              {dateTitle}
+            </AppText>
+          </Pressable>
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Nâng cấp gói"
-          onLayout={(e) => {
-            const { width, height } = e.nativeEvent.layout;
-            if (width > 0 && height > 0 && (width !== stickyPillSize.width || height !== stickyPillSize.height)) {
-              setStickyPillSize({ width, height });
-            }
-          }}
-          style={({ pressed }) => [styles.stickyUpgradePill, pressed && styles.pressedOpacity]}
-          onPress={handleUpgradePress}
-        >
-          {stickyPillSize.width > 0 && stickyPillSize.height > 0 && (
-            <Svg
-              style={StyleSheet.absoluteFill}
-              width={stickyPillSize.width}
-              height={stickyPillSize.height}
-            >
-              <Defs>
-                <LinearGradient id="upgradeGradSticky" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <Stop offset="0%" stopColor="#FFFFFF" />
-                  <Stop offset="25%" stopColor="#FFF4C2" />
-                  <Stop offset="65%" stopColor="#FED268" />
-                  <Stop offset="100%" stopColor="#F5A021" />
-                </LinearGradient>
-              </Defs>
-              <Rect
-                x={0}
-                y={0}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Nâng cấp gói"
+            onLayout={(e) => {
+              const { width, height } = e.nativeEvent.layout;
+              if (width > 0 && height > 0 && (width !== stickyPillSize.width || height !== stickyPillSize.height)) {
+                setStickyPillSize({ width, height });
+              }
+            }}
+            style={({ pressed }) => [styles.stickyUpgradePill, pressed && styles.pressedOpacity]}
+            onPress={handleUpgradePress}
+          >
+            {stickyPillSize.width > 0 && stickyPillSize.height > 0 && (
+              <Svg
+                style={StyleSheet.absoluteFill}
                 width={stickyPillSize.width}
                 height={stickyPillSize.height}
-                rx={stickyPillSize.height / 2}
-                ry={stickyPillSize.height / 2}
-                fill="url(#upgradeGradSticky)"
-              />
-            </Svg>
-          )}
-          <AppText variant="labelLg" style={styles.stickyUpgradePillText}>
-            Nâng cấp gói
-          </AppText>
-        </Pressable>
-      </Animated.View>
+              >
+                <Defs>
+                  <LinearGradient id="upgradeGradSticky" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <Stop offset="0%" stopColor="#FFFFFF" />
+                    <Stop offset="25%" stopColor="#FFF4C2" />
+                    <Stop offset="65%" stopColor="#FED268" />
+                    <Stop offset="100%" stopColor="#F5A021" />
+                  </LinearGradient>
+                </Defs>
+                <Rect
+                  x={0}
+                  y={0}
+                  width={stickyPillSize.width}
+                  height={stickyPillSize.height}
+                  rx={stickyPillSize.height / 2}
+                  ry={stickyPillSize.height / 2}
+                  fill="url(#upgradeGradSticky)"
+                />
+              </Svg>
+            )}
+            <AppText variant="labelLg" style={styles.stickyUpgradePillText}>
+              Nâng cấp gói
+            </AppText>
+          </Pressable>
+        </Animated.View>
+      )}
 
       <ScrollView
         style={styles.scrollView}
@@ -351,6 +356,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Nâng cấp gói"
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
               onLayout={(e) => {
                 const { width, height } = e.nativeEvent.layout;
                 if (width > 0 && height > 0 && (width !== pillSize.width || height !== pillSize.height)) {
@@ -394,6 +400,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={`Chuỗi ${streak.currentStreak} ngày`}
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                 style={styles.streakContainer}
                 onPress={() => {
                   if (root) {
@@ -415,6 +422,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Mở lịch"
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                 style={({ pressed }) => [styles.calendarBtn, pressed && styles.pressedOpacity]}
                 onPress={() => setCalendarModalVisible(true)}
               >

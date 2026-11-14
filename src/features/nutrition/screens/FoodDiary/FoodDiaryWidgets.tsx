@@ -78,6 +78,7 @@ export function DiaryHeader({
       <TouchableOpacity
         onPress={onOpenMenu}
         style={styles.headerIconButton}
+        hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
         accessibilityLabel="Menu tùy chọn"
       >
         <MenuIcon size={22} color={textColor || c.textPrimary} />
@@ -88,6 +89,7 @@ export function DiaryHeader({
         <TouchableOpacity
           onPress={onPrevDay}
           style={styles.chevronButton}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           accessibilityLabel="Ngày trước"
         >
           <ChevronLeftIcon size={18} color={textColor || c.textSecondary} />
@@ -96,6 +98,7 @@ export function DiaryHeader({
         <TouchableOpacity
           onPress={onOpenDatePicker}
           style={styles.dateTitleContainer}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           accessibilityLabel="Chọn ngày"
         >
           <Text style={[styles.dateTitleText, { color: textColor || c.textPrimary }]}>{getDateTitle(date)}</Text>
@@ -104,6 +107,7 @@ export function DiaryHeader({
         <TouchableOpacity
           onPress={onNextDay}
           style={styles.chevronButton}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           accessibilityLabel="Ngày tiếp theo"
         >
           <ChevronRightIcon size={18} color={textColor || c.textSecondary} />
