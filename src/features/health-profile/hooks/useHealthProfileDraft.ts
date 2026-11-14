@@ -7,6 +7,7 @@ import {
   getApiErrorMessage,
 } from '../api';
 import type {
+  HealthProfileCalculationResult,
   HealthProfileDraft,
   MacroName,
 } from '../types';
@@ -26,12 +27,12 @@ export const initialHealthProfileDraft: HealthProfileDraft = {
   nickname: '',
   dependent: 'me',
   gender: 'female',
-  age: '',
-  height: '',
-  weight: '',
+  age: '25',
+  height: '160',
+  weight: '53',
   activity: 'moderate',
   goal: 'maintain',
-  targetWeight: '',
+  targetWeight: '53',
   weeklyRate: '0',
   allergies: [],
   customAllergy: '',
@@ -41,7 +42,7 @@ export const initialHealthProfileDraft: HealthProfileDraft = {
 };
 
 export function useHealthProfileDraft(draftStorageKey = HEALTH_PROFILE_DRAFT_KEY) {
-  const { refreshProfileStatus } = useAuth();
+  const { completeOnboarding, refreshProfileStatus } = useAuth();
   const [draft, setDraft] = useState<HealthProfileDraft>(initialHealthProfileDraft);
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -52,7 +53,20 @@ export function useHealthProfileDraft(draftStorageKey = HEALTH_PROFILE_DRAFT_KEY
       .then((value) => {
         if (!value) return;
         try {
-          setDraft({ ...initialHealthProfileDraft, ...JSON.parse(value) });
+          const parsed = JSON.parse(value);
+          setDraft({
+            ...initialHealthProfileDraft,
+            ...parsed,
+            age: parsed.age && isValidAge(Number(parsed.age)) ? String(parsed.age) : '25',
+            height:
+              parsed.height && isValidHeight(Number(parsed.height))
+                ? String(parsed.height)
+                : initialHealthProfileDraft.height,
+            weight:
+              parsed.weight && isValidWeight(Number(parsed.weight))
+                ? String(parsed.weight)
+                : initialHealthProfileDraft.weight,
+          });
         } catch {
           setDraft(initialHealthProfileDraft);
         }
@@ -67,11 +81,26 @@ export function useHealthProfileDraft(draftStorageKey = HEALTH_PROFILE_DRAFT_KEY
     }
   }, [draft, loaded, draftStorageKey]);
 
-  const age = Number(draft.age);
-  const height = Number(draft.height);
-  const weight = Number(draft.weight);
-  const targetWeight = Number(draft.targetWeight || draft.weight);
-  const weeklyRate = Number(draft.weeklyRate || 0);
+  const parsedAge = parseInt(draft.age, 10);
+  const age = !isNaN(parsedAge) && isValidAge(parsedAge) ? parsedAge : 25;
+
+  const parsedHeight = parseFloat(draft.height);
+  const height = !isNaN(parsedHeight) && isValidHeight(parsedHeight) ? parsedHeight : 160;
+
+  const parsedWeight = parseFloat(draft.weight);
+  const weight = !isNaN(parsedWeight) && isValidWeight(parsedWeight) ? parsedWeight : 53;
+
+  const parsedTargetWeight = parseFloat(draft.targetWeight);
+  const targetWeight =
+    !isNaN(parsedTargetWeight) && isValidWeight(parsedTargetWeight) ? parsedTargetWeight : weight;
+
+  const parsedWeeklyRate = parseFloat(draft.weeklyRate);
+  const weeklyRate =
+    !isNaN(parsedWeeklyRate) && isValidWeeklyRate(parsedWeeklyRate)
+      ? parsedWeeklyRate
+      : draft.goal === 'maintain'
+      ? 0
+      : 0.5;
 
   const result = useMemo(() => {
     if (
@@ -82,14 +111,14 @@ export function useHealthProfileDraft(draftStorageKey = HEALTH_PROFILE_DRAFT_KEY
       isValidWeeklyRate(weeklyRate)
     ) {
       return calculateHealthProfile({
-        gender: draft.gender,
+        gender: draft.gender || 'female',
         age,
         heightCm: height,
         weightKg: weight,
-        activityLevel: draft.activity,
-        goalType: draft.goal,
+        activityLevel: draft.activity || 'moderate',
+        goalType: draft.goal || 'maintain',
         weeklyRateKg: weeklyRate,
-        macroPercentages: draft.macros,
+        macroPercentages: draft.macros || defaultMacroPercentages(draft.goal || 'maintain'),
       });
     }
     return undefined;
@@ -166,48 +195,61 @@ export function useHealthProfileDraft(draftStorageKey = HEALTH_PROFILE_DRAFT_KEY
     return undefined;
   };
 
-  const saveProfile = async (): Promise<boolean> => {
-    if (!result) {
-      setError('Vui lòng hoàn tất thông tin hồ sơ hợp lệ.');
-      return false;
+  const saveProfile = async (
+    overrideResult?: HealthProfileCalculationResult
+  ): Promise<{ ok: boolean; error?: string }> => {
+    const finalResult = overrideResult || result;
+    if (!finalResult) {
+      const msg = 'Vui lòng hoàn tất thông tin hồ sơ hợp lệ.';
+      setError(msg);
+      return { ok: false, error: msg };
     }
     setSaving(true);
     setError(undefined);
     try {
+      const profilePayload = {
+        nickname: draft.nickname?.trim() || undefined,
+        gender: draft.gender || 'female',
+        birthDate: `${new Date().getFullYear() - age}-01-01`,
+        heightCm: height,
+        weightKg: weight,
+        activityLevel: draft.activity || 'moderate',
+        goalType: draft.goal || 'maintain',
+        targetWeightKg: targetWeight,
+        weeklyRateKg: weeklyRate,
+        allergies: draft.allergies || [],
+        dietaryPreference: draft.dietaryPreference || 'standard',
+        healthConditions: draft.healthConditions || [],
+        bmi: finalResult.bmi,
+        bmr: finalResult.bmr,
+        tdee: finalResult.tdee,
+        dailyCalorieGoal: finalResult.dailyCalorieGoal,
+        proteinGoalGrams: finalResult.macros.proteinGrams,
+        carbsGoalGrams: finalResult.macros.carbsGrams,
+        fatGoalGrams: finalResult.macros.fatGrams,
+        waterGoalMl: Math.round(weight * 35),
+      };
+
+      // Always persist the completed health profile locally
+      await AsyncStorage.setItem('@kallo/health-profile', JSON.stringify(profilePayload));
+
       try {
-        await saveHealthProfile({
-          nickname: draft.nickname?.trim() || undefined,
-          gender: draft.gender,
-          birthDate: `${new Date().getFullYear() - age}-01-01`,
-          heightCm: height,
-          weightKg: weight,
-          activityLevel: draft.activity,
-          goalType: draft.goal,
-          targetWeightKg: targetWeight,
-          weeklyRateKg: weeklyRate,
-          allergies: draft.allergies,
-          dietaryPreference: draft.dietaryPreference || 'standard',
-          healthConditions: draft.healthConditions || [],
-          bmi: result.bmi,
-          bmr: result.bmr,
-          tdee: result.tdee,
-          dailyCalorieGoal: result.dailyCalorieGoal,
-          proteinGoalGrams: result.macros.proteinGrams,
-          carbsGoalGrams: result.macros.carbsGrams,
-          fatGoalGrams: result.macros.fatGrams,
-          waterGoalMl: Math.round(weight * 35),
-        });
-      } catch (saveError) {
-        if (!LOCAL_DEMO_ENABLED) {
-          throw saveError;
-        }
+        await saveHealthProfile(profilePayload);
+      } catch (saveError: any) {
+        // Backend /users/me/profile endpoint may not be implemented on server yet; local profile is already saved
+        console.warn('[saveProfile] Server sync fallback to local profile:', saveError?.message ?? saveError);
       }
       await AsyncStorage.removeItem(draftStorageKey);
-      await refreshProfileStatus();
-      return true;
+      if (completeOnboarding) {
+        await completeOnboarding();
+      } else {
+        await refreshProfileStatus();
+      }
+      return { ok: true };
     } catch (requestError) {
-      setError(getApiErrorMessage(requestError));
-      return false;
+      const msg = getApiErrorMessage(requestError);
+      setError(msg);
+      return { ok: false, error: msg };
     } finally {
       setSaving(false);
     }

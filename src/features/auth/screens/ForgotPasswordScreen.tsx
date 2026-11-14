@@ -23,15 +23,12 @@ export function ForgotPasswordScreen({ navigation }: Props) {
     setError(undefined);
     setLoading(true);
     try {
-      await Promise.race([
-        requestPasswordReset(email.trim()),
-        new Promise((resolve) => setTimeout(() => resolve(undefined), 1000)),
-      ]);
-    } catch {
-      // Cho phép tiếp tục luồng đặt lại mật khẩu khi không có kết nối backend
+      await requestPasswordReset(email.trim());
+    } catch (err) {
+      // Cho phép tiếp tục luồng đặt lại mật khẩu khi offline/demo
     } finally {
       setLoading(false);
-      navigation.navigate('ResetPassword');
+      navigation.navigate('ResetPassword', { email: email.trim() });
     }
   };
 

@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import {
   Alert,
   FlatList,
-  SafeAreaView,
   Share,
   StyleSheet,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppButton, AppCard, AppText } from '@/components/common';
 import {
@@ -142,7 +142,7 @@ export function FriendSearchScreen({ navigation }: Props) {
   };
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: c.canvasBase }]}>
+    <SafeAreaView edges={['top']} style={[styles.safe, { backgroundColor: c.canvasBase }]}>
       {/* ── Top Bar ─────────────────────────────────────────────────── */}
       <View style={[styles.topBar, { borderBottomColor: c.surfaceBorder }]}>
         <TouchableOpacity

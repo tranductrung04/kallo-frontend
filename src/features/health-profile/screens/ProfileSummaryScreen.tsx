@@ -20,6 +20,7 @@ import {
   TriangleAlertIcon,
   UserSingleIcon,
 } from '@/components/icons';
+import { useTheme } from '@/theme';
 import { useHealthProfileDraft } from '../hooks/useHealthProfileDraft';
 import { calculateBmi, bmiCategory } from '../utils/calculations';
 
@@ -37,6 +38,8 @@ export function ProfileSummaryScreen({
   hideHeader = false,
 }: ProfileSummaryScreenProps) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const isDark = theme.scheme === 'dark';
   const {
     draft,
     saving,
@@ -175,7 +178,15 @@ export function ProfileSummaryScreen({
   };
 
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        {
+          paddingTop: insets.top,
+          backgroundColor: isDark ? '#120E29' : theme.colors.canvasBase,
+        },
+      ]}
+    >
       {/* ── Top Bar ────────────────────────────────────────────── */}
       {!hideHeader && (
         <View style={styles.topBar}>
@@ -186,7 +197,10 @@ export function ProfileSummaryScreen({
             accessibilityRole="button"
             accessibilityLabel="Quay lại"
           >
-            <ChevronLeftIcon size={26} color="#FFFFFF" />
+            <ChevronLeftIcon
+              size={26}
+              color={isDark ? '#FFFFFF' : theme.colors.textPrimary}
+            />
           </TouchableOpacity>
         </View>
       )}
@@ -197,7 +211,15 @@ export function ProfileSummaryScreen({
       >
         {/* ── Avatar & Speech Bubble Row ─────────────────────────── */}
         <View style={styles.bubbleRow}>
-          <View style={styles.avatarWrap}>
+          <View
+            style={[
+              styles.avatarWrap,
+              {
+                backgroundColor: isDark ? '#2E2654' : '#EDE5FF',
+                borderColor: isDark ? '#4A3D7E' : '#D4C7F8',
+              },
+            ]}
+          >
             <Image
               source={images.mascotAvatar}
               style={styles.avatarImage}
@@ -205,8 +227,25 @@ export function ProfileSummaryScreen({
               accessibilityLabel="Mascot Kallo"
             />
           </View>
-          <View style={styles.bubble}>
-            <View style={styles.bubbleTail} />
+          <View
+            style={[
+              styles.bubble,
+              !isDark && {
+                borderWidth: 1,
+                borderColor: theme.colors.surfaceBorder,
+              },
+            ]}
+          >
+            <View
+              style={[
+                styles.bubbleTail,
+                !isDark && {
+                  borderLeftWidth: 1,
+                  borderBottomWidth: 1,
+                  borderColor: theme.colors.surfaceBorder,
+                },
+              ]}
+            />
             <AppText style={styles.bubbleText}>
               Kallo tổng hợp lại thông tin giúp bạn nha
             </AppText>
@@ -214,25 +253,65 @@ export function ProfileSummaryScreen({
         </View>
 
         {/* ── Main Top Summary Card ──────────────────────────────── */}
-        <View style={styles.mainCard}>
+        <View
+          style={[
+            styles.mainCard,
+            {
+              backgroundColor: isDark ? '#1D1736' : theme.colors.surfaceMid,
+              borderColor: isDark ? '#302554' : theme.colors.surfaceBorder,
+            },
+          ]}
+        >
           <View style={styles.mainCardContent}>
             <View style={styles.metricsCol}>
               {/* Mục tiêu */}
               <View style={styles.metricItem}>
                 <View style={styles.metricLabelRow}>
-                  <FlagIcon size={12} color="#AEA6CC" />
-                  <AppText style={styles.metricLabel}>MỤC TIÊU</AppText>
+                  <FlagIcon
+                    size={12}
+                    color={isDark ? '#AEA6CC' : theme.colors.textSecondary}
+                  />
+                  <AppText
+                    style={[
+                      styles.metricLabel,
+                      { color: isDark ? '#9C94BC' : theme.colors.textSecondary },
+                    ]}
+                  >
+                    MỤC TIÊU
+                  </AppText>
                 </View>
-                <AppText style={styles.metricValue}>{goalLabel}</AppText>
+                <AppText
+                  style={[
+                    styles.metricValue,
+                    { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+                  ]}
+                >
+                  {goalLabel}
+                </AppText>
               </View>
 
               {/* Cân nặng mục tiêu */}
               <View style={styles.metricItem}>
                 <View style={styles.metricLabelRow}>
-                  <ScaleIcon size={12} color="#AEA6CC" />
-                  <AppText style={styles.metricLabel}>CÂN NẶNG MỤC TIÊU</AppText>
+                  <ScaleIcon
+                    size={12}
+                    color={isDark ? '#AEA6CC' : theme.colors.textSecondary}
+                  />
+                  <AppText
+                    style={[
+                      styles.metricLabel,
+                      { color: isDark ? '#9C94BC' : theme.colors.textSecondary },
+                    ]}
+                  >
+                    CÂN NẶNG MỤC TIÊU
+                  </AppText>
                 </View>
-                <AppText style={styles.metricValue}>
+                <AppText
+                  style={[
+                    styles.metricValue,
+                    { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+                  ]}
+                >
                   {Math.round(targetWeight)} kg
                 </AppText>
               </View>
@@ -240,10 +319,27 @@ export function ProfileSummaryScreen({
               {/* Cường độ tập luyện */}
               <View style={styles.metricItem}>
                 <View style={styles.metricLabelRow}>
-                  <FlameIcon size={12} color="#AEA6CC" />
-                  <AppText style={styles.metricLabel}>CƯỜNG ĐỘ TẬP LUYỆN</AppText>
+                  <FlameIcon
+                    size={12}
+                    color={isDark ? '#AEA6CC' : theme.colors.textSecondary}
+                  />
+                  <AppText
+                    style={[
+                      styles.metricLabel,
+                      { color: isDark ? '#9C94BC' : theme.colors.textSecondary },
+                    ]}
+                  >
+                    CƯỜNG ĐỘ TẬP LUYỆN
+                  </AppText>
                 </View>
-                <AppText style={styles.metricValue}>{activityLabel}</AppText>
+                <AppText
+                  style={[
+                    styles.metricValue,
+                    { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+                  ]}
+                >
+                  {activityLabel}
+                </AppText>
               </View>
             </View>
 
@@ -259,33 +355,89 @@ export function ProfileSummaryScreen({
           </View>
 
           {/* Detailed Info Expansion (Nickname, Height/Weight, Diet, Allergies, Health) */}
-          <View style={styles.detailsDivider} />
+          <View
+            style={[
+              styles.detailsDivider,
+              {
+                backgroundColor: isDark
+                  ? '#2D2350'
+                  : theme.colors.surfaceBorder,
+              },
+            ]}
+          />
           <View style={styles.detailsSection}>
             <View style={styles.detailRow}>
               <View style={styles.detailLabelRow}>
-                <UserSingleIcon size={14} color="#AEA6CC" />
-                <AppText style={styles.detailLabel}>Người dùng:</AppText>
+                <UserSingleIcon
+                  size={14}
+                  color={isDark ? '#AEA6CC' : theme.colors.textSecondary}
+                />
+                <AppText
+                  style={[
+                    styles.detailLabel,
+                    { color: isDark ? '#AEA6CC' : theme.colors.textSecondary },
+                  ]}
+                >
+                  Người dùng:
+                </AppText>
               </View>
-              <AppText style={styles.detailVal}>
+              <AppText
+                style={[
+                  styles.detailVal,
+                  { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+                ]}
+              >
                 {draft.nickname ? `${draft.nickname} • ` : ''}
-                {draft.gender === 'female' ? 'Nữ' : 'Nam'} ({draft.height} cm, {draft.weight} kg)
+                {draft.gender === 'female' ? 'Nữ' : 'Nam'} ({draft.age ? `${draft.age} tuổi • ` : ''}{draft.height} cm, {draft.weight} kg)
               </AppText>
             </View>
 
             <View style={styles.detailRow}>
               <View style={styles.detailLabelRow}>
-                <CutleryIcon size={14} color="#AEA6CC" />
-                <AppText style={styles.detailLabel}>Chế độ ăn:</AppText>
+                <CutleryIcon
+                  size={14}
+                  color={isDark ? '#AEA6CC' : theme.colors.textSecondary}
+                />
+                <AppText
+                  style={[
+                    styles.detailLabel,
+                    { color: isDark ? '#AEA6CC' : theme.colors.textSecondary },
+                  ]}
+                >
+                  Chế độ ăn:
+                </AppText>
               </View>
-              <AppText style={styles.detailVal}>{dietPrefLabel}</AppText>
+              <AppText
+                style={[
+                  styles.detailVal,
+                  { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+                ]}
+              >
+                {dietPrefLabel}
+              </AppText>
             </View>
 
             <View style={styles.detailRow}>
               <View style={styles.detailLabelRow}>
-                <TriangleAlertIcon size={14} color="#AEA6CC" />
-                <AppText style={styles.detailLabel}>Dị ứng:</AppText>
+                <TriangleAlertIcon
+                  size={14}
+                  color={isDark ? '#AEA6CC' : theme.colors.textSecondary}
+                />
+                <AppText
+                  style={[
+                    styles.detailLabel,
+                    { color: isDark ? '#AEA6CC' : theme.colors.textSecondary },
+                  ]}
+                >
+                  Dị ứng:
+                </AppText>
               </View>
-              <AppText style={styles.detailVal}>
+              <AppText
+                style={[
+                  styles.detailVal,
+                  { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+                ]}
+              >
                 {draft.allergies.length > 0
                   ? draft.allergies.join(', ')
                   : 'Không có dị ứng'}
@@ -294,10 +446,27 @@ export function ProfileSummaryScreen({
 
             <View style={styles.detailRow}>
               <View style={styles.detailLabelRow}>
-                <ShieldSecurityIcon size={14} color="#AEA6CC" />
-                <AppText style={styles.detailLabel}>Tiền sử bệnh:</AppText>
+                <ShieldSecurityIcon
+                  size={14}
+                  color={isDark ? '#AEA6CC' : theme.colors.textSecondary}
+                />
+                <AppText
+                  style={[
+                    styles.detailLabel,
+                    { color: isDark ? '#AEA6CC' : theme.colors.textSecondary },
+                  ]}
+                >
+                  Tiền sử bệnh:
+                </AppText>
               </View>
-              <AppText style={styles.detailVal}>{conditionLabels}</AppText>
+              <AppText
+                style={[
+                  styles.detailVal,
+                  { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+                ]}
+              >
+                {conditionLabels}
+              </AppText>
             </View>
           </View>
         </View>
@@ -330,19 +499,76 @@ export function ProfileSummaryScreen({
 
           {/* Scale numbers below bar */}
           <View style={styles.scaleLabelsRow}>
-            <AppText style={styles.scaleText}>&lt; 15</AppText>
-            <AppText style={styles.scaleText}>18.5</AppText>
-            <AppText style={styles.scaleText}>22.9</AppText>
-            <AppText style={styles.scaleText}>24.9</AppText>
-            <AppText style={styles.scaleText}>29.9</AppText>
-            <AppText style={styles.scaleText}>≥ 35</AppText>
+            <AppText
+              style={[
+                styles.scaleText,
+                { color: isDark ? '#8E87AA' : theme.colors.textSecondary },
+              ]}
+            >
+              &lt; 15
+            </AppText>
+            <AppText
+              style={[
+                styles.scaleText,
+                { color: isDark ? '#8E87AA' : theme.colors.textSecondary },
+              ]}
+            >
+              18.5
+            </AppText>
+            <AppText
+              style={[
+                styles.scaleText,
+                { color: isDark ? '#8E87AA' : theme.colors.textSecondary },
+              ]}
+            >
+              22.9
+            </AppText>
+            <AppText
+              style={[
+                styles.scaleText,
+                { color: isDark ? '#8E87AA' : theme.colors.textSecondary },
+              ]}
+            >
+              24.9
+            </AppText>
+            <AppText
+              style={[
+                styles.scaleText,
+                { color: isDark ? '#8E87AA' : theme.colors.textSecondary },
+              ]}
+            >
+              29.9
+            </AppText>
+            <AppText
+              style={[
+                styles.scaleText,
+                { color: isDark ? '#8E87AA' : theme.colors.textSecondary },
+              ]}
+            >
+              ≥ 35
+            </AppText>
           </View>
         </View>
 
         {/* ── BMI Result Card ────────────────────────────────────── */}
-        <View style={styles.bmiCard}>
+        <View
+          style={[
+            styles.bmiCard,
+            {
+              backgroundColor: isDark ? '#1C1635' : theme.colors.surfaceMid,
+              borderColor: isDark ? '#2D2350' : theme.colors.surfaceBorder,
+            },
+          ]}
+        >
           <View style={styles.bmiHeaderRow}>
-            <AppText style={styles.bmiTitle}>BMI của bạn: </AppText>
+            <AppText
+              style={[
+                styles.bmiTitle,
+                { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+              ]}
+            >
+              BMI của bạn:{' '}
+            </AppText>
             <AppText style={[styles.bmiValue, { color: bmiMeta.valueColor }]}>
               {bmiVal.toFixed(1)}
             </AppText>
@@ -352,7 +578,14 @@ export function ProfileSummaryScreen({
               </AppText>
             </View>
           </View>
-          <AppText style={styles.bmiAdvice}>{bmiMeta.advice}</AppText>
+          <AppText
+            style={[
+              styles.bmiAdvice,
+              { color: isDark ? '#C7BFE0' : theme.colors.textSecondary },
+            ]}
+          >
+            {bmiMeta.advice}
+          </AppText>
         </View>
 
         {error ? (
@@ -363,7 +596,13 @@ export function ProfileSummaryScreen({
       {/* ── Bottom Action Button ───────────────────────────────── */}
       <View style={[styles.bottomArea, { paddingBottom: Math.max(insets.bottom, 16) }]}>
         <TouchableOpacity
-          style={styles.actionButton}
+          style={[
+            styles.actionButton,
+            {
+              backgroundColor: theme.colors.brandAction,
+              shadowColor: theme.colors.brandPrimary,
+            },
+          ]}
           onPress={handleNext}
           activeOpacity={0.85}
           accessibilityRole="button"

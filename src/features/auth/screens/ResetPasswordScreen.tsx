@@ -4,13 +4,15 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppButton, AppCard, AppInput, AppText } from '@/components/common';
 import type { AuthStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
-import { resetPassword } from '../api';
-import { AuthLayout, authStyles, passwordError } from './AuthLayout';
+import { getApiErrorMessage, resetPassword } from '../api';
+import { AuthLayout, authStyles, emailPattern, passwordError } from './AuthLayout';
+import { LOCAL_DEMO_ENABLED } from '../localAccount';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'ResetPassword'>;
 
 export function ResetPasswordScreen({ navigation, route }: Props) {
   const theme = useTheme();
+  const [email, setEmail] = useState(route.params?.email ?? '');
   const [token, setToken] = useState(route.params?.token ?? '');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -19,15 +21,15 @@ export function ResetPasswordScreen({ navigation, route }: Props) {
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
+    if (!email.trim() || !emailPattern.test(email.trim())) {
+      setError('Vui lòng nhập email hợp lệ.');
+      return;
+    }
+    if (!token.trim() || token.trim().length !== 6) {
+      setError('Mã đặt lại mật khẩu phải gồm đúng 6 chữ số.');
+      return;
+    }
     const passwordMessage = passwordError(password);
-    if (!token.trim()) {
-      setError('Vui lòng nhập mã đặt lại mật khẩu.');
-      return;
-    }
-    if (!/^\d+$/.test(token.trim())) {
-      setError('Mã đặt lại mật khẩu chỉ bao gồm số.');
-      return;
-    }
     if (passwordMessage) {
       setError(passwordMessage);
       return;
@@ -36,18 +38,24 @@ export function ResetPasswordScreen({ navigation, route }: Props) {
       setError('Mật khẩu xác nhận không khớp.');
       return;
     }
+
     setError(undefined);
     setLoading(true);
+
     try {
-      await Promise.race([
-        resetPassword(token.trim(), password),
-        new Promise((resolve) => setTimeout(() => resolve(undefined), 1000)),
-      ]);
-      setMessage('Đặt lại mật khẩu thành công. Đang chuyển hướng...');
-      setTimeout(() => navigation.navigate('Login'), 1000);
-    } catch {
-      setMessage('Đặt lại mật khẩu thành công. Đang chuyển hướng...');
-      setTimeout(() => navigation.navigate('Login'), 1000);
+      await resetPassword(email.trim(), token.trim(), password);
+      setMessage('Đặt lại mật khẩu thành công! Đang chuyển hướng...');
+      setTimeout(() => navigation.navigate('Login'), 1200);
+    } catch (err: any) {
+      if (err?.response?.status) {
+        setError(getApiErrorMessage(err));
+      } else if (LOCAL_DEMO_ENABLED && !err?.response) {
+        // Fallback cho chế độ dev / demo khi không có server
+        setMessage('Đặt lại mật khẩu thành công! Đang chuyển hướng...');
+        setTimeout(() => navigation.navigate('Login'), 1200);
+      } else {
+        setError(getApiErrorMessage(err));
+      }
     } finally {
       setLoading(false);
     }
@@ -57,33 +65,56 @@ export function ResetPasswordScreen({ navigation, route }: Props) {
     <AuthLayout>
       <View style={authStyles.headerSection}>
         <AppText variant="bodyMd" color={theme.colors.textSecondary} style={authStyles.headerSubtitle}>
-          Nhập mã xác nhận nhận được qua email và tạo mật khẩu mới.
+          Nhập mã 6 số từ email và tạo mật khẩu mới để bảo vệ tài khoản.
         </AppText>
       </View>
 
       <AppCard style={authStyles.formCard}>
         <View style={authStyles.inputStack}>
+          {!route.params?.email ? (
+            <AppInput
+              label="Email"
+              value={email}
+              onChangeText={(text) => {
+                setEmail(text);
+                if (error) setError(undefined);
+              }}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              placeholder="you@example.com"
+            />
+          ) : null}
+
           <AppInput
-            label="Mã đặt lại"
+            label="Mã đặt lại (6 chữ số)"
             value={token}
+            maxLength={6}
             onChangeText={(text) => {
               setToken(text.replace(/[^0-9]/g, ''));
               if (error) setError(undefined);
             }}
             keyboardType="number-pad"
-            placeholder="Nhập mã số từ email"
+            placeholder="Ví dụ: 123456"
           />
+
           <AppInput
             label="Mật khẩu mới"
             value={password}
-            onChangeText={setPassword}
+            onChangeText={(text) => {
+              setPassword(text);
+              if (error) setError(undefined);
+            }}
             secureTextEntry
             placeholder="Ít nhất 8 ký tự, gồm chữ và số"
           />
+
           <AppInput
             label="Xác nhận mật khẩu"
             value={confirm}
-            onChangeText={setConfirm}
+            onChangeText={(text) => {
+              setConfirm(text);
+              if (error) setError(undefined);
+            }}
             secureTextEntry
             placeholder="Nhập lại mật khẩu mới"
           />
@@ -122,7 +153,7 @@ export function ResetPasswordScreen({ navigation, route }: Props) {
         ) : null}
 
         <View style={authStyles.buttonStack}>
-          <AppButton label="Đặt lại mật khẩu" loading={loading} onPress={submit} />
+          <AppButton label="Cập nhật mật khẩu" loading={loading} onPress={submit} />
         </View>
       </AppCard>
     </AuthLayout>

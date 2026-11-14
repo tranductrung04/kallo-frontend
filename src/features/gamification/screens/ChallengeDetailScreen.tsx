@@ -2,12 +2,12 @@ import React, { useMemo } from 'react';
 import {
   Alert,
   Image,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { images } from '@/assets/images';
 import { AppButton, AppCard, AppText, ProgressBar } from '@/components/common';
@@ -37,7 +37,7 @@ export function ChallengeDetailScreen({ route, navigation }: Props) {
 
   if (!challenge) {
     return (
-      <SafeAreaView style={[styles.safe, { backgroundColor: c.canvasBase }]}>
+      <SafeAreaView edges={['top']} style={[styles.safe, { backgroundColor: c.canvasBase }]}>
         <View style={styles.notFoundContainer}>
           <AppText variant="headlineSm" color={c.textPrimary}>
             Không tìm thấy thông tin thử thách
@@ -73,7 +73,7 @@ export function ChallengeDetailScreen({ route, navigation }: Props) {
   };
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: c.canvasBase }]}>
+    <SafeAreaView edges={['top']} style={[styles.safe, { backgroundColor: c.canvasBase }]}>
       {/* ── Top Bar ─────────────────────────────────────────────────── */}
       <View style={[styles.topBar, { borderBottomColor: c.surfaceBorder }]}>
         <TouchableOpacity

@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { images } from '@/assets/images';
 import { AppText } from '@/components/common';
 import { ChevronLeftIcon } from '@/components/icons';
+import { useTheme } from '@/theme';
 import { useHealthProfileDraft } from '../hooks/useHealthProfileDraft';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -36,6 +37,8 @@ export function HeightSelectionScreen({
   hideHeader = false,
 }: HeightSelectionScreenProps) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const isDark = theme.scheme === 'dark';
   const { draft, updateDraft } = useHealthProfileDraft();
 
   const initialVal = useMemo(() => {
@@ -93,7 +96,15 @@ export function HeightSelectionScreen({
   const tickItems = useMemo(() => Array.from({ length: totalSteps }, (_, i) => MIN_HEIGHT + i), [totalSteps]);
 
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        {
+          paddingTop: insets.top,
+          backgroundColor: isDark ? '#120E29' : theme.colors.canvasBase,
+        },
+      ]}
+    >
       {/* ── Top Bar ────────────────────────────────────────────── */}
       {!hideHeader && (
         <>
@@ -105,20 +116,48 @@ export function HeightSelectionScreen({
               accessibilityRole="button"
               accessibilityLabel="Quay lại"
             >
-              <ChevronLeftIcon size={26} color="#FFFFFF" />
+              <ChevronLeftIcon
+                size={26}
+                color={isDark ? '#FFFFFF' : theme.colors.textPrimary}
+              />
             </TouchableOpacity>
           </View>
 
           {/* ── Progress Bar (~35%) ────────────────────────────────── */}
-          <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: '35%' }]} />
+          <View
+            style={[
+              styles.progressTrack,
+              {
+                backgroundColor: isDark
+                  ? '#272049'
+                  : theme.colors.surfaceBorder,
+              },
+            ]}
+          >
+            <View
+              style={[
+                styles.progressFill,
+                {
+                  backgroundColor: theme.colors.brandPrimary,
+                  width: '35%',
+                },
+              ]}
+            />
           </View>
         </>
       )}
 
       {/* ── Avatar & Speech Bubble Row ─────────────────────────── */}
       <View style={styles.bubbleRow}>
-        <View style={styles.avatarWrap}>
+        <View
+          style={[
+            styles.avatarWrap,
+            {
+              backgroundColor: isDark ? '#2E2654' : '#EDE5FF',
+              borderColor: isDark ? '#4A3D7E' : '#D4C7F8',
+            },
+          ]}
+        >
           <Image
             source={images.mascotAvatar}
             style={styles.avatarImage}
@@ -126,8 +165,25 @@ export function HeightSelectionScreen({
             accessibilityLabel="Mascot Kallo"
           />
         </View>
-        <View style={styles.bubble}>
-          <View style={styles.bubbleTail} />
+        <View
+          style={[
+            styles.bubble,
+            !isDark && {
+              borderWidth: 1,
+              borderColor: theme.colors.surfaceBorder,
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.bubbleTail,
+              !isDark && {
+                borderLeftWidth: 1,
+                borderBottomWidth: 1,
+                borderColor: theme.colors.surfaceBorder,
+              },
+            ]}
+          />
           <AppText style={styles.bubbleText}>
             Chiều cao của bạn là...
           </AppText>
@@ -136,14 +192,34 @@ export function HeightSelectionScreen({
 
       {/* ── Height Value Display ───────────────────────────────── */}
       <View style={styles.valueContainer}>
-        <AppText style={styles.heightValue}>{height}</AppText>
-        <AppText style={styles.heightUnit}>cm</AppText>
+        <AppText
+          style={[
+            styles.heightValue,
+            { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+          ]}
+        >
+          {height}
+        </AppText>
+        <AppText
+          style={[
+            styles.heightUnit,
+            { color: isDark ? '#9D6CFA' : theme.colors.brandPrimary },
+          ]}
+        >
+          cm
+        </AppText>
       </View>
 
       {/* ── Interactive Horizontal Ruler ──────────────────────── */}
       <View style={styles.rulerContainer}>
         {/* Fixed Center Purple Cursor Line */}
-        <View style={styles.centerCursor} pointerEvents="none" />
+        <View
+          style={[
+            styles.centerCursor,
+            { backgroundColor: theme.colors.brandPrimary },
+          ]}
+          pointerEvents="none"
+        />
 
         <ScrollView
           ref={scrollRef}
@@ -165,10 +241,31 @@ export function HeightSelectionScreen({
                   style={[
                     styles.tick,
                     isTen
-                      ? styles.tickTen
+                      ? [
+                          styles.tickTen,
+                          {
+                            backgroundColor: isDark
+                              ? '#C5BFE3'
+                              : theme.colors.brandPrimary,
+                          },
+                        ]
                       : isFive
-                      ? styles.tickFive
-                      : styles.tickOne,
+                      ? [
+                          styles.tickFive,
+                          {
+                            backgroundColor: isDark
+                              ? '#776F9F'
+                              : '#A6A1B8',
+                          },
+                        ]
+                      : [
+                          styles.tickOne,
+                          {
+                            backgroundColor: isDark
+                              ? '#372F5B'
+                              : '#D1CBDD',
+                          },
+                        ],
                   ]}
                 />
               </View>
@@ -180,7 +277,13 @@ export function HeightSelectionScreen({
       {/* ── Bottom Action Button ───────────────────────────────── */}
       <View style={[styles.bottomArea, { paddingBottom: Math.max(insets.bottom, 16) }]}>
         <TouchableOpacity
-          style={styles.actionButton}
+          style={[
+            styles.actionButton,
+            {
+              backgroundColor: theme.colors.brandAction,
+              shadowColor: theme.colors.brandPrimary,
+            },
+          ]}
           onPress={handleNext}
           activeOpacity={0.85}
           accessibilityRole="button"

@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import {
   Image,
   Modal,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { images } from '@/assets/images';
 import { AppButton, AppCard, AppText, ProgressBar } from '@/components/common';
@@ -63,7 +63,7 @@ export function BadgesChallengesScreen({ navigation }: Props) {
   });
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.canvasBase }]}>
+    <SafeAreaView edges={['top']} style={[styles.safe, { backgroundColor: theme.colors.canvasBase }]}>
       {/* ── Top Bar ─────────────────────────────────────────────────── */}
       <View style={[styles.topBar, { borderBottomColor: theme.colors.surfaceBorder }]}>
         <TouchableOpacity

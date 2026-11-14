@@ -61,7 +61,7 @@ export function calculateTdee(bmr: number, activityLevel: ActivityLevel) { retur
 export function defaultMacroPercentages(goalType: GoalType): MacroPercentages {
   if (goalType === 'lose') return { protein: 30, carbs: 40, fat: 30 };
   if (goalType === 'gain') return { protein: 25, carbs: 50, fat: 25 };
-  return { protein: 30, carbs: 45, fat: 25 };
+  return { protein: 20, carbs: 50, fat: 30 };
 }
 
 export function normalizeMacroPercentages(percentages: MacroPercentages): MacroPercentages {

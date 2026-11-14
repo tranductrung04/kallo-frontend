@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 import { AppText } from '@/components/common';
 import { CircleCheckIcon, StarIcon } from '@/components/icons';
+import { useTheme } from '@/theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -69,6 +70,8 @@ export function CalculatingPlanScreen({
   onFinished,
 }: CalculatingPlanScreenProps) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const isDark = theme.scheme === 'dark';
 
   // Progress animation values (0 to 1)
   const progress1 = useRef(new Animated.Value(0)).current;
@@ -183,7 +186,15 @@ export function CalculatingPlanScreen({
   };
 
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: Math.max(insets.top, 20) }]}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        {
+          paddingTop: Math.max(insets.top, 20),
+          backgroundColor: isDark ? '#0F0B1E' : theme.colors.canvasBase,
+        },
+      ]}
+    >
       <View style={styles.content}>
         {/* ── Top Mascot / Hourglass Icon ─────────────────────────── */}
         <Animated.View style={[styles.iconWrap, { transform: [{ scale: hourglassScale }] }]}>
@@ -191,27 +202,60 @@ export function CalculatingPlanScreen({
         </Animated.View>
 
         {/* ── Heading ────────────────────────────────────────────── */}
-        <AppText style={styles.title}>Kallo đang tính toán cho bạn nè...</AppText>
+        <AppText
+          style={[
+            styles.title,
+            { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+          ]}
+        >
+          Kallo đang tính toán cho bạn nè...
+        </AppText>
 
         {/* ── Progress Steps ─────────────────────────────────────── */}
         <View style={styles.stepsContainer}>
           {/* Step 1 */}
           <View style={styles.stepItem}>
             <View style={styles.stepHeader}>
-              <AppText style={styles.stepLabel}>Phân tích hồ sơ thể chất</AppText>
+              <AppText
+                style={[
+                  styles.stepLabel,
+                  { color: isDark ? '#F1F5F9' : theme.colors.textPrimary },
+                ]}
+              >
+                Phân tích hồ sơ thể chất
+              </AppText>
               {step1Done ? (
                 <View style={styles.checkCircle}>
                   <CircleCheckIcon size={20} color="#22C55E" />
                 </View>
               ) : (
-                <View style={styles.emptyCircle} />
+                <View
+                  style={[
+                    styles.emptyCircle,
+                    {
+                      borderColor: isDark
+                        ? '#362D59'
+                        : theme.colors.surfaceBorder,
+                    },
+                  ]}
+                />
               )}
             </View>
-            <View style={styles.track}>
+            <View
+              style={[
+                styles.track,
+                {
+                  backgroundColor: isDark
+                    ? '#231B42'
+                    : theme.colors.surfaceBorder,
+                },
+              ]}
+            >
               <Animated.View
                 style={[
                   styles.barFill,
                   {
+                    backgroundColor: theme.colors.brandPrimary,
                     width: progress1.interpolate({
                       inputRange: [0, 1],
                       outputRange: ['0%', '100%'],
@@ -225,20 +269,46 @@ export function CalculatingPlanScreen({
           {/* Step 2 */}
           <View style={styles.stepItem}>
             <View style={styles.stepHeader}>
-              <AppText style={styles.stepLabel}>Tính toán quá trình trao đổi chất</AppText>
+              <AppText
+                style={[
+                  styles.stepLabel,
+                  { color: isDark ? '#F1F5F9' : theme.colors.textPrimary },
+                ]}
+              >
+                Tính toán quá trình trao đổi chất
+              </AppText>
               {step2Done ? (
                 <View style={styles.checkCircle}>
                   <CircleCheckIcon size={20} color="#22C55E" />
                 </View>
               ) : (
-                <View style={styles.emptyCircle} />
+                <View
+                  style={[
+                    styles.emptyCircle,
+                    {
+                      borderColor: isDark
+                        ? '#362D59'
+                        : theme.colors.surfaceBorder,
+                    },
+                  ]}
+                />
               )}
             </View>
-            <View style={styles.track}>
+            <View
+              style={[
+                styles.track,
+                {
+                  backgroundColor: isDark
+                    ? '#231B42'
+                    : theme.colors.surfaceBorder,
+                },
+              ]}
+            >
               <Animated.View
                 style={[
                   styles.barFill,
                   {
+                    backgroundColor: theme.colors.brandPrimary,
                     width: progress2.interpolate({
                       inputRange: [0, 1],
                       outputRange: ['0%', '100%'],
@@ -252,7 +322,14 @@ export function CalculatingPlanScreen({
           {/* Step 3 */}
           <View style={styles.stepItem}>
             <View style={styles.stepHeader}>
-              <AppText style={styles.stepLabel}>Tính toán calo mục tiêu</AppText>
+              <AppText
+                style={[
+                  styles.stepLabel,
+                  { color: isDark ? '#F1F5F9' : theme.colors.textPrimary },
+                ]}
+              >
+                Tính toán calo mục tiêu
+              </AppText>
               {step3Done ? (
                 <View style={styles.checkCircle}>
                   <CircleCheckIcon size={20} color="#22C55E" />
@@ -264,7 +341,7 @@ export function CalculatingPlanScreen({
                       cx="12"
                       cy="12"
                       r="9"
-                      stroke="#9D6CFA"
+                      stroke={theme.colors.brandPrimary}
                       strokeWidth="2.5"
                       strokeDasharray="28 14"
                       fill="none"
@@ -272,14 +349,33 @@ export function CalculatingPlanScreen({
                   </Svg>
                 </View>
               ) : (
-                <View style={styles.emptyCircle} />
+                <View
+                  style={[
+                    styles.emptyCircle,
+                    {
+                      borderColor: isDark
+                        ? '#362D59'
+                        : theme.colors.surfaceBorder,
+                    },
+                  ]}
+                />
               )}
             </View>
-            <View style={styles.track}>
+            <View
+              style={[
+                styles.track,
+                {
+                  backgroundColor: isDark
+                    ? '#231B42'
+                    : theme.colors.surfaceBorder,
+                },
+              ]}
+            >
               <Animated.View
                 style={[
                   styles.barFill,
                   {
+                    backgroundColor: theme.colors.brandPrimary,
                     width: progress3.interpolate({
                       inputRange: [0, 1],
                       outputRange: ['0%', '100%'],
@@ -293,7 +389,12 @@ export function CalculatingPlanScreen({
 
         {/* ── Testimonials Section ───────────────────────────────── */}
         <View style={styles.testimonialSection}>
-          <AppText style={styles.testimonialHeading}>
+          <AppText
+            style={[
+              styles.testimonialHeading,
+              { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+            ]}
+          >
             Đánh giá từ người dùng Kallo
           </AppText>
 
@@ -311,18 +412,51 @@ export function CalculatingPlanScreen({
               setActiveIndex(newIndex);
             }}
             renderItem={({ item }) => (
-              <View style={styles.testimonialCard}>
+              <View
+                style={[
+                  styles.testimonialCard,
+                  {
+                    backgroundColor: isDark
+                      ? '#1E163B'
+                      : theme.colors.surfaceMid,
+                    borderColor: isDark
+                      ? '#34265E'
+                      : theme.colors.surfaceBorder,
+                  },
+                ]}
+              >
                 <View style={styles.testimonialTopRow}>
                   <View style={styles.starsRow}>
                     {[...Array(item.rating)].map((_, i) => (
                       <StarIcon key={i} size={15} color="#FACC15" fill="#FACC15" />
                     ))}
                   </View>
-                  <AppText style={styles.reviewerName}>{item.name}</AppText>
+                  <AppText
+                    style={[
+                      styles.reviewerName,
+                      { color: isDark ? '#CBD5E1' : theme.colors.textSecondary },
+                    ]}
+                  >
+                    {item.name}
+                  </AppText>
                 </View>
 
-                <AppText style={styles.reviewTitle}>{item.title}</AppText>
-                <AppText style={styles.reviewContent}>{item.content}</AppText>
+                <AppText
+                  style={[
+                    styles.reviewTitle,
+                    { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+                  ]}
+                >
+                  {item.title}
+                </AppText>
+                <AppText
+                  style={[
+                    styles.reviewContent,
+                    { color: isDark ? '#CBD5E1' : theme.colors.textSecondary },
+                  ]}
+                >
+                  {item.content}
+                </AppText>
               </View>
             )}
           />
@@ -334,7 +468,23 @@ export function CalculatingPlanScreen({
                 key={idx}
                 style={[
                   styles.dot,
-                  idx === activeIndex ? styles.activeDot : styles.inactiveDot,
+                  idx === activeIndex
+                    ? [
+                        styles.activeDot,
+                        {
+                          backgroundColor: isDark
+                            ? '#FFFFFF'
+                            : theme.colors.brandPrimary,
+                        },
+                      ]
+                    : [
+                        styles.inactiveDot,
+                        {
+                          backgroundColor: isDark
+                            ? 'rgba(255, 255, 255, 0.25)'
+                            : theme.colors.surfaceBorder,
+                        },
+                      ],
                 ]}
               />
             ))}
@@ -347,7 +497,14 @@ export function CalculatingPlanScreen({
           style={styles.skipButton}
           activeOpacity={0.7}
         >
-          <AppText style={styles.skipText}>Xem kết quả ngay ›</AppText>
+          <AppText
+            style={[
+              styles.skipText,
+              { color: theme.colors.brandPrimary },
+            ]}
+          >
+            Xem kết quả ngay ›
+          </AppText>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

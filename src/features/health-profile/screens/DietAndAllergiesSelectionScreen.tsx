@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { images } from '@/assets/images';
 import { AppText } from '@/components/common';
 import { CheckIcon, ChevronLeftIcon, CloseXIcon, PlusIcon } from '@/components/icons';
+import { useTheme } from '@/theme';
 import { AnimatedCard, AnimatedRadio } from '../components';
 import { useHealthProfileDraft } from '../hooks/useHealthProfileDraft';
 import { COMMON_ALLERGIES } from '../types';
@@ -47,6 +48,8 @@ export function DietAndAllergiesSelectionScreen({
   hideHeader = false,
 }: DietAndAllergiesSelectionScreenProps) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const isDark = theme.scheme === 'dark';
   const {
     draft,
     toggleAllergy,
@@ -106,7 +109,15 @@ export function DietAndAllergiesSelectionScreen({
       >
         {/* ── Avatar & Speech Bubble Row ─────────────────────────── */}
         <View style={styles.bubbleRow}>
-          <View style={styles.avatarWrap}>
+          <View
+            style={[
+              styles.avatarWrap,
+              {
+                backgroundColor: isDark ? '#302657' : '#EDE5FF',
+                borderColor: isDark ? '#9D6CFA' : '#D4C7F8',
+              },
+            ]}
+          >
             <Image
               source={images.mascotAvatar}
               style={styles.avatarImage}
@@ -114,9 +125,30 @@ export function DietAndAllergiesSelectionScreen({
               accessibilityLabel="Mascot Kallo"
             />
           </View>
-          <View style={styles.bubble}>
-            <View style={styles.bubbleTail} />
-            <AppText style={styles.bubbleText}>
+          <View
+            style={[
+              styles.bubble,
+              {
+                backgroundColor: '#FFFFFF',
+                borderColor: isDark ? '#382D61' : theme.colors.surfaceBorder,
+                borderWidth: 1,
+              },
+            ]}
+          >
+            <View
+              style={[
+                styles.bubbleTail,
+                {
+                  borderRightColor: '#FFFFFF',
+                },
+              ]}
+            />
+            <AppText
+              style={[
+                styles.bubbleText,
+                { color: '#111827' },
+              ]}
+            >
               Sở thích ăn uống & dị ứng của bạn?
             </AppText>
           </View>
@@ -124,8 +156,20 @@ export function DietAndAllergiesSelectionScreen({
 
         {/* ── Section 1: Chế độ ăn uống yêu thích ─────────────────── */}
         <View style={styles.section}>
-          <AppText style={styles.sectionTitle}>Chế độ ăn ưa thích</AppText>
-          <AppText style={styles.sectionSubtitle}>
+          <AppText
+            style={[
+              styles.sectionTitle,
+              { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+            ]}
+          >
+            Chế độ ăn ưa thích
+          </AppText>
+          <AppText
+            style={[
+              styles.sectionSubtitle,
+              { color: isDark ? '#CBD5E1' : theme.colors.textSecondary },
+            ]}
+          >
             Chọn chế độ ăn bạn muốn duy trì để Kallo gợi ý thực đơn phù hợp nhất
           </AppText>
 
@@ -138,10 +182,10 @@ export function DietAndAllergiesSelectionScreen({
                   selected={isSelected}
                   onPress={() => handleSelectDiet(item.key)}
                   style={styles.dietCard}
-                  selectedBorderColor="#A78BFA"
-                  selectedBgColor="#231742"
-                  unselectedBorderColor="#2E2352"
-                  unselectedBgColor="#1A1433"
+                  selectedBorderColor={theme.colors.brandPrimary}
+                  selectedBgColor={isDark ? '#231742' : theme.colors.brandSoftTint}
+                  unselectedBorderColor={isDark ? '#2E2352' : theme.colors.surfaceBorder}
+                  unselectedBgColor={isDark ? '#1A1433' : theme.colors.surfaceMid}
                   activeScale={0.97}
                   accessibilityRole="radio"
                   accessibilityLabel={`${item.label}, ${item.desc}`}
@@ -151,14 +195,34 @@ export function DietAndAllergiesSelectionScreen({
                       <AppText
                         style={[
                           styles.dietLabel,
-                          isSelected && styles.dietLabelSelected,
+                          {
+                            color: isSelected
+                              ? isDark
+                                ? '#E9D5FF'
+                                : theme.colors.brandPrimary
+                              : isDark
+                              ? '#E2E8F0'
+                              : theme.colors.textPrimary,
+                          },
                         ]}
                       >
                         {item.label}
                       </AppText>
-                      <AppText style={styles.dietDesc}>{item.desc}</AppText>
+                      <AppText
+                        style={[
+                          styles.dietDesc,
+                          { color: isDark ? '#A098BD' : theme.colors.textSecondary },
+                        ]}
+                      >
+                        {item.desc}
+                      </AppText>
                     </View>
-                    <AnimatedRadio selected={isSelected} activeColor="#A78BFA" size={22} />
+                    <AnimatedRadio
+                      selected={isSelected}
+                      activeColor={theme.colors.brandPrimary}
+                      inactiveColor={isDark ? '#473B6B' : theme.colors.surfaceBorder}
+                      size={22}
+                    />
                   </View>
                 </AnimatedCard>
               );
@@ -168,8 +232,20 @@ export function DietAndAllergiesSelectionScreen({
 
         {/* ── Section 2: Dị ứng thực phẩm ────────────────────────── */}
         <View style={styles.section}>
-          <AppText style={styles.sectionTitle}>Dị ứng & Kiêng kỵ thực phẩm</AppText>
-          <AppText style={styles.sectionSubtitle}>
+          <AppText
+            style={[
+              styles.sectionTitle,
+              { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+            ]}
+          >
+            Dị ứng & Kiêng kỵ thực phẩm
+          </AppText>
+          <AppText
+            style={[
+              styles.sectionSubtitle,
+              { color: isDark ? '#CBD5E1' : theme.colors.textSecondary },
+            ]}
+          >
             Kallo sẽ tự động gắn cờ cảnh báo trong thực đơn nếu có món chứa các thành phần này
           </AppText>
 
@@ -182,10 +258,10 @@ export function DietAndAllergiesSelectionScreen({
                   selected={isSelected}
                   onPress={() => handleToggleAllergy(allergy)}
                   style={styles.allergyPill}
-                  selectedBorderColor="#A78BFA"
-                  selectedBgColor="#7C3AED"
-                  unselectedBorderColor="#382C63"
-                  unselectedBgColor="#1F173B"
+                  selectedBorderColor={theme.colors.brandPrimary}
+                  selectedBgColor={theme.colors.brandPrimary}
+                  unselectedBorderColor={isDark ? '#382C63' : theme.colors.surfaceBorder}
+                  unselectedBgColor={isDark ? '#1F173B' : theme.colors.surfaceMid}
                   activeScale={0.93}
                   accessibilityRole="checkbox"
                   accessibilityLabel={allergy}
@@ -194,12 +270,22 @@ export function DietAndAllergiesSelectionScreen({
                     {isSelected ? (
                       <CheckIcon size={13} color="#FFFFFF" strokeWidth={2.4} />
                     ) : (
-                      <PlusIcon size={12} color="#CBD5E1" strokeWidth={2.4} />
+                      <PlusIcon
+                        size={12}
+                        color={isDark ? '#CBD5E1' : theme.colors.textSecondary}
+                        strokeWidth={2.4}
+                      />
                     )}
                     <AppText
                       style={[
                         styles.allergyPillText,
-                        isSelected && styles.allergyPillTextSelected,
+                        {
+                          color: isSelected
+                            ? '#FFFFFF'
+                            : isDark
+                            ? '#CBD5E1'
+                            : theme.colors.textSecondary,
+                        },
                       ]}
                     >
                       {allergy}
@@ -211,13 +297,24 @@ export function DietAndAllergiesSelectionScreen({
           </View>
 
           {/* Custom Allergy Input */}
-          <View style={styles.customInputRow}>
+          <View
+            style={[
+              styles.customInputRow,
+              {
+                backgroundColor: isDark ? '#1E173C' : theme.colors.surfaceMid,
+                borderColor: isDark ? '#34285D' : theme.colors.surfaceBorder,
+              },
+            ]}
+          >
             <TextInput
               value={customInput}
               onChangeText={setCustomInput}
               placeholder="Thành phần dị ứng khác (ví dụ: Thịt bò, mè...)"
-              placeholderTextColor="#5B537F"
-              style={styles.customTextInput}
+              placeholderTextColor={isDark ? '#5B537F' : theme.colors.textDisabled}
+              style={[
+                styles.customTextInput,
+                { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+              ]}
               returnKeyType="done"
               onSubmitEditing={handleAddCustom}
             />
@@ -226,18 +323,35 @@ export function DietAndAllergiesSelectionScreen({
               activeOpacity={0.8}
               style={[
                 styles.addCustomBtn,
-                !customInput.trim() && styles.addCustomBtnDisabled,
+                { backgroundColor: theme.colors.brandAction },
+                !customInput.trim() && {
+                  backgroundColor: isDark ? '#3D3163' : '#E4E0F0',
+                },
               ]}
               disabled={!customInput.trim()}
             >
-              <AppText style={styles.addCustomBtnText}>Thêm</AppText>
+              <AppText
+                style={[
+                  styles.addCustomBtnText,
+                  !customInput.trim() && !isDark && { color: '#A6A1B8' },
+                ]}
+              >
+                Thêm
+              </AppText>
             </TouchableOpacity>
           </View>
 
           {/* List of custom added allergies */}
           {draft.allergies.filter((a) => !COMMON_ALLERGIES.includes(a)).length > 0 && (
             <View style={styles.customPillsList}>
-              <AppText style={styles.customPillsLabel}>Đã thêm:</AppText>
+              <AppText
+                style={[
+                  styles.customPillsLabel,
+                  { color: isDark ? '#94A3B8' : theme.colors.textSecondary },
+                ]}
+              >
+                Đã thêm:
+              </AppText>
               <View style={styles.pillsContainer}>
                 {draft.allergies
                   .filter((a) => !COMMON_ALLERGIES.includes(a))
@@ -246,7 +360,13 @@ export function DietAndAllergiesSelectionScreen({
                       key={customAllergy}
                       onPress={() => handleToggleAllergy(customAllergy)}
                       activeOpacity={0.8}
-                      style={styles.customAddedPill}
+                      style={[
+                        styles.customAddedPill,
+                        {
+                          backgroundColor: theme.colors.brandPrimary,
+                          borderColor: theme.colors.brandPrimary,
+                        },
+                      ]}
                     >
                       <CloseXIcon size={12} color="#FFFFFF" strokeWidth={2.4} />
                       <AppText style={styles.customAddedPillText}>
@@ -262,7 +382,13 @@ export function DietAndAllergiesSelectionScreen({
         {/* ── Bottom Action Button ───────────────────────────────── */}
         <View style={[styles.bottomArea, { paddingBottom: Math.max(insets.bottom, 16) }]}>
           <TouchableOpacity
-            style={styles.actionButton}
+            style={[
+              styles.actionButton,
+              {
+                backgroundColor: theme.colors.brandAction,
+                shadowColor: theme.colors.brandPrimary,
+              },
+            ]}
             onPress={handleNext}
             activeOpacity={0.85}
             accessibilityRole="button"
@@ -280,7 +406,15 @@ export function DietAndAllergiesSelectionScreen({
   }
 
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        {
+          paddingTop: insets.top,
+          backgroundColor: isDark ? '#120E29' : theme.colors.canvasBase,
+        },
+      ]}
+    >
       {/* ── Top Bar ────────────────────────────────────────────── */}
       <View style={styles.topBar}>
         <TouchableOpacity
@@ -290,13 +424,31 @@ export function DietAndAllergiesSelectionScreen({
           accessibilityRole="button"
           accessibilityLabel="Quay lại"
         >
-          <ChevronLeftIcon size={26} color="#FFFFFF" />
+          <ChevronLeftIcon
+            size={26}
+            color={isDark ? '#FFFFFF' : theme.colors.textPrimary}
+          />
         </TouchableOpacity>
       </View>
 
       {/* ── Progress Bar: 92% ────────────────────────────────── */}
-      <View style={styles.progressTrack}>
-        <View style={[styles.progressFill, { width: '92%' }]} />
+      <View
+        style={[
+          styles.progressTrack,
+          {
+            backgroundColor: isDark ? '#261F45' : theme.colors.surfaceBorder,
+          },
+        ]}
+      >
+        <View
+          style={[
+            styles.progressFill,
+            {
+              backgroundColor: theme.colors.brandPrimary,
+              width: '92%',
+            },
+          ]}
+        />
       </View>
 
       {content}

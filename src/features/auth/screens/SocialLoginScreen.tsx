@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Image,
   ImageBackground,
@@ -11,6 +12,8 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Line, Path, Rect } from 'react-native-svg';
+import * as WebBrowser from 'expo-web-browser';
+import * as Google from 'expo-auth-session/providers/google';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { images } from '@/assets/images';
 import { AppText } from '@/components/common';
@@ -18,6 +21,10 @@ import { MoonIcon, SunIcon } from '@/components/icons';
 import { AuthLightBackground } from './AuthLightBackground';
 import type { AuthStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
+import { useAuth } from '../AuthProvider';
+
+// Hoàn tất phiên redirect nếu đang quay lại từ trình duyệt đăng nhập
+WebBrowser.maybeCompleteAuthSession();
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'SocialLogin'>;
 
@@ -91,11 +98,69 @@ export function SocialLoginScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
   const isDark = theme.scheme === 'dark';
+  const { signInWithGoogle, isDemoMode } = useAuth();
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const webClientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID?.trim() || '';
+  const androidClientId = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID?.trim() || webClientId;
+  const iosClientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID?.trim() || webClientId;
+
+  // Fallback an toàn (không bao giờ để undefined) để useIdTokenAuthRequest không crash màn hình khi chưa có Client ID trong .env
+  const fallbackClientId = 'kallo-google-auth-placeholder';
+
+  // Cấu hình Google Auth Request lấy ID Token
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+    clientId: webClientId || fallbackClientId,
+    webClientId: webClientId || fallbackClientId,
+    androidClientId: androidClientId || webClientId || fallbackClientId,
+    iosClientId: iosClientId || webClientId || fallbackClientId,
+  });
+
+  // In ra Redirect URI chính xác để người dùng copy vào Google Cloud Console
+  useEffect(() => {
+    if (request?.redirectUri) {
+      console.log('\n=======================================================');
+      console.log('[Google OAuth] URI chuyển hướng cần thêm vào Google Cloud:');
+      console.log(request.redirectUri);
+      console.log('=======================================================\n');
+    }
+  }, [request?.redirectUri]);
+
+  // Lắng nghe kết quả trả về từ Google OAuth
+  useEffect(() => {
+    if (!response) return;
+
+    if (response.type === 'success') {
+      const idToken = (response as any).authentication?.idToken || response.params?.id_token;
+      if (idToken) {
+        setGoogleLoading(true);
+        signInWithGoogle(idToken)
+          .catch((err) => {
+            console.error('[Google Sign-In] Backend verification failed:', err);
+            // Tự động chuyển sang màn hình đăng nhập thường nếu xảy ra lỗi xác thực backend
+            navigation.navigate('Login');
+          })
+          .finally(() => {
+            setGoogleLoading(false);
+          });
+      } else if (response.params?.code) {
+        // Đang đợi quá trình trao đổi Authorization Code lấy ID Token (PKCE auto-exchange)
+        setGoogleLoading(true);
+      } else {
+        // Không nhận được idToken -> Tự động chuyển sang đăng nhập thường
+        navigation.navigate('Login');
+      }
+    } else if (response.type === 'error') {
+      console.warn('[Google Sign-In] OAuth error:', response.error);
+      // Đăng nhập Google lỗi -> Tự động chuyển ngay sang đăng nhập thường
+      navigation.navigate('Login');
+    }
+  }, [navigation, response, signInWithGoogle]);
 
   const handleAppleLogin = () => {
     Alert.alert(
       'Đăng nhập với Apple',
-      'Tính năng đăng nhập với mạng xã hội đang được hoàn thiện. Bạn có muốn chuyển sang đăng nhập bằng tài khoản email/mật khẩu?',
+      'Tính năng đăng nhập với Apple đang được hoàn thiện. Bạn có muốn chuyển sang đăng nhập bằng tài khoản email/mật khẩu?',
       [
         { text: 'Huỷ', style: 'cancel' },
         { text: 'Đăng nhập ngay', onPress: () => navigation.navigate('Login') },
@@ -103,19 +168,49 @@ export function SocialLoginScreen({ navigation }: Props) {
     );
   };
 
-  const handleGoogleLogin = () => {
-    Alert.alert(
-      'Đăng nhập với Google',
-      'Tính năng đăng nhập với mạng xã hội đang được hoàn thiện. Bạn có muốn chuyển sang đăng nhập bằng tài khoản email/mật khẩu?',
-      [
-        { text: 'Huỷ', style: 'cancel' },
-        { text: 'Đăng nhập ngay', onPress: () => navigation.navigate('Login') },
-      ]
-    );
+  const handleGoogleLogin = async () => {
+    if (googleLoading) return;
+
+    // 1. Chế độ Demo: Đăng nhập giả lập ngay mà không cần gọi Google OAuth
+    if (isDemoMode) {
+      setGoogleLoading(true);
+      try {
+        await signInWithGoogle('demo-google-id-token');
+      } catch {
+        navigation.navigate('Login');
+      } finally {
+        setGoogleLoading(false);
+      }
+      return;
+    }
+
+    // 2. Chế độ Backend thật: Kích hoạt trực tiếp luồng đăng nhập Google
+    try {
+      setGoogleLoading(true);
+      await promptAsync();
+    } catch {
+      navigation.navigate('Login');
+    } finally {
+      setGoogleLoading(false);
+    }
   };
 
   const handleEmailLogin = () => {
     navigation.navigate('Login');
+  };
+
+  const handleOpenTerms = () => {
+    Alert.alert(
+      'Điều khoản sử dụng',
+      'Kallo cam kết bảo vệ quyền riêng tư và dữ liệu sức khỏe của người dùng. Mọi thông tin dinh dưỡng và calo chỉ mang tính chất tham khảo, hỗ trợ xây dựng lối sống lành mạnh.'
+    );
+  };
+
+  const handleOpenPrivacy = () => {
+    Alert.alert(
+      'Chính sách bảo mật',
+      'Dữ liệu cá nhân của bạn được mã hóa an toàn và chỉ sử dụng cho mục đích cá nhân hóa thực đơn và theo dõi sức khỏe theo quy định bảo mật của Kallo.'
+    );
   };
 
   const handleClose = () => {
@@ -191,6 +286,7 @@ export function SocialLoginScreen({ navigation }: Props) {
           {/* Google Sign In */}
           <Pressable
             onPress={handleGoogleLogin}
+            disabled={googleLoading}
             accessibilityRole="button"
             accessibilityLabel="Tiếp tục với Google"
             style={({ pressed }) => [
@@ -206,12 +302,19 @@ export function SocialLoginScreen({ navigation }: Props) {
                     theme.shadows.level1,
                   ],
               pressed && styles.buttonPressed,
+              googleLoading && { opacity: 0.6 },
             ]}
           >
-            <GoogleIcon />
-            <AppText style={styles.socialButtonText} color={isDark ? '#FFFFFF' : theme.colors.textPrimary}>
-              Tiếp tục với Google
-            </AppText>
+            {googleLoading ? (
+              <ActivityIndicator size="small" color={isDark ? '#FFFFFF' : theme.colors.brandPrimary} />
+            ) : (
+              <>
+                <GoogleIcon />
+                <AppText style={styles.socialButtonText} color={isDark ? '#FFFFFF' : theme.colors.textPrimary}>
+                  Tiếp tục với Google
+                </AppText>
+              </>
+            )}
           </Pressable>
 
           {/* Email Sign In */}
@@ -248,7 +351,7 @@ export function SocialLoginScreen({ navigation }: Props) {
           </AppText>
           <View style={styles.termsLinks}>
             <Pressable
-              onPress={() => {/* Open Terms */}}
+              onPress={handleOpenTerms}
               accessibilityRole="link"
               accessibilityLabel="Điều khoản sử dụng"
               style={({ pressed }) => pressed && styles.pressed}
@@ -261,7 +364,7 @@ export function SocialLoginScreen({ navigation }: Props) {
               {' '}và{' '}
             </AppText>
             <Pressable
-              onPress={() => {/* Open Privacy Policy */}}
+              onPress={handleOpenPrivacy}
               accessibilityRole="link"
               accessibilityLabel="Chính sách bảo mật"
               style={({ pressed }) => pressed && styles.pressed}
@@ -302,7 +405,7 @@ export function SocialLoginScreen({ navigation }: Props) {
   );
 
   return (
-    <View style={[styles.root, { backgroundColor: isDark ? '#13101F' : '#EDE9FA' }]}>
+    <View style={[styles.root, { backgroundColor: isDark ? '#13101F' : '#FFFFFF' }]}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       {isDark ? (
         <ImageBackground
@@ -313,7 +416,7 @@ export function SocialLoginScreen({ navigation }: Props) {
           {renderContent()}
         </ImageBackground>
       ) : (
-        <View style={styles.background}>
+        <View style={[styles.background, { backgroundColor: '#FFFFFF' }]}>
           <AuthLightBackground />
           {renderContent()}
         </View>

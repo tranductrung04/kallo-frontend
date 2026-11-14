@@ -138,7 +138,7 @@ export function VerifyOtpScreen({ route }: Props) {
                 style={[
                   styles.otpBox,
                   {
-                    backgroundColor: isDark ? theme.colors.surfaceHigh : theme.colors.surfaceMid,
+                    backgroundColor: isDark ? theme.colors.surfaceHigh : '#F8F7FC',
                     borderColor: isActive
                       ? theme.colors.brandPrimary
                       : digit

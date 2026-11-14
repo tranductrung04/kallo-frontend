@@ -83,8 +83,8 @@ export function HealthProfileSetupScreen({
   };
 
   const handleSave = async () => {
-    const ok = await saveProfile();
-    if (ok && onSuccess) {
+    const res = await saveProfile();
+    if (res.ok && onSuccess) {
       onSuccess();
     }
   };

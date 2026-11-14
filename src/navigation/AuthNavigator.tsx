@@ -24,7 +24,7 @@ function AuthHeader({ navigation, options, route, back }: NativeStackHeaderProps
   const isDark = theme.scheme === 'dark';
 
   return (
-    <View style={[styles.headerContainer, { paddingTop: Math.max(insets.top, 10), backgroundColor: isDark ? theme.colors.canvasBase : '#EDE9FA' }]}>
+    <View style={[styles.headerContainer, { paddingTop: Math.max(insets.top, 10), backgroundColor: isDark ? theme.colors.canvasBase : '#FFFFFF' }]}>
       <View style={styles.headerRow}>
         {canGoBack ? (
           <Pressable
@@ -72,12 +72,15 @@ const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 export function AuthNavigator() {
   const theme = useTheme();
+  const isDark = theme.scheme === 'dark';
+  const screenBg = isDark ? theme.colors.canvasBase : '#FFFFFF';
+
   return (
     <Stack.Navigator
       initialRouteName="Welcome"
       screenOptions={{
         header: (props) => <AuthHeader {...props} />,
-        contentStyle: { backgroundColor: theme.colors.canvasBase },
+        contentStyle: { backgroundColor: screenBg },
       }}
     >
       <Stack.Screen name="Welcome" component={WelcomeScreen} options={{ headerShown: false }} />
@@ -87,7 +90,7 @@ export function AuthNavigator() {
         options={{
           headerShown: false,
           animation: 'slide_from_bottom',
-          contentStyle: { backgroundColor: theme.colors.canvasBase },
+          contentStyle: { backgroundColor: screenBg },
         }}
       />
       <Stack.Screen name="Login" component={LoginScreen} options={{ title: 'Đăng nhập' }} />

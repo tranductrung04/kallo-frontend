@@ -8,6 +8,7 @@ export {
   KalloWelcomeScreen,
   NicknameScreen,
   GenderSelectionScreen,
+  AgeSelectionScreen,
   HeightSelectionScreen,
   CurrentWeightSelectionScreen,
   GoalSelectionScreen,
