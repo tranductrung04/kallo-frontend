@@ -52,6 +52,35 @@ export async function resetPassword(token: string, password: string) {
   await api.post('/auth/reset-password', { token, password });
 }
 
+export async function changePassword(currentPassword: string, newPassword: string) {
+  const response = await api.post<AuthResponse>('/auth/change-password', {
+    currentPassword,
+    newPassword,
+  });
+  const payload = unwrapAuthResponse(response.data);
+  if (payload.accessToken) {
+    await setTokens({ accessToken: payload.accessToken, refreshToken: payload.refreshToken });
+  }
+  return payload;
+}
+
+export function formatChangePasswordError(error: unknown): string {
+  const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message;
+  if (msg === 'Current password is invalid') {
+    return 'Mật khẩu hiện tại không chính xác. Vui lòng kiểm tra lại.';
+  }
+  if (msg === 'New password must differ from current password') {
+    return 'Mật khẩu mới phải khác mật khẩu hiện tại.';
+  }
+  if (msg === 'Password is not set') {
+    return 'Tài khoản này chưa thiết lập mật khẩu (đăng nhập bằng tài khoản xã hội).';
+  }
+  if (msg === 'Validation failed') {
+    return 'Mật khẩu mới không thỏa mãn yêu cầu bảo mật (tối thiểu 8 ký tự, gồm chữ và số).';
+  }
+  return getApiErrorMessage(error);
+}
+
 export async function logout() {
   try { await api.post('/auth/logout'); }
   catch { /* Keep local session cleanup when server is unavailable. */ }

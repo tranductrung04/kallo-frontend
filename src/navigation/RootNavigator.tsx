@@ -31,7 +31,7 @@ import {
   GameSettingsScreen,
   GameEventToast,
 } from '@/features/gamification';
-import { NotificationCenterScreen, ReminderSettingsScreen } from '@/features/system';
+import { ChangePasswordScreen, NotificationCenterScreen, ReminderSettingsScreen } from '@/features/system';
 import { ReportOverviewScreen } from '@/features/report/screens/ReportOverviewScreen';
 import { useTheme } from '@/theme';
 import { AppText } from '@/components/common';
@@ -108,6 +108,7 @@ export function RootNavigator() {
         <Stack.Screen name="GameSettings" component={GameSettingsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="NotificationCenter" component={NotificationCenterScreen} options={{ title: 'Trung tâm thông báo' }} />
         <Stack.Screen name="ReminderSettings" component={ReminderSettingsScreen} options={{ title: 'Cài đặt nhắc nhở' }} />
+        <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} options={{ title: 'Đổi mật khẩu' }} />
         <Stack.Screen name="ReportOverview" component={ReportOverviewScreen} options={{ headerShown: false }} />
 
       </>}

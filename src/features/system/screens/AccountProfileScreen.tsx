@@ -748,9 +748,10 @@ export function AccountProfileScreen({ navigation }: Props) {
               {/* Change Password */}
               <TouchableOpacity
                 style={styles.settingsRowItem}
-                onPress={() =>
-                  Alert.alert('Đổi mật khẩu', 'Nhập mật khẩu hiện tại và mật khẩu mới tối thiểu 8 ký tự.')
-                }
+                onPress={() => {
+                  setShowSettingsModal(false);
+                  root?.navigate('ChangePassword');
+                }}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                   <LockClosedIcon size={18} color={theme.colors.brandPrimary} />

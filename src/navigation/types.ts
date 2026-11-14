@@ -79,5 +79,6 @@ export type RootStackParamList = {
   GameSettings: undefined;
   NotificationCenter: undefined;
   ReminderSettings: undefined;
+  ChangePassword: undefined;
   ReportOverview: { date?: string; metric?: string } | undefined;
 };
