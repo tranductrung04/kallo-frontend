@@ -25,7 +25,7 @@ export function AuthLayout({ children }: React.PropsWithChildren) {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={[authStyles.safe, { backgroundColor: isDark ? theme.colors.canvasBase : '#EDE9FA' }]}
+      style={[authStyles.safe, { backgroundColor: isDark ? theme.colors.canvasBase : '#FFFFFF' }]}
     >
       <StatusBar style={isDark ? 'light' : 'dark'} />
       {!isDark && <AuthLightBackground />}

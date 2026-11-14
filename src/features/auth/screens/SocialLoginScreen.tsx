@@ -405,7 +405,7 @@ export function SocialLoginScreen({ navigation }: Props) {
   );
 
   return (
-    <View style={[styles.root, { backgroundColor: isDark ? '#13101F' : '#EDE9FA' }]}>
+    <View style={[styles.root, { backgroundColor: isDark ? '#13101F' : '#FFFFFF' }]}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       {isDark ? (
         <ImageBackground
@@ -416,7 +416,7 @@ export function SocialLoginScreen({ navigation }: Props) {
           {renderContent()}
         </ImageBackground>
       ) : (
-        <View style={styles.background}>
+        <View style={[styles.background, { backgroundColor: '#FFFFFF' }]}>
           <AuthLightBackground />
           {renderContent()}
         </View>
