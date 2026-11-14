@@ -1,6 +1,10 @@
 import 'react-native-gesture-handler';
 import React from 'react';
+import * as WebBrowser from 'expo-web-browser';
 import { StatusBar } from 'expo-status-bar';
+
+// Hoàn tất phiên redirect nếu đang quay lại từ trình duyệt đăng nhập OAuth
+WebBrowser.maybeCompleteAuthSession();
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { RootNavigator } from '@/navigation/RootNavigator';

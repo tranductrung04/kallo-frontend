@@ -15,7 +15,7 @@ export type AuthStackParamList = {
   Login: undefined;
   Register: undefined;
   ForgotPassword: undefined;
-  ResetPassword: { token?: string } | undefined;
+  ResetPassword: { email?: string; token?: string } | undefined;
   VerifyOtp: { email: string };
 };
 export type OnboardingStackParamList = {

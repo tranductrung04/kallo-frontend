@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Image,
   Modal,
@@ -8,12 +9,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { images } from '@/assets/images';
-import { AppButton, AppCard, AppSwitch, AppText } from '@/components/common';
+import { AppButton, AppCard, AppInput, AppSwitch, AppText } from '@/components/common';
 import {
   BellIcon,
   CalendarIcon,
@@ -30,6 +32,7 @@ import {
   LockClosedIcon,
   LogOutIcon,
   MoonIcon,
+  PenLineIcon,
   RefreshCwIcon,
   ScaleIcon,
   SearchIcon,
@@ -40,6 +43,8 @@ import {
 import type { MainTabParamList, RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
 import { useAuth } from '@/features/auth/AuthProvider';
+import { deleteAccount, getApiErrorMessage, updateAvatar, updateMe } from '@/features/auth/api';
+import { API_BASE_URL } from '@/services/api/client';
 import { useNutrition } from '@/features/nutrition/NutritionProvider';
 import { useOfflineSync } from '@/services/offline';
 import {
@@ -56,18 +61,30 @@ export function AccountProfileScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
   const isDark = theme.scheme === 'dark';
-  const { signOut } = useAuth();
+  const { signOut, user, refreshUser, isDemoMode } = useAuth();
   const { state: nutritionState } = useNutrition();
   const { isOnline, pendingCount, syncNow, toggleOnlineStatus } = useOfflineSync();
   const root = navigation.getParent() as RootNavigation | undefined;
+
+  useEffect(() => {
+    void refreshUser();
+  }, [refreshUser]);
 
   // Modals state
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showHealthMetricsModal, setShowHealthMetricsModal] = useState(false);
   const [showCustomizeGoalsModal, setShowCustomizeGoalsModal] = useState(false);
+  const [showEditNameModal, setShowEditNameModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // User Profile State
-  const [displayName] = useState('Nam');
+  const displayName = user?.displayName || 'Nam';
+  const email = user?.email || '';
+  const [editDisplayName, setEditDisplayName] = useState('');
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [avatarLoading, setAvatarLoading] = useState(false);
   const [age] = useState(22);
   const [heightCm] = useState(160);
   const [weightKg] = useState(60);
@@ -104,23 +121,64 @@ export function AccountProfileScreen({ navigation }: Props) {
   const carbsOffset = -proteinLength;
   const fatOffset = -(proteinLength + carbsLength);
 
+  const handlePickAvatar = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+      if (!result.canceled && result.assets[0]?.uri) {
+        setAvatarLoading(true);
+        const asset = result.assets[0];
+        await updateAvatar(asset.uri, asset.mimeType || 'image/jpeg');
+        await refreshUser();
+        Alert.alert('Thành công', 'Đã cập nhật ảnh đại diện mới.');
+      }
+    } catch (err) {
+      Alert.alert('Lỗi tải ảnh', getApiErrorMessage(err));
+    } finally {
+      setAvatarLoading(false);
+    }
+  };
+
+  const handleSaveDisplayName = async () => {
+    if (!editDisplayName.trim()) return;
+    try {
+      await updateMe(editDisplayName.trim(), user?.timezone || 'Asia/Ho_Chi_Minh');
+      await refreshUser();
+      setShowEditNameModal(false);
+      Alert.alert('Thành công', 'Đã cập nhật tên hiển thị.');
+    } catch (err) {
+      Alert.alert('Lỗi cập nhật', getApiErrorMessage(err));
+    }
+  };
+
+  const handleConfirmDeleteAccount = async () => {
+    if (!deletePassword.trim()) {
+      setDeleteError('Vui lòng nhập mật khẩu xác nhận.');
+      return;
+    }
+    setDeleteLoading(true);
+    setDeleteError(null);
+    try {
+      await deleteAccount(deletePassword.trim());
+      setShowDeleteModal(false);
+      await signOut();
+      Alert.alert('Đã xóa tài khoản', 'Tài khoản của bạn đã được xóa thành công khỏi hệ thống Kallo.');
+    } catch (err) {
+      setDeleteError(getApiErrorMessage(err));
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   const handleDeleteAccount = () => {
-    Alert.alert(
-      'Xóa vĩnh viễn tài khoản?',
-      'Hành động này sẽ xóa toàn bộ nhật ký bữa ăn, chỉ số cân nặng và dữ liệu sức khỏe của bạn khỏi hệ thống Kallo theo yêu cầu FR-AUTH-07. Bạn không thể hoàn tác sau khi xác nhận.',
-      [
-        { text: 'Hủy bỏ', style: 'cancel' },
-        {
-          text: 'Xóa tài khoản',
-          style: 'destructive',
-          onPress: async () => {
-            setShowSettingsModal(false);
-            await signOut();
-            Alert.alert('Đã xóa tài khoản', 'Dữ liệu của bạn đã được xóa thành công.');
-          },
-        },
-      ]
-    );
+    setShowSettingsModal(false);
+    setDeletePassword('');
+    setDeleteError(null);
+    setShowDeleteModal(true);
   };
 
   const handleSaveGoals = () => {
@@ -158,9 +216,15 @@ export function AccountProfileScreen({ navigation }: Props) {
         <View style={styles.avatarSection}>
           <View style={styles.avatarWrapper}>
             <View style={styles.avatarCircle}>
-              <AppText variant="dataDisplay" color="#FFFFFF" style={styles.avatarLetter}>
-                {displayName.charAt(0).toUpperCase()}
-              </AppText>
+              {avatarLoading ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : user?.avatarUrl ? (
+                <Image source={{ uri: user.avatarUrl }} style={styles.avatarImage} />
+              ) : (
+                <AppText variant="dataDisplay" color="#FFFFFF" style={styles.avatarLetter}>
+                  {displayName.charAt(0).toUpperCase()}
+                </AppText>
+              )}
             </View>
             <TouchableOpacity
               activeOpacity={0.85}
@@ -168,9 +232,7 @@ export function AccountProfileScreen({ navigation }: Props) {
                 styles.addPhotoButton,
                 { backgroundColor: isDark ? '#221D34' : '#FFFFFF', borderColor: theme.colors.canvasBase },
               ]}
-              onPress={() =>
-                Alert.alert('Đổi ảnh đại diện', 'Chọn ảnh đại diện mới từ thư viện hoặc chụp ảnh.')
-              }
+              onPress={handlePickAvatar}
               accessibilityRole="button"
               accessibilityLabel="Thay đổi ảnh đại diện"
             >
@@ -180,11 +242,24 @@ export function AccountProfileScreen({ navigation }: Props) {
             </TouchableOpacity>
           </View>
 
-          <AppText variant="headlineMd" style={styles.userName}>
-            {displayName}
-          </AppText>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10 }}>
+            <AppText variant="headlineMd" style={styles.userName}>
+              {displayName}
+            </AppText>
+            <TouchableOpacity
+              onPress={() => {
+                setEditDisplayName(displayName);
+                setShowEditNameModal(true);
+              }}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel="Chỉnh sửa tên hiển thị"
+            >
+              <PenLineIcon size={18} color={theme.colors.brandPrimary} />
+            </TouchableOpacity>
+          </View>
           <AppText variant="caption" color={theme.colors.textSecondary}>
-            Đã tham gia từ 15 Thg 09, 2026
+            {email || 'Chăm sóc sức khỏe mỗi ngày'}
           </AppText>
         </View>
 
@@ -728,6 +803,31 @@ export function AccountProfileScreen({ navigation }: Props) {
                 </AppText>
               </TouchableOpacity>
 
+              {/* Data Mode Info */}
+              <TouchableOpacity
+                style={styles.settingsRowItem}
+                onPress={() => {
+                  Alert.alert(
+                    'Chế độ dữ liệu ứng dụng',
+                    isDemoMode
+                      ? 'Ứng dụng đang chạy ở Chế độ Demo (Offline) với dữ liệu giả lập.\nĐể chuyển sang backend thật, chạy: npm run env:dev'
+                      : `Ứng dụng đang kết nối với máy chủ Backend thật:\n${API_BASE_URL}\n\nĐể chuyển sang demo, chạy: npm run env:demo`
+                  );
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <GlobeIcon size={18} color={theme.colors.brandPrimary} />
+                  <AppText variant="bodyMd">Chế độ dữ liệu</AppText>
+                </View>
+                <AppText
+                  variant="caption"
+                  color={isDemoMode ? theme.colors.vipStreak : theme.colors.quickScanner}
+                  style={{ fontWeight: '600' }}
+                >
+                  {isDemoMode ? 'Bản Demo (Offline)' : 'Backend Thật'}
+                </AppText>
+              </TouchableOpacity>
+
               {/* Offline & Sync */}
               <TouchableOpacity
                 style={styles.settingsRowItem}
@@ -993,6 +1093,104 @@ export function AccountProfileScreen({ navigation }: Props) {
           </View>
         </View>
       </Modal>
+
+      {/* ── 4. Edit Display Name Modal ─────────────────────────────────── */}
+      <Modal
+        visible={showEditNameModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowEditNameModal(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.surfaceMid }]}>
+            <View style={styles.modalHeaderRow}>
+              <AppText variant="headlineSm">Chỉnh sửa tên hiển thị</AppText>
+              <TouchableOpacity onPress={() => setShowEditNameModal(false)}>
+                <CloseXIcon size={20} color={theme.colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={{ marginTop: 8 }}>
+              <AppInput
+                label="Tên hiển thị mới"
+                placeholder="Nhập tên của bạn"
+                value={editDisplayName}
+                onChangeText={setEditDisplayName}
+              />
+            </View>
+
+            <View style={{ marginTop: 14 }}>
+              <AppButton
+                label="Lưu thay đổi"
+                variant="primary"
+                disabled={!editDisplayName.trim()}
+                onPress={handleSaveDisplayName}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* ── 5. Delete Account Confirmation Modal ───────────────────────── */}
+      <Modal
+        visible={showDeleteModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowDeleteModal(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.surfaceMid }]}>
+            <View style={styles.modalHeaderRow}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <TriangleAlertIcon size={20} color={theme.colors.macroProtein} />
+                <AppText variant="headlineSm" color={theme.colors.macroProtein}>
+                  Xác nhận xóa tài khoản
+                </AppText>
+              </View>
+              <TouchableOpacity onPress={() => setShowDeleteModal(false)}>
+                <CloseXIcon size={20} color={theme.colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
+            <AppText variant="bodySm" color={theme.colors.textSecondary} style={{ marginTop: 4, lineHeight: 20 }}>
+              Hành động này sẽ xóa vĩnh viễn toàn bộ dữ liệu nhật ký, cân nặng và chỉ số sức khỏe của bạn khỏi hệ thống Kallo. Không thể hoàn tác.
+            </AppText>
+
+            <View style={{ marginTop: 10 }}>
+              <AppInput
+                label="Mật khẩu của bạn"
+                placeholder="Nhập mật khẩu để xác nhận xóa"
+                secureTextEntry
+                value={deletePassword}
+                onChangeText={(text) => {
+                  setDeletePassword(text);
+                  if (deleteError) setDeleteError(null);
+                }}
+                error={deleteError || undefined}
+              />
+            </View>
+
+            <View style={{ flexDirection: 'row', gap: 12, marginTop: 16 }}>
+              <View style={{ flex: 1 }}>
+                <AppButton
+                  label="Hủy bỏ"
+                  variant="secondary"
+                  onPress={() => setShowDeleteModal(false)}
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <AppButton
+                  label="Xóa vĩnh viễn"
+                  variant="primary"
+                  loading={deleteLoading}
+                  onPress={handleConfirmDeleteAccount}
+                  style={{ backgroundColor: theme.colors.macroProtein }}
+                />
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -1048,6 +1246,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#0284C7',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  avatarImage: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
   },
   avatarLetter: {
     fontSize: 44,
