@@ -14,6 +14,7 @@ import Svg, {
   Circle,
   Defs,
   Ellipse,
+  G,
   Line,
   Path,
   Rect,
@@ -31,15 +32,30 @@ const ILLUS_W = SCREEN_W - 48;
 const ILLUS_H = Math.round(ILLUS_W * 0.62);
 
 // ─── Sparkle / star decoration ───────────────────────────────────────────────
-function Sparkle({ x, y, size = 10, color = '#7C5CFC' }: { x: number; y: number; size?: number; color?: string }) {
-  const h = size / 2;
+function Sparkle({
+  x,
+  y,
+  size = 10,
+  color = '#7C5CFC',
+  stroke,
+  inner,
+}: {
+  x: number;
+  y: number;
+  size?: number;
+  color?: string;
+  stroke?: string;
+  inner?: number; // inner-point ratio of size (default keeps the original thin look)
+}) {
+  const h = inner != null ? inner * size : (size / 2) * 0.3;
   return (
-    <>
-      <Path
-        d={`M${x},${y - size} L${x + h * 0.3},${y - h * 0.3} L${x + size},${y} L${x + h * 0.3},${y + h * 0.3} L${x},${y + size} L${x - h * 0.3},${y + h * 0.3} L${x - size},${y} L${x - h * 0.3},${y - h * 0.3} Z`}
-        fill={color}
-      />
-    </>
+    <Path
+      d={`M${x},${y - size} L${x + h},${y - h} L${x + size},${y} L${x + h},${y + h} L${x},${y + size} L${x - h},${y + h} L${x - size},${y} L${x - h},${y - h} Z`}
+      fill={color}
+      stroke={stroke}
+      strokeWidth={stroke ? 1.5 : 0}
+      strokeLinejoin="round"
+    />
   );
 }
 
@@ -58,285 +74,244 @@ const W = ILLUS_W;
 const H = ILLUS_H;
 const CX = W / 2;
 
+// Design space for the first three illustrations (matches the reference images)
+const VB_W = 330;
+const VB_H = 205;
+const VB = `0 0 ${VB_W} ${VB_H}`;
+
+function useIllusColors() {
+  const theme = useTheme();
+  const dark = theme.scheme === 'dark';
+  return {
+    dash: dark ? '#FFFFFF' : '#4A4A68',
+    body: dark ? '#C9C9D6' : '#8A8A9A',
+    faint: dark ? '#8A8A9A' : '#B5B5C8',
+    spark: '#5B3FC4',
+    sparkStroke: dark ? '#FFFFFF' : '#FFFFFF',
+    dot: dark ? '#FFFFFF' : '#4A4A68',
+  };
+}
+
+const MIRROR = `translate(${VB_W}, 0) scale(-1, 1)`;
+
 function IllustrationBodyFat() {
-  // Upper body silhouette for fat/muscle measurement (machine-based)
+  const c = useIllusColors();
+  const dashedOutline = 'M128,4 C105,20 75,22 58,42 C50,52 50,70 48,90 L44,158 L34,190';
+  const innerContour = 'M133,22 C90,40 64,56 62,80 L61,130 C60,150 55,170 52,196';
   return (
-    <Svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
-      {/* Upper body outline */}
-      <Path
-        d={`M${CX - 60},${H - 20} L${CX - 70},${H * 0.4} Q${CX - 80},${H * 0.15} ${CX},${H * 0.1} Q${CX + 80},${H * 0.15} ${CX + 70},${H * 0.4} L${CX + 60},${H - 20}`}
-        fill="none"
-        stroke="#8A8A9A"
-        strokeWidth={2}
-      />
-      {/* Arms outline left */}
-      <Path
-        d={`M${CX - 70},${H * 0.4} Q${CX - 110},${H * 0.5} ${CX - 100},${H * 0.75}`}
-        fill="none"
-        stroke="#8A8A9A"
-        strokeWidth={2}
-      />
-      {/* Arms outline right */}
-      <Path
-        d={`M${CX + 70},${H * 0.4} Q${CX + 110},${H * 0.5} ${CX + 100},${H * 0.75}`}
-        fill="none"
-        stroke="#8A8A9A"
-        strokeWidth={2}
-      />
-      {/* Sparkles */}
-      <Sparkle x={CX - 55} y={H * 0.42} size={9} />
-      <Sparkle x={CX + 25} y={H * 0.28} size={7} />
-      {/* Hollow dots */}
-      <HollowDot cx={CX - 80} cy={H * 0.42} />
-      <HollowDot cx={CX - 68} cy={H * 0.42} />
+    <Svg width={W} height={H} viewBox={VB}>
+      {/* Faint inner body contours */}
+      <G opacity={0.5}>
+        <Path d={innerContour} fill="none" stroke={c.faint} strokeWidth={1.5} />
+        <Path d="M98,123 L86,196 M98,123 L106,196" fill="none" stroke={c.faint} strokeWidth={1.5} />
+      </G>
+      <G opacity={0.5} transform={MIRROR}>
+        <Path d={innerContour} fill="none" stroke={c.faint} strokeWidth={1.5} />
+        <Path d="M98,123 L86,196 M98,123 L106,196" fill="none" stroke={c.faint} strokeWidth={1.5} />
+      </G>
+      {/* Dashed outline (shoulders + arms) */}
+      <Path d={dashedOutline} fill="none" stroke={c.dash} strokeWidth={2} strokeDasharray="7,5" />
+      <G transform={MIRROR}>
+        <Path d={dashedOutline} fill="none" stroke={c.dash} strokeWidth={2} strokeDasharray="7,5" />
+      </G>
+      {/* Decorations */}
+      <Circle cx={253} cy={81} r={3} fill="#1A1A2E" opacity={0.8} />
+      <HollowDot cx={36} cy={110} r={4} color={c.dot} />
+      <HollowDot cx={78} cy={119} r={4} color={c.dot} />
+      <Sparkle x={61} y={130} size={10} color={c.spark} stroke={c.sparkStroke} inner={0.32} />
+      <Sparkle x={233} y={69} size={10} color={c.spark} stroke={c.sparkStroke} inner={0.32} />
     </Svg>
   );
 }
 
 function IllustrationNeck() {
-  // Front view: shoulders + neck with dashed circle around neck
+  const c = useIllusColors();
+  const neck = 'M115,2 C122,15 134,30 134,55 L133,73';
+  const shoulder = 'M133,73 C128,80 100,86 70,100 C40,114 26,150 23,204';
   return (
-    <Svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
-      {/* Shoulder silhouette */}
-      <Path
-        d={`M${CX - 90},${H - 10} Q${CX - 85},${H * 0.55} ${CX - 55},${H * 0.4} Q${CX - 30},${H * 0.32} ${CX - 20},${H * 0.25}`}
-        fill="none" stroke="#8A8A9A" strokeWidth={2}
-      />
-      <Path
-        d={`M${CX + 90},${H - 10} Q${CX + 85},${H * 0.55} ${CX + 55},${H * 0.4} Q${CX + 30},${H * 0.32} ${CX + 20},${H * 0.25}`}
-        fill="none" stroke="#8A8A9A" strokeWidth={2}
-      />
-      {/* Neck */}
-      <Path
-        d={`M${CX - 20},${H * 0.25} Q${CX - 22},${H * 0.12} ${CX},${H * 0.08} Q${CX + 22},${H * 0.12} ${CX + 20},${H * 0.25}`}
-        fill="none" stroke="#8A8A9A" strokeWidth={2}
-      />
+    <Svg width={W} height={H} viewBox={VB}>
+      {/* Neck (faint) */}
+      <G opacity={0.5}>
+        <Path d={neck} fill="none" stroke={c.faint} strokeWidth={1.5} />
+      </G>
+      <G opacity={0.5} transform={MIRROR}>
+        <Path d={neck} fill="none" stroke={c.faint} strokeWidth={1.5} />
+      </G>
+      {/* Shoulders */}
+      <Path d={shoulder} fill="none" stroke={c.body} strokeWidth={2} />
+      <G transform={MIRROR}>
+        <Path d={shoulder} fill="none" stroke={c.body} strokeWidth={2} />
+      </G>
       {/* Dashed ellipse around neck */}
       <Ellipse
-        cx={CX}
-        cy={H * 0.3}
-        rx={28}
-        ry={12}
+        cx={165}
+        cy={62}
+        rx={46}
+        ry={14}
         fill="none"
-        stroke="#7C5CFC"
-        strokeWidth={1.5}
-        strokeDasharray="6,4"
+        stroke={c.dash}
+        strokeWidth={2}
+        strokeDasharray="7,5"
       />
-      {/* Sparkles */}
-      <Sparkle x={CX - 65} y={H * 0.4} size={9} />
-      <Sparkle x={CX + 30} y={H * 0.3} size={8} />
-      {/* Hollow dots */}
-      <HollowDot cx={CX - 75} cy={H * 0.42} />
-      <HollowDot cx={CX + 42} cy={H * 0.3} />
+      {/* Decorations */}
+      <HollowDot cx={60} cy={93} r={3} color={c.dot} />
+      <HollowDot cx={225} cy={60} r={5} color={c.dot} />
+      <HollowDot cx={245} cy={93} r={3} color={c.dot} />
+      <Sparkle x={78} y={75} size={10} color={c.spark} stroke={c.sparkStroke} inner={0.32} />
+      <Sparkle x={224} y={80} size={10} color={c.spark} stroke={c.sparkStroke} inner={0.32} />
     </Svg>
   );
 }
 
 function IllustrationChest() {
-  // Front torso, dashed line across chest
+  const c = useIllusColors();
+  const side = 'M25,4 C26,40 22,75 20,100 L18,138 C12,150 8,165 4,185';
+  const vee = 'M73,75 C68,110 55,160 51,203 M73,75 C82,110 88,160 86,203';
   return (
-    <Svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
-      {/* Body left */}
-      <Path
-        d={`M${CX - 30},${H - 10} L${CX - 40},${H * 0.5} Q${CX - 80},${H * 0.4} ${CX - 90},${H * 0.6} L${CX - 100},${H - 10}`}
-        fill="none" stroke="#8A8A9A" strokeWidth={2}
-      />
-      {/* Body right */}
-      <Path
-        d={`M${CX + 30},${H - 10} L${CX + 40},${H * 0.5} Q${CX + 80},${H * 0.4} ${CX + 90},${H * 0.6} L${CX + 100},${H - 10}`}
-        fill="none" stroke="#8A8A9A" strokeWidth={2}
-      />
-      {/* Dashed line across chest */}
-      <DashLine x1={CX - 90} y1={H * 0.42} x2={CX + 90} y2={H * 0.42} />
-      {/* Tick marks at ends */}
-      <Line x1={CX - 90} y1={H * 0.42 - 6} x2={CX - 90} y2={H * 0.42 + 6} stroke="#7C5CFC" strokeWidth={1.5} />
-      <Line x1={CX + 90} y1={H * 0.42 - 6} x2={CX + 90} y2={H * 0.42 + 6} stroke="#7C5CFC" strokeWidth={1.5} />
-      {/* Sparkles */}
-      <Sparkle x={CX - 55} y={H * 0.3} size={9} />
-      <Sparkle x={CX + 25} y={H * 0.56} size={8} />
-      {/* Hollow dots */}
-      <HollowDot cx={CX - 55} cy={H * 0.5} />
-      <HollowDot cx={CX + 10} cy={H * 0.3} />
+    <Svg width={W} height={H} viewBox={VB}>
+      {/* Body contours */}
+      <G opacity={0.7}>
+        <Path d={side} fill="none" stroke={c.faint} strokeWidth={1.5} />
+        <Path d={vee} fill="none" stroke={c.body} strokeWidth={1.5} />
+      </G>
+      <G opacity={0.7} transform={MIRROR}>
+        <Path d={side} fill="none" stroke={c.faint} strokeWidth={1.5} />
+        <Path d={vee} fill="none" stroke={c.body} strokeWidth={1.5} />
+      </G>
+      {/* Dashed measurement curve */}
+      <Path d="M64,96 Q165,142 266,96" fill="none" stroke={c.dash} strokeWidth={2} strokeDasharray="7,5" />
+      {/* Decorations */}
+      <HollowDot cx={116} cy={70} r={4} color={c.dot} />
+      <HollowDot cx={113} cy={102} r={3} color={c.dot} />
+      <HollowDot cx={206} cy={181} r={4} color={c.dot} />
+      <Sparkle x={92} y={93} size={10} color={c.spark} stroke={c.sparkStroke} inner={0.32} />
+      <Sparkle x={224} y={163} size={10} color={c.spark} stroke={c.sparkStroke} inner={0.32} />
     </Svg>
   );
 }
 
 function IllustrationArm() {
-  // Side view: arm with dashed ellipse around bicep
+  const c = useIllusColors();
   return (
-    <Svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
-      {/* Body left side */}
+    <Svg width={W} height={H} viewBox={VB}>
+      {/* Faint torso edge on the right */}
+      <Path d="M327,95 C320,125 315,170 317,202 C322,165 326,125 327,95 Z" fill={c.faint} opacity={0.6} />
+      {/* Arm contour (left) */}
       <Path
-        d={`M${CX - 10},${H * 0.05} Q${CX - 25},${H * 0.15} ${CX - 30},${H - 10}`}
-        fill="none" stroke="#8A8A9A" strokeWidth={2}
+        d="M89,5 L88,54 L80,73 L80,136 C72,150 66,178 63,202"
+        fill="none" stroke={c.body} strokeWidth={1.8} opacity={0.9}
       />
-      {/* Arm outer */}
-      <Path
-        d={`M${CX - 10},${H * 0.05} Q${CX + 50},${H * 0.1} ${CX + 55},${H * 0.5} Q${CX + 55},${H * 0.75} ${CX + 35},${H - 10}`}
-        fill="none" stroke="#8A8A9A" strokeWidth={2}
-      />
-      {/* Arm inner */}
-      <Path
-        d={`M${CX - 10},${H * 0.05} Q${CX + 20},${H * 0.12} ${CX + 25},${H * 0.5} Q${CX + 25},${H * 0.75} ${CX + 35},${H - 10}`}
-        fill="none" stroke="#8A8A9A" strokeWidth={2}
-      />
+      {/* Body / armpit V (right) */}
+      <Path d="M115,202 C118,160 128,110 137,70" fill="none" stroke={c.body} strokeWidth={1.8} opacity={0.9} />
+      <Path d="M137,70 C146,100 152,140 148,202" fill="none" stroke={c.body} strokeWidth={1.8} opacity={0.9} />
       {/* Dashed ellipse (bicep circumference) */}
-      <Ellipse
-        cx={CX + 40}
-        cy={H * 0.35}
-        rx={18}
-        ry={12}
-        fill="none"
-        stroke="#7C5CFC"
-        strokeWidth={1.5}
-        strokeDasharray="6,4"
-      />
-      {/* Sparkles */}
-      <Sparkle x={CX - 20} y={H * 0.42} size={9} />
-      <HollowDot cx={CX + 10} cy={H * 0.42} />
-      <HollowDot cx={CX + 55} cy={H * 0.3} />
-      <HollowDot cx={CX + 70} cy={H * 0.42} />
+      <Ellipse cx={104} cy={112} rx={34} ry={7} fill="none" stroke={c.dash} strokeWidth={2} strokeDasharray="6,4" />
+      {/* Decorations */}
+      <HollowDot cx={37} cy={103} r={3} color={c.dot} />
+      <HollowDot cx={27} cy={124} r={4} color={c.dot} />
+      <HollowDot cx={155} cy={92} r={4.5} color={c.dot} />
+      <HollowDot cx={173} cy={107} r={3} color={c.dot} />
+      <Sparkle x={54} y={137} size={8} color={c.spark} stroke={c.sparkStroke} inner={0.32} />
     </Svg>
   );
 }
 
 function IllustrationWaist() {
-  // Front torso + dashed line at waist
+  const c = useIllusColors();
+  const outer = 'M47,7 C45,35 44,55 36,72 C30,88 29,106 26,130 C23,160 20,185 18,204';
+  const vee = 'M88,15 C82,45 78,80 74,106 C68,130 62,150 60,161 C55,178 48,192 41,204 M88,15 C95,45 100,70 102,87 C103,105 101,118 100,130 C96,160 92,185 88,204';
   return (
-    <Svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
-      {/* Torso left */}
-      <Path
-        d={`M${CX - 25},${H * 0.05} Q${CX - 55},${H * 0.2} ${CX - 50},${H * 0.5} Q${CX - 55},${H * 0.75} ${CX - 70},${H - 10}`}
-        fill="none" stroke="#8A8A9A" strokeWidth={2}
-      />
-      {/* Torso right */}
-      <Path
-        d={`M${CX + 25},${H * 0.05} Q${CX + 55},${H * 0.2} ${CX + 50},${H * 0.5} Q${CX + 55},${H * 0.75} ${CX + 70},${H - 10}`}
-        fill="none" stroke="#8A8A9A" strokeWidth={2}
-      />
-      {/* Dashed waist line */}
-      <DashLine x1={CX - 50} y1={H * 0.52} x2={CX + 50} y2={H * 0.52} />
-      {/* Tick marks */}
-      <Line x1={CX - 50} y1={H * 0.52 - 5} x2={CX - 50} y2={H * 0.52 + 5} stroke="#7C5CFC" strokeWidth={1.5} />
-      <Line x1={CX + 50} y1={H * 0.52 - 5} x2={CX + 50} y2={H * 0.52 + 5} stroke="#7C5CFC" strokeWidth={1.5} />
-      {/* Sparkles */}
-      <Sparkle x={CX + 35} y={H * 0.38} size={9} />
-      <Sparkle x={CX - 55} y={H * 0.62} size={8} />
-      <HollowDot cx={CX - 55} cy={H * 0.52} />
-      <HollowDot cx={CX - 42} cy={H * 0.62} />
+    <Svg width={W} height={H} viewBox={VB}>
+      <G opacity={0.55}>
+        <Path d={outer} fill="none" stroke={c.faint} strokeWidth={1.5} />
+      </G>
+      <G opacity={0.55} transform={MIRROR}>
+        <Path d={outer} fill="none" stroke={c.faint} strokeWidth={1.5} />
+      </G>
+      <G opacity={0.9}>
+        <Path d={vee} fill="none" stroke={c.body} strokeWidth={1.8} />
+      </G>
+      <G opacity={0.9} transform={MIRROR}>
+        <Path d={vee} fill="none" stroke={c.body} strokeWidth={1.8} />
+      </G>
+      {/* Dashed waist curve */}
+      <Path d="M92,104 Q165,142 238,104" fill="none" stroke={c.dash} strokeWidth={2} strokeDasharray="7,5" />
+      <HollowDot cx={91} cy={127} r={2.5} color={c.dot} />
+      <HollowDot cx={86} cy={142} r={3.5} color={c.dot} />
+      <HollowDot cx={200} cy={112} r={3} color={c.dot} />
+      <Sparkle x={215} y={95} size={8} color={c.spark} stroke={c.sparkStroke} inner={0.32} />
+      <Sparkle x={110} y={136} size={8} color={c.spark} stroke={c.sparkStroke} inner={0.32} />
     </Svg>
   );
 }
 
 function IllustrationHip() {
-  // Lower body + dashed ellipse around hip
+  const c = useIllusColors();
+  const side = 'M84,3 C82,25 80,35 77,55 C72,85 68,110 68,134 C68,165 69,185 69,202';
   return (
-    <Svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
-      {/* Hip/pelvis area */}
-      <Path
-        d={`M${CX - 20},${H * 0.05} Q${CX - 70},${H * 0.15} ${CX - 75},${H * 0.5} L${CX - 55},${H - 10}`}
-        fill="none" stroke="#8A8A9A" strokeWidth={2}
-      />
-      <Path
-        d={`M${CX + 20},${H * 0.05} Q${CX + 70},${H * 0.15} ${CX + 75},${H * 0.5} L${CX + 55},${H - 10}`}
-        fill="none" stroke="#8A8A9A" strokeWidth={2}
-      />
-      {/* Inner legs */}
-      <Path d={`M${CX - 10},${H * 0.5} L${CX - 10},${H - 10}`} fill="none" stroke="#8A8A9A" strokeWidth={2} />
-      <Path d={`M${CX + 10},${H * 0.5} L${CX + 10},${H - 10}`} fill="none" stroke="#8A8A9A" strokeWidth={2} />
-      {/* Vertical bar */}
-      <Rect x={CX - 8} y={H * 0.5} width={16} height={H * 0.1} fill="#8A8A9A" opacity={0.3} />
+    <Svg width={W} height={H} viewBox={VB}>
+      <Path d={side} fill="none" stroke={c.body} strokeWidth={1.8} opacity={0.9} />
+      <G transform={MIRROR}>
+        <Path d={side} fill="none" stroke={c.body} strokeWidth={1.8} opacity={0.9} />
+      </G>
+      {/* Centre bar */}
+      <Path d="M161,150 L169,150 L171,204 L160,204 Z" fill={c.faint} opacity={0.75} />
       {/* Dashed ellipse around hip */}
-      <Ellipse
-        cx={CX}
-        cy={H * 0.38}
-        rx={72}
-        ry={18}
-        fill="none"
-        stroke="#7C5CFC"
-        strokeWidth={1.5}
-        strokeDasharray="6,4"
-      />
-      {/* Sparkles */}
-      <Sparkle x={CX - 55} y={H * 0.22} size={9} />
-      <Sparkle x={CX + 45} y={H * 0.42} size={8} />
-      <HollowDot cx={CX + 55} cy={H * 0.3} />
-      <HollowDot cx={CX + 68} cy={H * 0.42} />
+      <Ellipse cx={165} cy={88} rx={120} ry={20} fill="none" stroke={c.dash} strokeWidth={2} strokeDasharray="7,5" />
+      <HollowDot cx={234} cy={66} r={4} color={c.dot} />
+      <HollowDot cx={244} cy={88} r={3} color={c.dot} />
+      <HollowDot cx={36} cy={134} r={3} color={c.dot} />
+      <Sparkle x={219} y={86} size={10} color={c.spark} stroke={c.sparkStroke} inner={0.32} />
+      <Sparkle x={52} y={118} size={7} color={c.spark} stroke={c.sparkStroke} inner={0.32} />
     </Svg>
   );
 }
 
 function IllustrationGlute() {
-  // Side lower body — buttocks + dashed line
+  const c = useIllusColors();
   return (
-    <Svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
-      {/* Body */}
+    <Svg width={W} height={H} viewBox={VB}>
       <Path
-        d={`M${CX - 10},${H * 0.05} Q${CX + 55},${H * 0.1} ${CX + 65},${H * 0.4} Q${CX + 65},${H * 0.65} ${CX + 25},${H - 10}`}
-        fill="none" stroke="#8A8A9A" strokeWidth={2}
+        d="M135,7 C134,18 130,28 122,44 C112,62 108,80 111,95 C114,115 128,125 129,141 C129,165 127,180 126,197"
+        fill="none" stroke={c.body} strokeWidth={1.8} opacity={0.9}
       />
       <Path
-        d={`M${CX - 10},${H * 0.05} Q${CX - 25},${H * 0.15} ${CX - 20},${H - 10}`}
-        fill="none" stroke="#8A8A9A" strokeWidth={2}
+        d="M208,2 C205,30 207,50 213,70 C219,95 222,115 220,135 C219,160 214,180 208,197"
+        fill="none" stroke={c.body} strokeWidth={1.8} opacity={0.9}
       />
-      {/* Dashed ellipse across glute */}
-      <Ellipse
-        cx={CX + 30}
-        cy={H * 0.42}
-        rx={40}
-        ry={16}
-        fill="none"
-        stroke="#7C5CFC"
-        strokeWidth={1.5}
-        strokeDasharray="6,4"
-      />
-      {/* Sparkles */}
-      <Sparkle x={CX - 30} y={H * 0.22} size={9} />
-      <HollowDot cx={CX - 10} cy={H * 0.42} />
-      <HollowDot cx={CX + 10} cy={H * 0.3} />
+      {/* Dashed curve across glute */}
+      <Path d="M110,78 Q163,119 216,80" fill="none" stroke={c.dash} strokeWidth={2} strokeDasharray="7,5" />
+      <HollowDot cx={83} cy={82} r={3} color={c.dot} />
+      <HollowDot cx={224} cy={67} r={4} color={c.dot} />
+      <HollowDot cx={237} cy={79} r={3} color={c.dot} />
+      <Sparkle x={97} y={62} size={8} color={c.spark} stroke={c.sparkStroke} inner={0.32} />
     </Svg>
   );
 }
 
 function IllustrationThigh() {
-  // Front: two legs, dashed ellipse on one thigh
+  const c = useIllusColors();
   return (
-    <Svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
-      {/* Left leg outer */}
+    <Svg width={W} height={H} viewBox={VB}>
       <Path
-        d={`M${CX - 60},${H * 0.05} Q${CX - 75},${H * 0.4} ${CX - 65},${H - 10}`}
-        fill="none" stroke="#8A8A9A" strokeWidth={2}
+        d="M69,3 C62,40 62,90 66,130 C68,160 71,180 73,199"
+        fill="none" stroke={c.body} strokeWidth={1.8} opacity={0.9}
       />
-      {/* Left leg inner */}
       <Path
-        d={`M${CX - 10},${H * 0.05} Q${CX - 25},${H * 0.4} ${CX - 30},${H - 10}`}
-        fill="none" stroke="#8A8A9A" strokeWidth={2}
+        d="M260,3 C265,40 267,100 263,140 C260,170 258,185 256,199"
+        fill="none" stroke={c.body} strokeWidth={1.8} opacity={0.9}
       />
-      {/* Right leg outer */}
+      {/* Inner legs (inverted U) */}
       <Path
-        d={`M${CX + 60},${H * 0.05} Q${CX + 75},${H * 0.4} ${CX + 65},${H - 10}`}
-        fill="none" stroke="#8A8A9A" strokeWidth={2}
+        d="M147,204 C150,160 156,110 159,68 Q165,64 171,68 C172,100 176,150 181,204"
+        fill="none" stroke={c.body} strokeWidth={1.8} opacity={0.9}
       />
-      {/* Right leg inner */}
-      <Path
-        d={`M${CX + 10},${H * 0.05} Q${CX + 25},${H * 0.4} ${CX + 30},${H - 10}`}
-        fill="none" stroke="#8A8A9A" strokeWidth={2}
-      />
-      {/* Dashed ellipse on left thigh */}
-      <Ellipse
-        cx={CX - 42}
-        cy={H * 0.35}
-        rx={30}
-        ry={12}
-        fill="none"
-        stroke="#7C5CFC"
-        strokeWidth={1.5}
-        strokeDasharray="6,4"
-      />
-      {/* Sparkles */}
-      <Sparkle x={CX - 85} y={H * 0.22} size={9} />
-      <HollowDot cx={CX - 70} cy={H * 0.42} />
-      <HollowDot cx={CX - 12} cy={H * 0.42} />
+      {/* Dashed thigh curve */}
+      <Path d="M62,89 Q111,120 161,90" fill="none" stroke={c.dash} strokeWidth={2} strokeDasharray="7,5" />
+      <HollowDot cx={35} cy={84} r={3} color={c.dot} />
+      <HollowDot cx={150} cy={85} r={4} color={c.dot} />
+      <HollowDot cx={138} cy={115} r={3} color={c.dot} />
+      <Sparkle x={49} y={68} size={8} color={c.spark} stroke={c.sparkStroke} inner={0.32} />
     </Svg>
   );
 }

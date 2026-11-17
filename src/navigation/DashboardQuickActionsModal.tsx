@@ -186,7 +186,7 @@ export function DashboardQuickActionsModal({
 
   const handleBodyMetric = () => {
     onClose();
-    navigation.navigate('HealthMetrics');
+    navigation.navigate('HealthMetrics', { date: selectedDate });
   };
 
   // Interpolated animations
