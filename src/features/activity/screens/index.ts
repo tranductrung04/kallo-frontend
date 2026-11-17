@@ -1,6 +1,7 @@
 export * from './ActivityTrackerScreen';
 export * from './HealthSyncScreen';
 export * from './BodyMetricScreen';
+export * from './MeasurementGuideScreen';
 export * from './RunningWorkoutScreen';
 export * from './CyclingWorkoutScreen';
 export * from './BadmintonWorkoutScreen';

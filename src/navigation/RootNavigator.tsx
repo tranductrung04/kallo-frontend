@@ -16,7 +16,7 @@ import { CreateRecipeScreen } from '@/features/nutrition/screens/CreateRecipeScr
 import { AIMealScanScreen } from '@/features/nutrition/screens/AIMealScanScreen';
 import { MealScanResultScreen } from '@/features/nutrition/screens/MealScanResultScreen';
 import { BarcodeScannerScreen } from '@/features/nutrition/screens/BarcodeScannerScreen';
-import { ActivityTrackerScreen, HealthSyncScreen, StepDetailScreen, WorkoutStatisticsScreen, WeightStatisticsScreen, RecordWeightScreen, BodyMetricScreen, RunningWorkoutScreen, CyclingWorkoutScreen, BadmintonWorkoutScreen, PickleballWorkoutScreen, YogaWorkoutScreen, AddActivityScreen, ActivityWorkoutScreen } from '@/features/activity';
+import { ActivityTrackerScreen, HealthSyncScreen, StepDetailScreen, WorkoutStatisticsScreen, WeightStatisticsScreen, RecordWeightScreen, BodyMetricScreen, RunningWorkoutScreen, CyclingWorkoutScreen, BadmintonWorkoutScreen, PickleballWorkoutScreen, YogaWorkoutScreen, AddActivityScreen, ActivityWorkoutScreen, MeasurementGuideScreen } from '@/features/activity';
 import { MealPlanOverviewScreen, MealPlanWizardScreen, MealPlanDetailScreen } from '@/features/meal-plan';
 import { NutritionChatScreen, VoiceLogModal } from '@/features/assistant';
 import {
@@ -93,6 +93,7 @@ export function RootNavigator() {
         <Stack.Screen name="WeightStatistics" component={WeightStatisticsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="RecordWeight" component={RecordWeightScreen} options={{ headerShown: false, presentation: 'fullScreenModal' }} />
         <Stack.Screen name="BodyMetric" component={BodyMetricScreen} options={{ title: 'Chỉ số eo / mông' }} />
+        <Stack.Screen name="MeasurementGuide" component={MeasurementGuideScreen} options={{ headerShown: false, presentation: 'modal' }} />
         <Stack.Screen name="MealPlanOverview" component={MealPlanOverviewScreen} options={{ headerShown: false }} />
         <Stack.Screen name="MealPlanWizard" component={MealPlanWizardScreen} options={{ title: 'Tạo thực đơn AI' }} />
         <Stack.Screen name="MealPlanDetail" component={MealPlanDetailScreen} options={{ title: 'Chi tiết thực đơn' }} />
