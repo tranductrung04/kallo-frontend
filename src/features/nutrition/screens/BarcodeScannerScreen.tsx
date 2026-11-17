@@ -246,8 +246,8 @@ export function BarcodeScannerScreen({ navigation, route }: Props) {
                   permissionDenied && !isDark
                     ? colors.textPrimary
                     : isDark
-                    ? '#FFFFFF'
-                    : colors.textPrimary
+                      ? '#FFFFFF'
+                      : colors.textPrimary
                 }
               />
             </TouchableOpacity>
@@ -274,8 +274,8 @@ export function BarcodeScannerScreen({ navigation, route }: Props) {
                       permissionDenied && !isDark
                         ? colors.textPrimary
                         : isDark
-                        ? '#FFFFFF'
-                        : colors.textPrimary,
+                          ? '#FFFFFF'
+                          : colors.textPrimary,
                   },
                 ]}
               >
@@ -309,17 +309,17 @@ export function BarcodeScannerScreen({ navigation, route }: Props) {
                       ? '#FBBF24'
                       : '#F59E0B'
                     : permissionDenied && !isDark
-                    ? colors.textPrimary
-                    : isDark
-                    ? '#FFFFFF'
-                    : colors.textPrimary
+                      ? colors.textPrimary
+                      : isDark
+                        ? '#FFFFFF'
+                        : colors.textPrimary
                 }
               />
             </TouchableOpacity>
           </View>
 
           {/* ── 2. Top Banner: Bạn còn 3 lượt quét cho hôm nay [Premium] ──── */}
-          <View
+          {/* <View
             style={[
               styles.quotaBanner,
               {
@@ -363,7 +363,7 @@ export function BarcodeScannerScreen({ navigation, route }: Props) {
                 Premium
               </Text>
             </TouchableOpacity>
-          </View>
+          </View> */}
         </View>
 
         {/* ── Permission Denied State ────────────────────────────────────── */}
