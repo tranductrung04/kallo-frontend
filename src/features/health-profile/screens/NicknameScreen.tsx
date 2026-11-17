@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { images } from '@/assets/images';
 import { AppText } from '@/components/common';
 import { ChevronLeftIcon } from '@/components/icons';
+import { useTheme } from '@/theme';
 import { useHealthProfileDraft } from '../hooks/useHealthProfileDraft';
 
 interface NicknameScreenProps {
@@ -29,6 +30,8 @@ export function NicknameScreen({
   hideHeader = false,
 }: NicknameScreenProps) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const isDark = theme.scheme === 'dark';
   const { draft, updateDraft } = useHealthProfileDraft();
   const [nickname, setNickname] = useState(draft.nickname || '');
 
@@ -55,7 +58,15 @@ export function NicknameScreen({
   };
 
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        {
+          paddingTop: insets.top,
+          backgroundColor: isDark ? '#120E29' : theme.colors.canvasBase,
+        },
+      ]}
+    >
       <KeyboardAvoidingView
         style={styles.keyboardContainer}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -71,20 +82,48 @@ export function NicknameScreen({
                 accessibilityRole="button"
                 accessibilityLabel="Quay lại"
               >
-                <ChevronLeftIcon size={26} color="#FFFFFF" />
+                <ChevronLeftIcon
+                  size={26}
+                  color={isDark ? '#FFFFFF' : theme.colors.textPrimary}
+                />
               </TouchableOpacity>
             </View>
 
             {/* ── Progress Bar ───────────────────────────────────────── */}
-            <View style={styles.progressTrack}>
-              <View style={[styles.progressFill, { width: '10%' }]} />
+            <View
+              style={[
+                styles.progressTrack,
+                {
+                  backgroundColor: isDark
+                    ? '#272049'
+                    : theme.colors.surfaceBorder,
+                },
+              ]}
+            >
+              <View
+                style={[
+                  styles.progressFill,
+                  {
+                    backgroundColor: theme.colors.brandPrimary,
+                    width: '10%',
+                  },
+                ]}
+              />
             </View>
           </>
         )}
 
         {/* ── Avatar & Speech Bubble Row ─────────────────────────── */}
         <View style={styles.bubbleRow}>
-          <View style={styles.avatarWrap}>
+          <View
+            style={[
+              styles.avatarWrap,
+              {
+                backgroundColor: isDark ? '#2E2654' : '#EDE5FF',
+                borderColor: isDark ? '#4A3D7E' : '#D4C7F8',
+              },
+            ]}
+          >
             <Image
               source={images.mascotAvatar}
               style={styles.avatarImage}
@@ -92,8 +131,25 @@ export function NicknameScreen({
               accessibilityLabel="Mascot Kallo"
             />
           </View>
-          <View style={styles.bubble}>
-            <View style={styles.bubbleTail} />
+          <View
+            style={[
+              styles.bubble,
+              !isDark && {
+                borderWidth: 1,
+                borderColor: theme.colors.surfaceBorder,
+              },
+            ]}
+          >
+            <View
+              style={[
+                styles.bubbleTail,
+                !isDark && {
+                  borderLeftWidth: 1,
+                  borderBottomWidth: 1,
+                  borderColor: theme.colors.surfaceBorder,
+                },
+              ]}
+            />
             <AppText style={styles.bubbleText}>
               Và Kallo sẽ gọi bạn là...
             </AppText>
@@ -102,19 +158,34 @@ export function NicknameScreen({
 
         {/* ── Input Section ──────────────────────────────────────── */}
         <View style={styles.inputSection}>
-          <AppText style={styles.inputPrompt}>
+          <AppText
+            style={[
+              styles.inputPrompt,
+              {
+                color: isDark ? '#9CA3AF' : theme.colors.textSecondary,
+              },
+            ]}
+          >
             Nhập nickname mà bạn muốn sử dụng
           </AppText>
           <TextInput
             value={nickname}
             onChangeText={setNickname}
             placeholder="Nickname"
-            placeholderTextColor="#453E65"
-            style={styles.textInput}
+            placeholderTextColor={isDark ? '#453E65' : theme.colors.textDisabled}
+            style={[
+              styles.textInput,
+              {
+                color: isDark ? '#FFFFFF' : theme.colors.textPrimary,
+                borderBottomColor: isDark
+                  ? '#302854'
+                  : theme.colors.surfaceBorder,
+              },
+            ]}
             autoFocus
             autoCapitalize="words"
             autoCorrect={false}
-            selectionColor="#9D6CFA"
+            selectionColor={theme.colors.brandPrimary}
             returnKeyType="done"
             onSubmitEditing={handleNext}
           />
@@ -125,7 +196,14 @@ export function NicknameScreen({
           <TouchableOpacity
             style={[
               styles.actionButton,
-              isValid ? styles.actionButtonActive : styles.actionButtonDisabled,
+              isValid
+                ? {
+                    backgroundColor: theme.colors.brandAction,
+                    shadowColor: theme.colors.brandPrimary,
+                  }
+                : {
+                    backgroundColor: isDark ? '#252044' : '#E4E0F0',
+                  },
             ]}
             onPress={handleNext}
             disabled={!isValid}
@@ -137,7 +215,9 @@ export function NicknameScreen({
             <AppText
               style={[
                 styles.buttonText,
-                isValid ? styles.buttonTextActive : styles.buttonTextDisabled,
+                isValid
+                  ? styles.buttonTextActive
+                  : { color: isDark ? '#655D85' : '#A6A1B8' },
               ]}
             >
               Tiếp tục

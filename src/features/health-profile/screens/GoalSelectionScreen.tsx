@@ -11,6 +11,7 @@ import { MoveHorizontal, TrendingDown, TrendingUp } from 'lucide-react-native';
 import { images } from '@/assets/images';
 import { AppText } from '@/components/common';
 import { ChevronLeftIcon } from '@/components/icons';
+import { useTheme } from '@/theme';
 import { AnimatedCard, AnimatedRadio } from '../components';
 import { useHealthProfileDraft } from '../hooks/useHealthProfileDraft';
 import { defaultMacroPercentages } from '../utils/calculations';
@@ -58,12 +59,19 @@ export function GoalSelectionScreen({
   hideHeader = false,
 }: GoalSelectionScreenProps) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const isDark = theme.scheme === 'dark';
   const { draft, updateDraft } = useHealthProfileDraft();
   const [selectedGoal, setSelectedGoal] = useState<GoalType>(draft.goal || 'gain');
 
   const handleNext = () => {
     updateDraft('goal', selectedGoal);
     updateDraft('macros', defaultMacroPercentages(selectedGoal));
+    if (selectedGoal === 'maintain') {
+      updateDraft('weeklyRate', '0');
+    } else if (!draft.weeklyRate || draft.weeklyRate === '0') {
+      updateDraft('weeklyRate', '0.5');
+    }
 
     if (onNext) {
       onNext(selectedGoal);
@@ -84,7 +92,15 @@ export function GoalSelectionScreen({
     <>
       {/* ── Avatar & Speech Bubble Row ─────────────────────────── */}
       <View style={styles.bubbleRow}>
-        <View style={styles.avatarWrap}>
+        <View
+          style={[
+            styles.avatarWrap,
+            {
+              backgroundColor: isDark ? '#302657' : '#EDE5FF',
+              borderColor: isDark ? '#9D6CFA' : '#D4C7F8',
+            },
+          ]}
+        >
           <Image
             source={images.mascotAvatar}
             style={styles.avatarImage}
@@ -92,9 +108,30 @@ export function GoalSelectionScreen({
             accessibilityLabel="Mascot Kallo"
           />
         </View>
-        <View style={styles.bubble}>
-          <View style={styles.bubbleTail} />
-          <AppText style={styles.bubbleText}>
+        <View
+          style={[
+            styles.bubble,
+            {
+              backgroundColor: '#FFFFFF',
+              borderColor: isDark ? '#382D61' : theme.colors.surfaceBorder,
+              borderWidth: 1,
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.bubbleTail,
+              {
+                borderRightColor: '#FFFFFF',
+              },
+            ]}
+          />
+          <AppText
+            style={[
+              styles.bubbleText,
+              { color: '#111827' },
+            ]}
+          >
             Mục tiêu cân nặng của bạn
           </AppText>
         </View>
@@ -104,7 +141,13 @@ export function GoalSelectionScreen({
       <View style={styles.cardsContainer}>
         {GOAL_ITEMS.map((item) => {
           const isSelected = selectedGoal === item.key;
-          const iconColor = isSelected ? '#C084FC' : '#8E87AA';
+          const iconColor = isSelected
+            ? isDark
+              ? '#C084FC'
+              : theme.colors.brandPrimary
+            : isDark
+            ? '#8E87AA'
+            : theme.colors.textSecondary;
 
           return (
             <AnimatedCard
@@ -112,10 +155,10 @@ export function GoalSelectionScreen({
               selected={isSelected}
               onPress={() => setSelectedGoal(item.key)}
               style={styles.goalCard}
-              selectedBorderColor="#A78BFA"
-              selectedBgColor="#231742"
-              unselectedBorderColor="#2E2352"
-              unselectedBgColor="#1A1433"
+              selectedBorderColor={theme.colors.brandPrimary}
+              selectedBgColor={isDark ? '#231742' : theme.colors.brandSoftTint}
+              unselectedBorderColor={isDark ? '#2E2352' : theme.colors.surfaceBorder}
+              unselectedBgColor={isDark ? '#1A1433' : theme.colors.surfaceMid}
               activeScale={0.965}
               accessibilityLabel={`${item.title}, ${item.subtitle}`}
               accessibilityRole="radio"
@@ -124,19 +167,56 @@ export function GoalSelectionScreen({
                 <View
                   style={[
                     styles.iconWrap,
-                    isSelected ? styles.iconWrapSelected : styles.iconWrapUnselected,
+                    isSelected
+                      ? {
+                          backgroundColor: isDark
+                            ? 'rgba(167, 139, 250, 0.18)'
+                            : '#EDE5FF',
+                        }
+                      : {
+                          backgroundColor: isDark
+                            ? 'rgba(255, 255, 255, 0.05)'
+                            : '#F1EFF9',
+                        },
                   ]}
                 >
                   {item.renderIcon(iconColor)}
                 </View>
                 <View style={styles.textWrap}>
-                  <AppText style={[styles.cardTitle, isSelected && styles.cardTitleSelected]}>
+                  <AppText
+                    style={[
+                      styles.cardTitle,
+                      {
+                        color: isSelected
+                          ? isDark
+                            ? '#E9D5FF'
+                            : theme.colors.brandPrimary
+                          : isDark
+                          ? '#FFFFFF'
+                          : theme.colors.textPrimary,
+                      },
+                    ]}
+                  >
                     {item.title}
                   </AppText>
-                  <AppText style={styles.cardSubtitle}>{item.subtitle}</AppText>
+                  <AppText
+                    style={[
+                      styles.cardSubtitle,
+                      {
+                        color: isDark ? '#A098BD' : theme.colors.textSecondary,
+                      },
+                    ]}
+                  >
+                    {item.subtitle}
+                  </AppText>
                 </View>
                 <View style={styles.radioWrap}>
-                  <AnimatedRadio selected={isSelected} activeColor="#A78BFA" size={24} />
+                  <AnimatedRadio
+                    selected={isSelected}
+                    activeColor={theme.colors.brandPrimary}
+                    inactiveColor={isDark ? '#473B6B' : theme.colors.surfaceBorder}
+                    size={24}
+                  />
                 </View>
               </View>
             </AnimatedCard>
@@ -147,7 +227,13 @@ export function GoalSelectionScreen({
       {/* ── Bottom Action Button ───────────────────────────────── */}
       <View style={[styles.bottomArea, { paddingBottom: Math.max(insets.bottom, 16) }]}>
         <TouchableOpacity
-          style={styles.actionButton}
+          style={[
+            styles.actionButton,
+            {
+              backgroundColor: theme.colors.brandAction,
+              shadowColor: theme.colors.brandPrimary,
+            },
+          ]}
           onPress={handleNext}
           activeOpacity={0.85}
           accessibilityRole="button"
@@ -164,7 +250,15 @@ export function GoalSelectionScreen({
   }
 
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        {
+          paddingTop: insets.top,
+          backgroundColor: isDark ? '#120E29' : theme.colors.canvasBase,
+        },
+      ]}
+    >
       {/* ── Top Bar ────────────────────────────────────────────── */}
       <View style={styles.topBar}>
         <TouchableOpacity
@@ -174,13 +268,31 @@ export function GoalSelectionScreen({
           accessibilityRole="button"
           accessibilityLabel="Quay lại"
         >
-          <ChevronLeftIcon size={26} color="#FFFFFF" />
+          <ChevronLeftIcon
+            size={26}
+            color={isDark ? '#FFFFFF' : theme.colors.textPrimary}
+          />
         </TouchableOpacity>
       </View>
 
       {/* ── Progress Bar: 65% ────────────────────────────────── */}
-      <View style={styles.progressTrack}>
-        <View style={[styles.progressFill, { width: '65%' }]} />
+      <View
+        style={[
+          styles.progressTrack,
+          {
+            backgroundColor: isDark ? '#261F45' : theme.colors.surfaceBorder,
+          },
+        ]}
+      >
+        <View
+          style={[
+            styles.progressFill,
+            {
+              backgroundColor: theme.colors.brandPrimary,
+              width: '65%',
+            },
+          ]}
+        />
       </View>
 
       {content}

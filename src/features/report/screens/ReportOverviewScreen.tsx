@@ -1,10 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import {
-  SafeAreaView,
   ScrollView,
   StatusBar,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -213,7 +212,7 @@ export function ReportOverviewScreen() {
       : `${formatDayMonth(weekDatesList[0])} - ${formatDayMonth(weekDatesList[6])}`;
 
   return (
-    <SafeAreaView style={[styles.safeContainer, { backgroundColor: theme.colors.canvasBase }]}>
+    <SafeAreaView edges={['bottom', 'left', 'right']} style={[styles.safeContainer, { backgroundColor: theme.colors.canvasBase }]}>
       <StatusBar
         barStyle={theme.scheme === 'dark' ? 'light-content' : 'dark-content'}
         backgroundColor={theme.colors.canvasBase}

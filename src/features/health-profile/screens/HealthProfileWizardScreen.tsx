@@ -8,10 +8,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ChevronLeftIcon } from '@/components/icons';
+import { ChevronLeftIcon, MoonIcon, SunIcon } from '@/components/icons';
+import { useTheme } from '@/theme';
 import { NicknameScreen } from './NicknameScreen';
 import { GenderSelectionScreen } from './GenderSelectionScreen';
+import { AgeSelectionScreen } from './AgeSelectionScreen';
 import { HeightSelectionScreen } from './HeightSelectionScreen';
 import { CurrentWeightSelectionScreen } from './CurrentWeightSelectionScreen';
 import { GoalSelectionScreen } from './GoalSelectionScreen';
@@ -23,15 +26,16 @@ import { ProfileSummaryScreen } from './ProfileSummaryScreen';
 
 const STEP_PERCENTAGES = [
   10,  // 0: Nickname
-  20,  // 1: Gender
-  35,  // 2: Height
-  50,  // 3: Current Weight
-  65,  // 4: Goal
-  75,  // 5: Target Weight
-  85,  // 6: Activity Level
-  92,  // 7: Diet & Allergies
-  97,  // 8: Health Conditions
-  100, // 9: Profile Summary
+  18,  // 1: Gender
+  28,  // 2: Age
+  40,  // 3: Height
+  52,  // 4: Current Weight
+  64,  // 5: Goal
+  74,  // 6: Target Weight
+  84,  // 7: Activity Level
+  92,  // 8: Diet & Allergies
+  96,  // 9: Health Conditions
+  100, // 10: Profile Summary
 ];
 
 interface HealthProfileWizardScreenProps {
@@ -44,6 +48,8 @@ export function HealthProfileWizardScreen({
   route,
 }: HealthProfileWizardScreenProps) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const isDark = theme.scheme === 'dark';
   const initial = route?.params?.initialStep ?? 0;
   const [currentStep, setCurrentStep] = useState(initial);
 
@@ -90,7 +96,7 @@ export function HealthProfileWizardScreen({
   );
 
   const handleNext = useCallback(() => {
-    if (currentStep < 9) {
+    if (currentStep < 10) {
       animateToStep(currentStep + 1, 'forward');
     } else {
       // Completed Summary -> Navigate to Calculating Plan
@@ -132,7 +138,7 @@ export function HealthProfileWizardScreen({
         );
       case 2:
         return (
-          <HeightSelectionScreen
+          <AgeSelectionScreen
             navigation={navigation}
             onNext={handleNext}
             onBack={handleBack}
@@ -141,7 +147,7 @@ export function HealthProfileWizardScreen({
         );
       case 3:
         return (
-          <CurrentWeightSelectionScreen
+          <HeightSelectionScreen
             navigation={navigation}
             onNext={handleNext}
             onBack={handleBack}
@@ -150,7 +156,7 @@ export function HealthProfileWizardScreen({
         );
       case 4:
         return (
-          <GoalSelectionScreen
+          <CurrentWeightSelectionScreen
             navigation={navigation}
             onNext={handleNext}
             onBack={handleBack}
@@ -159,7 +165,7 @@ export function HealthProfileWizardScreen({
         );
       case 5:
         return (
-          <TargetWeightSelectionScreen
+          <GoalSelectionScreen
             navigation={navigation}
             onNext={handleNext}
             onBack={handleBack}
@@ -168,7 +174,7 @@ export function HealthProfileWizardScreen({
         );
       case 6:
         return (
-          <ActivityLevelSelectionScreen
+          <TargetWeightSelectionScreen
             navigation={navigation}
             onNext={handleNext}
             onBack={handleBack}
@@ -177,7 +183,7 @@ export function HealthProfileWizardScreen({
         );
       case 7:
         return (
-          <DietAndAllergiesSelectionScreen
+          <ActivityLevelSelectionScreen
             navigation={navigation}
             onNext={handleNext}
             onBack={handleBack}
@@ -186,7 +192,7 @@ export function HealthProfileWizardScreen({
         );
       case 8:
         return (
-          <HealthConditionsSelectionScreen
+          <DietAndAllergiesSelectionScreen
             navigation={navigation}
             onNext={handleNext}
             onBack={handleBack}
@@ -194,6 +200,15 @@ export function HealthProfileWizardScreen({
           />
         );
       case 9:
+        return (
+          <HealthConditionsSelectionScreen
+            navigation={navigation}
+            onNext={handleNext}
+            onBack={handleBack}
+            hideHeader
+          />
+        );
+      case 10:
         return (
           <ProfileSummaryScreen
             navigation={navigation}
@@ -208,7 +223,17 @@ export function HealthProfileWizardScreen({
   };
 
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        {
+          paddingTop: insets.top,
+          backgroundColor: isDark ? '#120E29' : theme.colors.canvasBase,
+        },
+      ]}
+    >
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+
       {/* ── Persistent Fixed Top Bar ────────────────────────────── */}
       <View style={styles.persistentTopBar}>
         <TouchableOpacity
@@ -218,16 +243,45 @@ export function HealthProfileWizardScreen({
           accessibilityRole="button"
           accessibilityLabel="Quay lại"
         >
-          <ChevronLeftIcon size={26} color="#FFFFFF" />
+          <ChevronLeftIcon
+            size={26}
+            color={isDark ? '#FFFFFF' : theme.colors.textPrimary}
+          />
+        </TouchableOpacity>
+
+        <View style={styles.topBarSpacer} />
+
+        <TouchableOpacity
+          onPress={theme.toggleScheme}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          accessibilityRole="button"
+          accessibilityLabel={
+            isDark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'
+          }
+          style={styles.themeToggleBtn}
+        >
+          {isDark ? (
+            <SunIcon size={20} color="#FACC15" />
+          ) : (
+            <MoonIcon size={20} color={theme.colors.brandPrimary} />
+          )}
         </TouchableOpacity>
       </View>
 
       {/* ── Persistent Single Progress Bar ──────────────────────── */}
-      <View style={styles.persistentProgressTrack}>
+      <View
+        style={[
+          styles.persistentProgressTrack,
+          {
+            backgroundColor: isDark ? '#261F45' : theme.colors.surfaceBorder,
+          },
+        ]}
+      >
         <Animated.View
           style={[
             styles.persistentProgressFill,
             {
+              backgroundColor: theme.colors.brandPrimary,
               width: progressAnim.interpolate({
                 inputRange: [0, 100],
                 outputRange: ['0%', '100%'],
@@ -268,6 +322,16 @@ const styles = StyleSheet.create({
   backButton: {
     width: 40,
     height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  topBarSpacer: {
+    flex: 1,
+  },
+  themeToggleBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },

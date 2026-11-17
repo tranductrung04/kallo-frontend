@@ -15,7 +15,7 @@ export type AuthStackParamList = {
   Login: undefined;
   Register: undefined;
   ForgotPassword: undefined;
-  ResetPassword: { token?: string } | undefined;
+  ResetPassword: { email?: string; token?: string } | undefined;
   VerifyOtp: { email: string };
 };
 export type OnboardingStackParamList = {
@@ -23,6 +23,7 @@ export type OnboardingStackParamList = {
   HealthProfileWizard: { initialStep?: number } | undefined;
   Nickname: undefined;
   GenderSelection: undefined;
+  AgeSelection: undefined;
   HeightSelection: undefined;
   CurrentWeightSelection: undefined;
   GoalSelection: undefined;
@@ -79,5 +80,6 @@ export type RootStackParamList = {
   GameSettings: undefined;
   NotificationCenter: undefined;
   ReminderSettings: undefined;
+  ChangePassword: undefined;
   ReportOverview: { date?: string; metric?: string } | undefined;
 };
