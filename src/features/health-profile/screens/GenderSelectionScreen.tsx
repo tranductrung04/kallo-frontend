@@ -11,6 +11,7 @@ import Svg, { Circle, Line, Path } from 'react-native-svg';
 import { images } from '@/assets/images';
 import { AppText } from '@/components/common';
 import { ChevronLeftIcon } from '@/components/icons';
+import { useTheme } from '@/theme';
 import { AnimatedCard } from '../components';
 import { useHealthProfileDraft } from '../hooks/useHealthProfileDraft';
 import type { Gender } from '../types';
@@ -29,6 +30,8 @@ export function GenderSelectionScreen({
   hideHeader = false,
 }: GenderSelectionScreenProps) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const isDark = theme.scheme === 'dark';
   const { draft, updateDraft } = useHealthProfileDraft();
   const [selectedGender, setSelectedGender] = useState<Gender>(draft.gender || 'male');
 
@@ -38,7 +41,7 @@ export function GenderSelectionScreen({
     if (onNext) {
       onNext(selectedGender);
     } else if (navigation?.navigate) {
-      navigation.navigate('HeightSelection');
+      navigation.navigate('AgeSelection');
     }
   };
 
@@ -53,11 +56,35 @@ export function GenderSelectionScreen({
   const isFemale = selectedGender === 'female';
   const isMale = selectedGender === 'male';
 
+  const femaleColor = isFemale
+    ? isDark
+      ? '#FFFFFF'
+      : theme.colors.brandPrimary
+    : isDark
+    ? '#A09CAE'
+    : theme.colors.textSecondary;
+
+  const maleColor = isMale
+    ? isDark
+      ? '#FFFFFF'
+      : theme.colors.brandPrimary
+    : isDark
+    ? '#A09CAE'
+    : theme.colors.textSecondary;
+
   const content = (
     <View style={styles.contentWrap}>
       {/* ── Avatar & White Speech Bubble Row (Exactly like reference image) ── */}
       <View style={styles.bubbleRow}>
-        <View style={styles.avatarWrap}>
+        <View
+          style={[
+            styles.avatarWrap,
+            {
+              backgroundColor: isDark ? '#302657' : '#EDE5FF',
+              borderColor: isDark ? '#9D6CFA' : '#D4C7F8',
+            },
+          ]}
+        >
           <Image
             source={images.mascotAvatar}
             style={styles.avatarImage}
@@ -65,8 +92,23 @@ export function GenderSelectionScreen({
             accessibilityLabel="Mascot Kallo"
           />
         </View>
-        <View style={styles.bubble}>
-          <View style={styles.bubbleTail} />
+        <View
+          style={[
+            styles.bubble,
+            !isDark && {
+              borderWidth: 1,
+              borderColor: theme.colors.surfaceBorder,
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.bubbleTail,
+              !isDark && {
+                borderRightColor: '#FFFFFF',
+              },
+            ]}
+          />
           <AppText style={styles.bubbleText}>
             Giới tính của bạn là...
           </AppText>
@@ -82,10 +124,10 @@ export function GenderSelectionScreen({
             onPress={() => setSelectedGender('female')}
             containerStyle={styles.cardContainer}
             style={styles.genderCard}
-            selectedBorderColor="#9D6CFA"
-            selectedBgColor="#260F53"
-            unselectedBorderColor="#2D2A3F"
-            unselectedBgColor="#2D2A3F"
+            selectedBorderColor={theme.colors.brandPrimary}
+            selectedBgColor={isDark ? '#260F53' : theme.colors.brandSoftTint}
+            unselectedBorderColor={isDark ? '#2D2A3F' : theme.colors.surfaceBorder}
+            unselectedBgColor={isDark ? '#2D2A3F' : theme.colors.surfaceMid}
             activeScale={0.96}
             accessibilityLabel="Giới tính Nữ"
             accessibilityRole="radio"
@@ -97,7 +139,7 @@ export function GenderSelectionScreen({
                   cx="12"
                   cy="9.5"
                   r="5.5"
-                  stroke={isFemale ? '#FFFFFF' : '#A09CAE'}
+                  stroke={femaleColor}
                   strokeWidth="2.2"
                 />
                 <Line
@@ -105,7 +147,7 @@ export function GenderSelectionScreen({
                   y1="15"
                   x2="12"
                   y2="21.5"
-                  stroke={isFemale ? '#FFFFFF' : '#A09CAE'}
+                  stroke={femaleColor}
                   strokeWidth="2.2"
                   strokeLinecap="round"
                 />
@@ -114,7 +156,7 @@ export function GenderSelectionScreen({
                   y1="18.2"
                   x2="15.5"
                   y2="18.2"
-                  stroke={isFemale ? '#FFFFFF' : '#A09CAE'}
+                  stroke={femaleColor}
                   strokeWidth="2.2"
                   strokeLinecap="round"
                 />
@@ -123,6 +165,7 @@ export function GenderSelectionScreen({
               <AppText
                 style={[
                   styles.genderLabel,
+                  { color: femaleColor },
                   isFemale && styles.genderLabelSelected,
                 ]}
               >
@@ -137,10 +180,10 @@ export function GenderSelectionScreen({
             onPress={() => setSelectedGender('male')}
             containerStyle={styles.cardContainer}
             style={styles.genderCard}
-            selectedBorderColor="#9D6CFA"
-            selectedBgColor="#260F53"
-            unselectedBorderColor="#2D2A3F"
-            unselectedBgColor="#2D2A3F"
+            selectedBorderColor={theme.colors.brandPrimary}
+            selectedBgColor={isDark ? '#260F53' : theme.colors.brandSoftTint}
+            unselectedBorderColor={isDark ? '#2D2A3F' : theme.colors.surfaceBorder}
+            unselectedBgColor={isDark ? '#2D2A3F' : theme.colors.surfaceMid}
             activeScale={0.96}
             accessibilityLabel="Giới tính Nam"
             accessibilityRole="radio"
@@ -152,7 +195,7 @@ export function GenderSelectionScreen({
                   cx="10"
                   cy="14"
                   r="5.5"
-                  stroke={isMale ? '#FFFFFF' : '#A09CAE'}
+                  stroke={maleColor}
                   strokeWidth="2.2"
                 />
                 <Line
@@ -160,13 +203,13 @@ export function GenderSelectionScreen({
                   y1="10"
                   x2="20"
                   y2="4"
-                  stroke={isMale ? '#FFFFFF' : '#A09CAE'}
+                  stroke={maleColor}
                   strokeWidth="2.2"
                   strokeLinecap="round"
                 />
                 <Path
                   d="M15 4h5v5"
-                  stroke={isMale ? '#FFFFFF' : '#A09CAE'}
+                  stroke={maleColor}
                   strokeWidth="2.2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -176,6 +219,7 @@ export function GenderSelectionScreen({
               <AppText
                 style={[
                   styles.genderLabel,
+                  { color: maleColor },
                   isMale && styles.genderLabelSelected,
                 ]}
               >
@@ -189,7 +233,13 @@ export function GenderSelectionScreen({
       {/* ── Bottom Action Button ("Tiếp tục") ──────────────────── */}
       <View style={[styles.bottomArea, { paddingBottom: Math.max(insets.bottom, 20) }]}>
         <TouchableOpacity
-          style={styles.actionButton}
+          style={[
+            styles.actionButton,
+            {
+              backgroundColor: theme.colors.brandAction,
+              shadowColor: theme.colors.brandPrimary,
+            },
+          ]}
           onPress={handleNext}
           activeOpacity={0.88}
           accessibilityRole="button"
@@ -206,7 +256,15 @@ export function GenderSelectionScreen({
   }
 
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        {
+          paddingTop: insets.top,
+          backgroundColor: isDark ? '#0E091D' : theme.colors.canvasBase,
+        },
+      ]}
+    >
       {/* ── Top Bar ────────────────────────────────────────────── */}
       <View style={styles.topBar}>
         <TouchableOpacity
@@ -216,13 +274,31 @@ export function GenderSelectionScreen({
           accessibilityRole="button"
           accessibilityLabel="Quay lại"
         >
-          <ChevronLeftIcon size={26} color="#FFFFFF" />
+          <ChevronLeftIcon
+            size={26}
+            color={isDark ? '#FFFFFF' : theme.colors.textPrimary}
+          />
         </TouchableOpacity>
       </View>
 
       {/* ── Progress Bar (~20%) ────────────────────────────────── */}
-      <View style={styles.progressTrack}>
-        <View style={[styles.progressFill, { width: '20%' }]} />
+      <View
+        style={[
+          styles.progressTrack,
+          {
+            backgroundColor: isDark ? '#272049' : theme.colors.surfaceBorder,
+          },
+        ]}
+      >
+        <View
+          style={[
+            styles.progressFill,
+            {
+              backgroundColor: theme.colors.brandPrimary,
+              width: '20%',
+            },
+          ]}
+        />
       </View>
 
       {content}

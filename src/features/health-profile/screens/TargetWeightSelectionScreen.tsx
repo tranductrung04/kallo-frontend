@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { images } from '@/assets/images';
 import { AppButton, AppText } from '@/components/common';
 import { ChevronLeftIcon } from '@/components/icons';
+import { useTheme } from '@/theme';
 import { useHealthProfileDraft } from '../hooks/useHealthProfileDraft';
 import { calculateBmi, bmiCategory } from '../utils/calculations';
 
@@ -39,6 +40,8 @@ export function TargetWeightSelectionScreen({
   hideHeader = false,
 }: TargetWeightSelectionScreenProps) {
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
+  const isDark = theme.scheme === 'dark';
   const { draft, updateDraft } = useHealthProfileDraft();
 
   const currentWeight = useMemo(() => {
@@ -54,7 +57,7 @@ export function TargetWeightSelectionScreen({
     // Default smart suggestion based on goal
     if (draft.goal === 'gain') return Math.min(MAX_WEIGHT, currentWeight + 8.0);
     if (draft.goal === 'lose') return Math.max(MIN_WEIGHT, currentWeight - 5.0);
-    return DEFAULT_TARGET;
+    return draft.goal === 'maintain' ? currentWeight : DEFAULT_TARGET;
   }, [draft.targetWeight, draft.goal, currentWeight]);
 
   const [targetWeight, setTargetWeight] = useState<number>(initialVal);
@@ -121,6 +124,11 @@ export function TargetWeightSelectionScreen({
 
   const handleNext = () => {
     updateDraft('targetWeight', targetWeight.toFixed(1));
+    if (draft.goal === 'maintain') {
+      updateDraft('weeklyRate', '0');
+    } else if (!draft.weeklyRate || draft.weeklyRate === '0') {
+      updateDraft('weeklyRate', '0.5');
+    }
 
     if (onNext) {
       onNext(targetWeight);
@@ -142,7 +150,15 @@ export function TargetWeightSelectionScreen({
   const isLose = targetWeight < currentWeight;
 
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        {
+          paddingTop: insets.top,
+          backgroundColor: isDark ? '#120E29' : theme.colors.canvasBase,
+        },
+      ]}
+    >
       {/* ── Top Bar ────────────────────────────────────────────── */}
       {!hideHeader && (
         <>
@@ -154,20 +170,48 @@ export function TargetWeightSelectionScreen({
               accessibilityRole="button"
               accessibilityLabel="Quay lại"
             >
-              <ChevronLeftIcon size={26} color="#FFFFFF" />
+              <ChevronLeftIcon
+                size={26}
+                color={isDark ? '#FFFFFF' : theme.colors.textPrimary}
+              />
             </TouchableOpacity>
           </View>
 
           {/* ── Progress Bar: 75% ────────────────────────────────── */}
-          <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: '75%' }]} />
+          <View
+            style={[
+              styles.progressTrack,
+              {
+                backgroundColor: isDark
+                  ? '#272049'
+                  : theme.colors.surfaceBorder,
+              },
+            ]}
+          >
+            <View
+              style={[
+                styles.progressFill,
+                {
+                  backgroundColor: theme.colors.brandPrimary,
+                  width: '75%',
+                },
+              ]}
+            />
           </View>
         </>
       )}
 
       {/* ── Avatar & Speech Bubble Row ─────────────────────────── */}
       <View style={styles.bubbleRow}>
-        <View style={styles.avatarWrap}>
+        <View
+          style={[
+            styles.avatarWrap,
+            {
+              backgroundColor: isDark ? '#2E2654' : '#EDE5FF',
+              borderColor: isDark ? '#4A3D7E' : '#D4C7F8',
+            },
+          ]}
+        >
           <Image
             source={images.mascotAvatar}
             style={styles.avatarImage}
@@ -175,8 +219,25 @@ export function TargetWeightSelectionScreen({
             accessibilityLabel="Mascot Kallo"
           />
         </View>
-        <View style={styles.bubble}>
-          <View style={styles.bubbleTail} />
+        <View
+          style={[
+            styles.bubble,
+            !isDark && {
+              borderWidth: 1,
+              borderColor: theme.colors.surfaceBorder,
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.bubbleTail,
+              !isDark && {
+                borderLeftWidth: 1,
+                borderBottomWidth: 1,
+                borderColor: theme.colors.surfaceBorder,
+              },
+            ]}
+          />
           <AppText style={styles.bubbleText}>
             Cân nặng mong muốn
           </AppText>
@@ -186,15 +247,39 @@ export function TargetWeightSelectionScreen({
       {/* ── Value Readout & Current Weight Indicator ───────────── */}
       <View style={styles.valueContainer}>
         <View style={styles.readoutRow}>
-          <AppText style={styles.weightValue}>{targetWeight.toFixed(1)}</AppText>
-          <AppText style={styles.weightUnit}>kg</AppText>
+          <AppText
+            style={[
+              styles.weightValue,
+              { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+            ]}
+          >
+            {targetWeight.toFixed(1)}
+          </AppText>
+          <AppText
+            style={[
+              styles.weightUnit,
+              { color: isDark ? '#9D6CFA' : theme.colors.brandPrimary },
+            ]}
+          >
+            kg
+          </AppText>
 
           {/* Current weight reference indicator */}
           <View style={styles.currentWeightTag}>
-            <AppText style={styles.currentWeightArrow}>
+            <AppText
+              style={[
+                styles.currentWeightArrow,
+                { color: isDark ? '#C5BFDE' : theme.colors.textSecondary },
+              ]}
+            >
               {isGain ? '◀◀' : isLose ? '▶▶' : '•'}
             </AppText>
-            <AppText style={styles.currentWeightText}>
+            <AppText
+              style={[
+                styles.currentWeightText,
+                { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+              ]}
+            >
               {Math.round(currentWeight)}
             </AppText>
           </View>
@@ -204,7 +289,13 @@ export function TargetWeightSelectionScreen({
       {/* ── Interactive Horizontal Ruler ──────────────────────── */}
       <View style={styles.rulerContainer}>
         {/* Fixed Center Purple Cursor Line */}
-        <View style={styles.centerCursor} pointerEvents="none" />
+        <View
+          style={[
+            styles.centerCursor,
+            { backgroundColor: theme.colors.brandPrimary },
+          ]}
+          pointerEvents="none"
+        />
 
         <FlatList
           ref={flatListRef}
@@ -246,10 +337,31 @@ export function TargetWeightSelectionScreen({
                   style={[
                     styles.tick,
                     isWhole
-                      ? styles.tickTen
+                      ? [
+                          styles.tickTen,
+                          {
+                            backgroundColor: isDark
+                              ? '#C5BFE3'
+                              : theme.colors.brandPrimary,
+                          },
+                        ]
                       : isHalf
-                      ? styles.tickFive
-                      : styles.tickOne,
+                      ? [
+                          styles.tickFive,
+                          {
+                            backgroundColor: isDark
+                              ? '#776F9F'
+                              : '#A6A1B8',
+                          },
+                        ]
+                      : [
+                          styles.tickOne,
+                          {
+                            backgroundColor: isDark
+                              ? '#372F5B'
+                              : '#D1CBDD',
+                          },
+                        ],
                   ]}
                 />
               </View>
@@ -260,9 +372,24 @@ export function TargetWeightSelectionScreen({
 
       {/* ── Projected BMI Card ─────────────────────────────────── */}
       <View style={styles.bmiCardWrap}>
-        <View style={styles.bmiCard}>
+        <View
+          style={[
+            styles.bmiCard,
+            {
+              backgroundColor: isDark ? '#1C1635' : theme.colors.surfaceMid,
+              borderColor: isDark ? '#2D2350' : theme.colors.surfaceBorder,
+            },
+          ]}
+        >
           <View style={styles.bmiHeaderRow}>
-            <AppText style={styles.bmiTitle}>BMI của bạn: </AppText>
+            <AppText
+              style={[
+                styles.bmiTitle,
+                { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+              ]}
+            >
+              BMI của bạn:{' '}
+            </AppText>
             <AppText style={[styles.bmiValue, { color: bmiMeta.valueColor }]}>
               {bmiVal.toFixed(1)}
             </AppText>
@@ -272,7 +399,14 @@ export function TargetWeightSelectionScreen({
               </AppText>
             </View>
           </View>
-          <AppText style={styles.bmiAdvice}>{bmiMeta.advice}</AppText>
+          <AppText
+            style={[
+              styles.bmiAdvice,
+              { color: isDark ? '#C7BFE0' : theme.colors.textSecondary },
+            ]}
+          >
+            {bmiMeta.advice}
+          </AppText>
         </View>
 
         {/* Nguồn tham khảo */}
@@ -282,14 +416,27 @@ export function TargetWeightSelectionScreen({
           accessibilityRole="button"
           accessibilityLabel="Nguồn tham khảo BMI"
         >
-          <AppText style={styles.referenceText}>Nguồn tham khảo</AppText>
+          <AppText
+            style={[
+              styles.referenceText,
+              { color: isDark ? '#FFFFFF' : theme.colors.brandPrimary },
+            ]}
+          >
+            Nguồn tham khảo
+          </AppText>
         </TouchableOpacity>
       </View>
 
       {/* ── Bottom Action Button ───────────────────────────────── */}
       <View style={[styles.bottomArea, { paddingBottom: Math.max(insets.bottom, 16) }]}>
         <TouchableOpacity
-          style={styles.actionButton}
+          style={[
+            styles.actionButton,
+            {
+              backgroundColor: theme.colors.brandAction,
+              shadowColor: theme.colors.brandPrimary,
+            },
+          ]}
           onPress={handleNext}
           activeOpacity={0.85}
           accessibilityRole="button"
@@ -307,9 +454,29 @@ export function TargetWeightSelectionScreen({
         onRequestClose={() => setShowReferenceModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <AppText style={styles.modalTitle}>Tiêu chuẩn BMI Châu Á (WHO WPRO)</AppText>
-            <AppText style={styles.modalBody}>
+          <View
+            style={[
+              styles.modalContent,
+              {
+                backgroundColor: isDark ? '#1E1838' : theme.colors.surfaceMid,
+                borderColor: isDark ? '#3D3369' : theme.colors.surfaceBorder,
+              },
+            ]}
+          >
+            <AppText
+              style={[
+                styles.modalTitle,
+                { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+              ]}
+            >
+              Tiêu chuẩn BMI Châu Á (WHO WPRO)
+            </AppText>
+            <AppText
+              style={[
+                styles.modalBody,
+                { color: isDark ? '#C7BFE0' : theme.colors.textSecondary },
+              ]}
+            >
               • Dưới 18.5: Thiếu cân (cần tăng cường dinh dưỡng){'\n'}
               • 18.5 – 22.9: Bình thường (vóc dáng lý tưởng){'\n'}
               • 23.0 – 24.9: Thừa cân (tiền béo phì){'\n'}
