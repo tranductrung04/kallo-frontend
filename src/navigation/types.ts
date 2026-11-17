@@ -64,6 +64,7 @@ export type RootStackParamList = {
   WeightStatistics: undefined;
   RecordWeight: { date?: string; initialWeight?: number } | undefined;
   BodyMetric: undefined;
+  HealthMetrics: undefined;
   MeasurementGuide: undefined;
   MealPlanOverview: undefined;
   MealPlanWizard: undefined;
