@@ -254,7 +254,7 @@ export function FoodSearchActionCards({
         onPress={onAIMealScan}
       >
         <View style={[styles.actionCircle, { backgroundColor: c.quickScanner }]}>
-          <QuickSparklesIcon size={24} color={c.onQuickTile} />
+          <QuickSparklesIcon size={24} color={c.onBrand} />
         </View>
         <Text style={styles.actionCardTitle}>Nhận diện{'\n'}món ăn</Text>
       </TouchableOpacity>
@@ -266,7 +266,7 @@ export function FoodSearchActionCards({
         onPress={onVoiceLog}
       >
         <View style={[styles.actionCircle, { backgroundColor: c.macroProtein }]}>
-          <QuickVoiceIcon size={24} color={c.onQuickTile} cutoutColor={c.macroProtein} />
+          <QuickVoiceIcon size={24} color={c.onBrand} cutoutColor={c.macroProtein} />
         </View>
         <Text style={styles.actionCardTitle}>Ghi bằng{'\n'}giọng nói</Text>
       </TouchableOpacity>
