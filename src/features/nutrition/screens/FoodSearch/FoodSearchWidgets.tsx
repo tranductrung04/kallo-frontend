@@ -6,14 +6,14 @@ import {
   View,
 } from 'react-native';
 import {
-  BowlFoodPlusIcon,
+  BookPlusIcon,
   ChevronLeftIcon,
   EmptyFolderIllustration,
   InfoIcon,
   QuickBarcodeIcon,
   QuickSparklesIcon,
   QuickVoiceIcon,
-  RecipeBookPlusIcon,
+  SaladIcon,
   SearchIcon,
   ViewfinderBarcodeIcon,
 } from '@/components/icons';
@@ -207,7 +207,7 @@ export function FoodSearchActionCards({
           accessibilityLabel="Tạo công thức"
         >
           <View style={[styles.customActionCircle, { backgroundColor: c.quickScanner }]}>
-            <RecipeBookPlusIcon size={26} color="#0D0B14" cutoutColor={c.quickScanner} />
+            <BookPlusIcon size={24} color={c.onBrand} />
           </View>
           <Text style={styles.customActionCardTitle} numberOfLines={1}>
             Tạo công thức
@@ -222,7 +222,7 @@ export function FoodSearchActionCards({
           accessibilityLabel="Tạo thực phẩm"
         >
           <View style={[styles.customActionCircle, { backgroundColor: c.macroProtein }]}>
-            <BowlFoodPlusIcon size={26} color="#0D0B14" cutoutColor={c.macroProtein} />
+            <SaladIcon size={24} color={c.onBrand} />
           </View>
           <Text style={styles.customActionCardTitle} numberOfLines={1}>
             Tạo thực phẩm

@@ -21,13 +21,13 @@ import { TILE_CONFIG } from '@/components/common';
 import {
   AppleScanIcon,
   BodyStickFigureIcon,
-  BowlFoodPlusIcon,
+  BookPlusIcon,
   FlameIcon,
   QuickBarcodeIcon,
   QuickSearchIcon,
   QuickSparklesIcon,
   QuickVoiceIcon,
-  RecipeBookPlusIcon,
+  SaladIcon,
   ScaleIcon,
   WaterGlassPlusIcon,
 } from '@/components/icons';
@@ -479,7 +479,6 @@ export function DashboardQuickActionsModal({
               <ScaleIcon
                 size={22}
                 color={colors.textPrimary}
-                innerColor={cardBg}
               />
               <Text
                 style={[
@@ -507,7 +506,7 @@ export function DashboardQuickActionsModal({
               onPress={handleCreateRecipe}
               accessibilityLabel="Tạo công thức"
             >
-              <RecipeBookPlusIcon
+              <BookPlusIcon
                 size={22}
                 color={colors.textPrimary}
               />
@@ -534,7 +533,7 @@ export function DashboardQuickActionsModal({
               onPress={handleCreateFood}
               accessibilityLabel="Tạo thực phẩm"
             >
-              <BowlFoodPlusIcon
+              <SaladIcon
                 size={22}
                 color={colors.textPrimary}
               />
