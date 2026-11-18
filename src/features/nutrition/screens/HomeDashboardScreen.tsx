@@ -1,6 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
 import {
-  Alert,
   Animated,
   Image,
   NativeScrollEvent,
@@ -24,6 +23,7 @@ import {
   CircularProgress,
   MonthCalendarModal,
   QuickUtilityGrid,
+  useAlert,
 } from '@/components/common';
 import type { MainTabParamList, RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
@@ -78,6 +78,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const { state, getSummary, addWater, setSelectedDate } = useNutrition();
   const { getTotalCaloriesBurnedForDate, getTotalStepsForDate, state: activityState } = useActivity();
   const { streak, badges, challenges, friends, incomingRequests } = useGamification();
+  const { showAlert } = useAlert();
   const [calendarModalVisible, setCalendarModalVisible] = useState(false);
   const [calorieGoalModalVisible, setCalorieGoalModalVisible] = useState(false);
   const [calorieIntakeModalVisible, setCalorieIntakeModalVisible] = useState(false);
@@ -259,11 +260,12 @@ export function HomeDashboardScreen({ navigation }: Props) {
   });
 
   const handleUpgradePress = () => {
-    Alert.alert(
-      'Kallo Premium',
-      'Nâng cấp gói Kallo Premium để mở khóa phân tích dinh dưỡng chuyên sâu, thực đơn AI không giới hạn và nhận diện hình ảnh thông minh!',
-      [{ text: 'Đóng', style: 'cancel' }]
-    );
+    showAlert({
+      title: 'Kallo Premium',
+      message:
+        'Nâng cấp gói Kallo Premium để mở khóa phân tích dinh dưỡng chuyên sâu, thực đơn AI không giới hạn và nhận diện hình ảnh thông minh!',
+      variant: 'info',
+    });
   };
 
   return (

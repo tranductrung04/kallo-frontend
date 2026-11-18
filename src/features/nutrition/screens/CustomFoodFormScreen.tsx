@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Alert,
   BackHandler,
   Image,
   Modal,
@@ -13,6 +12,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
+import { useAlert } from '@/components/common';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -39,6 +39,7 @@ export function CustomFoodFormScreen({ navigation, route }: Props) {
   const { colors } = theme;
   const insets = useSafeAreaInsets();
   const { findFood, saveCustomFood, addFoodLog } = useNutrition();
+  const { showAlert } = useAlert();
 
   const existing = route.params.foodId ? findFood(route.params.foodId) : undefined;
 
@@ -114,7 +115,7 @@ export function CustomFoodFormScreen({ navigation, route }: Props) {
         setImageUri(result.assets[0].uri);
       }
     } catch {
-      Alert.alert('Lỗi', 'Không thể chọn ảnh từ thiết bị.');
+      showAlert({ title: 'Lỗi', message: 'Không thể chọn ảnh từ thiết bị.', variant: 'error' });
     }
   };
 
@@ -206,12 +207,12 @@ export function CustomFoodFormScreen({ navigation, route }: Props) {
       barcode: barcode.trim() || undefined,
     });
 
-    Alert.alert('Thành công', 'Đã lưu thực phẩm của bạn.', [
-      {
-        text: 'Đóng',
-        onPress: () => navigation.goBack(),
-      },
-    ]);
+    showAlert({
+      title: 'Thành công',
+      message: 'Đã lưu thực phẩm của bạn.',
+      variant: 'success',
+      buttons: [{ text: 'OK', variant: 'primary', onPress: () => navigation.goBack() }],
+    });
   };
 
   // ── Action: Lưu và ghi (Lưu & thêm vào nhật ký bữa ăn ngay) ────────────
@@ -247,14 +248,20 @@ export function CustomFoodFormScreen({ navigation, route }: Props) {
       },
     });
 
-    Alert.alert('Thành công', 'Đã lưu và ghi thực phẩm vào nhật ký.', [
-      {
-        text: 'Xem nhật ký',
-        onPress: () => {
-          navigation.navigate('MainTabs', { screen: 'Diary' });
+    showAlert({
+      title: 'Thành công',
+      message: 'Đã lưu và ghi thực phẩm vào nhật ký.',
+      variant: 'success',
+      buttons: [
+        {
+          text: 'Xem nhật ký',
+          variant: 'primary',
+          onPress: () => {
+            navigation.navigate('MainTabs', { screen: 'Diary' });
+          },
         },
-      },
-    ]);
+      ],
+    });
   };
 
   const isStep2Valid =

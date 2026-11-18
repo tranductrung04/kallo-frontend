@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
 import {
-  Alert,
   Image,
   Modal,
   PanResponder,
@@ -15,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BookIcon, CloseXIcon } from '@/components/icons';
 import { images } from '@/assets/images';
 import { useTheme } from '@/theme';
+import { useAlert } from '@/components/common';
 
 export type SaltGuideModalProps = {
   visible: boolean;
@@ -26,6 +26,7 @@ export function SaltGuideModal({ visible, onClose, onOpenArticle }: SaltGuideMod
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const isDark = theme.scheme === 'dark';
+  const { showAlert } = useAlert();
 
   // Cho phép vuốt kéo xuống ở thanh tiêu đề trên để đóng modal
   const headerPanResponder = useRef(
@@ -51,11 +52,12 @@ export function SaltGuideModal({ visible, onClose, onOpenArticle }: SaltGuideMod
     if (onOpenArticle) {
       onOpenArticle();
     } else {
-      Alert.alert(
-        'Kiểm soát muối trong bữa ăn Việt',
-        'Hướng dẫn kiểm soát muối trong bữa ăn Việt: Cách đọc nhãn dinh dưỡng để nhận biết hàm lượng Natri, mẹo nêm nếm bằng thảo mộc tự nhiên thay cho muối tinh.',
-        [{ text: 'Đóng', style: 'cancel' }]
-      );
+      showAlert({
+        title: 'Kiểm soát muối trong bữa ăn Việt',
+        message:
+          'Hướng dẫn kiểm soát muối trong bữa ăn Việt: Cách đọc nhãn dinh dưỡng để nhận biết hàm lượng Natri, mẹo nêm nếm bằng thảo mộc tự nhiên thay cho muối tinh.',
+        variant: 'info',
+      });
     }
   };
 

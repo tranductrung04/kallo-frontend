@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
 import {
-  Alert,
   Image,
   Modal,
   Platform,
@@ -33,6 +32,7 @@ import { formatNumber, todayKey } from '@/features/nutrition/utils';
 import { useNutrition } from '@/features/nutrition/NutritionProvider';
 import { useActivity } from '../ActivityProvider';
 import { StepConnectModal } from '../components/StepConnectModal';
+import { useAlert } from '@/components/common';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'WeightStatistics'>;
 
@@ -45,6 +45,7 @@ export function WeightStatisticsScreen({ navigation }: Props) {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { state: nutritionState, addWeight } = useNutrition();
   const { state: activityState } = useActivity();
+  const { showAlert } = useAlert();
 
   const isConnected =
     activityState.syncStatus.healthConnect === 'CONNECTED' ||
@@ -317,7 +318,7 @@ export function WeightStatisticsScreen({ navigation }: Props) {
         <View style={styles.progressPhotosRow}>
           <TouchableOpacity
             style={styles.addPhotoDashedBtn}
-            onPress={() => Alert.alert('Thêm ảnh', 'Chọn ảnh từ thư viện để theo dõi tiến trình vóc dáng của bạn.')}
+            onPress={() => showAlert({ title: 'Thêm ảnh', message: 'Chọn ảnh từ thư viện để theo dõi tiến trình vóc dáng của bạn.', variant: 'info' })}
             activeOpacity={0.7}
           >
             <PlusIcon size={24} color={c.textSecondary} strokeWidth={2} />
@@ -327,7 +328,7 @@ export function WeightStatisticsScreen({ navigation }: Props) {
         {/* Chia sẻ hành trình button */}
         <TouchableOpacity
           style={styles.shareJourneyBtn}
-          onPress={() => Alert.alert('Chia sẻ hành trình', 'Chia sẻ tiến trình cân nặng của bạn lên bảng tin hoặc mạng xã hội.')}
+          onPress={() => showAlert({ title: 'Chia sẻ hành trình', message: 'Chia sẻ tiến trình cân nặng của bạn lên bảng tin hoặc mạng xã hội.', variant: 'info' })}
           activeOpacity={0.85}
         >
           <Text style={styles.shareJourneyBtnText}>Chia sẻ hành trình</Text>

@@ -59,14 +59,41 @@ export function FiberIcon({
   );
 }
 
-/** Icon Cân sức khỏe cá nhân */
-export function ScaleIcon({ size = 22, color, innerColor }: ScaleIconProps) {
-  const fillColor = color || '#F59E0B';
+/** Icon Cân sức khỏe cá nhân (Outline) */
+export function ScaleIcon({
+  size = 22,
+  color,
+  strokeWidth = 2,
+}: ScaleIconProps) {
+  const strokeColor = color || '#F59E0B';
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24">
-      <Rect x={2} y={2} width={20} height={20} rx={6} fill={fillColor} />
-      <Rect x={6} y={5} width={12} height={6} rx={2.5} fill={innerColor || '#181524'} />
-      <Rect x={7.5} y={6.5} width={9} height={3} rx={1} fill="#FEF3C7" />
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Rect
+        x={3}
+        y={3}
+        width={18}
+        height={18}
+        rx={5}
+        stroke={strokeColor}
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M8.5 7.5a3.5 3.5 0 0 1 7 0"
+        stroke={strokeColor}
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+      />
+      <Line
+        x1={12}
+        y1={7.5}
+        x2={12}
+        y2={5.5}
+        stroke={strokeColor}
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+      />
     </Svg>
   );
 }

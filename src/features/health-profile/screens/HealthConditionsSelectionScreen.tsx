@@ -250,8 +250,8 @@ export function HealthConditionsSelectionScreen({
               ? '#C084FC'
               : theme.colors.brandPrimary
             : isDark
-            ? '#8E87AA'
-            : theme.colors.textSecondary;
+              ? '#8E87AA'
+              : theme.colors.textSecondary;
 
           return (
             <AnimatedCard
@@ -274,15 +274,15 @@ export function HealthConditionsSelectionScreen({
                     styles.iconWrap,
                     isSelected
                       ? {
-                          backgroundColor: isDark
-                            ? 'rgba(167, 139, 250, 0.22)'
-                            : '#EDE5FF',
-                        }
+                        backgroundColor: isDark
+                          ? 'rgba(167, 139, 250, 0.22)'
+                          : '#EDE5FF',
+                      }
                       : {
-                          backgroundColor: isDark
-                            ? 'rgba(255, 255, 255, 0.05)'
-                            : '#F1EFF9',
-                        },
+                        backgroundColor: isDark
+                          ? 'rgba(255, 255, 255, 0.05)'
+                          : '#F1EFF9',
+                      },
                   ]}
                 >
                   {item.renderIcon(iconColor)}
@@ -297,8 +297,8 @@ export function HealthConditionsSelectionScreen({
                             ? '#E9D5FF'
                             : theme.colors.brandPrimary
                           : isDark
-                          ? '#FFFFFF'
-                          : theme.colors.textPrimary,
+                            ? '#FFFFFF'
+                            : theme.colors.textPrimary,
                       },
                     ]}
                   >

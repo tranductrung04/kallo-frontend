@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   Image,
+  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -13,8 +14,12 @@ import { useTheme } from '@/theme';
 import { todayKey } from '@/features/nutrition/utils';
 import { calculateWhr, classifyWhrRisk } from '../utils';
 import { useActivity } from '../ActivityProvider';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '@/navigation/types';
 
-export function BodyMetricScreen() {
+type Props = NativeStackScreenProps<RootStackParamList, 'BodyMetric'>;
+
+export function BodyMetricScreen({ navigation }: Props) {
   const theme = useTheme();
   const { state, addBodyMetricLog } = useActivity();
 
@@ -179,6 +184,11 @@ export function BodyMetricScreen() {
             • <AppText style={{ fontWeight: '700' }}>Vòng mông:</AppText> Đo quanh phần nở rộng nhất
             của mông, giữ thước dây nằm ngang.
           </AppText>
+          <Pressable onPress={() => navigation.navigate('MeasurementGuide')} style={styles.guideLink}>
+            <AppText style={[styles.guideLinkText, { color: theme.colors.brandPrimary }]}>
+              ⓘ Hướng dẫn đo các chỉ số
+            </AppText>
+          </Pressable>
         </AppCard>
 
         {/* Measurement History */}
@@ -261,6 +271,8 @@ const styles = StyleSheet.create({
   hintCard: { gap: 8 },
   hintHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   hintIcon: { width: 28, height: 28 },
+  guideLink: { marginTop: 4, alignSelf: 'center' },
+  guideLinkText: { fontSize: 14, fontWeight: '500' },
   historySection: { gap: 10, marginTop: 8 },
   emptyCard: { padding: 20, alignItems: 'center' },
   historyCard: { paddingVertical: 12, paddingHorizontal: 14 },

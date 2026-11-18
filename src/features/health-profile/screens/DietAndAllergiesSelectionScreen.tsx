@@ -201,8 +201,8 @@ export function DietAndAllergiesSelectionScreen({
                                 ? '#E9D5FF'
                                 : theme.colors.brandPrimary
                               : isDark
-                              ? '#E2E8F0'
-                              : theme.colors.textPrimary,
+                                ? '#E2E8F0'
+                                : theme.colors.textPrimary,
                           },
                         ]}
                       >
@@ -283,8 +283,8 @@ export function DietAndAllergiesSelectionScreen({
                           color: isSelected
                             ? '#FFFFFF'
                             : isDark
-                            ? '#CBD5E1'
-                            : theme.colors.textSecondary,
+                              ? '#CBD5E1'
+                              : theme.colors.textSecondary,
                         },
                       ]}
                     >
