@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Image,
   ImageBackground,
   Platform,
@@ -16,7 +15,7 @@ import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { images } from '@/assets/images';
-import { AppText } from '@/components/common';
+import { AppText, useAlert } from '@/components/common';
 import { MoonIcon, SunIcon } from '@/components/icons';
 import { AuthLightBackground } from './AuthLightBackground';
 import type { AuthStackParamList } from '@/navigation/types';
@@ -99,6 +98,7 @@ export function SocialLoginScreen({ navigation }: Props) {
   const theme = useTheme();
   const isDark = theme.scheme === 'dark';
   const { signInWithGoogle, isDemoMode } = useAuth();
+  const { showAlert } = useAlert();
   const [googleLoading, setGoogleLoading] = useState(false);
 
   const webClientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID?.trim() || '';
@@ -158,14 +158,20 @@ export function SocialLoginScreen({ navigation }: Props) {
   }, [navigation, response, signInWithGoogle]);
 
   const handleAppleLogin = () => {
-    Alert.alert(
-      'Đăng nhập với Apple',
-      'Tính năng đăng nhập với Apple đang được hoàn thiện. Bạn có muốn chuyển sang đăng nhập bằng tài khoản email/mật khẩu?',
-      [
-        { text: 'Huỷ', style: 'cancel' },
-        { text: 'Đăng nhập ngay', onPress: () => navigation.navigate('Login') },
-      ]
-    );
+    showAlert({
+      title: 'Đăng nhập với Apple',
+      message:
+        'Tính năng đăng nhập với Apple đang được hoàn thiện. Bạn có muốn chuyển sang đăng nhập bằng tài khoản email/mật khẩu?',
+      variant: 'info',
+      buttons: [
+        { text: 'Huỷ', variant: 'secondary' },
+        {
+          text: 'Đăng nhập ngay',
+          variant: 'primary',
+          onPress: () => navigation.navigate('Login'),
+        },
+      ],
+    });
   };
 
   const handleGoogleLogin = async () => {
@@ -200,17 +206,21 @@ export function SocialLoginScreen({ navigation }: Props) {
   };
 
   const handleOpenTerms = () => {
-    Alert.alert(
-      'Điều khoản sử dụng',
-      'Kallo cam kết bảo vệ quyền riêng tư và dữ liệu sức khỏe của người dùng. Mọi thông tin dinh dưỡng và calo chỉ mang tính chất tham khảo, hỗ trợ xây dựng lối sống lành mạnh.'
-    );
+    showAlert({
+      title: 'Điều khoản sử dụng',
+      message:
+        'Kallo cam kết bảo vệ quyền riêng tư và dữ liệu sức khỏe của người dùng. Mọi thông tin dinh dưỡng và calo chỉ mang tính chất tham khảo, hỗ trợ xây dựng lối sống lành mạnh.',
+      variant: 'info',
+    });
   };
 
   const handleOpenPrivacy = () => {
-    Alert.alert(
-      'Chính sách bảo mật',
-      'Dữ liệu cá nhân của bạn được mã hóa an toàn và chỉ sử dụng cho mục đích cá nhân hóa thực đơn và theo dõi sức khỏe theo quy định bảo mật của Kallo.'
-    );
+    showAlert({
+      title: 'Chính sách bảo mật',
+      message:
+        'Dữ liệu cá nhân của bạn được mã hóa an toàn và chỉ sử dụng cho mục đích cá nhân hóa thực đơn và theo dõi sức khỏe theo quy định bảo mật của Kallo.',
+      variant: 'info',
+    });
   };
 
   const handleClose = () => {

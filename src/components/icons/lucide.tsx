@@ -5,6 +5,7 @@ import {
   Bell,
   Bike,
   BookOpen,
+  BookPlus,
   Calendar,
   Candy,
   Check,
@@ -42,6 +43,8 @@ import {
   PersonStanding,
   Plus,
   RefreshCw,
+  Salad,
+  Scale,
   ScanBarcode,
   ScanSearch,
   Search,
@@ -59,6 +62,7 @@ import {
   Users,
   Utensils,
   Waves,
+  Weight,
   Wheat,
   X,
   Zap,
@@ -223,6 +227,15 @@ export const WheatIcon = fromLucide(Wheat, { defaultSize: 15, defaultColor: '#3B
 export const SugarIcon = fromLucide(Candy, { defaultSize: 15 });
 export const WaterGlassPlusIcon = fromLucide(GlassWater, { defaultSize: 22 });
 export const BodyStickFigureIcon = fromLucide(PersonStanding, { defaultSize: 24 });
+
+export const BookPlusIcon = fromLucide(BookPlus, { defaultSize: 22 });
+export const RecipeBookPlusOutlineIcon = BookPlusIcon;
+
+export const SaladIcon = fromLucide(Salad, { defaultSize: 22 });
+export const BowlFoodOutlineIcon = SaladIcon;
+
+export const ScaleOutlineIcon = fromLucide(Scale, { defaultSize: 22 });
+export const WeightIcon = fromLucide(Weight, { defaultSize: 22 });
 
 // ─── Wave 4: Physical Activities ─────────────────────────────────────────────
 

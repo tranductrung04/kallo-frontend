@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Alert,
   Image,
   Modal,
   StatusBar,
@@ -8,12 +7,13 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { images } from '@/assets/images';
-import { AppButton, AppCard, AppText } from '@/components/common';
+import { AppButton, AppCard, AppText, useAlert } from '@/components/common';
 import { ChevronLeftIcon, InfoIcon, QuickVoiceIcon, SquareIcon } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
@@ -55,7 +55,15 @@ export function VoiceLogModal({ navigation, route }: Props) {
   const isDark = theme.scheme === 'dark';
   const { colors } = theme;
   const insets = useSafeAreaInsets();
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const { addFoodLog } = useNutrition();
+  const { showAlert } = useAlert();
+
+  // Background gradient banner height: proportional to width, accounts for safe area insets
+  const heroBgHeight = Math.max(
+    Math.round(screenHeight * 0.42),
+    Math.round(screenWidth * (353 / 375) + insets.top)
+  );
 
   const [introVisible, setIntroVisible] = useState(false);
   const [introSeen, setIntroSeen] = useState(false);
@@ -124,30 +132,44 @@ export function VoiceLogModal({ navigation, route }: Props) {
       },
     });
 
-    Alert.alert(
-      'Ghi nhận thành công!',
-      `Đã thêm ${currentResult.foodName} (${currentResult.grams}g - ${currentResult.calories} kcal) vào nhật ký.`,
-      [{ text: 'Đóng', onPress: () => navigation.goBack() }]
-    );
+    showAlert({
+      title: 'Ghi nhận thành công!',
+      message: `Đã thêm ${currentResult.foodName} (${currentResult.grams}g - ${currentResult.calories} kcal) vào nhật ký.`,
+      variant: 'success',
+      buttons: [{ text: 'Đóng', onPress: () => navigation.goBack() }],
+    });
   };
 
   return (
-    <SafeAreaView
-      style={[styles.safe, { backgroundColor: colors.canvasBase }]}
-    >
+    <View style={[styles.root, { backgroundColor: colors.canvasBase }]}>
       <StatusBar
         barStyle={isDark ? 'light-content' : 'dark-content'}
-        backgroundColor={colors.canvasBase}
+        backgroundColor="transparent"
+        translucent
+      />
+
+      {/* Background Art - spans full width edge-to-edge behind status bar */}
+      <Image
+        source={images.voiceLogBg}
+        style={[
+          styles.bgImage,
+          {
+            width: screenWidth,
+            height: heroBgHeight,
+            opacity: isDark ? 0.85 : 0.45,
+          },
+        ]}
+        resizeMode="cover"
+        accessible={false}
+        importantForAccessibility="no"
       />
 
       {/* ── Main Voice Log Screen ─────────────────────────────────────── */}
-      <View style={styles.container}>
-        {/* Background Art */}
-        <Image
-          source={images.voiceLogBg}
-          style={[styles.bgImage, { opacity: isDark ? 0.85 : 0.45 }]}
-          resizeMode="cover"
-        />
+      <SafeAreaView
+        style={styles.safe}
+        edges={['top', 'bottom', 'left', 'right']}
+      >
+        <View style={styles.container}>
 
         {/* Header */}
         <View style={styles.header}>
@@ -304,6 +326,7 @@ export function VoiceLogModal({ navigation, route }: Props) {
           </TouchableOpacity>
         </View>
       </View>
+    </SafeAreaView>
 
       {/* ── First-time Intro Screen Modal (Theme Adaptive) ─────────────── */}
       <Modal
@@ -478,19 +501,30 @@ export function VoiceLogModal({ navigation, route }: Props) {
           </SafeAreaView>
         </View>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1 },
+  root: {
+    flex: 1,
+  },
+  safe: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
   container: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 20,
     justifyContent: 'space-between',
   },
   bgImage: {
-    ...StyleSheet.absoluteFill,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
   },
   header: {
     flexDirection: 'row',

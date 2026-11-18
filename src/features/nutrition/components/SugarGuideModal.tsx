@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
 import {
-  Alert,
   Image,
   Modal,
   PanResponder,
@@ -15,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BookIcon, CloseXIcon, TriangleAlertIcon } from '@/components/icons';
 import { images } from '@/assets/images';
 import { useTheme } from '@/theme';
+import { useAlert } from '@/components/common';
 
 export type SugarGuideModalProps = {
   visible: boolean;
@@ -26,6 +26,7 @@ export function SugarGuideModal({ visible, onClose, onOpenArticle }: SugarGuideM
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const isDark = theme.scheme === 'dark';
+  const { showAlert } = useAlert();
 
   // Cho phép vuốt kéo xuống ở thanh tiêu đề trên để đóng modal
   const headerPanResponder = useRef(
@@ -52,11 +53,12 @@ export function SugarGuideModal({ visible, onClose, onOpenArticle }: SugarGuideM
     if (onOpenArticle) {
       onOpenArticle();
     } else {
-      Alert.alert(
-        'Kiểm soát đường trong chế độ ăn',
-        'Cẩm nang kiểm soát đường trong chế độ ăn: Nhận diện đường tinh luyện và đường tự nhiên, các chất tạo ngọt an toàn cho người giảm cân.',
-        [{ text: 'Đóng', style: 'cancel' }]
-      );
+      showAlert({
+        title: 'Kiểm soát đường trong chế độ ăn',
+        message:
+          'Cẩm nang kiểm soát đường trong chế độ ăn: Nhận diện đường tinh luyện và đường tự nhiên, các chất tạo ngọt an toàn cho người giảm cân.',
+        variant: 'info',
+      });
     }
   };
 

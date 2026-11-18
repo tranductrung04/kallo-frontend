@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
 import {
-  Alert,
   Image,
   Modal,
   ScrollView,
@@ -11,12 +10,15 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useAlert } from '@/components/common';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '@/navigation/types';
 import {
+  ChevronDownIcon,
   ChevronLeftIcon,
+  ChevronUpIcon,
   CloseXIcon,
   DropletIcon,
   LightningIcon,
@@ -49,6 +51,7 @@ export function CreateRecipeScreen({ navigation, route }: Props) {
   const { colors } = theme;
   const insets = useSafeAreaInsets();
   const { foods, saveCustomFood } = useNutrition();
+  const { showAlert } = useAlert();
 
   const [recipeName, setRecipeName] = useState('');
   const [imageUri, setImageUri] = useState<string | null>(null);
@@ -87,7 +90,7 @@ export function CreateRecipeScreen({ navigation, route }: Props) {
         setImageUri(result.assets[0].uri);
       }
     } catch {
-      Alert.alert('Lỗi', 'Không thể chọn ảnh từ thiết bị.');
+      showAlert({ title: 'Lỗi', message: 'Không thể chọn ảnh từ thiết bị.', variant: 'error' });
     }
   };
 
@@ -130,7 +133,7 @@ export function CreateRecipeScreen({ navigation, route }: Props) {
   // Handle adding an ingredient
   const handleConfirmAddIngredient = () => {
     if (!ingName.trim()) {
-      Alert.alert('Thiếu thông tin', 'Vui lòng nhập tên nguyên liệu.');
+      showAlert({ title: 'Thiếu thông tin', message: 'Vui lòng nhập tên nguyên liệu.', variant: 'warning' });
       return;
     }
     const grams = parseFloat(ingGrams) || 100;
@@ -203,7 +206,7 @@ export function CreateRecipeScreen({ navigation, route }: Props) {
   // Save recipe
   const handleSaveRecipe = () => {
     if (!recipeName.trim()) {
-      Alert.alert('Chưa nhập tên món', 'Vui lòng nhập tên món ăn cho công thức.');
+      showAlert({ title: 'Chưa nhập tên món', message: 'Vui lòng nhập tên món ăn cho công thức.', variant: 'warning' });
       return;
     }
 
@@ -219,23 +222,26 @@ export function CreateRecipeScreen({ navigation, route }: Props) {
       allergens: [],
     });
 
-    Alert.alert('Thành công', `Đã lưu công thức "${recipeName.trim()}"!`, [
-      {
-        text: 'Xem chi tiết',
-        onPress: () => {
-          navigation.replace('FoodDetail', {
-            foodId: newFoodId,
-            date: route.params.date,
-            meal: route.params.meal,
-            source: 'CUSTOM',
-          });
+    showAlert({
+      title: 'Thành công',
+      message: `Đã lưu công thức "${recipeName.trim()}"!`,
+      variant: 'success',
+      buttons: [
+        {
+          text: 'Xem chi tiết',
+          variant: 'primary',
+          onPress: () => {
+            navigation.replace('FoodDetail', {
+              foodId: newFoodId,
+              date: route.params.date,
+              meal: route.params.meal,
+              source: 'CUSTOM',
+            });
+          },
         },
-      },
-      {
-        text: 'Đóng',
-        onPress: () => navigation.goBack(),
-      },
-    ]);
+        { text: 'Đóng', variant: 'secondary' },
+      ],
+    });
   };
 
   const canSave = recipeName.trim().length > 0;
@@ -465,9 +471,11 @@ export function CreateRecipeScreen({ navigation, route }: Props) {
             <Text style={[styles.detailsToggleText, { color: primaryBrand }]}>
               Hiển thị giá trị dinh dưỡng
             </Text>
-            <Text style={[styles.detailsToggleChevron, { color: primaryBrand }]}>
-              {showNutritionDetails ? '∧' : '∨'}
-            </Text>
+            {showNutritionDetails ? (
+              <ChevronUpIcon size={18} color={primaryBrand} />
+            ) : (
+              <ChevronDownIcon size={18} color={primaryBrand} />
+            )}
           </TouchableOpacity>
 
           {/* Expanded extra nutrients */}
@@ -1244,10 +1252,6 @@ const styles = StyleSheet.create({
   detailsToggleText: {
     fontSize: 14.5,
     fontWeight: '600',
-  },
-  detailsToggleChevron: {
-    fontSize: 13,
-    fontWeight: '700',
   },
   expandedNutrientCard: {
     borderRadius: 12,

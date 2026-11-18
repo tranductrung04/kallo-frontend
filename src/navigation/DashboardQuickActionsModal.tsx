@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  Alert,
   Animated,
   BackHandler,
   Pressable,
@@ -17,17 +16,17 @@ import type { MealSlot } from '@/features/nutrition/types';
 import { useNutrition } from '@/features/nutrition/NutritionProvider';
 import { todayKey } from '@/features/nutrition/utils';
 import { useTheme } from '@/theme';
-import { TILE_CONFIG } from '@/components/common';
+import { TILE_CONFIG, useAlert } from '@/components/common';
 import {
   AppleScanIcon,
   BodyStickFigureIcon,
-  BowlFoodPlusIcon,
+  BookPlusIcon,
   FlameIcon,
   QuickBarcodeIcon,
   QuickSearchIcon,
   QuickSparklesIcon,
   QuickVoiceIcon,
-  RecipeBookPlusIcon,
+  SaladIcon,
   ScaleIcon,
   WaterGlassPlusIcon,
 } from '@/components/icons';
@@ -52,6 +51,7 @@ export function DashboardQuickActionsModal({
 
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { state, addWater } = useNutrition();
+  const { showAlert } = useAlert();
 
   const selectedDate = propDate || state.selectedDate || todayKey();
 
@@ -150,7 +150,11 @@ export function DashboardQuickActionsModal({
   const handleAddWater = () => {
     onClose();
     addWater(selectedDate, 250);
-    Alert.alert('Đã ghi nhận', 'Đã thêm 250ml nước vào nhật ký hôm nay.');
+    showAlert({
+      title: 'Đã ghi nhận',
+      message: 'Đã thêm 250ml nước vào nhật ký hôm nay.',
+      variant: 'success',
+    });
   };
 
   const handleRecipeSuggestion = () => {
@@ -186,7 +190,7 @@ export function DashboardQuickActionsModal({
 
   const handleBodyMetric = () => {
     onClose();
-    navigation.navigate('BodyMetric');
+    navigation.navigate('HealthMetrics', { date: selectedDate });
   };
 
   // Interpolated animations
@@ -479,7 +483,6 @@ export function DashboardQuickActionsModal({
               <ScaleIcon
                 size={22}
                 color={colors.textPrimary}
-                innerColor={cardBg}
               />
               <Text
                 style={[
@@ -507,7 +510,7 @@ export function DashboardQuickActionsModal({
               onPress={handleCreateRecipe}
               accessibilityLabel="Tạo công thức"
             >
-              <RecipeBookPlusIcon
+              <BookPlusIcon
                 size={22}
                 color={colors.textPrimary}
               />
@@ -534,7 +537,7 @@ export function DashboardQuickActionsModal({
               onPress={handleCreateFood}
               accessibilityLabel="Tạo thực phẩm"
             >
-              <BowlFoodPlusIcon
+              <SaladIcon
                 size={22}
                 color={colors.textPrimary}
               />

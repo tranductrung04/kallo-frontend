@@ -1,12 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import {
-  Alert,
   ScrollView,
   StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useAlert } from '@/components/common';
 import type { MainTabParamList, RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
 import { useNutrition } from '../NutritionProvider';
@@ -34,6 +34,7 @@ export function FoodDiaryScreen({ navigation }: Props) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const root = navigation.getParent() as RootNavigation | undefined;
+  const { showAlert } = useAlert();
   const {
     state,
     foods,
@@ -72,29 +73,34 @@ export function FoodDiaryScreen({ navigation }: Props) {
 
   // Customize hours handler
   const handleCustomizeHours = () => {
-    Alert.alert(
-      'Tuỳ chỉnh khung giờ hiển thị',
-      'Chọn khoảng thời gian theo dõi nhật ký trong ngày:',
-      [
+    showAlert({
+      title: 'Tuỳ chỉnh khung giờ hiển thị',
+      message: 'Chọn khoảng thời gian theo dõi nhật ký trong ngày:',
+      variant: 'info',
+      buttons: [
         {
           text: '07:00 - 23:00 (Mặc định)',
+          variant: 'primary',
           onPress: () => setHourRange({ start: 7, end: 23 }),
         },
         {
           text: '06:00 - 24:00 (Cả ngày)',
+          variant: 'outline',
           onPress: () => setHourRange({ start: 6, end: 24 }),
         },
         {
           text: '08:00 - 22:00 (Gọn gàng)',
+          variant: 'outline',
           onPress: () => setHourRange({ start: 8, end: 22 }),
         },
         {
           text: '06:00 - 18:00 (Nhịn ăn 16:8)',
+          variant: 'outline',
           onPress: () => setHourRange({ start: 6, end: 18 }),
         },
-        { text: 'Hủy', style: 'cancel' },
-      ]
-    );
+        { text: 'Hủy', variant: 'secondary' },
+      ],
+    });
   };
 
   // Base timeline hours list
@@ -249,7 +255,11 @@ export function FoodDiaryScreen({ navigation }: Props) {
         onCopyYesterday={(meal: MealSlot) => {
           copyMeal(offsetDate(date, -1), date, meal);
           setSelectedHourForAdd(null);
-          Alert.alert('Thành công', 'Đã sao chép bữa ăn từ hôm qua.');
+          showAlert({
+            title: 'Thành công',
+            message: 'Đã sao chép bữa ăn từ hôm qua.',
+            variant: 'success',
+          });
         }}
       />
 
@@ -327,7 +337,11 @@ export function FoodDiaryScreen({ navigation }: Props) {
         onAddWeight={(newWeight) => {
           addWeight(date, newWeight);
           setWeightPromptVisible(false);
-          Alert.alert('Thành công', `Đã cập nhật cân nặng: ${newWeight} kg`);
+          showAlert({
+            title: 'Thành công',
+            message: `Đã cập nhật cân nặng: ${newWeight} kg`,
+            variant: 'success',
+          });
         }}
         onClose={() => setWeightPromptVisible(false)}
       />

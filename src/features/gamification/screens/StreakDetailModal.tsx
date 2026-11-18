@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
 import {
-  Alert,
   Image,
   ScrollView,
   StatusBar,
@@ -13,6 +12,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { images } from '@/assets/images';
 import { ChevronLeftIcon, InfoIcon } from '@/components/icons';
+import { useAlert } from '@/components/common';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
 import { useGamification } from '../GamificationProvider';
@@ -35,6 +35,7 @@ export function StreakDetailModal({ navigation }: Props) {
   const [heroHeight, setHeroHeight] = useState<number>(0);
   const [isRulesVisible, setIsRulesVisible] = useState(false);
   const { streak, freezeStreak } = useGamification();
+  const { showAlert, showConfirm } = useAlert();
 
   // Danh sách các ngày trong tuần (T2 -> CN)
   const weekDays = useMemo(
@@ -65,37 +66,39 @@ export function StreakDetailModal({ navigation }: Props) {
 
   const handleShieldPress = () => {
     if (streak.isFrozenToday) {
-      Alert.alert(
-        'Khiên Kallo đang bật',
-        'Chuỗi Streak của bạn hôm nay đã được bảo vệ an toàn!'
-      );
+      showAlert({
+        title: 'Khiên Kallo đang bật',
+        message: 'Chuỗi Streak của bạn hôm nay đã được bảo vệ an toàn!',
+        variant: 'info',
+      });
       return;
     }
 
     if (streak.freezeDaysRemaining <= 0) {
-      Alert.alert(
-        'Hết Khiên Kallo',
-        'Bạn đã sử dụng hết lượt khiên bảo vệ chuỗi.'
-      );
+      showAlert({
+        title: 'Hết Khiên Kallo',
+        message: 'Bạn đã sử dụng hết lượt khiên bảo vệ chuỗi.',
+        variant: 'warning',
+      });
       return;
     }
 
-    Alert.alert(
-      'Kích hoạt Khiên Kallo',
-      `Bạn còn ${streak.freezeDaysRemaining} lượt khiên. Kích hoạt để bảo vệ chuỗi hôm nay ngay cả khi bạn chưa kịp ghi món?`,
-      [
-        { text: 'Hủy', style: 'cancel' },
-        {
-          text: 'Kích hoạt ngay',
-          onPress: () => {
-            const ok = freezeStreak();
-            if (ok) {
-              Alert.alert('Thành công', 'Chuỗi của bạn hôm nay đã được bảo vệ!');
-            }
-          },
-        },
-      ]
-    );
+    showConfirm({
+      title: 'Kích hoạt Khiên Kallo',
+      message: `Bạn còn ${streak.freezeDaysRemaining} lượt khiên. Kích hoạt để bảo vệ chuỗi hôm nay ngay cả khi bạn chưa kịp ghi món?`,
+      confirmText: 'Kích hoạt ngay',
+      cancelText: 'Hủy',
+      onConfirm: () => {
+        const ok = freezeStreak();
+        if (ok) {
+          showAlert({
+            title: 'Thành công',
+            message: 'Chuỗi của bạn hôm nay đã được bảo vệ!',
+            variant: 'success',
+          });
+        }
+      },
+    });
   };
 
   return (

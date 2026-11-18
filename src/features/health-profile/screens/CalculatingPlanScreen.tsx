@@ -470,21 +470,21 @@ export function CalculatingPlanScreen({
                   styles.dot,
                   idx === activeIndex
                     ? [
-                        styles.activeDot,
-                        {
-                          backgroundColor: isDark
-                            ? '#FFFFFF'
-                            : theme.colors.brandPrimary,
-                        },
-                      ]
+                      styles.activeDot,
+                      {
+                        backgroundColor: isDark
+                          ? '#FFFFFF'
+                          : theme.colors.brandPrimary,
+                      },
+                    ]
                     : [
-                        styles.inactiveDot,
-                        {
-                          backgroundColor: isDark
-                            ? 'rgba(255, 255, 255, 0.25)'
-                            : theme.colors.surfaceBorder,
-                        },
-                      ],
+                      styles.inactiveDot,
+                      {
+                        backgroundColor: isDark
+                          ? 'rgba(255, 255, 255, 0.25)'
+                          : theme.colors.surfaceBorder,
+                      },
+                    ],
                 ]}
               />
             ))}

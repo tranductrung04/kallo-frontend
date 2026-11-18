@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
 import {
-  Alert,
   Image,
   Modal,
   PanResponder,
@@ -15,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BookIcon, CloseXIcon } from '@/components/icons';
 import { images } from '@/assets/images';
 import { useTheme } from '@/theme';
+import { useAlert } from '@/components/common';
 
 export type FatGuideModalProps = {
   visible: boolean;
@@ -26,6 +26,7 @@ export function FatGuideModal({ visible, onClose, onOpenArticle }: FatGuideModal
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const isDark = theme.scheme === 'dark';
+  const { showAlert } = useAlert();
 
   // Cho phép vuốt kéo xuống ở thanh tiêu đề trên để đóng modal
   const headerPanResponder = useRef(
@@ -51,11 +52,12 @@ export function FatGuideModal({ visible, onClose, onOpenArticle }: FatGuideModal
     if (onOpenArticle) {
       onOpenArticle();
     } else {
-      Alert.alert(
-        'Bí quyết cân đối chất béo',
-        'Bí quyết cân đối chất béo mỗi ngày: Lựa chọn chất béo không bão hòa đơn và đa, hạn chế chất béo chuyển hóa (trans fat) để bảo vệ tim mạch.',
-        [{ text: 'Đóng', style: 'cancel' }]
-      );
+      showAlert({
+        title: 'Bí quyết cân đối chất béo',
+        message:
+          'Bí quyết cân đối chất béo mỗi ngày: Lựa chọn chất béo không bão hòa đơn và đa, hạn chế chất béo chuyển hóa (trans fat) để bảo vệ tim mạch.',
+        variant: 'info',
+      });
     }
   };
 

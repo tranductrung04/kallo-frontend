@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { Image, SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { images } from '@/assets/images';
-import { AppButton, AppCard, AppInput, AppText, CircularProgress, EmptyStateView, LoadingOverlay, ProgressBar, StatusBanner } from '@/components/common';
+import { AppAlert, AppButton, AppCard, AppInput, AppText, CircularProgress, EmptyStateView, LoadingOverlay, ProgressBar, StatusBanner, useAlert } from '@/components/common';
 import { useTheme } from '@/theme';
 
 export function ComponentShowcaseScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(false);
+  const { showAlert, showConfirm } = useAlert();
   const swatches = [
     ['Action', theme.colors.brandAction],
     ['Primary', theme.colors.brandPrimary],
@@ -24,6 +25,81 @@ export function ComponentShowcaseScreen() {
   return <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.background }]}><ScrollView contentContainerStyle={[styles.content, { paddingBottom: 20 + insets.bottom }]}><View style={styles.header}><View style={styles.flex}><AppText variant="title">Component Showcase</AppText><AppText color={theme.colors.textMuted}>Bộ UI Kit Nocturne & Daylight</AppText></View><AppButton label={theme.scheme === 'dark' ? 'Sáng' : 'Tối'} variant="outline" onPress={theme.toggleScheme} accessibilityLabel="Đổi chế độ sáng tối" /></View>
     <Section title="Màu thương hiệu & Trạng thái"><View style={styles.swatches}>{swatches.map(([name, color]) => <View key={name} style={styles.swatch}><View style={[styles.color, { backgroundColor: color }]} /><AppText variant="caption">{name}</AppText></View>)}</View></Section>
     <Section title="Status Banners (Cảnh báo)"><StatusBanner type="warning" title="Cảnh báo thâm hụt calo" message="Mục tiêu calo hàng ngày thấp hơn BMR khuyến nghị." /><StatusBanner type="danger" title="Phát hiện chất gây dị ứng" message="Món ăn chứa đậu phộng, trùng với danh mục dị ứng của bạn." /></Section>
+    <Section title="AppAlert (Alert Đa Trạng Thái Dùng Chung)">
+      <AppAlert
+        variant="success"
+        title="Ghi nhận thành công"
+        message="Đã thêm 250ml nước vào nhật ký hôm nay."
+        closable
+      />
+      <AppAlert
+        variant="info"
+        title="Gợi ý thực đơn"
+        message="Thực đơn giàu Protein giúp bạn phục hồi cơ bắp tốt hơn."
+        action={{ label: 'Xem gợi ý', onPress: () => undefined }}
+      />
+      <AppAlert
+        variant="warning"
+        styleType="leftAccent"
+        title="Cảnh báo thâm hụt calo"
+        message="Mục tiêu calo hàng ngày thấp hơn BMR khuyến nghị."
+        closable
+      />
+      <AppAlert
+        variant="error"
+        styleType="outline"
+        title="Phát hiện chất gây dị ứng"
+        message="Món ăn chứa đậu phộng, trùng với danh mục dị ứng của bạn."
+        action={{ label: 'Thay thế món', onPress: () => undefined }}
+      />
+    </Section>
+    <Section title="AlertModal & Confirm Dialog (useAlert)">
+      <View style={styles.row}>
+        <AppButton
+          label="Alert Thành Công"
+          onPress={() =>
+            showAlert({
+              variant: 'success',
+              title: 'Ghi nhận thành công',
+              message: 'Đã lưu món Phở Bò (450g) vào bữa sáng.',
+            })
+          }
+        />
+        <AppButton
+          label="Alert Cảnh Báo"
+          variant="secondary"
+          onPress={() =>
+            showAlert({
+              variant: 'warning',
+              title: 'Cảnh báo calo',
+              message: 'Bữa ăn này vượt quá 60% tổng lượng calo khuyến nghị trong ngày.',
+            })
+          }
+        />
+      </View>
+      <View style={styles.row}>
+        <AppButton
+          label="Confirm Xóa Món (Destructive)"
+          variant="outline"
+          onPress={() =>
+            showConfirm({
+              title: 'Xóa món ăn',
+              message: 'Bạn có chắc chắn muốn xóa món này khỏi nhật ký hôm nay không?',
+              destructive: true,
+              confirmText: 'Xóa ngay',
+              cancelText: 'Giữ lại',
+              onConfirm: () => {
+                showAlert({
+                  variant: 'success',
+                  title: 'Đã xóa',
+                  message: 'Món ăn đã được xóa khỏi nhật ký.',
+                });
+              },
+            })
+          }
+        />
+      </View>
+    </Section>
     <Section title="Typography"><AppText variant="display">Display 32</AppText><AppText variant="title">Title 24</AppText><AppText variant="heading">Heading 18</AppText><AppText>Body hỗ trợ tiếng Việt có dấu</AppText><AppText variant="caption" color={theme.colors.textMuted}>Caption / số 123.456</AppText></Section>
     <Section title="Buttons"><View style={styles.row}><AppButton label="Primary" onPress={() => undefined} /><AppButton label="Secondary" variant="secondary" onPress={() => undefined} /></View><View style={styles.row}><AppButton label="Outline" variant="outline" onPress={() => undefined} /><AppButton label="Ghost" variant="ghost" onPress={() => undefined} /></View><AppButton label="Đang tải" loading onPress={() => undefined} /></Section>
     <Section title="Input"><AppInput label="Email" placeholder="you@example.com" keyboardType="email-address" /><AppInput label="Mật khẩu" placeholder="Nhập mật khẩu" secureTextEntry /><AppInput label="Ví dụ lỗi" value="sai dữ liệu" error="Email không đúng định dạng" onChangeText={() => undefined} /></Section>
