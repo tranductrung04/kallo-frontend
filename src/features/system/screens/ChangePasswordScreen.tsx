@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -10,7 +9,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AppButton, AppCard, AppInput, AppText } from '@/components/common';
+import { AppAlert, AppButton, AppCard, AppInput, AppText, useAlert } from '@/components/common';
 import {
   CheckIcon,
   CircleAlertIcon,
@@ -27,6 +26,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'ChangePassword'>;
 export function ChangePasswordScreen({ navigation }: Props) {
   const theme = useTheme();
   const isDark = theme.scheme === 'dark';
+  const { showAlert } = useAlert();
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -76,22 +76,24 @@ export function ChangePasswordScreen({ navigation }: Props) {
 
     try {
       await changePassword(currentPassword, newPassword);
-      Alert.alert(
-        'Đổi mật khẩu thành công',
-        'Mật khẩu của bạn đã được cập nhật thành công.',
-        [{ text: 'Đóng', onPress: () => navigation.goBack() }]
-      );
+      showAlert({
+        title: 'Đổi mật khẩu thành công',
+        message: 'Mật khẩu của bạn đã được cập nhật thành công.',
+        variant: 'success',
+        buttons: [{ text: 'Đóng', onPress: () => navigation.goBack() }],
+      });
     } catch (err: unknown) {
       const isLocalSession = (await AsyncStorage.getItem(LOCAL_SESSION_KEY)) === 'true';
       const statusCode = (err as { response?: { status?: number } })?.response?.status;
 
       // In local demo or offline mode when backend is unavailable
       if (!statusCode && isLocalSession) {
-        Alert.alert(
-          'Đổi mật khẩu thành công',
-          'Mật khẩu của bạn đã được cập nhật thành công.',
-          [{ text: 'Đóng', onPress: () => navigation.goBack() }]
-        );
+        showAlert({
+          title: 'Đổi mật khẩu thành công',
+          message: 'Mật khẩu của bạn đã được cập nhật thành công.',
+          variant: 'success',
+          buttons: [{ text: 'Đóng', onPress: () => navigation.goBack() }],
+        });
         return;
       }
 
@@ -134,20 +136,13 @@ export function ChangePasswordScreen({ navigation }: Props) {
 
           {/* ── Error Banner ────────────────────────────────────────────── */}
           {errorMessage ? (
-            <View
-              style={[
-                styles.errorBanner,
-                {
-                  backgroundColor: isDark ? 'rgba(239, 68, 68, 0.12)' : '#FEE2E2',
-                  borderColor: isDark ? 'rgba(239, 68, 68, 0.35)' : '#FCA5A5',
-                },
-              ]}
-            >
-              <CircleAlertIcon size={18} color={theme.colors.macroProtein} />
-              <AppText variant="bodySm" color={theme.colors.macroProtein} style={styles.errorText}>
-                {errorMessage}
-              </AppText>
-            </View>
+            <AppAlert
+              variant="error"
+              message={errorMessage}
+              closable
+              onClose={() => setErrorMessage(null)}
+              style={{ marginBottom: 16 }}
+            />
           ) : null}
 
           {/* ── Password Inputs Card ────────────────────────────────────── */}

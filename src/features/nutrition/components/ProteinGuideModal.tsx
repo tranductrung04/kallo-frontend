@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
 import {
-  Alert,
   Image,
   Modal,
   PanResponder,
@@ -15,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BookIcon, CloseXIcon } from '@/components/icons';
 import { images } from '@/assets/images';
 import { useTheme } from '@/theme';
+import { useAlert } from '@/components/common';
 
 export type ProteinGuideModalProps = {
   visible: boolean;
@@ -26,6 +26,7 @@ export function ProteinGuideModal({ visible, onClose, onOpenArticle }: ProteinGu
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const isDark = theme.scheme === 'dark';
+  const { showAlert } = useAlert();
 
   // Cho phép vuốt kéo xuống ở thanh tiêu đề trên để đóng modal
   const headerPanResponder = useRef(
@@ -51,11 +52,12 @@ export function ProteinGuideModal({ visible, onClose, onOpenArticle }: ProteinGu
     if (onOpenArticle) {
       onOpenArticle();
     } else {
-      Alert.alert(
-        'Cẩm nang protein',
-        'Ăn đúng đủ và hiệu quả mỗi ngày: Tìm hiểu các nguồn đạm dồi dào dinh dưỡng, thời điểm nạp đạm tốt nhất và cách kết hợp tối ưu cho cơ thể.',
-        [{ text: 'Đóng', style: 'cancel' }]
-      );
+      showAlert({
+        title: 'Cẩm nang protein',
+        message:
+          'Ăn đúng đủ và hiệu quả mỗi ngày: Tìm hiểu các nguồn đạm dồi dào dinh dưỡng, thời điểm nạp đạm tốt nhất và cách kết hợp tối ưu cho cơ thể.',
+        variant: 'info',
+      });
     }
   };
 

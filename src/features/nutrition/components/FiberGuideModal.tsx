@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
 import {
-  Alert,
   Image,
   Modal,
   PanResponder,
@@ -15,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BookIcon, CloseXIcon } from '@/components/icons';
 import { images } from '@/assets/images';
 import { useTheme } from '@/theme';
+import { useAlert } from '@/components/common';
 
 export type FiberGuideModalProps = {
   visible: boolean;
@@ -26,6 +26,7 @@ export function FiberGuideModal({ visible, onClose, onOpenArticle }: FiberGuideM
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const isDark = theme.scheme === 'dark';
+  const { showAlert } = useAlert();
 
   // Cho phép vuốt kéo xuống ở thanh tiêu đề trên để đóng modal
   const headerPanResponder = useRef(
@@ -51,11 +52,12 @@ export function FiberGuideModal({ visible, onClose, onOpenArticle }: FiberGuideM
     if (onOpenArticle) {
       onOpenArticle();
     } else {
-      Alert.alert(
-        'Tiêu hoá khỏe với chất xơ',
-        'Cách ăn đủ chất xơ để tiêu hoá khỏe mỗi ngày: Phân biệt chất xơ hòa tan và không hòa tan, cách tăng lượng rau củ vào từng bữa ăn mà không gây đầy bụng.',
-        [{ text: 'Đóng', style: 'cancel' }]
-      );
+      showAlert({
+        title: 'Tiêu hoá khỏe với chất xơ',
+        message:
+          'Cách ăn đủ chất xơ để tiêu hoá khỏe mỗi ngày: Phân biệt chất xơ hòa tan và không hòa tan, cách tăng lượng rau củ vào từng bữa ăn mà không gây đầy bụng.',
+        variant: 'info',
+      });
     }
   };
 

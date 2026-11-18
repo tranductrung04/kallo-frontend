@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Alert,
   Image,
   Modal,
   StatusBar,
@@ -14,7 +13,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { images } from '@/assets/images';
-import { AppButton, AppCard, AppText } from '@/components/common';
+import { AppButton, AppCard, AppText, useAlert } from '@/components/common';
 import { ChevronLeftIcon, InfoIcon, QuickVoiceIcon, SquareIcon } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
@@ -58,6 +57,7 @@ export function VoiceLogModal({ navigation, route }: Props) {
   const insets = useSafeAreaInsets();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const { addFoodLog } = useNutrition();
+  const { showAlert } = useAlert();
 
   // Background gradient banner height: proportional to width, accounts for safe area insets
   const heroBgHeight = Math.max(
@@ -132,11 +132,12 @@ export function VoiceLogModal({ navigation, route }: Props) {
       },
     });
 
-    Alert.alert(
-      'Ghi nhận thành công!',
-      `Đã thêm ${currentResult.foodName} (${currentResult.grams}g - ${currentResult.calories} kcal) vào nhật ký.`,
-      [{ text: 'Đóng', onPress: () => navigation.goBack() }]
-    );
+    showAlert({
+      title: 'Ghi nhận thành công!',
+      message: `Đã thêm ${currentResult.foodName} (${currentResult.grams}g - ${currentResult.calories} kcal) vào nhật ký.`,
+      variant: 'success',
+      buttons: [{ text: 'Đóng', onPress: () => navigation.goBack() }],
+    });
   };
 
   return (

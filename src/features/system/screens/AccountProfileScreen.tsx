@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Image,
   Modal,
   ScrollView,
@@ -15,7 +14,7 @@ import Svg, { Circle } from 'react-native-svg';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { images } from '@/assets/images';
-import { AppButton, AppCard, AppInput, AppSwitch, AppText } from '@/components/common';
+import { AppButton, AppCard, AppInput, AppSwitch, AppText, useAlert } from '@/components/common';
 import {
   BellIcon,
   CalendarIcon,
@@ -64,6 +63,7 @@ export function AccountProfileScreen({ navigation }: Props) {
   const { signOut, user, refreshUser, isDemoMode } = useAuth();
   const { state: nutritionState } = useNutrition();
   const { isOnline, pendingCount, syncNow, toggleOnlineStatus } = useOfflineSync();
+  const { showAlert, showConfirm } = useAlert();
   const root = navigation.getParent() as RootNavigation | undefined;
 
   useEffect(() => {
@@ -134,10 +134,18 @@ export function AccountProfileScreen({ navigation }: Props) {
         const asset = result.assets[0];
         await updateAvatar(asset.uri, asset.mimeType || 'image/jpeg');
         await refreshUser();
-        Alert.alert('Thành công', 'Đã cập nhật ảnh đại diện mới.');
+        showAlert({
+          title: 'Thành công',
+          message: 'Đã cập nhật ảnh đại diện mới.',
+          variant: 'success',
+        });
       }
     } catch (err) {
-      Alert.alert('Lỗi tải ảnh', getApiErrorMessage(err));
+      showAlert({
+        title: 'Lỗi tải ảnh',
+        message: getApiErrorMessage(err),
+        variant: 'error',
+      });
     } finally {
       setAvatarLoading(false);
     }
@@ -149,9 +157,17 @@ export function AccountProfileScreen({ navigation }: Props) {
       await updateMe(editDisplayName.trim(), user?.timezone || 'Asia/Ho_Chi_Minh');
       await refreshUser();
       setShowEditNameModal(false);
-      Alert.alert('Thành công', 'Đã cập nhật tên hiển thị.');
+      showAlert({
+        title: 'Thành công',
+        message: 'Đã cập nhật tên hiển thị.',
+        variant: 'success',
+      });
     } catch (err) {
-      Alert.alert('Lỗi cập nhật', getApiErrorMessage(err));
+      showAlert({
+        title: 'Lỗi cập nhật',
+        message: getApiErrorMessage(err),
+        variant: 'error',
+      });
     }
   };
 
@@ -166,7 +182,11 @@ export function AccountProfileScreen({ navigation }: Props) {
       await deleteAccount(deletePassword.trim());
       setShowDeleteModal(false);
       await signOut();
-      Alert.alert('Đã xóa tài khoản', 'Tài khoản của bạn đã được xóa thành công khỏi hệ thống Kallo.');
+      showAlert({
+        title: 'Đã xóa tài khoản',
+        message: 'Tài khoản của bạn đã được xóa thành công khỏi hệ thống Kallo.',
+        variant: 'success',
+      });
     } catch (err) {
       setDeleteError(getApiErrorMessage(err));
     } finally {
@@ -183,11 +203,19 @@ export function AccountProfileScreen({ navigation }: Props) {
 
   const handleSaveGoals = () => {
     if (proteinPercent + carbsPercent + fatPercent !== 100) {
-      Alert.alert('Chưa cân bằng tỷ lệ', 'Tổng tỷ lệ % của Đạm, Carb và Béo phải bằng đúng 100%.');
+      showAlert({
+        title: 'Chưa cân bằng tỷ lệ',
+        message: 'Tổng tỷ lệ % của Đạm, Carb và Béo phải bằng đúng 100%.',
+        variant: 'warning',
+      });
       return;
     }
     setShowCustomizeGoalsModal(false);
-    Alert.alert('Cập nhật thành công!', 'Mục tiêu dinh dưỡng của bạn đã được cập nhật.');
+    showAlert({
+      title: 'Cập nhật thành công!',
+      message: 'Mục tiêu dinh dưỡng của bạn đã được cập nhật.',
+      variant: 'success',
+    });
   };
 
   return (
@@ -273,10 +301,12 @@ export function AccountProfileScreen({ navigation }: Props) {
               activeOpacity={0.85}
               style={styles.vipBannerButton}
               onPress={() =>
-                Alert.alert(
-                  'Kallo Premium VIP',
-                  'Kích hoạt 14 ngày dùng thử miễn phí toàn bộ tính năng: Quét AI không giới hạn, phân tích thực đơn chuyên sâu và mở khóa toàn bộ huy hiệu!'
-                )
+                showAlert({
+                  variant: 'info',
+                  title: 'Kallo Premium VIP',
+                  message:
+                    'Kích hoạt 14 ngày dùng thử miễn phí toàn bộ tính năng: Quét AI không giới hạn, phân tích thực đơn chuyên sâu và mở khóa toàn bộ huy hiệu!',
+                })
               }
             >
               <AppText variant="labelMd" style={styles.vipBannerButtonText}>
@@ -620,10 +650,12 @@ export function AccountProfileScreen({ navigation }: Props) {
             style={styles.communityBannerWrap}
             activeOpacity={0.88}
             onPress={() =>
-              Alert.alert(
-                'Cộng đồng Kallo',
-                'Đang kết nối tới nhóm Facebook và Zalo Cộng đồng Healthy Kallo Việt Nam!'
-              )
+              showAlert({
+                variant: 'info',
+                title: 'Cộng đồng Kallo',
+                message:
+                  'Đang kết nối tới nhóm Facebook và Zalo Cộng đồng Healthy Kallo Việt Nam!',
+              })
             }
             accessibilityRole="button"
             accessibilityLabel="Gia nhập cộng đồng Kallo ngay"
@@ -651,7 +683,13 @@ export function AccountProfileScreen({ navigation }: Props) {
               <TouchableOpacity
                 style={[styles.socialTile, { backgroundColor: theme.colors.surfaceHigh }]}
                 activeOpacity={0.8}
-                onPress={() => Alert.alert('Kallo TikTok', 'Theo dõi @kallo.health trên TikTok')}
+                onPress={() =>
+                  showAlert({
+                    variant: 'info',
+                    title: 'Kallo TikTok',
+                    message: 'Theo dõi @kallo.health trên TikTok',
+                  })
+                }
               >
                 <Image source={images.tiktokLogo} style={styles.socialLogoImg} resizeMode="contain" />
                 <AppText variant="caption" color={theme.colors.textPrimary}>
@@ -663,7 +701,13 @@ export function AccountProfileScreen({ navigation }: Props) {
               <TouchableOpacity
                 style={[styles.socialTile, { backgroundColor: theme.colors.surfaceHigh }]}
                 activeOpacity={0.8}
-                onPress={() => Alert.alert('Kallo Facebook', 'Theo dõi Fanpage Kallo Healthy')}
+                onPress={() =>
+                  showAlert({
+                    variant: 'info',
+                    title: 'Kallo Facebook',
+                    message: 'Theo dõi Fanpage Kallo Healthy',
+                  })
+                }
               >
                 <Image source={images.facebookLogo} style={styles.socialLogoImg} resizeMode="contain" />
                 <AppText variant="caption" color={theme.colors.textPrimary}>
@@ -675,7 +719,13 @@ export function AccountProfileScreen({ navigation }: Props) {
               <TouchableOpacity
                 style={[styles.socialTile, { backgroundColor: theme.colors.surfaceHigh }]}
                 activeOpacity={0.8}
-                onPress={() => Alert.alert('Kallo Instagram', 'Theo dõi @kallo.vietnam trên Instagram')}
+                onPress={() =>
+                  showAlert({
+                    variant: 'info',
+                    title: 'Kallo Instagram',
+                    message: 'Theo dõi @kallo.vietnam trên Instagram',
+                  })
+                }
               >
                 <Image source={images.instagramLogo} style={styles.socialLogoImg} resizeMode="contain" />
                 <AppText variant="caption" color={theme.colors.textPrimary}>
@@ -691,10 +741,12 @@ export function AccountProfileScreen({ navigation }: Props) {
               style={styles.supportCenterRow}
               activeOpacity={0.8}
               onPress={() =>
-                Alert.alert(
-                  'Trung tâm hỗ trợ Kallo',
-                  'Hotline: 1900-KALLO\nEmail: support@kallo.health\nGiờ hỗ trợ: 08:00 - 21:00 hằng ngày'
-                )
+                showAlert({
+                  variant: 'info',
+                  title: 'Trung tâm hỗ trợ Kallo',
+                  message:
+                    'Hotline: 1900-KALLO\nEmail: support@kallo.health\nGiờ hỗ trợ: 08:00 - 21:00 hằng ngày',
+                })
               }
             >
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -807,12 +859,13 @@ export function AccountProfileScreen({ navigation }: Props) {
               <TouchableOpacity
                 style={styles.settingsRowItem}
                 onPress={() => {
-                  Alert.alert(
-                    'Chế độ dữ liệu ứng dụng',
-                    isDemoMode
+                  showAlert({
+                    variant: 'info',
+                    title: 'Chế độ dữ liệu ứng dụng',
+                    message: isDemoMode
                       ? 'Ứng dụng đang chạy ở Chế độ Demo (Offline) với dữ liệu giả lập.\nĐể chuyển sang backend thật, chạy: npm run env:dev'
-                      : `Ứng dụng đang kết nối với máy chủ Backend thật:\n${API_BASE_URL}\n\nĐể chuyển sang demo, chạy: npm run env:demo`
-                  );
+                      : `Ứng dụng đang kết nối với máy chủ Backend thật:\n${API_BASE_URL}\n\nĐể chuyển sang demo, chạy: npm run env:demo`,
+                  });
                 }}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
@@ -833,7 +886,13 @@ export function AccountProfileScreen({ navigation }: Props) {
                 style={styles.settingsRowItem}
                 onPress={() => {
                   void syncNow();
-                  Alert.alert('Đồng bộ dữ liệu', isOnline ? 'Đang trực tuyến. Đã gửi các bản ghi.' : 'Đang ở chế độ ngoại tuyến.');
+                  showAlert({
+                    variant: isOnline ? 'success' : 'warning',
+                    title: 'Đồng bộ dữ liệu',
+                    message: isOnline
+                      ? 'Đang trực tuyến. Đã gửi các bản ghi.'
+                      : 'Đang ở chế độ ngoại tuyến.',
+                  });
                 }}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
@@ -867,7 +926,16 @@ export function AccountProfileScreen({ navigation }: Props) {
                 style={styles.settingsRowItem}
                 onPress={() => {
                   setShowSettingsModal(false);
-                  void signOut();
+                  showConfirm({
+                    title: 'Đăng xuất',
+                    message: 'Bạn có chắc chắn muốn đăng xuất khỏi tài khoản Kallo?',
+                    confirmText: 'Đăng xuất',
+                    cancelText: 'Ở lại',
+                    destructive: true,
+                    onConfirm: async () => {
+                      await signOut();
+                    },
+                  });
                 }}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>

@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import {
-  Alert,
   Image,
   ScrollView,
   StyleSheet,
@@ -11,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { images } from '@/assets/images';
 import { AppButton, AppCard, AppText, ProgressBar } from '@/components/common';
+import { useAlert } from '@/components/common';
 import {
   CheckIcon,
   ChevronLeftIcon,
@@ -28,6 +28,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'ChallengeDetail'>;
 export function ChallengeDetailScreen({ route, navigation }: Props) {
   const theme = useTheme();
   const { colors: c } = theme;
+  const { showAlert } = useAlert();
   const { challengeId } = route.params;
   const { getChallengeById, joinChallenge, triggerGameEvent } = useGamification();
 
@@ -57,10 +58,11 @@ export function ChallengeDetailScreen({ route, navigation }: Props) {
 
   const handleJoin = () => {
     joinChallenge(challenge.id);
-    Alert.alert(
-      'Tham gia thành công!',
-      `Bạn đã tham gia thử thách "${challenge.title}". Hãy cố gắng hoàn thành mỗi ngày nhé!`
-    );
+    showAlert({
+      title: 'Tham gia thành công!',
+      message: `Bạn đã tham gia thử thách "${challenge.title}". Hãy cố gắng hoàn thành mỗi ngày nhé!`,
+      variant: 'success',
+    });
     triggerGameEvent({
       type: 'CHALLENGE_COMPLETED',
       version: 1,

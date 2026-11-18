@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
 import {
-  Alert,
   Image,
   Modal,
   PanResponder,
@@ -15,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BookIcon, CloseXIcon } from '@/components/icons';
 import { images } from '@/assets/images';
 import { useTheme } from '@/theme';
+import { useAlert } from '@/components/common';
 
 export type CarbGuideModalProps = {
   visible: boolean;
@@ -26,6 +26,7 @@ export function CarbGuideModal({ visible, onClose, onOpenArticle }: CarbGuideMod
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const isDark = theme.scheme === 'dark';
+  const { showAlert } = useAlert();
 
   // Cho phép vuốt kéo xuống ở thanh tiêu đề trên để đóng modal
   const headerPanResponder = useRef(
@@ -51,11 +52,12 @@ export function CarbGuideModal({ visible, onClose, onOpenArticle }: CarbGuideMod
     if (onOpenArticle) {
       onOpenArticle();
     } else {
-      Alert.alert(
-        'Cẩm nang ăn đường bột',
-        'Cẩm nang ăn đường bột để duy trì sức khỏe: Cách phân biệt carb tốt (chậm) và carb xấu (nhanh), lượng carb tối ưu cho từng mục tiêu thể chất.',
-        [{ text: 'Đóng', style: 'cancel' }]
-      );
+      showAlert({
+        title: 'Cẩm nang ăn đường bột',
+        message:
+          'Cẩm nang ăn đường bột để duy trì sức khỏe: Cách phân biệt carb tốt (chậm) và carb xấu (nhanh), lượng carb tối ưu cho từng mục tiêu thể chất.',
+        variant: 'info',
+      });
     }
   };
 

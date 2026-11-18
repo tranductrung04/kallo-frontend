@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
 import {
-  Alert,
   Image,
   KeyboardAvoidingView,
   Modal,
@@ -20,6 +19,7 @@ import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import type { RootStackParamList } from '@/navigation/types';
 import { CalendarIcon, CloseXIcon, PlusIcon } from '@/components/icons';
 import { MonthCalendarModal } from '@/components/common/MonthCalendarModal';
+import { useAlert } from '@/components/common';
 import { todayKey } from '@/features/nutrition/utils';
 import { useNutrition } from '@/features/nutrition/NutritionProvider';
 
@@ -49,6 +49,7 @@ export function RecordWeightScreen({ navigation, route }: Props) {
   const theme = useTheme();
   const { colors: c } = theme;
   const { state: nutritionState, addWeight } = useNutrition();
+  const { showAlert } = useAlert();
 
   const weightLogs = nutritionState.weightLogs || [];
   const initialWeightVal =
@@ -88,11 +89,34 @@ export function RecordWeightScreen({ navigation, route }: Props) {
   };
 
   const handleAddPhoto = () => {
-    Alert.alert('Thêm ảnh chụp', 'Chọn nguồn ảnh', [
-      { text: 'Chụp ảnh mới', onPress: () => Alert.alert('Thông báo', 'Đã chụp ảnh tiến trình') },
-      { text: 'Chọn từ thư viện', onPress: () => Alert.alert('Thông báo', 'Đã chọn ảnh từ thư viện') },
-      { text: 'Hủy', style: 'cancel' },
-    ]);
+    showAlert({
+      title: 'Thêm ảnh chụp',
+      message: 'Chọn nguồn ảnh',
+      variant: 'info',
+      buttons: [
+        {
+          text: 'Chụp ảnh mới',
+          variant: 'primary',
+          onPress: () =>
+            showAlert({
+              title: 'Thông báo',
+              message: 'Đã chụp ảnh tiến trình',
+              variant: 'success',
+            }),
+        },
+        {
+          text: 'Chọn từ thư viện',
+          variant: 'outline',
+          onPress: () =>
+            showAlert({
+              title: 'Thông báo',
+              message: 'Đã chọn ảnh từ thư viện',
+              variant: 'success',
+            }),
+        },
+        { text: 'Hủy', variant: 'secondary' },
+      ],
+    });
   };
 
   const handleConfirmManualWeight = () => {
