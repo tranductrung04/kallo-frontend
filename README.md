@@ -1,72 +1,110 @@
-# Kallo Mobile — Ứng dụng Chăm sóc Sức khỏe & Dinh dưỡng Tích hợp AI
+# Kallo – Mobile App
 
-Ứng dụng di động thông minh được xây dựng bằng **React Native**, **Expo SDK 52** và **TypeScript**, đóng vai trò là tầng Frontend toàn diện cho nền tảng Kallo. Ứng dụng hỗ trợ theo dõi dinh dưỡng cá nhân hóa, nhận diện món ăn Việt Nam qua thị giác máy tính AI (YOLOv11m), lập thực đơn thông minh, đồng bộ sức khỏe đa nền tảng và hoạt động bền bỉ với kiến trúc ngoại tuyến (Offline-First).
+> Ứng dụng di động (React Native / Expo) cho **Kallo** – trợ lý chăm sóc sức khỏe và dinh dưỡng tích hợp AI: theo dõi bữa ăn, cân nặng, vận động; nhận diện món ăn Việt Nam qua ảnh và ước lượng calo.
 
----
+![Expo](https://img.shields.io/badge/Expo-SDK%2052-000020)
+![React Native](https://img.shields.io/badge/React%20Native-0.76-61DAFB)
+![React](https://img.shields.io/badge/React-18.3-149ECA)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.3-3178C6)
+![Node](https://img.shields.io/badge/Node.js-18%2B-339933)
 
 ## Mục lục
 
-- [Hướng dẫn Cài đặt & Khởi chạy](#-hướng-dẫn-cài-đặt--khởi-chạy)
-- [Tài liệu tham chiếu](#-tài-liệu-tham-chiếu)
+- [Giới thiệu](#giới-thiệu)
+- [Tính năng chính](#tính-năng-chính)
+- [Kiến trúc hệ thống](#kiến-trúc-hệ-thống)
+- [Công nghệ sử dụng](#công-nghệ-sử-dụng)
+- [Yêu cầu hệ thống](#yêu-cầu-hệ-thống)
+- [Cài đặt & chạy dự án](#cài-đặt--chạy-dự-án)
+- [Testing](#testing)
+- [Tài liệu](#tài-liệu)
+- [License](#license)
 
----
+## Giới thiệu
 
-## Hướng dẫn Cài đặt & Khởi chạy
+Kallo đóng vai trò như một trợ lý sức khỏe cá nhân, giúp người dùng theo dõi dinh dưỡng, kiểm soát cân nặng và vận động thể chất một cách tiện lợi, tự động hoá. Hệ thống tích hợp pipeline nhận diện món ăn Việt Nam (YOLO, tập dữ liệu VietFood68) và ước lượng calo, được xây dựng và triển khai độc lập, không phụ thuộc API AI bên thứ ba.
 
-### 1. Yêu cầu Môi trường
-- **Node.js:** Phiên bản $\ge 18.0.0$ (Khuyến nghị LTS).
-- **Trình quản lý gói:** `npm` (hoặc `yarn` / `pnpm`).
-- **Thiết bị chạy:** Expo Go trên điện thoại thực hoặc Trình giả lập Android Emulator / iOS Simulator.
+Các thành phần khác của hệ thống:
 
-### 2. Cài đặt Phụ thuộc
+| Thành phần         | Công nghệ                          | Repository                 |
+|--------------------|------------------------------------|----------------------------|
+| **Mobile app (repo này)**       | React Native, Expo, TypeScript     |           |
+| AI service         | Python, FastAPI, ONNX Runtime      | _(cập nhật link)_          |
+| Backend | Java, Spring Boot 4.x          | [kallo-backend](https://github.com/tranductrung04/kallo-backend)                          |
+
+## Tính năng chính
+
+- **Tài khoản & hồ sơ sức khoẻ:** đăng ký/đăng nhập (Email, Google OAuth2), khôi phục mật khẩu, thể trạng – mục tiêu cân nặng – dị ứng; tự tính BMI, TDEE, mục tiêu calo hàng ngày.
+- **Dinh dưỡng & bữa ăn:** nhật ký bữa ăn (Sáng/Trưa/Tối/Bữa phụ), nhận diện món ăn qua ảnh, tra cứu món, quét mã vạch, món ăn tuỳ chỉnh.
+- **Kế hoạch bữa ăn & trợ lý AI:** gợi ý thực đơn cá nhân hoá theo calo/dị ứng/ngân sách, chatbot tư vấn dinh dưỡng.
+- **Vận động & chỉ số cơ thể:** nhật ký tập luyện, đồng bộ Google Fit / Apple Health, lịch sử cân nặng, nước uống.
+- **Báo cáo & thống kê:** dashboard, biểu đồ calo/macro/cân nặng theo ngày/tuần/tháng, dự đoán xu hướng cân nặng.
+- **Streak & động lực:** chuỗi ngày, thử thách, huy hiệu, kết bạn, bảng xếp hạng thời gian thực (WebSocket).
+- **Tiện ích:** thông báo đẩy (FCM), nhắc nhở thông minh, hỗ trợ đồng bộ khi offline.
+
+## Kiến trúc hệ thống
+
+![System Architecture](docs/images/system-architecture.png)
+
+## Công nghệ sử dụng
+
+| Thành phần          | Công nghệ                                                         |
+| ------------------- | ----------------------------------------------------------------- |
+| Ngôn ngữ            | TypeScript 5.3                                                    |
+| Framework           | React Native 0.76, Expo SDK 52                                    |
+| UI                  | React 18.3                                                        |
+| Điều hướng          | React Navigation 7                    |
+| HTTP client         | Axios                                                             |
+| Lưu trữ cục bộ      | `@react-native-async-storage/async-storage`                       |
+| Camera & ảnh        | `expo-camera`, `expo-image-picker`, `expo-image-manipulator`      |
+| Đồ họa vector       | `react-native-svg`                                                |
+| Cử chỉ & layout     | `react-native-gesture-handler`, `react-native-screens`, `react-native-safe-area-context` |
+| Font                | Plus Jakarta Sans        |
+| Tooling             | Babel, TypeScript compiler       |
+| Quản lý gói         | npm                                                               |
+
+
+## Yêu cầu hệ thống
+
+- Node.js 18.0.0 trở lên
+- npm (hoặc yarn / pnpm)
+- Ứng dụng **Expo Go** trên điện thoại, hoặc trình giả lập Android / iOS
+- macOS nếu muốn chạy trình giả lập iOS
+
+## Cài đặt & chạy dự án
+
+### 1. Clone repository
+
+```bash
+git clone https://github.com/tranductrung04/kallo-frontend.git
+cd kallo-frontend
+```
+
+### 2. Cài đặt dependencies
+
 ```bash
 npm install
 ```
 
-### 3. Kiểm tra Tính Hợp lệ của Kiểu (TypeScript Typecheck)
+### 3. Chạy ứng dụng
+
 ```bash
-npm run typecheck
+npm run start      # mở Expo Dev Server, quét QR bằng Expo Go
+npm run android    # chạy trên Android
+npm run ios        # chạy trên iOS (cần macOS)
 ```
 
-### 4. Chạy Toàn bộ Kịch bản Kiểm thử 7 Phase
-Lệnh chạy lần lượt toàn bộ 7 bộ tự kiểm tra từ Phase 1 đến Phase 7:
+## Testing
+
 ```bash
+npm run typecheck  
 npm run self-check
 ```
-*Kết quả mẫu khi kiểm tra thành công:*
-```text
-Phase 1 self-check passed
-Phase 2 calculation source self-check passed
-Phase 3 nutrition self-check passed
-Phase 4 nutrition self-check passed
-Phase 5 activity, health sync & report self-check passed
-Phase 6 AI meal plan, assistant chat & gamification self-check passed
-Phase 7 system utilities, offline-first & UX polish self-check passed
-```
 
-### 5. Khởi động Ứng dụng
-```bash
-# Khởi động Metro Bundler
-npm run start
+## Tài liệu
 
-# Chạy trực tiếp trên thiết bị Android
-npm run android
+- [docs](/docs) - yêu cầu chức năng, thiết kế giao diện
 
-# Chạy trực tiếp trên thiết bị iOS (yêu cầu macOS)
-npm run ios
-```
+## License
 
-## Tài liệu tham chiếu
-
-- [REQUIREMENT.md](docs/REQUIREMENT.md): Tài liệu Đặc tả Yêu cầu Nghiệp vụ Phần mềm (SRS v1.1).
-- [UI_IMPLEMENTATION_PLAN.md](docs/UI_IMPLEMENTATION_PLAN.md): Lộ trình 13 tuần triển khai giao diện người dùng qua 7 Phase.
-- [DESIGN.md](docs/DESIGN.md): Hệ thống thiết kế (Design System, Typography, Colors, Iconography).
-- [ICON_MIGRATION_PLAN.md](docs/ICON_MIGRATION_PLAN.md): Kế hoạch và quy ước chuyển đổi icon sang `lucide-react-native`.
-- [Expo Documentation](https://docs.expo.dev/): Hướng dẫn sử dụng Expo SDK 52.
-- [React Navigation 7 Docs](https://reactnavigation.org/docs/getting-started): Hướng dẫn cấu trúc điều hướng React Navigation.
-
-> **Quy ước Icon:** Mọi icon chuẩn được import tập trung qua `@/components/icons` (được adapter từ `lucide-react-native` tại `src/components/icons/lucide.tsx`). Không tự vẽ SVG inline cho các icon đơn giản. Icon đặc thù/thương hiệu đặt trong `src/components/icons/custom/` hoặc `illustrations/`.
-
----
-
-© 2026 Kallo Health & Nutrition Team. Mọi quyền được bảo lưu.
+MIT. See [LICENSE](LICENSE) file.
