@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import {
-  Alert,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -8,7 +7,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AppButton, AppCard, AppText } from '@/components/common';
+import { AppButton, AppCard, AppText, useAlert } from '@/components/common';
 import {
   CheckIcon,
   ChevronLeftIcon,
@@ -29,6 +28,7 @@ export function FriendProfileScreen({ route, navigation }: Props) {
   const { colors: c } = theme;
   const { friendUserId } = route.params;
   const { getFriendById, unfriend } = useGamification();
+  const { showAlert, showConfirm } = useAlert();
 
   const friend = useMemo(() => {
     return getFriendById(friendUserId);
@@ -48,22 +48,22 @@ export function FriendProfileScreen({ route, navigation }: Props) {
   }
 
   const handleUnfriend = () => {
-    Alert.alert(
-      'Hủy kết bạn',
-      `Bạn có chắc chắn muốn hủy kết bạn với ${friend.name}? Người này sẽ không còn hiển thị trên bảng xếp hạng của bạn.`,
-      [
-        { text: 'Hủy', style: 'cancel' },
-        {
-          text: 'Đồng ý hủy',
-          style: 'destructive',
-          onPress: () => {
-            unfriend(friend.id);
-            Alert.alert('Đã hủy kết bạn', `Đã hủy kết bạn với ${friend.name}`);
-            navigation.goBack();
-          },
-        },
-      ]
-    );
+    showConfirm({
+      title: 'Hủy kết bạn',
+      message: `Bạn có chắc chắn muốn hủy kết bạn với ${friend.name}? Người này sẽ không còn hiển thị trên bảng xếp hạng của bạn.`,
+      confirmText: 'Đồng ý hủy',
+      cancelText: 'Hủy',
+      destructive: true,
+      onConfirm: () => {
+        unfriend(friend.id);
+        showAlert({
+          title: 'Đã hủy kết bạn',
+          message: `Đã hủy kết bạn với ${friend.name}`,
+          variant: 'info',
+        });
+        navigation.goBack();
+      },
+    });
   };
 
   return (

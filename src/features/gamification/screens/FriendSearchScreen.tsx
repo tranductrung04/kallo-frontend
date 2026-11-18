@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Alert,
   FlatList,
   Share,
   StyleSheet,
@@ -10,7 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AppButton, AppCard, AppText } from '@/components/common';
+import { AppButton, AppCard, AppText, useAlert } from '@/components/common';
 import {
   CheckIcon,
   ChevronLeftIcon,
@@ -37,6 +36,7 @@ export function FriendSearchScreen({ navigation }: Props) {
     respondFriendRequest,
     incomingRequests,
   } = useGamification();
+  const { showAlert } = useAlert();
 
   const [query, setQuery] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
@@ -57,7 +57,11 @@ export function FriendSearchScreen({ navigation }: Props) {
   const handleSend = (user: UserSearchResult) => {
     const res = sendFriendRequestToUser(user.displayName);
     if (res.success) {
-      Alert.alert('Thành công', res.message);
+      showAlert({
+        variant: 'success',
+        title: 'Thành công',
+        message: res.message,
+      });
       // Update relationship in local list
       setResults((prev) =>
         prev.map((u) =>
@@ -65,7 +69,11 @@ export function FriendSearchScreen({ navigation }: Props) {
         )
       );
     } else {
-      Alert.alert('Thông báo', res.message);
+      showAlert({
+        variant: 'warning',
+        title: 'Thông báo',
+        message: res.message,
+      });
     }
   };
 
@@ -73,7 +81,11 @@ export function FriendSearchScreen({ navigation }: Props) {
     const req = incomingRequests.find((r) => r.user.displayName === user.displayName);
     if (req) {
       respondFriendRequest(req.id, 'ACCEPT');
-      Alert.alert('Đã kết bạn', `Bạn và ${user.displayName} đã trở thành bạn bè!`);
+      showAlert({
+        variant: 'success',
+        title: 'Đã kết bạn',
+        message: `Bạn và ${user.displayName} đã trở thành bạn bè!`,
+      });
       setResults((prev) =>
         prev.map((u) =>
           u.id === user.id ? { ...u, relationship: 'FRIENDS' } : u

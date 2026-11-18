@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  Alert,
   Animated,
   BackHandler,
   Pressable,
@@ -17,7 +16,7 @@ import type { MealSlot } from '@/features/nutrition/types';
 import { useNutrition } from '@/features/nutrition/NutritionProvider';
 import { todayKey } from '@/features/nutrition/utils';
 import { useTheme } from '@/theme';
-import { TILE_CONFIG } from '@/components/common';
+import { TILE_CONFIG, useAlert } from '@/components/common';
 import {
   AppleScanIcon,
   BodyStickFigureIcon,
@@ -52,6 +51,7 @@ export function DashboardQuickActionsModal({
 
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { state, addWater } = useNutrition();
+  const { showAlert } = useAlert();
 
   const selectedDate = propDate || state.selectedDate || todayKey();
 
@@ -150,7 +150,11 @@ export function DashboardQuickActionsModal({
   const handleAddWater = () => {
     onClose();
     addWater(selectedDate, 250);
-    Alert.alert('Đã ghi nhận', 'Đã thêm 250ml nước vào nhật ký hôm nay.');
+    showAlert({
+      title: 'Đã ghi nhận',
+      message: 'Đã thêm 250ml nước vào nhật ký hôm nay.',
+      variant: 'success',
+    });
   };
 
   const handleRecipeSuggestion = () => {

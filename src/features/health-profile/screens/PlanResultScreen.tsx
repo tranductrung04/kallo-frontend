@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Dimensions,
   SafeAreaView,
   ScrollView,
@@ -19,7 +18,7 @@ import Svg, {
   Stop,
   Line,
 } from 'react-native-svg';
-import { AppText } from '@/components/common';
+import { AppText, useAlert } from '@/components/common';
 import {
   ChevronLeftIcon,
   DropletIcon,
@@ -59,6 +58,7 @@ export function PlanResultScreen({
     error,
     saveProfile,
   } = useHealthProfileDraft();
+  const { showAlert } = useAlert();
 
   const [savingPlan, setSavingPlan] = useState(false);
 
@@ -229,13 +229,19 @@ export function PlanResultScreen({
           }
         }
       } else {
-        Alert.alert(
-          'Lưu kế hoạch',
-          res.error || error || 'Chưa thể lưu hồ sơ sức khỏe. Vui lòng thử lại!'
-        );
+        showAlert({
+          variant: 'error',
+          title: 'Lưu kế hoạch',
+          message:
+            res.error || error || 'Chưa thể lưu hồ sơ sức khỏe. Vui lòng thử lại!',
+        });
       }
     } catch (e: any) {
-      Alert.alert('Lỗi', e?.message || 'Có lỗi xảy ra khi lưu kế hoạch sức khỏe.');
+      showAlert({
+        variant: 'error',
+        title: 'Lỗi',
+        message: e?.message || 'Có lỗi xảy ra khi lưu kế hoạch sức khỏe.',
+      });
     } finally {
       setSavingPlan(false);
     }

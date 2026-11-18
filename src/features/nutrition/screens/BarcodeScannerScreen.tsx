@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  Alert,
   Animated,
   Easing,
   StatusBar,
@@ -9,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useAlert } from '@/components/common';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   CameraView,
@@ -37,6 +37,7 @@ export function BarcodeScannerScreen({ navigation, route }: Props) {
   const insets = useSafeAreaInsets();
   const primaryBrand = colors.brandPrimary;
   const secondaryBrand = isDark ? '#B488FC' : colors.brandSecondary;
+  const { showAlert } = useAlert();
 
   const [permission, requestPermission] = useCameraPermissions();
   const [flash, setFlash] = useState<'off' | 'on'>('off');
@@ -108,19 +109,22 @@ export function BarcodeScannerScreen({ navigation, route }: Props) {
           barcode: code,
         });
       } else {
-        Alert.alert(
-          'Không tìm thấy',
-          'Không thể tìm thấy thông tin sản phẩm với mã vạch này. Bạn có muốn tạo món ăn mới?',
-          [
+        showAlert({
+          title: 'Không tìm thấy',
+          message:
+            'Không thể tìm thấy thông tin sản phẩm với mã vạch này. Bạn có muốn tạo món ăn mới?',
+          variant: 'warning',
+          buttons: [
             {
               text: 'Thử lại',
-              style: 'cancel',
+              variant: 'secondary',
               onPress: () => {
                 scannedRef.current = false;
               },
             },
             {
               text: 'Tạo món mới',
+              variant: 'primary',
               onPress: () => {
                 navigation.replace('CustomFoodForm', {
                   date: route.params.date,
@@ -129,8 +133,8 @@ export function BarcodeScannerScreen({ navigation, route }: Props) {
                 });
               },
             },
-          ]
-        );
+          ],
+        });
       }
     } finally {
       setBusy(false);
@@ -160,20 +164,28 @@ export function BarcodeScannerScreen({ navigation, route }: Props) {
           if (barcodeResults && barcodeResults.length > 0) {
             handleBarcodeScanned(barcodeResults[0]);
           } else {
-            Alert.alert(
-              'Không tìm thấy mã vạch',
-              'Không thể nhận diện được mã vạch trong ảnh bạn đã chọn. Vui lòng thử lại với ảnh rõ nét hơn.'
-            );
+            showAlert({
+              title: 'Không tìm thấy mã vạch',
+              message:
+                'Không thể nhận diện được mã vạch trong ảnh bạn đã chọn. Vui lòng thử lại với ảnh rõ nét hơn.',
+              variant: 'warning',
+            });
           }
         } catch {
-          Alert.alert(
-            'Không tìm thấy mã vạch',
-            'Không nhận diện được mã vạch trong ảnh đã chọn. Vui lòng kiểm tra lại.'
-          );
+          showAlert({
+            title: 'Không tìm thấy mã vạch',
+            message:
+              'Không nhận diện được mã vạch trong ảnh đã chọn. Vui lòng kiểm tra lại.',
+            variant: 'warning',
+          });
         }
       }
     } catch {
-      Alert.alert('Lỗi', 'Không thể mở thư viện ảnh.');
+      showAlert({
+        title: 'Lỗi',
+        message: 'Không thể mở thư viện ảnh.',
+        variant: 'error',
+      });
     }
   };
 
@@ -347,10 +359,12 @@ export function BarcodeScannerScreen({ navigation, route }: Props) {
               ]}
               activeOpacity={0.8}
               onPress={() =>
-                Alert.alert(
-                  'Gói Kallo Premium',
-                  'Nâng cấp Premium để sử dụng tính năng quét mã vạch không giới hạn!'
-                )
+                showAlert({
+                  title: 'Gói Kallo Premium',
+                  message:
+                    'Nâng cấp Premium để sử dụng tính năng quét mã vạch không giới hạn!',
+                  variant: 'info',
+                })
               }
               accessibilityLabel="Gói Premium"
             >

@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
 import {
-  Alert,
   Image,
   ScrollView,
   StatusBar,
@@ -12,7 +11,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import { images } from '@/assets/images';
-import { AppButton, AppCard, AppText } from '@/components/common';
+import { AppButton, AppCard, AppText, useAlert } from '@/components/common';
 import { ChevronLeftIcon } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme, type ThemeContextValue } from '@/theme';
@@ -41,6 +40,7 @@ export function MealPlanOverviewScreen() {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<NavigationProp>();
   const { currentPlan, savedPlans, clearCurrentPlan, setActivePlan, applyPlanToDiary, deletePlan } = useMealPlan();
+  const { showAlert, showConfirm } = useAlert();
 
   // Default to Explore tab with 2400-2600 Cal range selected to match user mockup exactly
   const [activeTab, setActiveTab] = useState<TabKey>('explore');
@@ -55,20 +55,22 @@ export function MealPlanOverviewScreen() {
     if (setActivePlan) {
       setActivePlan(newPlan);
     }
-    Alert.alert(
-      'Áp dụng thực đơn thành công!',
-      `Đã chọn "${curated.title}" làm thực đơn hiện tại của bạn. Bạn có thể theo dõi và áp dụng các bữa ăn vào Nhật ký dinh dưỡng.`,
-      [
+    showAlert({
+      title: 'Áp dụng thực đơn thành công!',
+      message: `Đã chọn "${curated.title}" làm thực đơn hiện tại của bạn. Bạn có thể theo dõi và áp dụng các bữa ăn vào Nhật ký dinh dưỡng.`,
+      variant: 'success',
+      buttons: [
         {
           text: 'Xem thực đơn của tôi',
+          variant: 'primary',
           onPress: () => setActiveTab('my_plans'),
         },
         {
           text: 'Ở lại đây',
-          style: 'cancel',
+          variant: 'secondary',
         },
       ],
-    );
+    });
   };
 
   const handleViewCuratedDetail = (curated: CuratedPlan) => {
@@ -82,40 +84,39 @@ export function MealPlanOverviewScreen() {
   const handleApplyTodayToDiary = () => {
     if (!currentPlan) return;
     const count = applyPlanToDiary(0);
-    Alert.alert(
-      'Áp dụng thành công!',
-      `Đã thêm ${count} món ăn của hôm nay vào Nhật ký dinh dưỡng.`,
-      [
+    showAlert({
+      title: 'Áp dụng thành công!',
+      message: `Đã thêm ${count} món ăn của hôm nay vào Nhật ký dinh dưỡng.`,
+      variant: 'success',
+      buttons: [
         {
           text: 'Về Nhật ký xem',
+          variant: 'primary',
           onPress: () => {
             (navigation.getParent() as any)?.navigate('Diary');
           },
         },
-        { text: 'Ở lại đây', style: 'cancel' },
+        { text: 'Ở lại đây', variant: 'secondary' },
       ],
-    );
+    });
   };
 
   const handleResetCurrentPlan = () => {
-    Alert.alert(
-      'Hủy theo dõi thực đơn?',
-      'Bạn có muốn dừng theo dõi thực đơn hiện tại? Dữ liệu các món đã ghi vào nhật ký sẽ không bị ảnh hưởng.',
-      [
-        { text: 'Giữ lại', style: 'cancel' },
-        {
-          text: 'Dừng theo dõi',
-          style: 'destructive',
-          onPress: () => {
-            if (clearCurrentPlan) {
-              clearCurrentPlan();
-            } else if (currentPlan) {
-              deletePlan(currentPlan.id);
-            }
-          },
-        },
-      ],
-    );
+    showConfirm({
+      title: 'Hủy theo dõi thực đơn?',
+      message:
+        'Bạn có muốn dừng theo dõi thực đơn hiện tại? Dữ liệu các món đã ghi vào nhật ký sẽ không bị ảnh hưởng.',
+      confirmText: 'Dừng theo dõi',
+      cancelText: 'Giữ lại',
+      destructive: true,
+      onConfirm: () => {
+        if (clearCurrentPlan) {
+          clearCurrentPlan();
+        } else if (currentPlan) {
+          deletePlan(currentPlan.id);
+        }
+      },
+    });
   };
 
   const getScreenTitle = () => {

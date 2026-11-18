@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
 import {
-  Alert,
   Modal,
   SafeAreaView,
   ScrollView,
@@ -11,7 +10,7 @@ import {
 } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
-import { AppButton, AppCard, AppText } from '@/components/common';
+import { AppButton, AppCard, AppText, useAlert } from '@/components/common';
 import { CheckIcon, CloseXIcon } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme, type ThemeContextValue } from '@/theme';
@@ -26,6 +25,7 @@ export function MealPlanDetailScreen() {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<NavigationProp>();
   const { currentPlan, swapItem, savePlan, applyPlanToDiary } = useMealPlan();
+  const { showAlert } = useAlert();
 
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [swappingItem, setSwappingItem] = useState<MealPlanItem | null>(null);
@@ -55,24 +55,30 @@ export function MealPlanDetailScreen() {
 
   const handleApplyToDiary = () => {
     const count = applyPlanToDiary(selectedDayIndex);
-    Alert.alert(
-      'Áp dụng thành công!',
-      `Đã thêm ${count} món ăn của ${activeDay.dayLabel} vào Nhật ký dinh dưỡng hôm nay.`,
-      [
+    showAlert({
+      title: 'Áp dụng thành công!',
+      message: `Đã thêm ${count} món ăn của ${activeDay.dayLabel} vào Nhật ký dinh dưỡng hôm nay.`,
+      variant: 'success',
+      buttons: [
         {
           text: 'Về Nhật ký xem',
+          variant: 'primary',
           onPress: () => {
             (navigation.getParent() as any)?.navigate('Diary');
           },
         },
-        { text: 'Ở lại đây', style: 'cancel' },
-      ]
-    );
+        { text: 'Ở lại đây', variant: 'secondary' },
+      ],
+    });
   };
 
   const handleSave = () => {
     savePlan(currentPlan);
-    Alert.alert('Đã lưu', 'Thực đơn đã được lưu vào danh sách của bạn.');
+    showAlert({
+      title: 'Đã lưu',
+      message: 'Thực đơn đã được lưu vào danh sách của bạn.',
+      variant: 'success',
+    });
   };
 
   const swapCandidates = swappingItem

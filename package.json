@@ -13,7 +13,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "typecheck": "tsc --noEmit",
-    "self-check": "node scripts/self-check.js && node scripts/phase2-self-check.js && node scripts/phase3-self-check.js && node scripts/phase4-self-check.js && node scripts/phase5-self-check.js && node scripts/phase6-self-check.js && node scripts/phase7-self-check.js && node scripts/phase8-self-check.js",
+    "self-check": "node scripts/self-check.js && node scripts/phase2-self-check.js && node scripts/phase3-self-check.js && node scripts/phase4-self-check.js && node scripts/phase5-self-check.js && node scripts/phase6-self-check.js && node scripts/phase7-self-check.js && node scripts/phase8-self-check.js && node scripts/alert-self-check.js",
     "copy-assets": "node scripts/copy-assets.js"
   },
   "dependencies": {

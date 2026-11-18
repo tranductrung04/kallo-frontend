@@ -16,7 +16,7 @@ import { MealPlanProvider } from '@/features/meal-plan';
 import { GamificationProvider } from '@/features/gamification';
 import { OfflineSyncProvider } from '@/services/offline';
 import { SystemProvider } from '@/features/system';
-import { OfflineBanner } from '@/components/common';
+import { AlertProvider, OfflineBanner } from '@/components/common';
 // AuthProvider owns token/profile routing state for Phase 2.
 
 function AppContent() {
@@ -35,21 +35,23 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <ThemeProvider>
-          <AuthProvider>
-            <OfflineSyncProvider>
-              <SystemProvider>
-                <ActivityProvider>
-                  <NutritionProvider>
-                    <MealPlanProvider>
-                      <GamificationProvider>
-                        <AppContent />
-                      </GamificationProvider>
-                    </MealPlanProvider>
-                  </NutritionProvider>
-                </ActivityProvider>
-              </SystemProvider>
-            </OfflineSyncProvider>
-          </AuthProvider>
+          <AlertProvider>
+            <AuthProvider>
+              <OfflineSyncProvider>
+                <SystemProvider>
+                  <ActivityProvider>
+                    <NutritionProvider>
+                      <MealPlanProvider>
+                        <GamificationProvider>
+                          <AppContent />
+                        </GamificationProvider>
+                      </MealPlanProvider>
+                    </NutritionProvider>
+                  </ActivityProvider>
+                </SystemProvider>
+              </OfflineSyncProvider>
+            </AuthProvider>
+          </AlertProvider>
         </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

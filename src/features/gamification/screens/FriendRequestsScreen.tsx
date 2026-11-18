@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Alert,
   FlatList,
   StyleSheet,
   TouchableOpacity,
@@ -8,7 +7,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AppButton, AppCard, AppText } from '@/components/common';
+import { AppButton, AppCard, AppText, useAlert } from '@/components/common';
 import {
   ChevronLeftIcon,
   MailInboxIcon,
@@ -30,42 +29,39 @@ export function FriendRequestsScreen({ navigation }: Props) {
     respondFriendRequest,
     cancelFriendRequest,
   } = useGamification();
+  const { showAlert, showConfirm } = useAlert();
 
   const [activeTab, setActiveTab] = useState<'incoming' | 'outgoing'>('incoming');
 
   const handleAccept = (req: FriendRequest) => {
     respondFriendRequest(req.id, 'ACCEPT');
-    Alert.alert('Thành công', `Đã chấp nhận lời mời từ ${req.user.displayName}`);
+    showAlert({
+      title: 'Thành công',
+      message: `Đã chấp nhận lời mời từ ${req.user.displayName}`,
+      variant: 'success',
+    });
   };
 
   const handleDecline = (req: FriendRequest) => {
-    Alert.alert(
-      'Từ chối lời mời',
-      `Bạn có chắc chắn muốn từ chối lời mời kết bạn từ ${req.user.displayName}?`,
-      [
-        { text: 'Hủy', style: 'cancel' },
-        {
-          text: 'Từ chối',
-          style: 'destructive',
-          onPress: () => respondFriendRequest(req.id, 'DECLINE'),
-        },
-      ]
-    );
+    showConfirm({
+      title: 'Từ chối lời mời',
+      message: `Bạn có chắc chắn muốn từ chối lời mời kết bạn từ ${req.user.displayName}?`,
+      confirmText: 'Từ chối',
+      cancelText: 'Hủy',
+      destructive: true,
+      onConfirm: () => respondFriendRequest(req.id, 'DECLINE'),
+    });
   };
 
   const handleCancelOutgoing = (req: FriendRequest) => {
-    Alert.alert(
-      'Thu hồi lời mời',
-      `Thu hồi lời mời kết bạn đã gửi tới ${req.user.displayName}?`,
-      [
-        { text: 'Hủy', style: 'cancel' },
-        {
-          text: 'Thu hồi',
-          style: 'destructive',
-          onPress: () => cancelFriendRequest(req.id),
-        },
-      ]
-    );
+    showConfirm({
+      title: 'Thu hồi lời mời',
+      message: `Thu hồi lời mời kết bạn đã gửi tới ${req.user.displayName}?`,
+      confirmText: 'Thu hồi',
+      cancelText: 'Hủy',
+      destructive: true,
+      onConfirm: () => cancelFriendRequest(req.id),
+    });
   };
 
   const renderIncomingItem = ({ item }: { item: FriendRequest }) => (
