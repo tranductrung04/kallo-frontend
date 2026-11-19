@@ -7,6 +7,7 @@
     "start": "expo start -c",
     "start:dev": "node scripts/switch-env.js dev && expo start -c",
     "start:demo": "node scripts/switch-env.js demo && expo start -c",
+    "start:prod": "node scripts/switch-env.js prod && expo start -c",
     "env:dev": "node scripts/switch-env.js dev",
     "env:demo": "node scripts/switch-env.js demo",
     "env:prod": "node scripts/switch-env.js prod",

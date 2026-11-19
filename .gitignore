@@ -12,9 +12,15 @@ ios/
 
 # Environment variables
 .env
-.env.local
-.env.*.local
+.env.*
+*.env
+*.env.*
 !.env.example
+!.env.*.example
+!*.env.example
+!*.example.env
+!*example*.env
+!*.example
 
 # Logs
 npm-debug.log*
