@@ -4,7 +4,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppButton, AppCard, AppInput, AppText } from '@/components/common';
 import type { AuthStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
-import { requestPasswordReset } from '../api';
+import { getApiErrorMessage, requestPasswordReset } from '../api';
 import { AuthLayout, authStyles, emailPattern } from './AuthLayout';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'ForgotPassword'>;
@@ -24,11 +24,11 @@ export function ForgotPasswordScreen({ navigation }: Props) {
     setLoading(true);
     try {
       await requestPasswordReset(email.trim());
-    } catch (err) {
-      // Cho phép tiếp tục luồng đặt lại mật khẩu khi offline/demo
+      navigation.navigate('ResetPassword', { email: email.trim() });
+    } catch (requestError) {
+      setError(getApiErrorMessage(requestError));
     } finally {
       setLoading(false);
-      navigation.navigate('ResetPassword', { email: email.trim() });
     }
   };
 

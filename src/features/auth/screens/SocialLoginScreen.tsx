@@ -21,6 +21,7 @@ import { AuthLightBackground } from './AuthLightBackground';
 import type { AuthStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
 import { useAuth } from '../AuthProvider';
+import { getApiErrorMessage } from '../api';
 
 // Hoàn tất phiên redirect nếu đang quay lại từ trình duyệt đăng nhập
 WebBrowser.maybeCompleteAuthSession();
@@ -137,8 +138,11 @@ export function SocialLoginScreen({ navigation }: Props) {
         signInWithGoogle(idToken)
           .catch((err) => {
             console.error('[Google Sign-In] Backend verification failed:', err);
-            // Tự động chuyển sang màn hình đăng nhập thường nếu xảy ra lỗi xác thực backend
-            navigation.navigate('Login');
+            showAlert({
+              title: 'Đăng nhập Google thất bại',
+              message: getApiErrorMessage(err),
+              variant: 'error',
+            });
           })
           .finally(() => {
             setGoogleLoading(false);

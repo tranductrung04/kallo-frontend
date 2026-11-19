@@ -18,7 +18,6 @@ const AUTH_NO_RETRY_PATHS = [
   '/auth/refresh',
   '/auth/forgot-password',
   '/auth/reset-password',
-  '/auth/verify-email',
 ];
 
 function shouldSkipAuthRefresh(url?: string): boolean {
@@ -31,6 +30,20 @@ export const api = axios.create({ baseURL, timeout: 15000, headers: { Accept: 'a
 const refreshClient = axios.create({ baseURL, timeout: 15000, headers: { Accept: 'application/json' } });
 type RetryConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 let refreshPromise: Promise<string> | null = null;
+let onSessionExpired: (() => void) | null = null;
+
+export function registerSessionExpiredHandler(handler: () => void): () => void {
+  onSessionExpired = handler;
+  return () => {
+    if (onSessionExpired === handler) onSessionExpired = null;
+  };
+}
+
+function isInvalidRefreshToken(error: unknown): boolean {
+  const response = (error as AxiosError)?.response;
+  const data = response?.data as { error?: { code?: string }; code?: string } | undefined;
+  return response?.status === 401 && (data?.error?.code === 'REFRESH_TOKEN_INVALID' || data?.code === 'REFRESH_TOKEN_INVALID');
+}
 
 api.interceptors.request.use(async (config) => {
   const token = await getAccessToken();
@@ -54,7 +67,10 @@ api.interceptors.response.use((response) => response, async (error: AxiosError) 
     config.headers.set('Authorization', `Bearer ${accessToken}`);
     return api(config);
   } catch (refreshError) {
-    await clearTokens();
+    if (isInvalidRefreshToken(refreshError)) {
+      await clearTokens();
+      onSessionExpired?.();
+    }
     throw refreshError;
   }
 });

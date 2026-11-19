@@ -10,7 +10,7 @@ export function AppInput({ label, error, left, right, secureTextEntry, style, te
   const [hidden, setHidden] = useState(Boolean(secureTextEntry));
   return <View style={styles.wrapper}>
     {label ? <AppText variant="labelLg" style={styles.label}>{label}</AppText> : null}
-    <View style={[styles.field, { backgroundColor: theme.colors.surfaceHigh, borderColor: error ? theme.colors.error : focused ? theme.colors.brandPrimary : theme.colors.surfaceBorder }]}>
+    <View style={[styles.field, { backgroundColor: theme.colors.canvasBase, borderColor: error ? theme.colors.error : focused ? theme.colors.brandPrimary : theme.colors.surfaceBorder }]}>
       {left}
       <TextInput {...props} testID={testID} accessibilityLabel={props.accessibilityLabel ?? label} secureTextEntry={secureTextEntry ? hidden : false} onFocus={(event) => { setFocused(true); props.onFocus?.(event); }} onBlur={(event) => { setFocused(false); props.onBlur?.(event); }} placeholderTextColor={theme.colors.textSecondary} maxFontSizeMultiplier={1.3} style={[styles.input, { color: theme.colors.textPrimary }, style]} />
       {secureTextEntry ? <Pressable accessibilityRole="button" accessibilityLabel={hidden ? 'Hiện mật khẩu' : 'Ẩn mật khẩu'} onPress={() => setHidden((value) => !value)} style={styles.action}><AppText variant="labelMd" color={theme.colors.brandPrimary}>{hidden ? 'Hiện' : 'Ẩn'}</AppText></Pressable> : right}

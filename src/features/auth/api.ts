@@ -43,6 +43,9 @@ export type UserProfileResponse = {
   timezone: string;
   avatarUrl: string | null;
   role: string;
+  allergies?: string[];
+  provider?: string;
+  hasPassword?: boolean;
 };
 
 export type AvatarResponse = {
@@ -183,18 +186,8 @@ export async function requestPasswordReset(email: string): Promise<void> {
   await api.post('/auth/forgot-password', { email });
 }
 
-export async function resetPassword(emailOrToken: string, passwordOrCode: string, maybePassword?: string): Promise<void> {
-  // Support both new (email, code, newPassword) and old (token, password) signatures
-  if (maybePassword !== undefined) {
-    await api.post('/auth/reset-password', {
-      email: emailOrToken,
-      code: passwordOrCode,
-      newPassword: maybePassword,
-    });
-  } else {
-    // Old fallback
-    await api.post('/auth/reset-password', { token: emailOrToken, password: passwordOrCode });
-  }
+export async function resetPassword(email: string, code: string, newPassword: string): Promise<void> {
+  await api.post('/auth/reset-password', { email, code, newPassword });
 }
 
 export async function changePassword(currentPassword: string, newPassword: string): Promise<AuthResponse> {
