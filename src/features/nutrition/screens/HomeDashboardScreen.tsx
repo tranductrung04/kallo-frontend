@@ -8,12 +8,10 @@ import {
   Pressable,
   ScrollView,
   StatusBar,
-  StyleSheet,
   View,
   useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
@@ -23,7 +21,6 @@ import {
   CircularProgress,
   MonthCalendarModal,
   QuickUtilityGrid,
-  useAlert,
 } from '@/components/common';
 import type { MainTabParamList, RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
@@ -78,7 +75,6 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const { state, getSummary, addWater, setSelectedDate } = useNutrition();
   const { getTotalCaloriesBurnedForDate, getTotalStepsForDate, state: activityState } = useActivity();
   const { streak, badges, challenges, friends, incomingRequests } = useGamification();
-  const { showAlert } = useAlert();
   const [calendarModalVisible, setCalendarModalVisible] = useState(false);
   const [calorieGoalModalVisible, setCalorieGoalModalVisible] = useState(false);
   const [calorieIntakeModalVisible, setCalorieIntakeModalVisible] = useState(false);
@@ -89,8 +85,6 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const [saltModalVisible, setSaltModalVisible] = useState(false);
   const [sugarModalVisible, setSugarModalVisible] = useState(false);
   const [fiberModalVisible, setFiberModalVisible] = useState(false);
-  const [pillSize, setPillSize] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
-  const [stickyPillSize, setStickyPillSize] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
   const selectedDate = state.selectedDate || todayKey();
   const isToday = selectedDate === todayKey();
   const caloriesBurned = getTotalCaloriesBurnedForDate(selectedDate);
@@ -259,14 +253,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
     outputRange: [0, 86],
   });
 
-  const handleUpgradePress = () => {
-    showAlert({
-      title: 'Kallo Premium',
-      message:
-        'Nâng cấp gói Kallo Premium để mở khóa phân tích dinh dưỡng chuyên sâu, thực đơn AI không giới hạn và nhận diện hình ảnh thông minh!',
-      variant: 'info',
-    });
-  };
+  const openAssistant = () => root?.navigate('NutritionChat');
 
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>
@@ -275,7 +262,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
         backgroundColor={colors.surfaceMid}
       />
 
-      {/* ── Sticky Top Header khi cuộn xuống: Ngày + Nâng cấp gói ── */}
+      {/* ── Sticky Top Header khi cuộn xuống: Ngày + Trợ lý AI ── */}
       {isStickyVisible && (
         <Animated.View
           style={[
@@ -302,44 +289,12 @@ export function HomeDashboardScreen({ navigation }: Props) {
 
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Nâng cấp gói"
-            onLayout={(e) => {
-              const { width, height } = e.nativeEvent.layout;
-              if (width > 0 && height > 0 && (width !== stickyPillSize.width || height !== stickyPillSize.height)) {
-                setStickyPillSize({ width, height });
-              }
-            }}
-            style={({ pressed }) => [styles.stickyUpgradePill, pressed && styles.pressedOpacity]}
-            onPress={handleUpgradePress}
+            accessibilityLabel="Mở trợ lý Kallo AI"
+            style={({ pressed }) => [styles.aiAssistantButton, pressed && styles.pressedOpacity]}
+            onPress={openAssistant}
           >
-            {stickyPillSize.width > 0 && stickyPillSize.height > 0 && (
-              <Svg
-                style={StyleSheet.absoluteFill}
-                width={stickyPillSize.width}
-                height={stickyPillSize.height}
-              >
-                <Defs>
-                  <LinearGradient id="upgradeGradSticky" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <Stop offset="0%" stopColor="#FFFFFF" />
-                    <Stop offset="25%" stopColor="#FFF4C2" />
-                    <Stop offset="65%" stopColor="#FED268" />
-                    <Stop offset="100%" stopColor="#F5A021" />
-                  </LinearGradient>
-                </Defs>
-                <Rect
-                  x={0}
-                  y={0}
-                  width={stickyPillSize.width}
-                  height={stickyPillSize.height}
-                  rx={stickyPillSize.height / 2}
-                  ry={stickyPillSize.height / 2}
-                  fill="url(#upgradeGradSticky)"
-                />
-              </Svg>
-            )}
-            <AppText variant="labelLg" style={styles.stickyUpgradePillText}>
-              Nâng cấp gói
-            </AppText>
+            <Image source={images.mascotAvatar} style={styles.aiAssistantImage} accessibilityLabel="Trợ lý Kallo AI" />
+            <AppText variant="labelLg" color={colors.brandPrimary}>Kallo AI</AppText>
           </Pressable>
         </Animated.View>
       )}
@@ -357,45 +312,13 @@ export function HomeDashboardScreen({ navigation }: Props) {
           <View style={styles.topHeader}>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Nâng cấp gói"
-              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-              onLayout={(e) => {
-                const { width, height } = e.nativeEvent.layout;
-                if (width > 0 && height > 0 && (width !== pillSize.width || height !== pillSize.height)) {
-                  setPillSize({ width, height });
-                }
-              }}
-              style={({ pressed }) => [styles.upgradePillTop, pressed && styles.pressedOpacity]}
-              onPress={handleUpgradePress}
+              accessibilityLabel="Mở trợ lý Kallo AI"
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              style={({ pressed }) => [styles.aiAssistantButton, pressed && styles.pressedOpacity]}
+              onPress={openAssistant}
             >
-              {pillSize.width > 0 && pillSize.height > 0 && (
-                <Svg
-                  style={StyleSheet.absoluteFill}
-                  width={pillSize.width}
-                  height={pillSize.height}
-                >
-                  <Defs>
-                    <LinearGradient id="upgradeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <Stop offset="0%" stopColor="#FFFFFF" />
-                      <Stop offset="25%" stopColor="#FFF4C2" />
-                      <Stop offset="65%" stopColor="#FED268" />
-                      <Stop offset="100%" stopColor="#F5A021" />
-                    </LinearGradient>
-                  </Defs>
-                  <Rect
-                    x={0}
-                    y={0}
-                    width={pillSize.width}
-                    height={pillSize.height}
-                    rx={pillSize.height / 2}
-                    ry={pillSize.height / 2}
-                    fill="url(#upgradeGrad)"
-                  />
-                </Svg>
-              )}
-              <AppText variant="labelLg" style={styles.upgradePillText}>
-                Nâng cấp gói
-              </AppText>
+              <Image source={images.mascotAvatar} style={styles.aiAssistantImage} accessibilityLabel="Trợ lý Kallo AI" />
+              <AppText variant="labelLg" color={colors.brandPrimary}>Kallo AI</AppText>
             </Pressable>
 
             <View style={styles.headerRightRow}>

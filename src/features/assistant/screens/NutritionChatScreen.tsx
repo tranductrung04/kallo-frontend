@@ -15,7 +15,6 @@ import { AppText } from '@/components/common';
 import {
   ChevronLeftIcon,
   MessageSquareIcon,
-  QuickVoiceIcon,
   RefreshCwIcon,
   SendIcon,
   ThumbsDownIcon,
@@ -238,7 +237,6 @@ export function NutritionChatScreen({ route, navigation }: Props) {
 
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}>
         <View style={[styles.inputContainer, { backgroundColor: theme.colors.surfaceMid, borderTopColor: theme.colors.surfaceBorder }]}>
-          <Pressable onPress={() => navigation.navigate('VoiceLogModal')} style={styles.inputIconButton} accessibilityRole="button" accessibilityLabel="Mở ghi nhật ký bằng giọng nói"><QuickVoiceIcon size={21} color={theme.colors.brandPrimary} /></Pressable>
           <TextInput style={[styles.input, { color: theme.colors.textPrimary, borderColor: theme.colors.surfaceBorder, backgroundColor: theme.colors.surfaceHigh }]} placeholder="Hỏi Kallo về calo, thực đơn..." placeholderTextColor={theme.colors.textSecondary} value={inputText} onChangeText={setInputText} onSubmitEditing={() => void handleSend()} returnKeyType="send" editable={!isSending} maxLength={2000} accessibilityLabel="Nội dung tin nhắn" />
           <Pressable onPress={() => void handleSend()} style={[styles.sendButton, { backgroundColor: inputText.trim() && !isSending ? theme.colors.brandPrimary : theme.colors.textDisabled }]} disabled={!inputText.trim() || isSending} accessibilityRole="button" accessibilityLabel="Gửi tin nhắn"><SendIcon size={19} color={theme.colors.onBrand} /></Pressable>
         </View>
@@ -273,7 +271,6 @@ const styles = StyleSheet.create({
   promptsList: { paddingHorizontal: 16, gap: 8 },
   promptChip: { minHeight: 40, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, borderRadius: 20, borderWidth: 1, gap: 6 },
   inputContainer: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 10, gap: 8, borderTopWidth: 1 },
-  inputIconButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   input: { flex: 1, minHeight: 44, maxHeight: 100, borderRadius: 22, borderWidth: 1, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15 },
   sendButton: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
 });
