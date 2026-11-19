@@ -43,6 +43,7 @@ import {
   PersonStanding,
   Plus,
   RefreshCw,
+  Send,
   Salad,
   Scale,
   ScanBarcode,
@@ -57,6 +58,8 @@ import {
   Star,
   Sun,
   TriangleAlert,
+  ThumbsDown,
+  ThumbsUp,
   Trophy,
   User,
   Users,
@@ -260,6 +263,9 @@ export const LogOutIcon = fromLucide(LogOut, { defaultSize: 20 });
 export const MessageSquareIcon = fromLucide(MessageSquare, { defaultSize: 20 });
 export const PenLineIcon = fromLucide(PenLine, { defaultSize: 20 });
 export const RefreshCwIcon = fromLucide(RefreshCw, { defaultSize: 20 });
+export const SendIcon = fromLucide(Send, { defaultSize: 20 });
+export const ThumbsUpIcon = fromLucide(ThumbsUp, { defaultSize: 18 });
+export const ThumbsDownIcon = fromLucide(ThumbsDown, { defaultSize: 18 });
 export const SquareIcon = fromLucide(Square, { defaultSize: 20 });
 export const SquareCheckIcon = fromLucide(SquareCheck, { defaultSize: 20 });
 export const CheckSquareIcon = SquareCheckIcon;
