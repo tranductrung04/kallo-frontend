@@ -4,19 +4,34 @@ const path = require('node:path');
 const target = (process.argv[2] || 'development').toLowerCase();
 const root = path.resolve(__dirname, '..');
 
-let sourceFileName;
+let candidateNames = [];
 if (target === 'demo') {
-  sourceFileName = 'demo.env';
+  candidateNames = ['.env.demo', 'env.demo', 'demo.env'];
 } else if (target === 'prod' || target === 'production') {
-  sourceFileName = 'production.env';
+  candidateNames = ['.env.prod', '.env.production', 'env.prod', 'prod.env', 'production.env'];
 } else {
-  sourceFileName = 'development.env';
+  candidateNames = ['.env.dev', '.env.development', 'env.dev', 'dev.env', 'development.env'];
 }
 
-const sourcePath = path.join(root, 'environments', sourceFileName);
+// Tìm ở thư mục gốc (root) trước, sau đó tìm trong environments/
+let sourcePath = null;
+const searchDirs = [root, path.join(root, 'environments')];
 
-if (!fs.existsSync(sourcePath)) {
-  console.error(`[Kallo Env Error] File nguồn ${sourcePath} không tồn tại.`);
+for (const dir of searchDirs) {
+  for (const name of candidateNames) {
+    const p = path.join(dir, name);
+    if (fs.existsSync(p)) {
+      sourcePath = p;
+      break;
+    }
+  }
+  if (sourcePath) break;
+}
+
+if (!sourcePath) {
+  console.error(`[Kallo Env Error] Không tìm thấy file cấu hình cho môi trường "${target}".`);
+  console.error(`Vui lòng tạo một trong các file sau ở thư mục gốc hoặc trong environments/:`);
+  console.error(candidateNames.map((n) => `  - ${n}`).join('\n'));
   process.exit(1);
 }
 
@@ -25,20 +40,10 @@ const content = fs.readFileSync(sourcePath, 'utf8');
 // Ghi nội dung vào file .env duy nhất (chuẩn theo Expo env loading)
 fs.writeFileSync(path.join(root, '.env'), content, 'utf8');
 
-// Xoá các file .env đặc biệt ở root nếu còn tồn tại để tránh Expo ưu tiên load đè lên .env
-const filesToClean = ['.env.development', '.env.demo', '.env.production', '.env.local'];
-for (const file of filesToClean) {
-  const filePath = path.join(root, file);
-  try {
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
-  } catch {
-    // Bỏ qua nếu file đang bị lock hoặc không có quyền xoá
-  }
-}
+const relSource = path.relative(root, sourcePath);
 
 console.log(`\n=======================================================`);
+console.log(`[Kallo Env] Nguồn: ${relSource}`);
 console.log(`[Kallo Env] Đã chuyển sang cấu hình: ${target.toUpperCase()}`);
 console.log(`[Kallo Env] Đã ghi cấu hình vào: .env`);
 console.log(`=======================================================\n`);
