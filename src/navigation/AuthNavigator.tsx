@@ -15,6 +15,7 @@ import {
 import { AppText } from '@/components/common';
 import { ChevronLeftIcon, MoonIcon, SunIcon } from '@/components/icons';
 import { useTheme } from '@/theme';
+import { useAuth } from '@/features/auth/AuthProvider';
 
 function AuthHeader({ navigation, options, route, back }: NativeStackHeaderProps) {
   const insets = useSafeAreaInsets();
@@ -72,12 +73,13 @@ const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 export function AuthNavigator() {
   const theme = useTheme();
+  const { status, user } = useAuth();
   const isDark = theme.scheme === 'dark';
   const screenBg = isDark ? theme.colors.canvasBase : '#FFFFFF';
 
   return (
     <Stack.Navigator
-      initialRouteName="Welcome"
+      initialRouteName={status === 'needsVerification' ? 'VerifyOtp' : 'Welcome'}
       screenOptions={{
         header: (props) => <AuthHeader {...props} />,
         contentStyle: { backgroundColor: screenBg },
@@ -95,7 +97,12 @@ export function AuthNavigator() {
       />
       <Stack.Screen name="Login" component={LoginScreen} options={{ title: 'Đăng nhập' }} />
       <Stack.Screen name="Register" component={RegisterScreen} options={{ title: 'Tạo tài khoản' }} />
-      <Stack.Screen name="VerifyOtp" component={VerifyOtpScreen} options={{ title: 'Xác thực tài khoản' }} />
+      <Stack.Screen
+        name="VerifyOtp"
+        component={VerifyOtpScreen}
+        initialParams={user?.email ? { email: user.email } : undefined}
+        options={{ title: 'Xác thực tài khoản' }}
+      />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ title: 'Quên mật khẩu' }} />
       <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} options={{ title: 'Đặt lại mật khẩu' }} />
     </Stack.Navigator>

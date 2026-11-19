@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAccessToken } from '@/services/api/tokenStorage';
+import { registerSessionExpiredHandler } from '@/services/api/client';
 import {
   APP_DATA_MODE,
   IS_DEMO_MODE,
@@ -10,7 +11,6 @@ import {
 } from './localAccount';
 import {
   getApiErrorMessage,
-  getHealthProfile,
   getMe,
   login,
   loginWithGoogle,
@@ -23,7 +23,7 @@ import {
   type UserProfileResponse,
 } from './api';
 
-type AuthStatus = 'loading' | 'signedOut' | 'needsProfile' | 'signedIn';
+type AuthStatus = 'loading' | 'signedOut' | 'needsVerification' | 'needsProfile' | 'signedIn';
 
 type AuthContextValue = {
   status: AuthStatus;
@@ -121,7 +121,15 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
       }
 
       // Fetch user profile info
-      await refreshUser();
+      const currentUser = await refreshUser();
+      if (!currentUser) {
+        if (mountedRef.current) setStatus('signedOut');
+        return;
+      }
+      if (!currentUser.emailVerified) {
+        if (mountedRef.current) setStatus('needsVerification');
+        return;
+      }
 
       // Chỉ điều hướng đến Onboarding nếu vừa đăng ký mới (chưa hoàn thành bước thiết lập hồ sơ)
       const pendingOnboarding = await AsyncStorage.getItem('@kallo/pending-onboarding');
@@ -176,8 +184,12 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
 
       // In Backend Mode: call real Spring Boot endpoint
       const result = await login(email, password);
-      await refreshUser();
+      const currentUser = await refreshUser();
       if (!mountedRef.current) return;
+      if (currentUser && !currentUser.emailVerified) {
+        setStatus('needsVerification');
+        return result;
+      }
 
       // Người dùng đăng nhập bằng email & password: luôn vào thẳng MainTabs (signedIn), không vào Onboarding
       await AsyncStorage.removeItem('@kallo/pending-onboarding');
@@ -213,8 +225,12 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
       }
 
       const result = await loginWithGoogle(idToken);
-      await refreshUser();
+      const currentUser = await refreshUser();
       if (!mountedRef.current) return;
+      if (currentUser && !currentUser.emailVerified) {
+        setStatus('needsVerification');
+        return result;
+      }
 
       // Lần đầu đăng ký bằng Google thành công -> điều hướng đến Onboarding
       const isNewUser = Boolean(
@@ -264,7 +280,11 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
       }
       await verifyEmail(otp);
       if (!mountedRef.current) return;
-      await refreshUser();
+      const verifiedUser = await refreshUser();
+      if (!verifiedUser?.emailVerified) {
+        setStatus('needsVerification');
+        return;
+      }
       // Lần đầu đăng ký bằng email thành công -> điều hướng đến Onboarding
       await AsyncStorage.setItem('@kallo/pending-onboarding', 'true');
       if (mountedRef.current) {
@@ -330,6 +350,17 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
       setStatus('signedOut');
     }
   }, []);
+
+  const handleSessionExpired = useCallback(() => {
+    if (!mountedRef.current) return;
+    setUser(null);
+    setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+    setStatus('signedOut');
+  }, []);
+
+  useEffect(() => {
+    return registerSessionExpiredHandler(handleSessionExpired);
+  }, [handleSessionExpired]);
 
   const clearError = useCallback(() => setError(null), []);
 

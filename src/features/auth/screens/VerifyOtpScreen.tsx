@@ -17,9 +17,9 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'VerifyOtp'>;
 
 export function VerifyOtpScreen({ route }: Props) {
   const theme = useTheme();
-  const { verifyOtp, resendOtp } = useAuth();
+  const { verifyOtp, resendOtp, user } = useAuth();
   const isDark = theme.scheme === 'dark';
-  const email = route.params?.email ?? '';
+  const email = route.params?.email ?? user?.email ?? '';
 
   const [otp, setOtp] = useState('');
   const [error, setError] = useState<string>();

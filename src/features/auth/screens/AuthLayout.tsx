@@ -13,6 +13,10 @@ import { AuthLightBackground } from './AuthLightBackground';
 export const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function passwordError(password: string) {
+  const utf8ByteLength = encodeURIComponent(password).replace(/%[0-9A-F]{2}|./g, 'x').length;
+  if (utf8ByteLength > 72) {
+    return 'Mật khẩu quá dài. Vui lòng dùng mật khẩu ngắn hơn.';
+  }
   return password.length < 8 || !/[A-Za-z]/.test(password) || !/\d/.test(password)
     ? 'Mật khẩu cần ít nhất 8 ký tự, gồm chữ và số.'
     : undefined;
