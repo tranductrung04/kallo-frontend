@@ -90,6 +90,7 @@ npm install
 
 ```bash
 npm run start      # mở Expo Dev Server, quét QR bằng Expo Go
+npm run web        # chạy trên trình duyệt Web
 npm run android    # chạy trên Android
 npm run ios        # chạy trên iOS (cần macOS)
 ```
