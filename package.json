@@ -8,6 +8,10 @@
     "start:dev": "node scripts/switch-env.js dev && expo start -c",
     "start:demo": "node scripts/switch-env.js demo && expo start -c",
     "start:prod": "node scripts/switch-env.js prod && expo start -c",
+    "web": "expo start --web",
+    "web:dev": "node scripts/switch-env.js dev && expo start --web",
+    "web:demo": "node scripts/switch-env.js demo && expo start --web",
+    "web:prod": "node scripts/switch-env.js prod && expo start --web",
     "env:dev": "node scripts/switch-env.js dev",
     "env:demo": "node scripts/switch-env.js demo",
     "env:prod": "node scripts/switch-env.js prod",
@@ -19,6 +23,7 @@
   },
   "dependencies": {
     "@expo-google-fonts/plus-jakarta-sans": "^0.4.2",
+    "@expo/metro-runtime": "~57.0.18",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-navigation/bottom-tabs": "^7.0.0",
     "@react-navigation/native": "^7.0.0",
@@ -38,11 +43,13 @@
     "expo-web-browser": "~57.0.3",
     "lucide-react-native": "^1.72.0",
     "react": "19.2.3",
+    "react-dom": "19.2.3",
     "react-native": "0.86.3",
     "react-native-gesture-handler": "~2.32.0",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.26.0",
-    "react-native-svg": "15.15.4"
+    "react-native-svg": "15.15.4",
+    "react-native-web": "^0.21.2"
   },
   "devDependencies": {
     "@types/react": "~19.2.4",
