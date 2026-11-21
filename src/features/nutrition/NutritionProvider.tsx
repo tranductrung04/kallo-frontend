@@ -21,10 +21,39 @@ export function NutritionProvider({ children }: React.PropsWithChildren) {
   const [state, setState] = useState<NutritionState>(initialState);
   const [ready, setReady] = useState(false);
   useEffect(() => {
-    void AsyncStorage.getItem(STORAGE_KEY).then((value) => {
-      if (!value) return;
-      try { setState({ ...initialState, ...JSON.parse(value) }); } catch { /* Ignore invalid local cache. */ }
-    }).catch(() => undefined).finally(() => setReady(true));
+    void AsyncStorage.getItem(STORAGE_KEY)
+      .then(async (value) => {
+        let baseState = initialState;
+        if (value) {
+          try {
+            baseState = { ...initialState, ...JSON.parse(value) };
+          } catch {
+            /* Ignore invalid local cache. */
+          }
+        }
+        try {
+          const profileRaw = await AsyncStorage.getItem('@kallo/health-profile');
+          if (profileRaw) {
+            const p = JSON.parse(profileRaw);
+            baseState = {
+              ...baseState,
+              goals: {
+                calories: p.dailyCalorieGoal || p.dailyCalories || baseState.goals.calories,
+                protein: p.proteinGoalG || p.proteinGoalGrams || baseState.goals.protein,
+                carbs: p.carbsGoalG || p.carbsGoalGrams || baseState.goals.carbs,
+                fat: p.fatGoalG || p.fatGoalGrams || baseState.goals.fat,
+                waterMl: p.waterGoalMl || baseState.goals.waterMl,
+                targetWeightKg: p.targetWeightKg || baseState.goals.targetWeightKg,
+              },
+            };
+          }
+        } catch {
+          /* Ignore profile parse errors. */
+        }
+        setState(baseState);
+      })
+      .catch(() => undefined)
+      .finally(() => setReady(true));
   }, []);
   useEffect(() => { if (ready) void AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state)).catch(() => undefined); }, [ready, state]);
   useEffect(() => { if (ready) void api.get(`/reports/dashboard?date=${encodeURIComponent(state.selectedDate)}`).catch(() => undefined); }, [ready, state.selectedDate]);

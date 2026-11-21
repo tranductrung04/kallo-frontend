@@ -1,15 +1,23 @@
 import { useEffect, useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '@/features/auth/AuthProvider';
-import { LOCAL_DEMO_ENABLED } from '@/features/auth/localAccount';
+import { IS_DEMO_MODE } from '@/features/auth/localAccount';
 import {
   saveHealthProfile,
   getApiErrorMessage,
 } from '../api';
-import type {
-  HealthProfileCalculationResult,
-  HealthProfileDraft,
-  MacroName,
+import {
+  toBackendGender,
+  toBackendActivityLevel,
+  toBackendGoalType,
+  fromBackendGender,
+  fromBackendActivityLevel,
+  fromBackendGoalType,
+  type HealthProfileCalculationResult,
+  type HealthProfileDraft,
+  type HealthProfileRequestPayload,
+  type HealthProfileResponse,
+  type MacroName,
 } from '../types';
 import {
   calculateHealthProfile,
@@ -195,6 +203,29 @@ export function useHealthProfileDraft(draftStorageKey = HEALTH_PROFILE_DRAFT_KEY
     return undefined;
   };
 
+  const populateFromProfile = (profile: HealthProfileResponse) => {
+    setDraft((current) => ({
+      ...current,
+      gender: fromBackendGender(profile.gender),
+      age: String(
+        profile.age ||
+          (profile.birthDate ? new Date().getFullYear() - parseInt(profile.birthDate.split('-')[0], 10) : 25)
+      ),
+      height: String(profile.heightCm),
+      weight: String(profile.weightKg),
+      targetWeight: String(profile.targetWeightKg),
+      weeklyRate: String(profile.weeklyRateKg),
+      activity: fromBackendActivityLevel(profile.activityLevel),
+      goal: fromBackendGoalType(profile.goalType),
+      allergies: profile.allergies || [],
+      macros: {
+        protein: profile.proteinPct || 20,
+        carbs: profile.carbsPct || 50,
+        fat: profile.fatPct || 30,
+      },
+    }));
+  };
+
   const saveProfile = async (
     overrideResult?: HealthProfileCalculationResult
   ): Promise<{ ok: boolean; error?: string }> => {
@@ -207,7 +238,25 @@ export function useHealthProfileDraft(draftStorageKey = HEALTH_PROFILE_DRAFT_KEY
     setSaving(true);
     setError(undefined);
     try {
-      const profilePayload = {
+      // 1. Prepare backend payload with UPPERCASE enums matching Spring Boot DTO
+      const backendPayload: HealthProfileRequestPayload = {
+        gender: toBackendGender(draft.gender || 'female'),
+        birthDate: `${new Date().getFullYear() - age}-01-01`,
+        heightCm: height,
+        weightKg: weight,
+        activityLevel: toBackendActivityLevel(draft.activity || 'moderate'),
+        goalType: toBackendGoalType(draft.goal || 'maintain'),
+        targetWeightKg: targetWeight,
+        weeklyRateKg: weeklyRate,
+        customProteinPct: finalResult.macros.protein,
+        customCarbsPct: finalResult.macros.carbs,
+        customFatPct: finalResult.macros.fat,
+        customWaterGoalMl: Math.round(weight * 35),
+        allergies: draft.allergies?.length ? draft.allergies : undefined,
+      };
+
+      // 2. Prepare local cache fallback
+      const localProfile = {
         nickname: draft.nickname?.trim() || undefined,
         gender: draft.gender || 'female',
         birthDate: `${new Date().getFullYear() - age}-01-01`,
@@ -230,15 +279,29 @@ export function useHealthProfileDraft(draftStorageKey = HEALTH_PROFILE_DRAFT_KEY
         waterGoalMl: Math.round(weight * 35),
       };
 
-      // Always persist the completed health profile locally
-      await AsyncStorage.setItem('@kallo/health-profile', JSON.stringify(profilePayload));
-
-      try {
-        await saveHealthProfile(profilePayload);
-      } catch (saveError: any) {
-        // Backend /users/me/profile endpoint may not be implemented on server yet; local profile is already saved
-        console.warn('[saveProfile] Server sync fallback to local profile:', saveError?.message ?? saveError);
+      if (IS_DEMO_MODE) {
+        await AsyncStorage.setItem('@kallo/health-profile', JSON.stringify(localProfile));
+        await AsyncStorage.removeItem(draftStorageKey);
+        if (completeOnboarding) {
+          await completeOnboarding();
+        } else {
+          await refreshProfileStatus();
+        }
+        return { ok: true };
       }
+
+      // 3. Real backend request - errors will be caught and reported
+      const serverProfile = await saveHealthProfile(backendPayload);
+
+      // Persist both server response and local attributes
+      await AsyncStorage.setItem(
+        '@kallo/health-profile',
+        JSON.stringify({
+          ...localProfile,
+          ...serverProfile,
+        })
+      );
+
       await AsyncStorage.removeItem(draftStorageKey);
       if (completeOnboarding) {
         await completeOnboarding();
@@ -275,6 +338,7 @@ export function useHealthProfileDraft(draftStorageKey = HEALTH_PROFILE_DRAFT_KEY
     toggleHealthCondition,
     setDietaryPreference,
     validateHealthMetrics,
+    populateFromProfile,
     saveProfile,
   };
 }

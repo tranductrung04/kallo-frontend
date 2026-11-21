@@ -10,6 +10,7 @@ import {
   type AppDataMode,
 } from './localAccount';
 import {
+  getApiErrorCode,
   getApiErrorMessage,
   getMe,
   login,
@@ -22,6 +23,7 @@ import {
   type HealthProfile,
   type UserProfileResponse,
 } from './api';
+import { getHealthProfile } from '@/features/health-profile/api';
 
 type AuthStatus = 'loading' | 'signedOut' | 'needsVerification' | 'needsProfile' | 'signedIn';
 
@@ -138,9 +140,28 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
         return;
       }
 
-      // Mọi phiên đã đăng nhập trước đó: vào thẳng màn hình chính (signedIn)
-      if (mountedRef.current) {
-        setStatus('signedIn');
+      // Xác minh hồ sơ sức khỏe trên backend (hoặc local cache nếu offline)
+      try {
+        const healthProfile = await getHealthProfile();
+        await AsyncStorage.setItem('@kallo/health-profile', JSON.stringify(healthProfile));
+        if (mountedRef.current) {
+          setStatus('signedIn');
+        }
+      } catch (profileError: any) {
+        const code = getApiErrorCode(profileError);
+        if (profileError?.response?.status === 404 || code === 'PROFILE_NOT_FOUND') {
+          await AsyncStorage.setItem('@kallo/pending-onboarding', 'true');
+          if (mountedRef.current) setStatus('needsProfile');
+          return;
+        }
+        // Trường hợp lỗi mạng, kiểm tra cache local đã lưu trước đó
+        const cachedProfile = await AsyncStorage.getItem('@kallo/health-profile');
+        if (cachedProfile) {
+          if (mountedRef.current) setStatus('signedIn');
+        } else {
+          await AsyncStorage.setItem('@kallo/pending-onboarding', 'true');
+          if (mountedRef.current) setStatus('needsProfile');
+        }
       }
     } catch {
       if (!mountedRef.current) return;
@@ -191,7 +212,13 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
         return result;
       }
 
-      // Người dùng đăng nhập bằng email & password: luôn vào thẳng MainTabs (signedIn), không vào Onboarding
+      // Nếu tài khoản chưa hoàn tất hồ sơ sức khỏe -> chuyển sang Onboarding
+      if (result.profileCompleted === false) {
+        await AsyncStorage.setItem('@kallo/pending-onboarding', 'true');
+        setStatus('needsProfile');
+        return result;
+      }
+
       await AsyncStorage.removeItem('@kallo/pending-onboarding');
       setStatus('signedIn');
       return result;
@@ -232,16 +259,17 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
         return result;
       }
 
-      // Lần đầu đăng ký bằng Google thành công -> điều hướng đến Onboarding
+      // Lần đầu đăng ký hoặc chưa tạo hồ sơ -> điều hướng đến Onboarding
       const isNewUser = Boolean(
         (result as any)?.isNewUser ?? (result as any)?.newUser
       );
+      const isProfileIncomplete = result.profileCompleted === false;
 
-      if (isNewUser) {
+      if (isNewUser || isProfileIncomplete) {
         await AsyncStorage.setItem('@kallo/pending-onboarding', 'true');
         setStatus('needsProfile');
       } else {
-        // Đăng nhập Google bằng tài khoản đã có -> vào thẳng màn hình chính (signedIn)
+        // Đăng nhập Google bằng tài khoản đã có hồ sơ -> vào thẳng màn hình chính (signedIn)
         await AsyncStorage.removeItem('@kallo/pending-onboarding');
         setStatus('signedIn');
       }
