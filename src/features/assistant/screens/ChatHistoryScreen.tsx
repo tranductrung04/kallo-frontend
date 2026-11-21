@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, SafeAreaView, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppText, useAlert } from '@/components/common';
 import { ChevronLeftIcon, CloseXIcon, MessageSquareIcon, PenLineIcon, RefreshCwIcon } from '@/components/icons';
@@ -66,9 +67,17 @@ export function ChatHistoryScreen({ navigation }: Props) {
     });
   };
 
-  return <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.canvasBase }]}>
+  return <SafeAreaView edges={['top']} style={[styles.safe, { backgroundColor: theme.colors.canvasBase }]}>
     <View style={[styles.header, { borderBottomColor: theme.colors.surfaceBorder }]}>
-      <Pressable onPress={() => navigation.goBack()} style={styles.iconButton} accessibilityRole="button" accessibilityLabel="Quay lại"><ChevronLeftIcon size={24} color={theme.colors.textPrimary} /></Pressable>
+      <Pressable
+        onPress={() => navigation.goBack()}
+        style={styles.iconButton}
+        hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+        accessibilityRole="button"
+        accessibilityLabel="Quay lại"
+      >
+        <ChevronLeftIcon size={24} color={theme.colors.textPrimary} />
+      </Pressable>
       <AppText variant="headlineSm" style={styles.headerTitle}>Lịch sử trò chuyện</AppText>
       <View style={styles.iconButton} />
     </View>

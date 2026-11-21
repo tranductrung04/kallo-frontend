@@ -9,18 +9,24 @@ export type ChatMessage = {
   role: MessageRole;
   content: string;
   timestamp: string;
-  status?: ChatMessageStatus;
+  status?: ChatMessageStatus | 'sending' | 'sent' | 'failed';
   feedback?: -1 | 1 | null;
   isStreaming?: boolean;
+  clientMessageId?: string;
+  errorText?: string;
 };
 
 export type ChatApiMessage = {
   id: string;
   role: ChatApiRole;
   content: string | null;
-  status: ChatMessageStatus;
+  status?: ChatMessageStatus;
   clientMessageId?: string | null;
-  metadata?: Record<string, unknown> | null;
+  metadata?: {
+    suggestedFoods?: { name: string; kcal?: number }[];
+    disclaimerAdded?: boolean;
+    [key: string]: unknown;
+  } | null;
   feedback?: -1 | 1 | null;
   createdAt: string;
 };
