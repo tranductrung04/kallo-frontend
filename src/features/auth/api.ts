@@ -260,14 +260,9 @@ export async function deleteAccount(password?: string, idToken?: string): Promis
 
 // ── Health Profile Endpoints (Profile Wizard) ──────────────────────────────────
 
-export type HealthProfile = { heightCm?: number; weightKg?: number };
-type ApiEnvelope<T> = { data?: T; message?: string };
-export type HealthProfileResponse = ApiEnvelope<HealthProfile> & HealthProfile;
-
-export async function getHealthProfile() {
-  return api.get<HealthProfileResponse>('/users/me/profile');
-}
-
-export async function saveHealthProfile(payload: object) {
-  return api.put<HealthProfileResponse>('/users/me/profile', payload);
-}
+export {
+  getHealthProfile,
+  saveHealthProfile,
+  type HealthProfile,
+  type HealthProfileResponse,
+} from '@/features/health-profile/api';
