@@ -30,6 +30,7 @@ import {
   LightningIcon,
   LockClosedIcon,
   LogOutIcon,
+  MessageSquareIcon,
   MoonIcon,
   PenLineIcon,
   RefreshCwIcon,
@@ -572,6 +573,28 @@ export function AccountProfileScreen({ navigation }: Props) {
               style={styles.customizeGoalBtn}
             />
           </AppCard>
+        </View>
+
+        {/* ── Trợ lý dinh dưỡng ─────────────────────────────────────────── */}
+        <View style={styles.sectionContainer}>
+          <TouchableOpacity
+            style={[styles.chatEntryCard, { backgroundColor: theme.colors.brandSoftTint, borderColor: theme.colors.surfaceBorder }]}
+            activeOpacity={0.82}
+            onPress={() => root?.navigate('NutritionChat')}
+            accessibilityRole="button"
+            accessibilityLabel="Mở trợ lý Kallo AI"
+          >
+            <View style={[styles.chatEntryIcon, { backgroundColor: theme.colors.brandPrimary }]}>
+              <Image source={images.mascotAvatar} style={styles.chatEntryImage} accessibilityLabel="Trợ lý Kallo AI" />
+            </View>
+            <View style={styles.chatEntryCopy}>
+              <AppText variant="headlineSm">Trợ lý Kallo AI</AppText>
+              <AppText variant="caption" color={theme.colors.textSecondary}>
+                Hỏi về calo, thực đơn và dinh dưỡng hôm nay
+              </AppText>
+            </View>
+            <AppText variant="headlineSm" color={theme.colors.brandPrimary}>›</AppText>
+          </TouchableOpacity>
         </View>
 
         {/* ── Xem báo cáo thống kê ──────────────────────────────────────── */}
@@ -1431,6 +1454,32 @@ const styles = StyleSheet.create({
   sectionHeaderTitle: {
     fontSize: 18,
     fontWeight: '700',
+  },
+  chatEntryCard: {
+    minHeight: 78,
+    borderRadius: 18,
+    borderWidth: 1,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  chatEntryIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  chatEntryImage: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+  },
+  chatEntryCopy: {
+    flex: 1,
+    gap: 3,
   },
   journeyCard: {
     borderRadius: 20,

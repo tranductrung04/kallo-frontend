@@ -1,257 +1,274 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   FlatList,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
+  Pressable,
   StyleSheet,
   TextInput,
-  TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppText } from '@/components/common';
-import { MessageSquareIcon, QuickVoiceIcon, TriangleAlertIcon } from '@/components/icons';
+import {
+  ChevronLeftIcon,
+  MessageSquareIcon,
+  RefreshCwIcon,
+  SendIcon,
+  ThumbsDownIcon,
+  ThumbsUpIcon,
+  TriangleAlertIcon,
+} from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
+import { IS_DEMO_MODE } from '@/features/auth/localAccount';
 import { useNutrition } from '@/features/nutrition/NutritionProvider';
 import { todayKey } from '@/features/nutrition/utils';
-import type { ChatMessage } from '../types';
+import { randomUUID } from 'expo-crypto';
+import {
+  getChatErrorMessage,
+  getChatSuggestions,
+  getConversationMessages,
+  isRetryableChatError,
+  retryChatMessage,
+  sendChatFeedback,
+  sendChatMessage,
+} from '../api';
+import type { ChatApiMessage, ChatMessage, ChatSuggestion } from '../types';
 import { generateAssistantResponse, QUICK_PROMPTS } from '../utils';
+import { TypingIndicator } from '../components/TypingIndicator';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'NutritionChat'>;
+
+function toUiMessage(message: ChatApiMessage): ChatMessage {
+  return {
+    id: message.id,
+    role: message.role === 'USER' ? 'user' : message.role === 'SYSTEM' ? 'system' : 'assistant',
+    content: message.content ?? '',
+    timestamp: new Date(message.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+    status: message.status,
+    feedback: message.feedback,
+    clientMessageId: message.clientMessageId ?? undefined,
+  };
+}
+
+const welcomeMessage = (): ChatMessage => ({
+  id: 'welcome',
+  role: 'assistant',
+  content: 'Chào bạn! Mình là trợ lý dinh dưỡng AI của Kallo. Mình nắm rõ tiến độ calo và bữa ăn hôm nay của bạn. Bạn muốn hỏi gì nào?',
+  timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+  status: 'COMPLETED',
+});
 
 export function NutritionChatScreen({ route, navigation }: Props) {
   const theme = useTheme();
   const { getSummary } = useNutrition();
-  const date = todayKey();
-  const summary = getSummary(date);
-
+  const summary = getSummary(todayKey());
+  const conversationId = route.params?.conversationId;
   const initialPrompt = route.params?.initialPrompt;
-
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 'welcome',
-      role: 'assistant',
-      content:
-        'Chào bạn! Mình là trợ lý dinh dưỡng AI của Kallo. Mình nắm rõ tiến độ calo và bữa ăn hôm nay của bạn. Bạn muốn hỏi gì nào?',
-      timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
-    },
-  ]);
-
+  const [activeConversationId, setActiveConversationId] = useState(conversationId ?? null);
+  const [messages, setMessages] = useState<ChatMessage[]>([welcomeMessage()]);
+  const [suggestions, setSuggestions] = useState<ChatSuggestion[]>([]);
   const [inputText, setInputText] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [isLoading, setIsLoading] = useState(Boolean(conversationId));
+  const [error, setError] = useState<string | null>(null);
+  const sentInitialPrompt = useRef(false);
   const flatListRef = useRef<FlatList<ChatMessage>>(null);
 
-  const handleSend = (textToSend?: string) => {
-    const content = (textToSend ?? inputText).trim();
-    if (!content || isTyping) return;
+  const loadConversation = useCallback(async () => {
+    if (!activeConversationId || IS_DEMO_MODE) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const page = await getConversationMessages(activeConversationId);
+      setMessages(page.items.slice().reverse().map(toUiMessage));
+    } catch {
+      setError('Không tải được lịch sử trò chuyện. Kiểm tra kết nối rồi thử lại.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [activeConversationId]);
 
-    const userMsg: ChatMessage = {
-      id: `user-${Date.now()}`,
+  useEffect(() => {
+    void loadConversation();
+  }, [loadConversation]);
+
+  useEffect(() => {
+    if (IS_DEMO_MODE) return;
+    void getChatSuggestions().then(setSuggestions).catch(() => undefined);
+  }, []);
+
+  const handleSend = useCallback(async (textToSend?: string) => {
+    const content = (textToSend ?? inputText).trim();
+    if (!content || isSending || content.length > 2000) return;
+
+    const clientMessageId = randomUUID();
+    const userMessage: ChatMessage = {
+      id: clientMessageId,
       role: 'user',
       content,
       timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+      status: 'COMPLETED',
     };
-
-    setMessages((prev) => [...prev, userMsg]);
+    setMessages((current) => [...current.filter((message) => message.id !== 'welcome'), userMessage]);
     setInputText('');
-    setIsTyping(true);
+    setIsSending(true);
+    setError(null);
 
-    // Compute answer
-    const answer = generateAssistantResponse(content, {
-      summary,
-      allergens: [],
-    });
+    if (IS_DEMO_MODE) {
+      const answer = generateAssistantResponse(content, { summary, allergens: [] });
+      setMessages((current) => [...current, {
+        id: `assistant-${Date.now()}`,
+        role: 'assistant',
+        content: answer,
+        timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+        status: 'COMPLETED',
+      }]);
+      setIsSending(false);
+      return;
+    }
 
-    // Simulated real-time streaming response (FR-CHAT-03)
-    const assistantMsgId = `assistant-${Date.now()}`;
-    const assistantMsg: ChatMessage = {
-      id: assistantMsgId,
+    const pendingId = `pending-${clientMessageId}`;
+    setMessages((current) => [...current, {
+      id: pendingId,
       role: 'assistant',
       content: '',
       timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+      status: 'PENDING',
       isStreaming: true,
-    };
-
-    setMessages((prev) => [...prev, assistantMsg]);
-
-    let charIndex = 0;
-    const chunkSize = 6;
-    const interval = setInterval(() => {
-      charIndex += chunkSize;
-      if (charIndex >= answer.length) {
-        clearInterval(interval);
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === assistantMsgId ? { ...msg, content: answer, isStreaming: false } : msg
-          )
-        );
-        setIsTyping(false);
-      } else {
-        const partial = answer.slice(0, charIndex);
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === assistantMsgId ? { ...msg, content: partial } : msg
-          )
-        );
-      }
-    }, 40);
-  };
+      clientMessageId,
+    }]);
+    try {
+      const reply = await sendChatMessage({ conversationId: activeConversationId, content, clientMessageId });
+      setActiveConversationId(reply.conversationId);
+      setMessages((current) => [
+        ...current.filter((message) => message.id !== pendingId),
+        toUiMessage(reply.assistantMessage),
+      ]);
+    } catch (requestError: unknown) {
+      const message = getChatErrorMessage(requestError);
+      setError(message);
+      setMessages((current) => current.map((item) => item.id === pendingId ? { ...item, status: 'FAILED', errorText: message } : item));
+    } finally {
+      setIsSending(false);
+    }
+  }, [activeConversationId, inputText, isSending, summary]);
 
   useEffect(() => {
-    if (initialPrompt) {
-      handleSend(initialPrompt);
+    if (initialPrompt && !sentInitialPrompt.current && !isLoading) {
+      sentInitialPrompt.current = true;
+      void handleSend(initialPrompt);
     }
-  }, [initialPrompt]);
+  }, [handleSend, initialPrompt, isLoading]);
 
-  const clearChat = () => {
-    setMessages([
-      {
-        id: `welcome-${Date.now()}`,
-        role: 'assistant',
-        content: 'Cuộc trò chuyện đã được làm mới. Bạn cần hỗ trợ gì tiếp theo nhé?',
-        timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
-      },
-    ]);
+  const handleRetry = async (item: ChatMessage) => {
+    if (isSending || IS_DEMO_MODE) return;
+    setIsSending(true);
+    setError(null);
+    try {
+      const reply = await retryChatMessage(item.id);
+      setMessages((current) => [...current.filter((msg) => msg.id !== item.id), toUiMessage(reply.assistantMessage)]);
+    } catch (requestError: unknown) {
+      setError(getChatErrorMessage(requestError));
+    } finally {
+      setIsSending(false);
+    }
   };
 
+  const handleFeedback = async (messageId: string, feedback: -1 | 1) => {
+    if (IS_DEMO_MODE) return;
+    setMessages((current) => current.map((item) => item.id === messageId ? { ...item, feedback } : item));
+    try {
+      await sendChatFeedback(messageId, feedback);
+    } catch {
+      setMessages((current) => current.map((item) => item.id === messageId ? { ...item, feedback: null } : item));
+    }
+  };
+
+  const promptItems = suggestions.length > 0 ? suggestions.map((item) => item.prompt) : QUICK_PROMPTS;
+
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.canvasBase }]}>
-      {/* ── FR-CHAT-06: Medical Disclaimer Banner ───────────────────── */}
-      <View style={[styles.disclaimerBanner, { backgroundColor: theme.colors.surface }]}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <TriangleAlertIcon size={14} color={theme.colors.calorieIn} />
-          <AppText variant="caption" color={theme.colors.calorieIn}>
-            LƯU Ý Y TẾ
-          </AppText>
+    <SafeAreaView edges={['top']} style={[styles.safe, { backgroundColor: theme.colors.canvasBase }]}>
+      <View style={[styles.header, { borderBottomColor: theme.colors.surfaceBorder }]}>
+        <Pressable
+          onPress={() => navigation.goBack()}
+          style={styles.iconButton}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          accessibilityRole="button"
+          accessibilityLabel="Quay lại"
+        >
+          <ChevronLeftIcon size={24} color={theme.colors.textPrimary} />
+        </Pressable>
+        <View style={styles.headerCopy}>
+          <AppText variant="headlineSm">Trợ lý Kallo</AppText>
+          <View style={styles.statusLine}><View style={[styles.statusDot, { backgroundColor: theme.colors.quickScanner }]} /><AppText variant="caption" color={theme.colors.textSecondary}>Dinh dưỡng cá nhân</AppText></View>
         </View>
-        <AppText variant="caption" color={theme.colors.textSecondary}>
-          Trợ lý AI dựa trên dữ liệu dinh dưỡng tham khảo, không thay thế chẩn đoán hoặc chỉ định của bác sĩ.
-        </AppText>
+        <Pressable
+          onPress={() => navigation.navigate('ChatHistory')}
+          style={styles.iconButton}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          accessibilityRole="button"
+          accessibilityLabel="Mở lịch sử trò chuyện"
+        >
+          <MessageSquareIcon size={22} color={theme.colors.textPrimary} />
+        </Pressable>
       </View>
 
-      {/* ── Message List ────────────────────────────────────────────── */}
-      <FlatList
+      <View style={[styles.disclaimerBanner, { backgroundColor: theme.colors.surfaceMid }]}>
+        <TriangleAlertIcon size={16} color={theme.colors.statusWarning} />
+        <AppText variant="caption" color={theme.colors.textSecondary} style={styles.disclaimerText}>Thông tin tham khảo, không thay thế chẩn đoán hoặc chỉ định của bác sĩ.</AppText>
+      </View>
+
+      {error ? <Pressable onPress={() => setError(null)} style={[styles.errorBanner, { backgroundColor: theme.colors.surfaceHigh }]} accessibilityRole="alert"><RefreshCwIcon size={16} color={theme.colors.statusDanger} /><AppText variant="caption" color={theme.colors.statusDanger} style={styles.errorText}>{error}</AppText></Pressable> : null}
+
+      {isLoading ? <View style={styles.loading}><ActivityIndicator color={theme.colors.brandPrimary} /><AppText variant="bodyMd" color={theme.colors.textSecondary}>Đang tải cuộc trò chuyện...</AppText></View> : <FlatList
         ref={flatListRef}
         data={messages}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.messageList}
         onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+        ListFooterComponent={null}
         renderItem={({ item }) => {
           const isUser = item.role === 'user';
-          return (
-            <View
-              style={[
-                styles.messageRow,
-                isUser ? styles.messageRowUser : styles.messageRowAssistant,
-              ]}
-            >
-              <View
-                style={[
-                  styles.messageBubble,
-                  isUser
-                    ? [styles.bubbleUser, { backgroundColor: theme.colors.brandPrimary }]
-                    : [styles.bubbleAssistant, { backgroundColor: theme.colors.surface }],
-                ]}
-              >
-                {!isUser && (
-                  <AppText variant="caption" color={theme.colors.brandPrimary} style={styles.botTag}>
-                    KALLO AI ASSISTANT
+          const failed = item.status === 'FAILED';
+          const isPending = !isUser && !failed && (item.status === 'PENDING' || (!item.content && item.isStreaming));
+          return <View style={[styles.messageRow, isUser ? styles.messageRowUser : styles.messageRowAssistant]}>
+            <View style={[styles.messageBubble, isUser ? [styles.bubbleUser, { backgroundColor: theme.colors.brandPrimary }] : [styles.bubbleAssistant, { backgroundColor: theme.colors.surfaceMid, borderColor: theme.colors.surfaceBorder }]]}>
+              {!isUser ? <AppText variant="labelSm" color={theme.colors.brandPrimary}>KALLO AI</AppText> : null}
+              {isPending ? (
+                <View style={styles.typingContainer}>
+                  <TypingIndicator color={theme.colors.brandPrimary} />
+                  <AppText variant="caption" color={theme.colors.textSecondary} style={styles.typingLabel}>
+                    Đang soạn câu trả lời…
                   </AppText>
-                )}
-                <AppText
-                  variant="bodyMd"
-                  color={isUser ? '#FFFFFF' : theme.colors.textPrimary}
-                  style={styles.messageText}
-                >
-                  {item.content || (item.isStreaming ? '...' : '')}
+                </View>
+              ) : (
+                <AppText variant="bodyMd" color={isUser ? theme.colors.onBrand : theme.colors.textPrimary}>
+                  {failed ? (item.errorText ?? 'Tin nhắn chưa nhận được phản hồi.') : item.content}
                 </AppText>
-                <AppText
-                  variant="caption"
-                  color={isUser ? 'rgba(255,255,255,0.7)' : theme.colors.textSecondary}
-                  align={isUser ? 'right' : 'left'}
-                >
-                  {item.timestamp}
-                </AppText>
-              </View>
+              )}
+              <AppText variant="caption" color={isUser ? 'rgba(255,255,255,0.75)' : theme.colors.textSecondary} align={isUser ? 'right' : 'left'}>{item.timestamp}</AppText>
+              {!isUser && item.status === 'COMPLETED' && item.id !== 'welcome' ? <View style={styles.feedbackRow}>
+                <Pressable onPress={() => void handleFeedback(item.id, 1)} style={styles.feedbackButton} accessibilityRole="button" accessibilityLabel="Câu trả lời hữu ích"><ThumbsUpIcon size={16} color={item.feedback === 1 ? theme.colors.brandPrimary : theme.colors.textSecondary} /></Pressable>
+                <Pressable onPress={() => void handleFeedback(item.id, -1)} style={styles.feedbackButton} accessibilityRole="button" accessibilityLabel="Câu trả lời chưa hữu ích"><ThumbsDownIcon size={16} color={item.feedback === -1 ? theme.colors.statusDanger : theme.colors.textSecondary} /></Pressable>
+              </View> : null}
+              {failed ? <Pressable onPress={() => void handleRetry(item)} style={[styles.retryButton, { borderColor: theme.colors.surfaceBorder }]} accessibilityRole="button" accessibilityLabel="Thử lại câu trả lời"><RefreshCwIcon size={15} color={theme.colors.brandPrimary} /><AppText variant="labelMd" color={theme.colors.brandPrimary}>Thử lại</AppText></Pressable> : null}
             </View>
-          );
+          </View>;
         }}
-      />
+      />}
 
-      {/* ── FR-CHAT-05: Quick Prompts Strip ─────────────────────────── */}
-      <View style={styles.quickPromptsWrap}>
-        <FlatList
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          data={QUICK_PROMPTS}
-          keyExtractor={(item) => item}
-          contentContainerStyle={styles.promptsList}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[
-                styles.promptChip,
-                { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
-              ]}
-              onPress={() => handleSend(item)}
-              disabled={isTyping}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                <MessageSquareIcon size={12} color={theme.colors.textSecondary} />
-                <AppText variant="caption" color={theme.colors.textPrimary}>
-                  {item}
-                </AppText>
-              </View>
-            </TouchableOpacity>
-          )}
-        />
+      <View style={[styles.quickPromptsWrap, { borderTopColor: theme.colors.surfaceBorder }]}>
+        <FlatList horizontal showsHorizontalScrollIndicator={false} data={promptItems} keyExtractor={(item) => item} contentContainerStyle={styles.promptsList} renderItem={({ item }) => <Pressable style={[styles.promptChip, { backgroundColor: theme.colors.surfaceMid, borderColor: theme.colors.surfaceBorder }]} onPress={() => void handleSend(item)} disabled={isSending} accessibilityRole="button" accessibilityLabel={`Gợi ý: ${item}`}><MessageSquareIcon size={14} color={theme.colors.brandPrimary} /><AppText variant="caption" color={theme.colors.textPrimary}>{item}</AppText></Pressable>} />
       </View>
 
-      {/* ── Input Bar ───────────────────────────────────────────────── */}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}
-      >
-        <View style={[styles.inputContainer, { backgroundColor: theme.colors.surface }]}>
-          <TouchableOpacity
-            style={styles.voiceButton}
-            onPress={() => navigation.navigate('VoiceLogModal')}
-            accessibilityRole="button"
-            accessibilityLabel="Mở ghi nhật ký bằng giọng nói"
-          >
-            <QuickVoiceIcon size={20} color={theme.colors.brandPrimary} />
-          </TouchableOpacity>
-
-          <TextInput
-            style={[styles.input, { color: theme.colors.textPrimary }]}
-            placeholder="Hỏi Kallo về calo, thực đơn..."
-            placeholderTextColor={theme.colors.textSecondary}
-            value={inputText}
-            onChangeText={setInputText}
-            onSubmitEditing={() => handleSend()}
-            returnKeyType="send"
-            editable={!isTyping}
-          />
-
-          <TouchableOpacity
-            style={[
-              styles.sendButton,
-              {
-                backgroundColor: inputText.trim() && !isTyping
-                  ? theme.colors.brandPrimary
-                  : 'rgba(128,128,128,0.3)',
-              },
-            ]}
-            onPress={() => handleSend()}
-            disabled={!inputText.trim() || isTyping}
-            accessibilityRole="button"
-            accessibilityLabel="Gửi tin nhắn"
-          >
-            <AppText variant="bodySm" color="#FFFFFF">
-              Gửi
-            </AppText>
-          </TouchableOpacity>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}>
+        <View style={[styles.inputContainer, { backgroundColor: theme.colors.surfaceMid, borderTopColor: theme.colors.surfaceBorder }]}>
+          <TextInput style={[styles.input, { color: theme.colors.textPrimary, borderColor: theme.colors.surfaceBorder, backgroundColor: theme.colors.surfaceHigh }]} placeholder="Hỏi Kallo về calo, thực đơn..." placeholderTextColor={theme.colors.textSecondary} value={inputText} onChangeText={setInputText} onSubmitEditing={() => void handleSend()} returnKeyType="send" editable={!isSending} maxLength={2000} accessibilityLabel="Nội dung tin nhắn" />
+          <Pressable onPress={() => void handleSend()} style={[styles.sendButton, { backgroundColor: inputText.trim() && !isSending ? theme.colors.brandPrimary : theme.colors.textDisabled }]} disabled={!inputText.trim() || isSending} accessibilityRole="button" accessibilityLabel="Gửi tin nhắn"><SendIcon size={19} color={theme.colors.onBrand} /></Pressable>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -260,83 +277,32 @@ export function NutritionChatScreen({ route, navigation }: Props) {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  disclaimerBanner: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderColor: 'rgba(128,128,128,0.15)',
-    gap: 2,
-  },
-  messageList: {
-    padding: 16,
-    gap: 12,
-    paddingBottom: 20,
-  },
-  messageRow: {
-    flexDirection: 'row',
-  },
-  messageRowUser: {
-    justifyContent: 'flex-end',
-  },
-  messageRowAssistant: {
-    justifyContent: 'flex-start',
-  },
-  messageBubble: {
-    maxWidth: '82%',
-    padding: 14,
-    borderRadius: 18,
-    gap: 6,
-  },
-  bubbleUser: {
-    borderBottomRightRadius: 4,
-  },
-  bubbleAssistant: {
-    borderBottomLeftRadius: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(128,128,128,0.15)',
-  },
-  botTag: {
-    fontSize: 10,
-    letterSpacing: 0.5,
-  },
-  messageText: {
-    lineHeight: 22,
-  },
-  quickPromptsWrap: {
-    paddingVertical: 8,
-    borderTopWidth: 1,
-    borderColor: 'rgba(128,128,128,0.1)',
-  },
-  promptsList: {
-    paddingHorizontal: 16,
-    gap: 8,
-  },
-  promptChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 16,
-    borderWidth: 1,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    gap: 10,
-    borderTopWidth: 1,
-    borderColor: 'rgba(128,128,128,0.15)',
-  },
-  voiceButton: {
-    padding: 6,
-  },
-  input: {
-    flex: 1,
-    height: 40,
-    fontSize: 15,
-  },
-  sendButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
+  header: { minHeight: 56, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, borderBottomWidth: 1, gap: 8 },
+  iconButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 22 },
+  headerCopy: { flex: 1, gap: 2 },
+  statusLine: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  statusDot: { width: 7, height: 7, borderRadius: 4 },
+  disclaimerBanner: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, gap: 8 },
+  disclaimerText: { flex: 1 },
+  errorBanner: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginTop: 10, padding: 10, borderRadius: 12, gap: 8 },
+  errorText: { flex: 1 },
+  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10 },
+  typingContainer: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 2 },
+  typingLabel: { fontSize: 13 },
+  messageList: { padding: 16, gap: 12, paddingBottom: 20 },
+  messageRow: { flexDirection: 'row' },
+  messageRowUser: { justifyContent: 'flex-end' },
+  messageRowAssistant: { justifyContent: 'flex-start' },
+  messageBubble: { maxWidth: '84%', padding: 14, borderRadius: 18, gap: 7 },
+  bubbleUser: { borderBottomRightRadius: 4 },
+  bubbleAssistant: { borderBottomLeftRadius: 4, borderWidth: 1 },
+  feedbackRow: { flexDirection: 'row', gap: 4, marginTop: 2 },
+  feedbackButton: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+  retryButton: { minHeight: 40, flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', borderWidth: 1, borderRadius: 20, paddingHorizontal: 12, gap: 6 },
+  quickPromptsWrap: { paddingVertical: 8, borderTopWidth: 1 },
+  promptsList: { paddingHorizontal: 16, gap: 8 },
+  promptChip: { minHeight: 40, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, borderRadius: 20, borderWidth: 1, gap: 6 },
+  inputContainer: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 10, gap: 8, borderTopWidth: 1 },
+  input: { flex: 1, minHeight: 44, maxHeight: 100, borderRadius: 22, borderWidth: 1, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15 },
+  sendButton: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
 });

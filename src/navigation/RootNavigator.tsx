@@ -18,7 +18,7 @@ import { MealScanResultScreen } from '@/features/nutrition/screens/MealScanResul
 import { BarcodeScannerScreen } from '@/features/nutrition/screens/BarcodeScannerScreen';
 import { ActivityTrackerScreen, HealthSyncScreen, StepDetailScreen, WorkoutStatisticsScreen, WeightStatisticsScreen, RecordWeightScreen, BodyMetricScreen, HealthMetricsScreen, RunningWorkoutScreen, CyclingWorkoutScreen, BadmintonWorkoutScreen, PickleballWorkoutScreen, YogaWorkoutScreen, AddActivityScreen, ActivityWorkoutScreen, MeasurementGuideScreen } from '@/features/activity';
 import { MealPlanOverviewScreen, MealPlanWizardScreen, MealPlanDetailScreen } from '@/features/meal-plan';
-import { NutritionChatScreen, VoiceLogModal } from '@/features/assistant';
+import { ChatHistoryScreen, NutritionChatScreen, VoiceLogModal } from '@/features/assistant';
 import {
   StreakDetailModal,
   StreakRulesScreen,
@@ -98,7 +98,8 @@ export function RootNavigator() {
         <Stack.Screen name="MealPlanOverview" component={MealPlanOverviewScreen} options={{ headerShown: false }} />
         <Stack.Screen name="MealPlanWizard" component={MealPlanWizardScreen} options={{ title: 'Tạo thực đơn AI' }} />
         <Stack.Screen name="MealPlanDetail" component={MealPlanDetailScreen} options={{ title: 'Chi tiết thực đơn' }} />
-        <Stack.Screen name="NutritionChat" component={NutritionChatScreen} options={{ title: 'Trợ lý Kallo AI' }} />
+        <Stack.Screen name="NutritionChat" component={NutritionChatScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="ChatHistory" component={ChatHistoryScreen} options={{ headerShown: false }} />
         <Stack.Screen name="VoiceLogModal" component={VoiceLogModal} options={{ headerShown: false, presentation: 'modal' }} />
         <Stack.Screen name="StreakDetail" component={StreakDetailModal} options={{ headerShown: false, presentation: 'fullScreenModal' }} />
         <Stack.Screen name="StreakRules" component={StreakRulesScreen} options={{ headerShown: false, presentation: 'fullScreenModal' }} />

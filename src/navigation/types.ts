@@ -69,7 +69,8 @@ export type RootStackParamList = {
   MealPlanOverview: undefined;
   MealPlanWizard: undefined;
   MealPlanDetail: { planId?: string } | undefined;
-  NutritionChat: { initialPrompt?: string } | undefined;
+  NutritionChat: { initialPrompt?: string; conversationId?: string } | undefined;
+  ChatHistory: undefined;
   VoiceLogModal: { date?: string; meal?: MealSlot } | undefined;
   StreakDetail: undefined;
   StreakRules: undefined;
