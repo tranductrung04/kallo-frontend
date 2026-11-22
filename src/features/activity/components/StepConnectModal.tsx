@@ -39,15 +39,19 @@ export function StepConnectModal({
   const { requestHealthPermission, syncHealthData } = useActivity();
   const [connecting, setConnecting] = useState(false);
 
+  const isIos = Platform.OS === 'ios';
+  const providerName = isIos ? 'Apple Health' : 'Health Connect';
+  const providerLogo = isIos ? images.appleHealthIcon : images.healthConnectIcon;
+
   const defaultTitle =
     type === 'workout'
-      ? 'Wao cần quyền truy cập dữ liệu tập luyện'
-      : 'Wao cần quyền truy cập dữ liệu bước chân';
+      ? `Wao cần quyền truy cập dữ liệu tập luyện`
+      : `Wao cần quyền truy cập dữ liệu bước chân`;
 
   const defaultDesc =
     type === 'workout'
-      ? 'Wao cần quyền truy cập Health Connect để ghi nhận dữ liệu tập luyện như số bước chân, calo tiêu hao, thời gian vận động...'
-      : 'Kết nối với Health Connect để Wao có thể đọc bước chân và hỗ trợ bạn theo dõi mức độ hoạt động mỗi ngày.';
+      ? `Wao cần quyền truy cập ${providerName} để ghi nhận dữ liệu tập luyện như số bước chân, calo tiêu hao, thời gian vận động...`
+      : `Kết nối với ${providerName} để Wao có thể đọc bước chân và hỗ trợ bạn theo dõi mức độ hoạt động mỗi ngày.`;
 
   const finalTitle = title || defaultTitle;
   const finalDesc = description || defaultDesc;
@@ -121,10 +125,10 @@ export function StepConnectModal({
 
             <View style={[styles.healthConnectContainer, { backgroundColor: c.surfaceMid }]}>
               <Image
-                source={images.healthConnectIcon}
+                source={providerLogo}
                 style={styles.healthConnectLogo}
                 resizeMode="contain"
-                accessibilityLabel="Health Connect"
+                accessibilityLabel={providerName}
               />
             </View>
           </View>

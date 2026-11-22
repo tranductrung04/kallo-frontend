@@ -67,7 +67,10 @@ export function WeightStatisticsScreen({ navigation }: Props) {
   }, [monthOffset]);
 
   // Weight statistics
-  const weightLogs = nutritionState.weightLogs || [];
+  const weightLogs =
+    activityState.weightLogs && activityState.weightLogs.length > 0
+      ? activityState.weightLogs
+      : nutritionState.weightLogs || [];
   const latestWeight = weightLogs.length > 0 ? weightLogs[weightLogs.length - 1].weightKg : 50;
   const initialWeight = weightLogs.length > 0 ? weightLogs[0].weightKg : 50;
   const weightDifference = Number((latestWeight - initialWeight).toFixed(1));

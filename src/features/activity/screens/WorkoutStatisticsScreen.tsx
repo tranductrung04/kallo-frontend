@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Image,
   Modal,
@@ -41,7 +41,11 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
   const theme = useTheme();
   const { colors: c } = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const { state } = useActivity();
+  const { state, refreshActivities } = useActivity();
+
+  useEffect(() => {
+    void refreshActivities();
+  }, [refreshActivities]);
 
   const isConnected =
     state.syncStatus.healthConnect === 'CONNECTED' ||
@@ -93,14 +97,18 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
     return weekInfo.days.map((d) => {
       // Find manual activity logs for this date
       const activityLogs = state.activityLogs.filter((a) => a.date === d.isoDate);
-      const totalCalories = activityLogs.reduce((sum, a) => sum + (a.caloriesBurned || 0), 0);
+      const manualCalories = activityLogs.reduce((sum, a) => sum + (a.caloriesBurned || 0), 0);
+      const serverTotal = state.dailySummary[d.isoDate]?.activityCalories != null
+        ? Math.round(Number(state.dailySummary[d.isoDate].activityCalories))
+        : null;
+      const totalCalories = serverTotal ?? manualCalories;
       return {
         ...d,
         calories: totalCalories,
         hasData: totalCalories > 0,
       };
     });
-  }, [weekInfo.days, state.activityLogs]);
+  }, [weekInfo.days, state.activityLogs, state.dailySummary]);
 
   // Total and average calculations
   const { totalCaloriesThisWeek, avgDailyCalories, totalCaloriesLastWeek } = useMemo(() => {

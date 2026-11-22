@@ -22,6 +22,7 @@ import { MonthCalendarModal } from '@/components/common/MonthCalendarModal';
 import { useAlert } from '@/components/common';
 import { todayKey } from '@/features/nutrition/utils';
 import { useNutrition } from '@/features/nutrition/NutritionProvider';
+import { useActivity } from '../ActivityProvider';
 
 import { useTheme } from '@/theme';
 
@@ -49,6 +50,7 @@ export function RecordWeightScreen({ navigation, route }: Props) {
   const theme = useTheme();
   const { colors: c } = theme;
   const { state: nutritionState, addWeight } = useNutrition();
+  const { addWeightLog } = useActivity();
   const { showAlert } = useAlert();
 
   const weightLogs = nutritionState.weightLogs || [];
@@ -129,6 +131,7 @@ export function RecordWeightScreen({ navigation, route }: Props) {
 
   const handleSave = () => {
     addWeight(recordDate, weight);
+    void addWeightLog(weight, recordDate);
     navigation.goBack();
   };
 

@@ -49,6 +49,10 @@ export function StepDetailScreen({ navigation, route }: Props) {
     state.syncStatus.healthConnect === 'CONNECTED' ||
     (Platform.OS === 'ios' && state.syncStatus.appleHealth === 'CONNECTED');
 
+  const isIos = Platform.OS === 'ios';
+  const providerName = isIos ? 'Apple Health' : 'Health Connect';
+  const providerLogo = isIos ? images.appleHealthIcon : images.healthConnectIcon;
+
   const [activeTab, setActiveTab] = useState<TimeTab>('week');
   const [weekOffset, setWeekOffset] = useState(0); // 0 = current week, -1 = last week
   const [showConnectModal, setShowConnectModal] = useState(
@@ -103,13 +107,14 @@ export function StepDetailScreen({ navigation, route }: Props) {
       // Find sync log or activity steps for this date
       const syncLogsForDate = state.syncLogs.filter((l) => l.date === d.isoDate);
       const totalSyncSteps = syncLogsForDate.reduce((sum, l) => sum + (l.steps || 0), 0);
+      const steps = state.dailySummary[d.isoDate]?.totalSteps != null ? state.dailySummary[d.isoDate].totalSteps : totalSyncSteps;
       return {
         ...d,
-        steps: totalSyncSteps,
-        achieved: totalSyncSteps >= stepGoal,
+        steps,
+        achieved: steps >= stepGoal,
       };
     });
-  }, [weekInfo.days, state.syncLogs, stepGoal]);
+  }, [weekInfo.days, state.syncLogs, state.dailySummary, stepGoal]);
 
   // Average calculations
   const { thisWeekAvg, lastWeekAvg } = useMemo(() => {
@@ -290,8 +295,34 @@ export function StepDetailScreen({ navigation, route }: Props) {
           </View>
         </View>
 
-        {/* ── Banner: Connect Health Connect (if not connected) ── */}
-        {!isConnected && (
+        {/* ── Banner: Connect Health Connect or show connection status ── */}
+        {isConnected ? (
+          <TouchableOpacity
+            style={[styles.connectedBanner, { backgroundColor: c.surfaceHigh, borderColor: c.surfaceBorder }]}
+            onPress={() => navigation.navigate('HealthSync')}
+            activeOpacity={0.85}
+          >
+            <View style={styles.healthConnectIconBox}>
+              <Image
+                source={providerLogo}
+                style={styles.healthConnectImg}
+                resizeMode="contain"
+              />
+            </View>
+            <View style={styles.connectedBannerInfo}>
+              <View style={styles.connectedTitleRow}>
+                <Text style={[styles.connectedBannerTitle, { color: c.textPrimary }]}>
+                  {providerName} • Đã kết nối
+                </Text>
+                <View style={[styles.connectedDot, { backgroundColor: c.quickScanner }]} />
+              </View>
+              <Text style={[styles.connectedBannerSub, { color: c.textSecondary }]}>
+                Chạm để xem chi tiết hoặc đồng bộ dữ liệu
+              </Text>
+            </View>
+            <ChevronRightIcon size={18} color={c.textSecondary} />
+          </TouchableOpacity>
+        ) : (
           <TouchableOpacity
             style={styles.connectBanner}
             onPress={() => setShowConnectModal(true)}
@@ -299,13 +330,13 @@ export function StepDetailScreen({ navigation, route }: Props) {
           >
             <View style={styles.healthConnectIconBox}>
               <Image
-                source={images.healthConnectIcon}
+                source={providerLogo}
                 style={styles.healthConnectImg}
                 resizeMode="contain"
               />
             </View>
             <Text style={styles.connectBannerText}>
-              Kết nối Health Connect để tự động cập nhật.{' '}
+              Kết nối {providerName} để tự động cập nhật.{' '}
               <Text style={styles.connectBannerLink}>Kết nối ngay</Text>
             </Text>
           </TouchableOpacity>
@@ -762,6 +793,38 @@ function createStyles(theme: ThemeContextValue) {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 12,
+    },
+    connectedBanner: {
+      borderRadius: 14,
+      padding: 12,
+      marginHorizontal: 16,
+      marginBottom: 16,
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderWidth: 1,
+      gap: 12,
+    },
+    connectedBannerInfo: {
+      flex: 1,
+    },
+    connectedTitleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      marginBottom: 2,
+    },
+    connectedBannerTitle: {
+      fontSize: 13,
+      fontWeight: '700',
+    },
+    connectedDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+    },
+    connectedBannerSub: {
+      fontSize: 12,
+      fontWeight: '500',
     },
     healthConnectIconBox: {
       width: 38,

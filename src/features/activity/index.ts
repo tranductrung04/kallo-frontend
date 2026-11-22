@@ -1,4 +1,5 @@
 export * from './types';
+export * from './api';
 export * from './catalog';
 export * from './extendedActivities';
 export * from './utils';
