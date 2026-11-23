@@ -21,16 +21,10 @@ function unwrap<T>(response: { data: ApiEnvelope<T> | T }): T {
   return (payload && typeof payload === 'object' && 'data' in payload ? payload.data : payload) as T;
 }
 
-/**
- * Lấy thông tin streak của người dùng hiện tại từ API backend (`GET /api/streak`).
- */
 export function getStreak(): Promise<StreakResponse> {
   return api.get<ApiEnvelope<StreakResponse>>('/streak').then(unwrap);
 }
 
-/**
- * Định dạng thông báo lỗi thân thiện cho người dùng từ API streak.
- */
 export function getStreakApiErrorMessage(error: unknown): string {
   if (!axios.isAxiosError(error)) {
     return error instanceof Error ? error.message : 'Có lỗi xảy ra khi lấy dữ liệu chuỗi ngày.';

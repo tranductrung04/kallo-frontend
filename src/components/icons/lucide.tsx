@@ -20,7 +20,9 @@ import {
   ClipboardList,
   Clock,
   Cloud,
+  Crown,
   Droplet,
+  Droplets,
   Dumbbell,
   Flag,
   Flame,
@@ -35,6 +37,7 @@ import {
   Lock,
   LogOut,
   Mail,
+  Medal,
   Menu,
   MessageSquare,
   Mic,
@@ -55,6 +58,7 @@ import {
   Share2,
   ShieldCheck,
   Sparkles,
+  Sprout,
   Square,
   SquareCheck,
   Star,
@@ -218,6 +222,10 @@ export const ShareNodesIcon = fromLucide(Share2, { defaultSize: 22 });
 export const UsersIcon = fromLucide(Users, { defaultSize: 22 });
 export const UserSingleIcon = fromLucide(User, { defaultSize: 22 });
 export const TrophyIcon = fromLucide(Trophy, { defaultSize: 22, defaultColor: '#F59E0B' });
+export const CrownIcon = fromLucide(Crown, { defaultSize: 22, defaultColor: '#F59E0B' });
+export const MedalIcon = fromLucide(Medal, { defaultSize: 22, defaultColor: '#F59E0B' });
+export const SproutIcon = fromLucide(Sprout, { defaultSize: 22, defaultColor: '#10B981' });
+export const DropletsIcon = fromLucide(Droplets, { defaultSize: 22, defaultColor: '#0284C7' });
 
 export const BookIcon = fromLucide(BookOpen, { defaultSize: 16, defaultColor: '#A59EBD' });
 export const BookOpenIcon = BookIcon;

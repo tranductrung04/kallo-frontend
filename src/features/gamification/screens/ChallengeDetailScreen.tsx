@@ -95,7 +95,7 @@ export function ChallengeDetailScreen({ route, navigation }: Props) {
         {/* ── Banner Artwork ────────────────────────────────────────── */}
         <View style={styles.bannerWrap}>
           <Image
-            source={images.courseArtwork}
+            source={images.poweruserActiveBg}
             style={styles.bannerImage}
             resizeMode="cover"
           />
@@ -285,6 +285,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     overflow: 'hidden',
     position: 'relative',
+    backgroundColor: '#6C5CE7',
   },
   bannerImage: {
     width: '100%',
@@ -292,9 +293,10 @@ const styles = StyleSheet.create({
   },
   bannerOverlay: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(15, 12, 25, 0.55)',
+    backgroundColor: 'rgba(24, 16, 50, 0.25)',
     padding: 20,
-    justifyContent: 'flex-end',
+    paddingRight: 110,
+    justifyContent: 'center',
     gap: 6,
   },
   tagPill: {

@@ -1,14 +1,3 @@
-// ─── HomeDashboardScreen styles — theme-aware ─────────────────────────────────
-// Chỉ còn layout + khoảng cách + nền/viền riêng của màn hình này.
-//   • Chữ      → <AppText variant color /> (typography nằm trong theme)
-//   • Card     → <AppCard />  (surface, viền, bo góc, shadow level1)
-//   • Nút      → <AppButton />
-//   • Thanh/vòng tiến độ → <ProgressBar /> / <CircularProgress />
-//
-// StyleSheet.create là static nên không gọi được useTheme(); dùng factory:
-//   const styles = useMemo(() => createStyles(theme, width), [theme, width]);
-// ─────────────────────────────────────────────────────────────────────────────
-
 import { StyleSheet, type ViewStyle } from 'react-native';
 import type { ThemeContextValue } from '@/theme';
 
@@ -36,7 +25,7 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       backgroundColor: c.canvasBase,
     },
     scrollContent: {
-      paddingBottom: s.lg,
+      paddingBottom: s.xl + s.md,
     },
     topHeroContainer: {
       backgroundColor: c.surfaceMid,
@@ -519,6 +508,9 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
     },
 
     // 9. Weight Card
+    weightCard: {
+      marginBottom: s.md,
+    },
     weightHeaderRow: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -585,7 +577,22 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
     },
     communityTextWrap: {
       flex: 1,
-      gap: 2,
+      justifyContent: 'center',
+      gap: 3,
+    },
+    communityRightWrap: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: s.xs + 2,
+    },
+    incomingBadge: {
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: r.full,
+    },
+    incomingBadgeText: {
+      fontSize: 11,
+      fontWeight: '700',
     },
     bold: {
       fontWeight: '700',

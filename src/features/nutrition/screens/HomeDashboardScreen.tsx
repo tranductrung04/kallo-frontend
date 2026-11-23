@@ -47,6 +47,7 @@ import { createStyles } from './HomeDashboard/HomeDashboardScreen.styles';
 import {
   BowlFoodPlusIcon,
   CalendarIcon,
+  ChevronRightIcon,
   CutleryIcon,
   DropletIcon,
   FiberIcon,
@@ -108,6 +109,15 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const isStepConnected =
     activityState.syncStatus.healthConnect === 'CONNECTED' ||
     (Platform.OS === 'ios' && activityState.syncStatus.appleHealth === 'CONNECTED');
+
+  const unlockedBadgesCount = useMemo(
+    () => badges.filter((b) => b.isUnlocked).length,
+    [badges]
+  );
+  const joinedChallengesCount = useMemo(
+    () => challenges.filter((c) => c.isJoined).length,
+    [challenges]
+  );
 
   const latestActivityName = useMemo(() => {
     const dayActivities = getActivitiesForDate(selectedDate);
@@ -787,6 +797,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
           <AppCard
             accessibilityLabel="Thống kê cân nặng"
             onPress={() => root?.navigate('WeightStatistics')}
+            style={styles.weightCard}
           >
             <View style={styles.weightHeaderRow}>
               <Image
@@ -836,24 +847,43 @@ export function HomeDashboardScreen({ navigation }: Props) {
               <AppCard
                 style={styles.communityCard}
                 onPress={() => root?.navigate('BadgesChallenges')}
+                accessibilityLabel="Huy hiệu & Thử thách"
               >
-                <View style={[styles.communityIconBox, { backgroundColor: colors.brandSoftTint }]}>
+                <View
+                  style={[
+                    styles.communityIconBox,
+                    {
+                      backgroundColor:
+                        theme.scheme === 'dark'
+                          ? 'rgba(245, 158, 11, 0.15)'
+                          : 'rgba(217, 119, 6, 0.12)',
+                    },
+                  ]}
+                >
                   <TrophyIcon size={22} color={colors.vipStreak} />
                 </View>
                 <View style={styles.communityTextWrap}>
                   <AppText variant="labelLg" color={colors.textPrimary}>Huy hiệu & Thử thách</AppText>
                   <AppText variant="caption" color={colors.textSecondary}>
-                    {badges.filter((b) => b.isUnlocked).length}/{badges.length} huy hiệu • {challenges.filter((c) => c.isJoined).length} đang tham gia
+                    {unlockedBadgesCount}/{badges.length} huy hiệu
                   </AppText>
                 </View>
-                <AppText variant="caption" color={colors.brandPrimary} style={styles.bold}>
-                  Xem →
-                </AppText>
+                <View style={styles.communityRightWrap}>
+                  {joinedChallengesCount > 0 && (
+                    <View style={[styles.incomingBadge, { backgroundColor: colors.brandAction }]}>
+                      <AppText variant="labelSm" color={colors.onBrand} style={styles.incomingBadgeText}>
+                        {joinedChallengesCount} tham gia
+                      </AppText>
+                    </View>
+                  )}
+                  <ChevronRightIcon size={20} color={colors.textDisabled} />
+                </View>
               </AppCard>
 
               <AppCard
                 style={styles.communityCard}
                 onPress={() => root?.navigate('FriendsLeaderboard')}
+                accessibilityLabel="Bảng xếp hạng Bạn bè"
               >
                 <View style={[styles.communityIconBox, { backgroundColor: colors.brandSoftTint }]}>
                   <UsersIcon size={22} color={colors.brandPrimary} />
@@ -861,12 +891,19 @@ export function HomeDashboardScreen({ navigation }: Props) {
                 <View style={styles.communityTextWrap}>
                   <AppText variant="labelLg" color={colors.textPrimary}>Bảng xếp hạng Bạn bè</AppText>
                   <AppText variant="caption" color={colors.textSecondary}>
-                    {friends.length} bạn bè {incomingRequests.length > 0 ? `• ${incomingRequests.length} lời mời mới` : ''}
+                    {friends.length} bạn bè
                   </AppText>
                 </View>
-                <AppText variant="caption" color={colors.brandPrimary} style={styles.bold}>
-                  Xem →
-                </AppText>
+                <View style={styles.communityRightWrap}>
+                  {incomingRequests.length > 0 && (
+                    <View style={[styles.incomingBadge, { backgroundColor: colors.brandAction }]}>
+                      <AppText variant="labelSm" color={colors.onBrand} style={styles.incomingBadgeText}>
+                        {incomingRequests.length} lời mời
+                      </AppText>
+                    </View>
+                  )}
+                  <ChevronRightIcon size={20} color={colors.textDisabled} />
+                </View>
               </AppCard>
             </View>
           </View>

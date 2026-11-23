@@ -14,12 +14,14 @@ import { AppButton, AppCard, AppText, ProgressBar } from '@/components/common';
 import {
   CheckIcon,
   ChevronLeftIcon,
-  DropletIcon,
+  CrownIcon,
+  DropletsIcon,
   FlameIcon,
   FootprintsIcon,
   LockClosedIcon,
-  ScaleIcon,
+  ScaleOutlineIcon,
   SparklesIcon,
+  SproutIcon,
   TrophyIcon,
 } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
@@ -29,23 +31,101 @@ import { useGamification } from '../GamificationProvider';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'BadgesChallenges'>;
 
-function BadgeVisual({ id, size = 28 }: { id: string; size?: number }) {
-  switch (id) {
-    case 'first_log':
-      return <SparklesIcon size={size} color="#10B981" />;
-    case 'streak_7':
-      return <FlameIcon size={size} color="#F44E42" />;
-    case 'streak_30':
-      return <TrophyIcon size={size} color="#F59E0B" />;
-    case 'water_target':
-      return <DropletIcon size={size} color="#3B82F6" />;
-    case 'step_master':
-      return <FootprintsIcon size={size} color="#8B5CF6" />;
-    case 'weight_logger':
-      return <ScaleIcon size={size} color="#EC4899" />;
-    default:
-      return <TrophyIcon size={size} color="#F59E0B" />;
+export interface BadgeThemeConfig {
+  activeColor: string;
+  lightBg: string;
+  darkBg: string;
+  renderIcon: (size: number, color: string) => React.ReactNode;
+}
+
+export function getBadgeVisualConfig(badgeIdOrCode?: string): BadgeThemeConfig {
+  const key = (badgeIdOrCode || '').toLowerCase();
+
+  // 1. Khởi đầu xanh - Ghi nhận bữa ăn đầu tiên (Sprout / Mầm xanh)
+  if (key.includes('first') || key.includes('khởi đầu')) {
+    return {
+      activeColor: '#10B981',
+      lightBg: '#ECFDF5',
+      darkBg: 'rgba(16, 185, 129, 0.18)',
+      renderIcon: (size, color) => <SproutIcon size={size} color={color} />,
+    };
   }
+
+  // 2. Chiến binh 7 ngày - 7 ngày streak (Flame / Ngọn lửa)
+  if (key.includes('streak-7') || key.includes('streak_7') || key.includes('7')) {
+    return {
+      activeColor: '#EF4444',
+      lightBg: '#FEF2F2',
+      darkBg: 'rgba(239, 68, 68, 0.18)',
+      renderIcon: (size, color) => <FlameIcon size={size} color={color} />,
+    };
+  }
+
+  // 3. Bền bỉ 30 ngày - 30 ngày streak (Crown / Vương miện danh giá)
+  if (key.includes('streak-30') || key.includes('streak_30') || key.includes('30')) {
+    return {
+      activeColor: '#F59E0B',
+      lightBg: '#FEF3C7',
+      darkBg: 'rgba(245, 158, 11, 0.18)',
+      renderIcon: (size, color) => <CrownIcon size={size} color={color} />,
+    };
+  }
+
+  // 4. Thủy thần Kallo - 2.000ml nước (Droplets / Giọt nước)
+  if (key.includes('water') || key.includes('thủy thần')) {
+    return {
+      activeColor: '#0284C7',
+      lightBg: '#E0F2FE',
+      darkBg: 'rgba(2, 132, 199, 0.18)',
+      renderIcon: (size, color) => <DropletsIcon size={size} color={color} />,
+    };
+  }
+
+  // 5. Vạn bước chân - 10.000 bước (Footprints / Dấu chân)
+  if (key.includes('steps') || key.includes('bước')) {
+    return {
+      activeColor: '#8B5CF6',
+      lightBg: '#EDE9FE',
+      darkBg: 'rgba(139, 92, 246, 0.18)',
+      renderIcon: (size, color) => <FootprintsIcon size={size} color={color} />,
+    };
+  }
+
+  // 6. Bậc thầy Macro - Cân đối tỷ lệ P/C/F (Scale / Cán cân dinh dưỡng)
+  if (key.includes('macro') || key.includes('scale')) {
+    return {
+      activeColor: '#EC4899',
+      lightBg: '#FCE7F3',
+      darkBg: 'rgba(236, 72, 153, 0.18)',
+      renderIcon: (size, color) => <ScaleOutlineIcon size={size} color={color} />,
+    };
+  }
+
+  // Mặc định: Cúp vàng
+  return {
+    activeColor: '#F59E0B',
+    lightBg: '#FEF3C7',
+    darkBg: 'rgba(245, 158, 11, 0.18)',
+    renderIcon: (size, color) => <TrophyIcon size={size} color={color} />,
+  };
+}
+
+function BadgeVisual({
+  id,
+  isUnlocked = true,
+  size = 30,
+}: {
+  id: string;
+  isUnlocked?: boolean;
+  size?: number;
+}) {
+  const theme = useTheme();
+  const config = getBadgeVisualConfig(id);
+  const color = isUnlocked
+    ? config.activeColor
+    : (theme.scheme === 'dark' ? '#64748B' : '#94A3B8');
+
+  return config.renderIcon(size, color);
 }
 
 export function BadgesChallengesScreen({ navigation }: Props) {
@@ -127,6 +207,11 @@ export function BadgesChallengesScreen({ navigation }: Props) {
             <View style={styles.badgesGrid}>
               {badges.map((badge) => {
                 const isUnlocked = badge.isUnlocked;
+                const config = getBadgeVisualConfig(badge.id || badge.code);
+                const iconBgColor = isUnlocked
+                  ? (theme.scheme === 'dark' ? config.darkBg : config.lightBg)
+                  : (theme.scheme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)');
+
                 return (
                   <TouchableOpacity
                     key={badge.id}
@@ -135,8 +220,8 @@ export function BadgesChallengesScreen({ navigation }: Props) {
                       {
                         backgroundColor: theme.colors.surface,
                         borderColor: isUnlocked
-                          ? theme.colors.brandPrimary
-                          : 'rgba(128,128,128,0.2)',
+                          ? config.activeColor
+                          : (theme.scheme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'),
                       },
                       isUnlocked && styles.badgeCardUnlocked,
                     ]}
@@ -147,13 +232,11 @@ export function BadgesChallengesScreen({ navigation }: Props) {
                       style={[
                         styles.badgeIconBox,
                         {
-                          backgroundColor: isUnlocked
-                            ? theme.colors.brandSoftTint
-                            : 'rgba(128,128,128,0.1)',
+                          backgroundColor: iconBgColor,
                         },
                       ]}
                     >
-                      <BadgeVisual id={badge.id} size={30} />
+                      <BadgeVisual id={badge.id || badge.code} isUnlocked={isUnlocked} size={30} />
                     </View>
                     <AppText variant="bodySm" align="center" style={styles.badgeTitle}>
                       {badge.title}
@@ -163,20 +246,21 @@ export function BadgesChallengesScreen({ navigation }: Props) {
                         styles.unlockStatus,
                         {
                           backgroundColor: isUnlocked
-                            ? 'rgba(46, 204, 113, 0.15)'
-                            : 'rgba(128,128,128,0.1)',
+                            ? (theme.scheme === 'dark' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(16, 185, 129, 0.12)')
+                            : (theme.scheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'),
                         },
                       ]}
                     >
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                         {isUnlocked ? (
-                          <CheckIcon size={12} color={theme.colors.brandPrimary} />
+                          <CheckIcon size={12} color="#10B981" />
                         ) : (
                           <LockClosedIcon size={12} color={theme.colors.textSecondary} />
                         )}
                         <AppText
                           variant="caption"
-                          color={isUnlocked ? theme.colors.brandPrimary : theme.colors.textSecondary}
+                          color={isUnlocked ? '#10B981' : theme.colors.textSecondary}
+                          style={styles.bold}
                         >
                           {isUnlocked ? 'Đã mở' : 'Khóa'}
                         </AppText>
@@ -195,15 +279,21 @@ export function BadgesChallengesScreen({ navigation }: Props) {
             {/* ── Banner Artwork ────────────────────────────────────── */}
             <View style={styles.courseBannerWrap}>
               <Image
-                source={images.courseArtwork}
+                source={images.poweruserActiveBg}
                 style={styles.courseBanner}
                 resizeMode="cover"
               />
               <View style={styles.courseBannerOverlay}>
-                <AppText variant="headlineSm" color="#FFFFFF">
+                <View style={styles.courseBannerBadge}>
+                  <SparklesIcon size={12} color="#FFFFFF" />
+                  <AppText variant="caption" color="#FFFFFF" style={styles.courseBannerBadgeText}>
+                    THỬ THÁCH
+                  </AppText>
+                </View>
+                <AppText variant="headlineSm" color="#FFFFFF" style={styles.courseBannerTitle}>
                   Thử thách sức khỏe Kallo
                 </AppText>
-                <AppText variant="caption" color="rgba(255,255,255,0.85)">
+                <AppText variant="caption" color="rgba(255,255,255,0.9)" style={styles.courseBannerSubtitle}>
                   Cùng hàng ngàn thành viên rèn luyện thói quen dinh dưỡng
                 </AppText>
               </View>
@@ -340,60 +430,96 @@ export function BadgesChallengesScreen({ navigation }: Props) {
       >
         <View style={styles.modalBackdrop}>
           <View style={[styles.badgeModalBox, { backgroundColor: theme.colors.surface }]}>
-            <Image
-              source={images.awardBackground}
-              style={styles.awardBg}
-              resizeMode="cover"
-            />
-            <Image
-              source={images.paywallTrophy}
-              style={styles.trophyIcon}
-              resizeMode="contain"
-            />
+            {selectedBadge && (() => {
+              const config = getBadgeVisualConfig(selectedBadge.id || selectedBadge.code);
+              const headerBg = selectedBadge.isUnlocked
+                ? (theme.scheme === 'dark' ? config.darkBg : config.lightBg)
+                : (theme.scheme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)');
 
-            <AppText variant="headlineMd" align="center">
-              {selectedBadge?.title}
-            </AppText>
+              return (
+                <View
+                  style={[
+                    styles.modalHeaderSection,
+                    {
+                      backgroundColor: headerBg,
+                    },
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.modalBadgeIconBox,
+                      {
+                        backgroundColor: theme.colors.surface,
+                        borderColor: selectedBadge.isUnlocked
+                          ? config.activeColor + (theme.scheme === 'dark' ? '44' : '33')
+                          : theme.colors.surfaceBorder,
+                      },
+                    ]}
+                  >
+                    <BadgeVisual
+                      id={selectedBadge.id || selectedBadge.code}
+                      isUnlocked={selectedBadge.isUnlocked}
+                      size={44}
+                    />
+                  </View>
 
-            <AppText
-              variant="bodyMd"
-              color={theme.colors.textSecondary}
-              align="center"
-              style={styles.badgeDesc}
-            >
-              {selectedBadge?.description}
-            </AppText>
+                  <AppText variant="headlineMd" align="center" style={styles.modalBadgeTitle}>
+                    {selectedBadge.title}
+                  </AppText>
+                </View>
+              );
+            })()}
 
-            <View
-              style={[
-                styles.unlockedBox,
-                {
-                  backgroundColor: selectedBadge?.isUnlocked
-                    ? theme.colors.brandSoftTint
-                    : 'rgba(128,128,128,0.1)',
-                },
-              ]}
-            >
+            <View style={styles.modalBodySection}>
               <AppText
-                variant="bodySm"
-                color={
-                  selectedBadge?.isUnlocked
-                    ? theme.colors.brandPrimary
-                    : theme.colors.textSecondary
-                }
+                variant="bodyMd"
+                color={theme.colors.textSecondary}
                 align="center"
+                style={styles.badgeDesc}
               >
-                {selectedBadge?.isUnlocked
-                  ? `Mở khóa thành công • ${selectedBadge.unlockedAt || 'Gần đây'}`
-                  : 'Tiếp tục rèn luyện để mở khóa huy hiệu này nhé!'}
+                {selectedBadge?.description}
               </AppText>
-            </View>
 
-            <AppButton
-              label="Đóng"
-              variant="primary"
-              onPress={() => setSelectedBadge(null)}
-            />
+              <View
+                style={[
+                  styles.unlockedBox,
+                  {
+                    backgroundColor: selectedBadge?.isUnlocked
+                      ? (theme.scheme === 'dark' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(16, 185, 129, 0.12)')
+                      : (theme.scheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'),
+                  },
+                ]}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                  {selectedBadge?.isUnlocked ? (
+                    <CheckIcon size={14} color="#10B981" />
+                  ) : (
+                    <LockClosedIcon size={14} color={theme.colors.textSecondary} />
+                  )}
+                  <AppText
+                    variant="bodySm"
+                    color={
+                      selectedBadge?.isUnlocked
+                        ? '#10B981'
+                        : theme.colors.textSecondary
+                    }
+                    align="center"
+                    style={styles.bold}
+                  >
+                    {selectedBadge?.isUnlocked
+                      ? `Mở khóa thành công • ${selectedBadge.unlockedAt || 'Gần đây'}`
+                      : 'Tiếp tục rèn luyện để mở khóa huy hiệu này nhé!'}
+                  </AppText>
+                </View>
+              </View>
+
+              <AppButton
+                label="Đóng"
+                variant="primary"
+                onPress={() => setSelectedBadge(null)}
+                style={styles.closeBtn}
+              />
+            </View>
           </View>
         </View>
       </Modal>
@@ -493,10 +619,10 @@ const styles = StyleSheet.create({
   },
   courseBannerWrap: {
     height: 140,
-    borderRadius: 18,
+    borderRadius: 20,
     overflow: 'hidden',
     position: 'relative',
-    backgroundColor: '#1E1B2E',
+    backgroundColor: '#6C5CE7',
   },
   courseBanner: {
     width: '100%',
@@ -504,10 +630,39 @@ const styles = StyleSheet.create({
   },
   courseBannerOverlay: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(20, 18, 30, 0.45)',
+    backgroundColor: 'rgba(24, 16, 50, 0.22)',
     padding: 16,
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
+    paddingRight: 110,
     gap: 4,
+  },
+  courseBannerBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+    marginBottom: 2,
+  },
+  courseBannerBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  courseBannerTitle: {
+    fontWeight: '700',
+    textShadowColor: 'rgba(0, 0, 0, 0.25)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+  courseBannerSubtitle: {
+    lineHeight: 18,
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   challengeCard: {
     gap: 12,
@@ -550,27 +705,60 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 340,
     borderRadius: 24,
-    padding: 24,
-    alignItems: 'center',
-    gap: 14,
     overflow: 'hidden',
     position: 'relative',
+    alignItems: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 20,
+    elevation: 8,
   },
-  awardBg: {
-    ...StyleSheet.absoluteFill,
-    opacity: 0.15,
+  modalHeaderSection: {
+    width: '100%',
+    paddingTop: 28,
+    paddingBottom: 22,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    gap: 12,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
   },
-  trophyIcon: {
+  modalBadgeIconBox: {
     width: 80,
     height: 80,
-    marginBottom: 4,
+    borderRadius: 40,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  modalBadgeTitle: {
+    fontWeight: '700',
+  },
+  modalBodySection: {
+    width: '100%',
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 24,
+    alignItems: 'center',
+    gap: 14,
   },
   badgeDesc: {
     lineHeight: 20,
   },
   unlockedBox: {
     width: '100%',
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
     borderRadius: 12,
+  },
+  closeBtn: {
+    minWidth: 120,
+    paddingHorizontal: 28,
   },
 });
