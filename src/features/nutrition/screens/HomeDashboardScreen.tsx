@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   Image,
@@ -15,6 +15,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   AppButton,
   AppCard,
@@ -80,7 +81,13 @@ export function HomeDashboardScreen({ navigation }: Props) {
     getActivitiesForDate,
     state: activityState,
   } = useActivity();
-  const { streak, badges, challenges, friends, incomingRequests } = useGamification();
+  const { streak, badges, challenges, friends, incomingRequests, refreshStreak } = useGamification();
+
+  useFocusEffect(
+    useCallback(() => {
+      void refreshStreak();
+    }, [refreshStreak])
+  );
   const [calendarModalVisible, setCalendarModalVisible] = useState(false);
   const [calorieGoalModalVisible, setCalorieGoalModalVisible] = useState(false);
   const [calorieIntakeModalVisible, setCalorieIntakeModalVisible] = useState(false);

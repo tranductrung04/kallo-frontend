@@ -15,7 +15,7 @@ const initialState: NutritionState = {
 
 function id(prefix: string) { return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`; }
 
-const NutritionContext = createContext<NutritionContextValue | null>(null);
+export const NutritionContext = createContext<NutritionContextValue | null>(null);
 
 export function NutritionProvider({ children }: React.PropsWithChildren) {
   const [state, setState] = useState<NutritionState>(initialState);
