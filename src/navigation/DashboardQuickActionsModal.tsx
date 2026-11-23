@@ -149,10 +149,10 @@ export function DashboardQuickActionsModal({
 
   const handleAddWater = () => {
     onClose();
-    addWater(selectedDate, 250);
+    addWater(selectedDate, 200);
     showAlert({
       title: 'Đã ghi nhận',
-      message: 'Đã thêm 250ml nước vào nhật ký hôm nay.',
+      message: 'Đã thêm 200ml nước vào nhật ký hôm nay.',
       variant: 'success',
     });
   };

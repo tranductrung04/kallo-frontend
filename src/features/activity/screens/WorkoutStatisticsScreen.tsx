@@ -53,12 +53,24 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
 
   const [activeTab, setActiveTab] = useState<TimeTab>('week');
   const [weekOffset, setWeekOffset] = useState(0); // 0 = current week, -1 = last week
+  const [monthOffset, setMonthOffset] = useState(0); // 0 = current month, -1 = last month
+  const [sixMonthsOffset, setSixMonthsOffset] = useState(0); // 0 = current 6 months
   const [showConnectModal, setShowConnectModal] = useState(
     route.params?.openConnectModal ?? !isConnected
   );
 
-  // Week calculation
-  const weekInfo = useMemo(() => {
+  const getCaloriesForDate = (isoDate: string): number => {
+    const activityLogs = state.activityLogs.filter((a) => a.date === isoDate);
+    const manualCalories = activityLogs.reduce((sum, a) => sum + (a.caloriesBurned || 0), 0);
+    const serverTotal =
+      state.dailySummary[isoDate]?.activityCalories != null
+        ? Math.round(Number(state.dailySummary[isoDate].activityCalories))
+        : null;
+    return serverTotal ?? manualCalories;
+  };
+
+  // 1. Week calculation
+  const weekData = useMemo(() => {
     const now = new Date();
     now.setDate(now.getDate() + weekOffset * 7);
 
@@ -69,15 +81,19 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
 
     const days = [];
     const dayNames = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+    const todayIso = new Date().toISOString().split('T')[0];
 
     for (let i = 0; i < 7; i++) {
       const d = new Date(monday);
       d.setDate(monday.getDate() + i);
       const isoDate = d.toISOString().split('T')[0];
+      const cal = getCaloriesForDate(isoDate);
       days.push({
         name: dayNames[i],
         isoDate,
-        isToday: isoDate === new Date().toISOString().split('T')[0],
+        calories: cal,
+        hasData: cal > 0,
+        isToday: isoDate === todayIso,
       });
     }
 
@@ -86,62 +102,205 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
     sunday.setDate(monday.getDate() + 6);
     const endLabel = `${sunday.getDate()}/${sunday.getMonth() + 1}`;
 
-    return {
-      dateRangeLabel: `${startLabel} - ${endLabel}`,
-      days,
-    };
-  }, [weekOffset]);
-
-  // Workout data for the week
-  const weekWorkoutData = useMemo(() => {
-    return weekInfo.days.map((d) => {
-      // Find manual activity logs for this date
-      const activityLogs = state.activityLogs.filter((a) => a.date === d.isoDate);
-      const manualCalories = activityLogs.reduce((sum, a) => sum + (a.caloriesBurned || 0), 0);
-      const serverTotal = state.dailySummary[d.isoDate]?.activityCalories != null
-        ? Math.round(Number(state.dailySummary[d.isoDate].activityCalories))
-        : null;
-      const totalCalories = serverTotal ?? manualCalories;
-      return {
-        ...d,
-        calories: totalCalories,
-        hasData: totalCalories > 0,
-      };
-    });
-  }, [weekInfo.days, state.activityLogs, state.dailySummary]);
-
-  // Total and average calculations
-  const { totalCaloriesThisWeek, avgDailyCalories, totalCaloriesLastWeek } = useMemo(() => {
-    const totalThisWeek = weekWorkoutData.reduce((sum, d) => sum + d.calories, 0);
+    const totalThisWeek = days.reduce((sum, d) => sum + d.calories, 0);
     const avg = Math.round(totalThisWeek / 7);
 
-    // Calculate last week roughly from activityLogs
+    return {
+      dateRangeLabel: `${startLabel} - ${endLabel}`,
+      items: days,
+      totalCalories: totalThisWeek,
+      avgDailyCalories: avg,
+      periodLabel: 'Mục tiêu/tuần',
+      totalLabel: 'Tổng calo tập luyện',
+    };
+  }, [weekOffset, state.activityLogs, state.dailySummary]);
+
+  // 2. Month calculation
+  const monthData = useMemo(() => {
     const now = new Date();
-    now.setDate(now.getDate() + (weekOffset - 1) * 7);
+    const targetDate = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
+    const year = targetDate.getFullYear();
+    const month = targetDate.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const todayIso = new Date().toISOString().split('T')[0];
+
+    const weekRanges = [
+      { start: 1, end: 7, name: 'Tuần 1' },
+      { start: 8, end: 14, name: 'Tuần 2' },
+      { start: 15, end: 21, name: 'Tuần 3' },
+      { start: 22, end: 28, name: 'Tuần 4' },
+    ];
+    if (daysInMonth > 28) {
+      weekRanges.push({ start: 29, end: daysInMonth, name: 'Tuần 5' });
+    }
+
+    let monthTotalCalories = 0;
+
+    const items = weekRanges.map((w) => {
+      let bucketCalories = 0;
+      let containsToday = false;
+
+      for (let dayNum = w.start; dayNum <= w.end; dayNum++) {
+        const mStr = String(month + 1).padStart(2, '0');
+        const dStr = String(dayNum).padStart(2, '0');
+        const isoDate = `${year}-${mStr}-${dStr}`;
+        const cal = getCaloriesForDate(isoDate);
+
+        if (isoDate === todayIso) {
+          containsToday = true;
+        }
+
+        bucketCalories += cal;
+        monthTotalCalories += cal;
+      }
+
+      return {
+        name: w.name,
+        isoDate: `${year}-${String(month + 1).padStart(2, '0')}-${String(w.start).padStart(2, '0')}`,
+        calories: bucketCalories,
+        hasData: bucketCalories > 0,
+        isToday: containsToday,
+      };
+    });
+
+    const avg = Math.round(monthTotalCalories / daysInMonth);
+
+    return {
+      dateRangeLabel: `Tháng ${month + 1}/${year}`,
+      items,
+      totalCalories: monthTotalCalories,
+      avgDailyCalories: avg,
+      periodLabel: 'Mục tiêu/tháng',
+      totalLabel: 'Tổng calo tháng này',
+    };
+  }, [monthOffset, state.activityLogs, state.dailySummary]);
+
+  // 3. Six Months calculation
+  const sixMonthsData = useMemo(() => {
+    const now = new Date();
+    const endTarget = new Date(now.getFullYear(), now.getMonth() + sixMonthsOffset * 6, 1);
+    const currentMonthIndex = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    let totalPeriodCalories = 0;
+    let totalDays = 0;
+
+    const items = [];
+    for (let i = 5; i >= 0; i--) {
+      const mDate = new Date(endTarget.getFullYear(), endTarget.getMonth() - i, 1);
+      const year = mDate.getFullYear();
+      const month = mDate.getMonth();
+      const daysInM = new Date(year, month + 1, 0).getDate();
+      totalDays += daysInM;
+
+      let mCal = 0;
+      for (let dayNum = 1; dayNum <= daysInM; dayNum++) {
+        const mStr = String(month + 1).padStart(2, '0');
+        const dStr = String(dayNum).padStart(2, '0');
+        const isoDate = `${year}-${mStr}-${dStr}`;
+        mCal += getCaloriesForDate(isoDate);
+      }
+
+      totalPeriodCalories += mCal;
+      const isCurrentMonth = year === currentYear && month === currentMonthIndex;
+
+      items.push({
+        name: `Th ${month + 1}`,
+        isoDate: `${year}-${String(month + 1).padStart(2, '0')}-01`,
+        calories: mCal,
+        hasData: mCal > 0,
+        isToday: isCurrentMonth,
+      });
+    }
+
+    const avg = totalDays > 0 ? Math.round(totalPeriodCalories / totalDays) : 0;
+    const firstMonthDate = new Date(endTarget.getFullYear(), endTarget.getMonth() - 5, 1);
+    const startRange = `${String(firstMonthDate.getMonth() + 1).padStart(2, '0')}/${firstMonthDate.getFullYear()}`;
+    const endRange = `${String(endTarget.getMonth() + 1).padStart(2, '0')}/${endTarget.getFullYear()}`;
+
+    return {
+      dateRangeLabel: `${startRange} - ${endRange}`,
+      items,
+      totalCalories: totalPeriodCalories,
+      avgDailyCalories: avg,
+      periodLabel: 'Mục tiêu/6 tháng',
+      totalLabel: 'Tổng calo 6 tháng này',
+    };
+  }, [sixMonthsOffset, state.activityLogs, state.dailySummary]);
+
+  // Active view dataset
+  const activeViewData = useMemo(() => {
+    switch (activeTab) {
+      case 'month':
+        return monthData;
+      case 'six_months':
+        return sixMonthsData;
+      case 'week':
+      default:
+        return weekData;
+    }
+  }, [activeTab, weekData, monthData, sixMonthsData]);
+
+  const handlePrevTime = () => {
+    if (activeTab === 'week') {
+      setWeekOffset((prev) => prev - 1);
+    } else if (activeTab === 'month') {
+      setMonthOffset((prev) => prev - 1);
+    } else {
+      setSixMonthsOffset((prev) => prev - 1);
+    }
+  };
+
+  const handleNextTime = () => {
+    if (activeTab === 'week') {
+      setWeekOffset((prev) => Math.min(0, prev + 1));
+    } else if (activeTab === 'month') {
+      setMonthOffset((prev) => Math.min(0, prev + 1));
+    } else {
+      setSixMonthsOffset((prev) => Math.min(0, prev + 1));
+    }
+  };
+
+  const isLatestTime =
+    activeTab === 'week'
+      ? weekOffset >= 0
+      : activeTab === 'month'
+      ? monthOffset >= 0
+      : sixMonthsOffset >= 0;
+
+  const maxCaloInView = Math.max(...activeViewData.items.map((d) => d.calories), 500);
+  const chartMaxScale = Math.ceil(maxCaloInView / 100) * 100;
+  const weeklyCalorieGoal = 0; // Default 0 as shown in reference image
+  const avgDailyCalories = activeViewData.avgDailyCalories;
+
+  const { totalCaloriesThisWeek, totalCaloriesLastWeek } = useMemo(() => {
+    const now = new Date();
     const day = now.getDay();
     const diffToMonday = day === 0 ? -6 : 1 - day;
-    const lastMonday = new Date(now);
-    lastMonday.setDate(now.getDate() + diffToMonday);
+    const thisMonday = new Date(now);
+    thisMonday.setDate(now.getDate() + diffToMonday);
 
+    let thisWeekTotal = 0;
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(thisMonday);
+      d.setDate(thisMonday.getDate() + i);
+      thisWeekTotal += getCaloriesForDate(d.toISOString().split('T')[0]);
+    }
+
+    const lastMonday = new Date(thisMonday);
+    lastMonday.setDate(thisMonday.getDate() - 7);
     let lastWeekTotal = 0;
     for (let i = 0; i < 7; i++) {
       const d = new Date(lastMonday);
       d.setDate(lastMonday.getDate() + i);
-      const isoDate = d.toISOString().split('T')[0];
-      const logs = state.activityLogs.filter((a) => a.date === isoDate);
-      lastWeekTotal += logs.reduce((sum, a) => sum + (a.caloriesBurned || 0), 0);
+      lastWeekTotal += getCaloriesForDate(d.toISOString().split('T')[0]);
     }
 
     return {
-      totalCaloriesThisWeek: totalThisWeek,
-      avgDailyCalories: avg,
+      totalCaloriesThisWeek: thisWeekTotal,
       totalCaloriesLastWeek: lastWeekTotal,
     };
-  }, [weekWorkoutData, state.activityLogs, weekOffset]);
-
-  const maxCaloInWeek = Math.max(...weekWorkoutData.map((d) => d.calories), 500);
-  const chartMaxScale = Math.ceil(maxCaloInWeek / 100) * 100;
-  const weeklyCalorieGoal = 0; // Default 0 as shown in reference image
+  }, [state.activityLogs, state.dailySummary]);
 
   return (
     <View style={[styles.container, { paddingTop: Math.max(8, insets.top) }]}>
@@ -218,20 +377,20 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
         {/* ── Date Navigator ─────────────────────────────────── */}
         <View style={styles.dateNavigator}>
           <TouchableOpacity
-            onPress={() => setWeekOffset((prev) => prev - 1)}
+            onPress={handlePrevTime}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             style={styles.dateNavBtn}
           >
             <ChevronLeftIcon size={16} color={c.textSecondary} />
           </TouchableOpacity>
 
-          <Text style={styles.dateRangeText}>{weekInfo.dateRangeLabel}</Text>
+          <Text style={styles.dateRangeText}>{activeViewData.dateRangeLabel}</Text>
 
           <TouchableOpacity
-            onPress={() => setWeekOffset((prev) => Math.min(0, prev + 1))}
-            disabled={weekOffset >= 0}
+            onPress={handleNextTime}
+            disabled={isLatestTime}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            style={[styles.dateNavBtn, weekOffset >= 0 && { opacity: 0.3 }]}
+            style={[styles.dateNavBtn, isLatestTime && { opacity: 0.3 }]}
           >
             <ChevronRightIcon size={16} color={c.textSecondary} />
           </TouchableOpacity>
@@ -271,7 +430,7 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
 
             {/* Bars container */}
             <View style={styles.barsContainer}>
-              {weekWorkoutData.map((d, idx) => {
+              {activeViewData.items.map((d, idx) => {
                 const heightPercent = chartMaxScale > 0 ? Math.min(100, (d.calories / chartMaxScale) * 100) : 0;
                 return (
                   <View key={idx} style={styles.barCol}>
@@ -287,7 +446,7 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
                         />
                       )}
                     </View>
-                    <Text style={[styles.xAxisLabel, d.isToday && styles.xAxisLabelToday]}>
+                    <Text style={[styles.xAxisLabel, d.isToday && styles.xAxisLabelToday]} numberOfLines={1}>
                       {d.name}
                     </Text>
                   </View>
@@ -354,23 +513,23 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
                 {formatNumber(weeklyCalorieGoal)}{' '}
                 <Text style={styles.statUnit}>calo</Text>
               </Text>
-              <Text style={styles.statLabel}>Mục tiêu/tuần</Text>
+              <Text style={styles.statLabel}>{activeViewData.periodLabel}</Text>
             </View>
 
             <View style={styles.statCol}>
               <Text style={styles.statNumber}>
-                {formatNumber(totalCaloriesThisWeek)}{' '}
+                {formatNumber(activeViewData.totalCalories)}{' '}
                 <Text style={styles.statUnit}>calo</Text>
               </Text>
-              <Text style={styles.statLabel}>Tổng calo tập luyện</Text>
+              <Text style={styles.statLabel}>{activeViewData.totalLabel}</Text>
             </View>
           </View>
 
-          {/* 7 Days Circular Badges Row */}
+          {/* Circular Badges Row */}
           <View style={styles.weekCirclesRow}>
-            {weekWorkoutData.map((d, idx) => (
+            {activeViewData.items.map((d, idx) => (
               <View key={idx} style={styles.weekDayCircleCol}>
-                <Text style={styles.circleDayName}>{d.name}</Text>
+                <Text style={styles.circleDayName} numberOfLines={1}>{d.name}</Text>
                 <View
                   style={[
                     styles.dayCircle,
@@ -781,6 +940,7 @@ function createStyles(theme: ThemeContextValue) {
       marginBottom: 18,
     },
     weekDayCircleCol: {
+      flex: 1,
       alignItems: 'center',
       gap: 6,
     },

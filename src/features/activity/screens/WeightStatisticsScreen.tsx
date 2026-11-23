@@ -53,18 +53,67 @@ export function WeightStatisticsScreen({ navigation }: Props) {
 
   const [activeTab, setActiveTab] = useState<TimeTab>('1_month');
   const [monthOffset, setMonthOffset] = useState(0); // 0 = current month
+  const [sixMonthsOffset, setSixMonthsOffset] = useState(0);
+  const [yearOffset, setYearOffset] = useState(0);
   const [showConnectModal, setShowConnectModal] = useState(false);
 
-  // Month navigation calculation
-  const monthInfo = useMemo(() => {
-    const d = new Date();
-    d.setMonth(d.getMonth() + monthOffset);
+  // Time navigation calculation based on activeTab
+  const timeInfo = useMemo(() => {
+    const now = new Date();
+
+    if (activeTab === '6_months') {
+      const endTarget = new Date(now.getFullYear(), now.getMonth() + sixMonthsOffset * 6, 1);
+      const startTarget = new Date(endTarget.getFullYear(), endTarget.getMonth() - 5, 1);
+      const startLabel = `${String(startTarget.getMonth() + 1).padStart(2, '0')}/${startTarget.getFullYear()}`;
+      const endLabel = `${String(endTarget.getMonth() + 1).padStart(2, '0')}/${endTarget.getFullYear()}`;
+
+      const xLabels: string[] = [];
+      for (let i = 5; i >= 0; i--) {
+        const m = new Date(endTarget.getFullYear(), endTarget.getMonth() - i, 1);
+        xLabels.push(`Th ${m.getMonth() + 1}`);
+      }
+
+      return {
+        label: `${startLabel} - ${endLabel}`,
+        xLabels,
+      };
+    }
+
+    if (activeTab === '12_months') {
+      const targetYear = now.getFullYear() + yearOffset;
+      const xLabels = ['T1', 'T3', 'T5', 'T7', 'T9', 'T11'];
+      return {
+        label: `Năm ${targetYear}`,
+        xLabels,
+      };
+    }
+
+    // Default: 1_month
+    const d = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
     return {
-      label: `Tháng ${d.getMonth() + 1}`,
-      year: d.getFullYear(),
-      month: d.getMonth() + 1,
+      label: `Tháng ${d.getMonth() + 1}/${d.getFullYear()}`,
+      xLabels: ['01', '05', '10', '15', '20', '25', '31'],
     };
-  }, [monthOffset]);
+  }, [activeTab, monthOffset, sixMonthsOffset, yearOffset]);
+
+  const handlePrevTime = () => {
+    if (activeTab === '1_month') setMonthOffset((prev) => prev - 1);
+    else if (activeTab === '6_months') setSixMonthsOffset((prev) => prev - 1);
+    else setYearOffset((prev) => prev - 1);
+  };
+
+  const handleNextTime = () => {
+    if (activeTab === '1_month') setMonthOffset((prev) => Math.min(0, prev + 1));
+    else if (activeTab === '6_months') setSixMonthsOffset((prev) => Math.min(0, prev + 1));
+    else setYearOffset((prev) => Math.min(0, prev + 1));
+  };
+
+  const isLatestTime =
+    activeTab === '1_month'
+      ? monthOffset >= 0
+      : activeTab === '6_months'
+      ? sixMonthsOffset >= 0
+      : yearOffset >= 0;
 
   // Weight statistics
   const weightLogs =
@@ -169,20 +218,20 @@ export function WeightStatisticsScreen({ navigation }: Props) {
         {/* ── Month Navigator ─────────────────────────────────── */}
         <View style={styles.dateNavigator}>
           <TouchableOpacity
-            onPress={() => setMonthOffset((prev) => prev - 1)}
+            onPress={handlePrevTime}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             style={styles.dateNavBtn}
           >
             <ChevronLeftIcon size={16} color={c.textSecondary} />
           </TouchableOpacity>
 
-          <Text style={styles.dateRangeText}>{monthInfo.label}</Text>
+          <Text style={styles.dateRangeText}>{timeInfo.label}</Text>
 
           <TouchableOpacity
-            onPress={() => setMonthOffset((prev) => Math.min(0, prev + 1))}
-            disabled={monthOffset >= 0}
+            onPress={handleNextTime}
+            disabled={isLatestTime}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            style={[styles.dateNavBtn, monthOffset >= 0 && { opacity: 0.3 }]}
+            style={[styles.dateNavBtn, isLatestTime && { opacity: 0.3 }]}
           >
             <ChevronRightIcon size={16} color={c.textSecondary} />
           </TouchableOpacity>
@@ -234,10 +283,10 @@ export function WeightStatisticsScreen({ navigation }: Props) {
             </View>
           </View>
 
-          {/* X-axis days: 01, 05, 10, 15, 20, 25, 31 */}
+          {/* X-axis labels */}
           <View style={styles.xAxisRow}>
-            {['01', '05', '10', '15', '20', '25', '31'].map((day) => (
-              <Text key={day} style={styles.xAxisLabel}>{day}</Text>
+            {timeInfo.xLabels.map((lbl) => (
+              <Text key={lbl} style={styles.xAxisLabel}>{lbl}</Text>
             ))}
           </View>
 
