@@ -329,7 +329,7 @@ export function AccountProfileScreen({ navigation }: Props) {
           <View
             style={[
               styles.metricsCapsule,
-              { backgroundColor: theme.colors.surfaceHigh, borderColor: theme.colors.surfaceBorder },
+              { backgroundColor: theme.colors.surface, borderColor: theme.colors.surfaceBorder },
             ]}
           >
             <View style={styles.metricItemCol}>
@@ -361,37 +361,31 @@ export function AccountProfileScreen({ navigation }: Props) {
           </View>
 
           <View style={styles.metricsPillsRow}>
-            <TouchableOpacity
-              activeOpacity={0.85}
+            <AppButton
+              label="Chỉ số sức khỏe"
+              variant="outline"
               style={[
                 styles.subActionPill,
                 {
-                  backgroundColor: isDark ? 'rgba(158, 100, 247, 0.15)' : '#EDE5FF',
-                  borderColor: isDark ? 'rgba(158, 100, 247, 0.3)' : '#D6B8FF',
+                  backgroundColor: theme.colors.surface,
+                  borderColor: theme.colors.brandAction,
                 },
               ]}
               onPress={() => setShowHealthMetricsModal(true)}
-            >
-              <AppText variant="labelMd" color={theme.colors.brandPrimary}>
-                Chỉ số sức khỏe
-              </AppText>
-            </TouchableOpacity>
+            />
 
-            <TouchableOpacity
-              activeOpacity={0.85}
+            <AppButton
+              label="Hồ sơ thể chất"
+              variant="outline"
               style={[
                 styles.subActionPill,
                 {
-                  backgroundColor: isDark ? 'rgba(158, 100, 247, 0.15)' : '#EDE5FF',
-                  borderColor: isDark ? 'rgba(158, 100, 247, 0.3)' : '#D6B8FF',
+                  backgroundColor: theme.colors.surface,
+                  borderColor: theme.colors.brandAction,
                 },
               ]}
               onPress={() => root?.navigate('Onboarding', { screen: 'Onboarding' })}
-            >
-              <AppText variant="labelMd" color={theme.colors.brandPrimary}>
-                Hồ sơ thể chất
-              </AppText>
-            </TouchableOpacity>
+            />
           </View>
         </View>
 
@@ -568,7 +562,7 @@ export function AccountProfileScreen({ navigation }: Props) {
             {/* Bottom Button inside Macro Card */}
             <AppButton
               label="Tuỳ chỉnh mục tiêu"
-              variant="secondary"
+              variant="outline"
               onPress={() => setShowCustomizeGoalsModal(true)}
               style={styles.customizeGoalBtn}
             />
@@ -578,7 +572,7 @@ export function AccountProfileScreen({ navigation }: Props) {
         {/* ── Trợ lý dinh dưỡng ─────────────────────────────────────────── */}
         <View style={styles.sectionContainer}>
           <TouchableOpacity
-            style={[styles.chatEntryCard, { backgroundColor: theme.colors.brandSoftTint, borderColor: theme.colors.surfaceBorder }]}
+            style={[styles.chatEntryCard, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
             activeOpacity={0.82}
             onPress={() => root?.navigate('NutritionChat')}
             accessibilityRole="button"

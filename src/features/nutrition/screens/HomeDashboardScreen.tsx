@@ -441,7 +441,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
               </Pressable>
               <AppButton
                 label="Xem báo cáo"
-                variant="secondary"
+                variant="outline"
                 onPress={() => root?.navigate('ReportOverview')}
               />
             </View>

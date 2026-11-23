@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Dimensions,
   Modal,
@@ -59,13 +59,7 @@ export function ShareJourneyModal({
   const theme = useTheme();
   const { colors: c } = theme;
   const isAppDark = theme.scheme === 'dark';
-
-  // 0 = Dark Template, 1 = Light Template
-  const [selectedTemplate, setSelectedTemplate] = useState<number>(() =>
-    theme.scheme === 'light' ? 1 : 0
-  );
-
-  const isLightTemplate = selectedTemplate === 1;
+  const isLightTemplate = !isAppDark;
 
   const handleShare = async () => {
     try {
@@ -136,60 +130,6 @@ export function ShareJourneyModal({
         <Text style={[styles.subtitle, { color: subtitleColor }]}>
           CHỌN MỘT TEMPLATE BẠN THÍCH
         </Text>
-
-        {/* ── Template Theme Segmented Toggle ────────────────── */}
-        <View
-          style={[
-            styles.templateToggleContainer,
-            {
-              backgroundColor: isAppDark ? '#1E1933' : '#EDE8FA',
-            },
-          ]}
-        >
-          <TouchableOpacity
-            style={[
-              styles.templateToggleBtn,
-              selectedTemplate === 0 && styles.templateToggleBtnActive,
-            ]}
-            onPress={() => setSelectedTemplate(0)}
-            activeOpacity={0.8}
-            accessibilityRole="button"
-            accessibilityLabel="Giao diện tối"
-          >
-            <Text
-              style={[
-                styles.templateToggleText,
-                selectedTemplate === 0
-                  ? styles.templateToggleTextActive
-                  : { color: isAppDark ? '#8A849F' : '#6A6284' },
-              ]}
-            >
-              🌙 Giao diện tối
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.templateToggleBtn,
-              selectedTemplate === 1 && styles.templateToggleBtnActive,
-            ]}
-            onPress={() => setSelectedTemplate(1)}
-            activeOpacity={0.8}
-            accessibilityRole="button"
-            accessibilityLabel="Giao diện sáng"
-          >
-            <Text
-              style={[
-                styles.templateToggleText,
-                selectedTemplate === 1
-                  ? styles.templateToggleTextActive
-                  : { color: isAppDark ? '#8A849F' : '#6A6284' },
-              ]}
-            >
-              ☀️ Giao diện sáng
-            </Text>
-          </TouchableOpacity>
-        </View>
 
         {/* ── Template Card Preview ──────────────────────────── */}
         <View style={styles.previewContainer}>
@@ -373,23 +313,17 @@ export function ShareJourneyModal({
 
           {/* ── Pagination Dots ──────────────────────────────── */}
           <View style={styles.paginationRow}>
-            <TouchableOpacity
-              onPress={() => setSelectedTemplate(0)}
+            <View
               style={[
                 styles.paginationDot,
-                selectedTemplate === 0 && styles.paginationDotActive,
+                !isLightTemplate && styles.paginationDotActive,
               ]}
-              accessibilityRole="button"
-              accessibilityLabel="Giao diện tối"
             />
-            <TouchableOpacity
-              onPress={() => setSelectedTemplate(1)}
+            <View
               style={[
                 styles.paginationDot,
-                selectedTemplate === 1 && styles.paginationDotActive,
+                isLightTemplate && styles.paginationDotActive,
               ]}
-              accessibilityRole="button"
-              accessibilityLabel="Giao diện sáng"
             />
           </View>
         </View>
@@ -447,30 +381,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 10,
     fontFamily: 'PlusJakartaSans_700Bold',
-  },
-  templateToggleContainer: {
-    flexDirection: 'row',
-    alignSelf: 'center',
-    borderRadius: 20,
-    padding: 3,
-    marginBottom: 8,
-  },
-  templateToggleBtn: {
-    paddingHorizontal: 16,
-    paddingVertical: 7,
-    borderRadius: 18,
-  },
-  templateToggleBtnActive: {
-    backgroundColor: '#7B4FE0',
-  },
-  templateToggleText: {
-    fontSize: 13,
-    fontWeight: '600',
-    fontFamily: 'PlusJakartaSans_600SemiBold',
-  },
-  templateToggleTextActive: {
-    color: '#FFFFFF',
-    fontWeight: '700',
   },
   previewContainer: {
     flex: 1,

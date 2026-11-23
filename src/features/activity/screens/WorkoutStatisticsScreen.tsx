@@ -41,11 +41,12 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
   const theme = useTheme();
   const { colors: c } = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const { state, refreshActivities } = useActivity();
+  const { state, refreshActivities, fetchSummary } = useActivity();
 
   useEffect(() => {
     void refreshActivities();
-  }, [refreshActivities]);
+    void fetchSummary();
+  }, [refreshActivities, fetchSummary]);
 
   const isConnected =
     state.syncStatus.healthConnect === 'CONNECTED' ||
@@ -60,13 +61,15 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
   );
 
   const getCaloriesForDate = (isoDate: string): number => {
-    const activityLogs = state.activityLogs.filter((a) => a.date === isoDate);
+    const activityLogs = state.activityLogs.filter(
+      (a) => (a.date || '').split('T')[0] === isoDate
+    );
     const manualCalories = activityLogs.reduce((sum, a) => sum + (a.caloriesBurned || 0), 0);
-    const serverTotal =
+    const serverActivity =
       state.dailySummary[isoDate]?.activityCalories != null
         ? Math.round(Number(state.dailySummary[isoDate].activityCalories))
-        : null;
-    return serverTotal ?? manualCalories;
+        : 0;
+    return Math.max(serverActivity, manualCalories);
   };
 
   // 1. Week calculation
@@ -603,9 +606,18 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
           {/* Trend Notice Card */}
           <View style={styles.trendNoticeCard}>
             <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
-              <DumbbellIcon size={16} color={c.textMuted} />
+              <DumbbellIcon
+                size={16}
+                color={
+                  totalCaloriesThisWeek > 0 || totalCaloriesLastWeek > 0
+                    ? '#9E64F7'
+                    : c.textMuted
+                }
+              />
               <Text style={[styles.trendNoticeText, { flex: 1 }]}>
-                Chưa ghi nhận hoạt động. Bạn có thể vận động một chút để cải thiện xu hướng tập luyện nhé.
+                {totalCaloriesThisWeek > 0 || totalCaloriesLastWeek > 0
+                  ? 'Hiệu suất vận động đang cải thiện rõ rệt. Tiếp tục giữ phong độ nhé!'
+                  : 'Chưa ghi nhận hoạt động. Bạn có thể vận động một chút để cải thiện xu hướng tập luyện nhé.'}
               </Text>
             </View>
           </View>

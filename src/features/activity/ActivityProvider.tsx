@@ -339,11 +339,43 @@ export function ActivityProvider({ children }: React.PropsWithChildren) {
       };
 
       // Optimistic update
-      setState((prev) => ({
-        ...prev,
-        activityLogs: [log, ...prev.activityLogs.filter((item) => item.clientUuid !== clientUuid && item.id !== clientUuid)],
-        error: null,
-      }));
+      setState((prev) => {
+        const nextLogs = [
+          log,
+          ...prev.activityLogs.filter(
+            (item) => item.clientUuid !== clientUuid && item.id !== clientUuid
+          ),
+        ];
+        const prevSummary = prev.dailySummary[date];
+        const updatedDailySummary = { ...prev.dailySummary };
+        if (prevSummary) {
+          updatedDailySummary[date] = {
+            ...prevSummary,
+            activityCalories: (prevSummary.activityCalories || 0) + calories,
+            totalCaloriesBurned: (prevSummary.totalCaloriesBurned || 0) + calories,
+            activeMinutes: (prevSummary.activeMinutes || 0) + input.durationMinutes,
+          };
+        } else {
+          updatedDailySummary[date] = {
+            date,
+            totalSteps: 0,
+            activityCalories: calories,
+            stepCalories: 0,
+            totalCaloriesBurned: calories,
+            activeMinutes: input.durationMinutes,
+            averageHeartRate: null,
+            maxHeartRate: null,
+            weightKg: latestWeight,
+            stepsSource: null,
+          };
+        }
+        return {
+          ...prev,
+          activityLogs: nextLogs,
+          dailySummary: updatedDailySummary,
+          error: null,
+        };
+      });
 
       // Async backend call
       void createActivity({
@@ -370,6 +402,16 @@ export function ActivityProvider({ children }: React.PropsWithChildren) {
                 : item
             ),
           }));
+          void getActivitySummary({ date })
+            .then((stats) => {
+              if (stats && stats[0]) {
+                setState((prev) => ({
+                  ...prev,
+                  dailySummary: { ...prev.dailySummary, [date]: stats[0] },
+                }));
+              }
+            })
+            .catch(() => undefined);
         })
         .catch((err) => {
           const msg = getActivityApiErrorMessage(err);
@@ -385,17 +427,54 @@ export function ActivityProvider({ children }: React.PropsWithChildren) {
   // ── Delete Activity Log ───────────────────────────────────────
   const deleteActivityLog = useCallback(
     (id: string) => {
-      const target = state.activityLogs.find((item) => item.id === id || item.clientUuid === id || item.remoteId === id);
-      setState((prev) => ({
-        ...prev,
-        activityLogs: prev.activityLogs.filter((item) => item.id !== id && item.clientUuid !== id && item.remoteId !== id),
-      }));
+      const target = state.activityLogs.find(
+        (item) => item.id === id || item.clientUuid === id || item.remoteId === id
+      );
+      const date = target?.date;
+      const targetCalories = target?.caloriesBurned || 0;
+      const targetDuration = target?.durationMinutes || 0;
+
+      setState((prev) => {
+        const nextLogs = prev.activityLogs.filter(
+          (item) => item.id !== id && item.clientUuid !== id && item.remoteId !== id
+        );
+        const updatedDailySummary = { ...prev.dailySummary };
+        if (date && updatedDailySummary[date]) {
+          const curr = updatedDailySummary[date];
+          updatedDailySummary[date] = {
+            ...curr,
+            activityCalories: Math.max(0, (curr.activityCalories || 0) - targetCalories),
+            totalCaloriesBurned: Math.max(0, (curr.totalCaloriesBurned || 0) - targetCalories),
+            activeMinutes: Math.max(0, (curr.activeMinutes || 0) - targetDuration),
+          };
+        }
+        return {
+          ...prev,
+          activityLogs: nextLogs,
+          dailySummary: updatedDailySummary,
+        };
+      });
 
       const apiId = target?.remoteId || target?.id || id;
-      void deleteActivity(apiId).catch((err) => {
-        const msg = getActivityApiErrorMessage(err);
-        console.warn('[ActivityProvider] deleteActivity error:', msg);
-      });
+      void deleteActivity(apiId)
+        .then(() => {
+          if (date) {
+            void getActivitySummary({ date })
+              .then((stats) => {
+                if (stats && stats[0]) {
+                  setState((prev) => ({
+                    ...prev,
+                    dailySummary: { ...prev.dailySummary, [date]: stats[0] },
+                  }));
+                }
+              })
+              .catch(() => undefined);
+          }
+        })
+        .catch((err) => {
+          const msg = getActivityApiErrorMessage(err);
+          console.warn('[ActivityProvider] deleteActivity error:', msg);
+        });
     },
     [state.activityLogs]
   );
@@ -455,28 +534,37 @@ export function ActivityProvider({ children }: React.PropsWithChildren) {
   }, []);
 
   const getActivitiesForDate = useCallback(
-    (date: string) => state.activityLogs.filter((item) => item.date === date),
+    (date: string) => {
+      const dayKey = (date || '').split('T')[0];
+      return state.activityLogs.filter(
+        (item) => (item.date || '').split('T')[0] === dayKey
+      );
+    },
     [state.activityLogs]
   );
 
   const getTotalCaloriesBurnedForDate = useCallback(
     (date: string) => {
-      if (state.dailySummary[date]?.totalCaloriesBurned != null) {
-        return Math.round(Number(state.dailySummary[date].totalCaloriesBurned));
-      }
-      const summary = aggregateDailyActivity(state.activityLogs, state.syncLogs, date);
-      return summary.totalCaloriesBurned;
+      const dayKey = (date || '').split('T')[0];
+      const summary = aggregateDailyActivity(state.activityLogs, state.syncLogs, dayKey);
+      const serverTotal =
+        state.dailySummary[dayKey]?.totalCaloriesBurned != null
+          ? Math.round(Number(state.dailySummary[dayKey].totalCaloriesBurned))
+          : 0;
+      return Math.max(serverTotal, summary.totalCaloriesBurned);
     },
     [state.activityLogs, state.syncLogs, state.dailySummary]
   );
 
   const getTotalStepsForDate = useCallback(
     (date: string) => {
-      if (state.dailySummary[date]?.totalSteps != null) {
-        return state.dailySummary[date].totalSteps;
-      }
-      const summary = aggregateDailyActivity(state.activityLogs, state.syncLogs, date);
-      return summary.totalSteps;
+      const dayKey = (date || '').split('T')[0];
+      const summary = aggregateDailyActivity(state.activityLogs, state.syncLogs, dayKey);
+      const serverSteps =
+        state.dailySummary[dayKey]?.totalSteps != null
+          ? Number(state.dailySummary[dayKey].totalSteps)
+          : 0;
+      return Math.max(serverSteps, summary.totalSteps);
     },
     [state.activityLogs, state.syncLogs, state.dailySummary]
   );
