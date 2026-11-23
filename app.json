@@ -35,6 +35,11 @@
     },
     "ios": {
       "bundleIdentifier": "com.kallo.mobile"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./src/assets/images/common/logo.png"
     }
   }
 }

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   ActivityIndicator,
   Image,
@@ -53,6 +54,15 @@ import {
   calculateBmr,
   calculateTdee,
 } from '@/features/profile/utils/calculations';
+import { saveHealthProfile, getHealthProfile } from '@/features/health-profile/api';
+import {
+  toBackendGender,
+  toBackendActivityLevel,
+  toBackendGoalType,
+  fromBackendGender,
+  fromBackendActivityLevel,
+  type HealthProfileRequestPayload,
+} from '@/features/health-profile/types';
 
 type Props = BottomTabScreenProps<MainTabParamList, 'Profile'>;
 type RootNavigation = NativeStackNavigationProp<RootStackParamList>;
@@ -86,9 +96,33 @@ export function AccountProfileScreen({ navigation }: Props) {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [avatarLoading, setAvatarLoading] = useState(false);
-  const [age] = useState(22);
-  const [heightCm] = useState(160);
-  const [weightKg] = useState(60);
+  const [age, setAge] = useState(22);
+  const [heightCm, setHeightCm] = useState(160);
+  const [weightKg, setWeightKg] = useState(60);
+  const [gender, setGender] = useState<'male' | 'female'>('male');
+  const [activityLevel, setActivityLevel] = useState<'sedentary' | 'light' | 'moderate' | 'high' | 'veryHigh'>('light');
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const raw = await AsyncStorage.getItem('@kallo/health-profile');
+        if (raw) {
+          const p = JSON.parse(raw);
+          if (p.age) setAge(Number(p.age));
+          if (p.heightCm) setHeightCm(Number(p.heightCm));
+          if (p.weightKg) setWeightKg(Number(p.weightKg));
+          if (p.dailyCalorieGoal) setTargetCalories(Number(p.dailyCalorieGoal));
+          if (p.proteinPct) setProteinPercent(Number(p.proteinPct));
+          if (p.carbsPct) setCarbsPercent(Number(p.carbsPct));
+          if (p.fatPct) setFatPercent(Number(p.fatPct));
+          if (p.gender) setGender(p.gender === 'female' || p.gender === 'FEMALE' ? 'female' : 'male');
+          if (p.activityLevel) setActivityLevel(fromBackendActivityLevel(p.activityLevel));
+        }
+      } catch {
+        // ignore
+      }
+    })();
+  }, []);
 
   // Nutrition goals & Macro State
   const [targetCalories, setTargetCalories] = useState(1794);
@@ -104,8 +138,8 @@ export function AccountProfileScreen({ navigation }: Props) {
   // Health calculations (BMI, BMR, TDEE)
   const bmiVal = calculateBmi(weightKg, heightCm);
   const bmiDesc = bmiCategory(bmiVal);
-  const bmrVal = Math.round(calculateBmr('male', weightKg, heightCm, age));
-  const tdeeVal = Math.round(calculateTdee(bmrVal, 'light'));
+  const bmrVal = Math.round(calculateBmr(gender, weightKg, heightCm, age));
+  const tdeeVal = Math.round(calculateTdee(bmrVal, activityLevel));
 
   // SVG Segmented Ring Dimensions
   const ringSize = 130;
@@ -202,7 +236,7 @@ export function AccountProfileScreen({ navigation }: Props) {
     setShowDeleteModal(true);
   };
 
-  const handleSaveGoals = () => {
+  const handleSaveGoals = async () => {
     if (proteinPercent + carbsPercent + fatPercent !== 100) {
       showAlert({
         title: 'Chưa cân bằng tỷ lệ',
@@ -210,6 +244,39 @@ export function AccountProfileScreen({ navigation }: Props) {
         variant: 'warning',
       });
       return;
+    }
+    try {
+      const raw = await AsyncStorage.getItem('@kallo/health-profile');
+      if (raw) {
+        const existing = JSON.parse(raw);
+        if (existing.gender && existing.birthDate) {
+          const updatePayload: HealthProfileRequestPayload = {
+            gender: toBackendGender(existing.gender),
+            birthDate: existing.birthDate,
+            heightCm: existing.heightCm || heightCm,
+            weightKg: existing.weightKg || weightKg,
+            activityLevel: toBackendActivityLevel(existing.activityLevel),
+            goalType: toBackendGoalType(existing.goalType),
+            targetWeightKg: existing.targetWeightKg,
+            weeklyRateKg: existing.weeklyRateKg,
+            customProteinPct: proteinPercent,
+            customCarbsPct: carbsPercent,
+            customFatPct: fatPercent,
+            customWaterGoalMl: (existing.weightKg || weightKg) * 35,
+            allergies: existing.allergies,
+          };
+          const updated = await saveHealthProfile(updatePayload);
+          await AsyncStorage.setItem(
+            '@kallo/health-profile',
+            JSON.stringify({ ...existing, ...updated })
+          );
+          if (updated.dailyCalorieGoal) {
+            setTargetCalories(updated.dailyCalorieGoal);
+          }
+        }
+      }
+    } catch {
+      // Backend sync fallback
     }
     setShowCustomizeGoalsModal(false);
     showAlert({
