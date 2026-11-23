@@ -9,6 +9,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from './types';
@@ -22,6 +23,8 @@ import {
   BodyStickFigureIcon,
   BookPlusIcon,
   FlameIcon,
+  MinusIcon,
+  PlusIcon,
   QuickBarcodeIcon,
   QuickSearchIcon,
   QuickSparklesIcon,
@@ -48,12 +51,16 @@ export function DashboardQuickActionsModal({
   const isDark = theme.scheme === 'dark';
   const { colors } = theme;
   const primaryBrand = colors.brandPrimary;
+  const insets = useSafeAreaInsets();
 
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { state, addWater } = useNutrition();
   const { showAlert } = useAlert();
 
   const selectedDate = propDate || state.selectedDate || todayKey();
+
+  const [viewMode, setViewMode] = useState<'actions' | 'water'>('actions');
+  const [waterLiters, setWaterLiters] = useState(0.20);
 
   // Semantic card surface & border tokens from active theme
   const cardBg = isDark ? colors.surfaceHigh : colors.canvasBase;
@@ -86,6 +93,8 @@ export function DashboardQuickActionsModal({
       }).start(({ finished }) => {
         if (finished) {
           setMounted(false);
+          setViewMode('actions');
+          setWaterLiters(0.20);
         }
       });
     }
@@ -95,12 +104,16 @@ export function DashboardQuickActionsModal({
   useEffect(() => {
     if (!visible) return;
     const onBackPress = () => {
+      if (viewMode === 'water') {
+        setViewMode('actions');
+        return true;
+      }
       onClose();
       return true;
     };
     const sub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
     return () => sub.remove();
-  }, [visible, onClose]);
+  }, [visible, viewMode, onClose]);
 
   if (!mounted) {
     return null;
@@ -147,14 +160,21 @@ export function DashboardQuickActionsModal({
     navigation.navigate('VoiceLogModal');
   };
 
-  const handleAddWater = () => {
+  const handleOpenWater = () => {
+    setViewMode('water');
+  };
+
+  const handleConfirmWater = () => {
+    const amountMl = Math.round(waterLiters * 1000);
+    addWater(selectedDate, amountMl);
     onClose();
-    addWater(selectedDate, 250);
-    showAlert({
-      title: 'Đã ghi nhận',
-      message: 'Đã thêm 250ml nước vào nhật ký hôm nay.',
-      variant: 'success',
-    });
+    setViewMode('actions');
+    setWaterLiters(0.20);
+  };
+
+  const handleCloseModal = () => {
+    setViewMode('actions');
+    onClose();
   };
 
   const handleRecipeSuggestion = () => {
@@ -208,7 +228,7 @@ export function DashboardQuickActionsModal({
     <View
       style={[
         styles.overlayRoot,
-        { bottom: bottomOffset },
+        { bottom: viewMode === 'water' ? 0 : bottomOffset },
       ]}
       pointerEvents={visible ? 'auto' : 'none'}
     >
@@ -222,7 +242,7 @@ export function DashboardQuickActionsModal({
           },
         ]}
       >
-        <TouchableWithoutFeedback onPress={onClose}>
+        <TouchableWithoutFeedback onPress={handleCloseModal}>
           <View style={StyleSheet.absoluteFill} />
         </TouchableWithoutFeedback>
       </Animated.View>
@@ -232,13 +252,80 @@ export function DashboardQuickActionsModal({
         style={[
           styles.sheetContainer,
           {
-            backgroundColor: colors.surfaceMid,
+            backgroundColor: isDark ? '#1C1929' : colors.surfaceMid,
             borderTopColor: colors.surfaceBorder,
             transform: [{ translateY: sheetTranslateY }],
           },
         ]}
       >
-        <View style={styles.sheetContent}>
+        {viewMode === 'water' ? (
+          <View
+            style={[
+              styles.waterSheetContent,
+              { paddingBottom: Math.max(34, insets.bottom + 16) },
+            ]}
+          >
+            <Text style={[styles.waterSheetTitle, { color: colors.textPrimary }]}>
+              Uống nước
+            </Text>
+
+            <View style={styles.waterStepperRow}>
+              <TouchableOpacity
+                style={[
+                  styles.waterCircleBtn,
+                  { backgroundColor: isDark ? '#35304C' : colors.surfaceMuted },
+                ]}
+                activeOpacity={0.7}
+                onPress={() =>
+                  setWaterLiters((prev) =>
+                    Math.max(0.05, Math.round((prev - 0.05) * 100) / 100)
+                  )
+                }
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                accessibilityRole="button"
+                accessibilityLabel="Giảm lượng nước"
+              >
+                <MinusIcon size={18} color={colors.textPrimary} strokeWidth={2.4} />
+              </TouchableOpacity>
+
+              <Text style={[styles.waterValueText, { color: colors.textPrimary }]}>
+                {waterLiters.toFixed(2)} L
+              </Text>
+
+              <TouchableOpacity
+                style={[
+                  styles.waterCircleBtn,
+                  { backgroundColor: isDark ? '#35304C' : colors.surfaceMuted },
+                ]}
+                activeOpacity={0.7}
+                onPress={() =>
+                  setWaterLiters((prev) =>
+                    Math.min(3.0, Math.round((prev + 0.05) * 100) / 100)
+                  )
+                }
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                accessibilityRole="button"
+                accessibilityLabel="Tăng lượng nước"
+              >
+                <PlusIcon size={18} color={colors.textPrimary} strokeWidth={2.4} />
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              style={[
+                styles.waterConfirmBtn,
+                { backgroundColor: '#A066F6' },
+              ]}
+              activeOpacity={0.8}
+              onPress={handleConfirmWater}
+              accessibilityRole="button"
+              accessibilityLabel="Ghi lại"
+            >
+              <Text style={styles.waterConfirmBtnText}>Ghi lại</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.sheetContent}>
           {/* ── Row 1: 4 Square Cards (Màu sắc đồng bộ 100% với Dashboard) ─ */}
           <View style={styles.quickTilesRow}>
             {/* 1. Ghi lại bữa ăn (Search) */}
@@ -374,7 +461,7 @@ export function DashboardQuickActionsModal({
                 },
               ]}
               activeOpacity={0.8}
-              onPress={handleAddWater}
+              onPress={handleOpenWater}
               accessibilityLabel="Uống nước"
             >
               <WaterGlassPlusIcon
@@ -587,6 +674,7 @@ export function DashboardQuickActionsModal({
             </Text>
           </TouchableOpacity>
         </View>
+      )}
       </Animated.View>
     </View>
   );
@@ -718,5 +806,51 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '700',
+  },
+
+  // ── Water Logging Sheet Styles ─────────────────────────────────────────
+  waterSheetContent: {
+    paddingHorizontal: 24,
+    paddingTop: 22,
+  },
+  waterSheetTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans_700Bold',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  waterStepperRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 36,
+    marginBottom: 32,
+  },
+  waterCircleBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  waterValueText: {
+    fontSize: 34,
+    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans_700Bold',
+    letterSpacing: 0.5,
+  },
+  waterConfirmBtn: {
+    height: 52,
+    borderRadius: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  waterConfirmBtnText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+    fontFamily: 'PlusJakartaSans_700Bold',
   },
 });

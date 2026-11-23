@@ -38,10 +38,12 @@ import {
   Menu,
   MessageSquare,
   Mic,
+  Minus,
   Moon,
   PenLine,
   PersonStanding,
   Plus,
+  QrCode,
   RefreshCw,
   Send,
   Salad,
@@ -138,6 +140,7 @@ export const ChevronUpIcon = fromLucide(ChevronUp, { defaultSize: 20 });
 
 export const CloseXIcon = fromLucide(X, { defaultSize: 20, strokeWidth: 2.2 });
 export const PlusIcon = fromLucide(Plus, { defaultSize: 14, strokeWidth: 2.4 });
+export const MinusIcon = fromLucide(Minus, { defaultSize: 14, strokeWidth: 2.4 });
 
 export function CirclePlusIcon({
   size = 20,
@@ -270,5 +273,6 @@ export const SquareIcon = fromLucide(Square, { defaultSize: 20 });
 export const SquareCheckIcon = fromLucide(SquareCheck, { defaultSize: 20 });
 export const CheckSquareIcon = SquareCheckIcon;
 export const StarIcon = fromLucide(Star, { defaultSize: 14, defaultColor: '#FACC15', defaultFill: '#FACC15' });
+export const QrCodeIcon = fromLucide(QrCode, { defaultSize: 24 });
 
 

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Image,
   Modal,
@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import Svg, { Circle, Line, Path, Rect } from 'react-native-svg';
+import Svg, { Circle, Defs, Line, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
 import type { RootStackParamList } from '@/navigation/types';
 import {
   CircleAlertIcon,
@@ -32,7 +32,8 @@ import { formatNumber, todayKey } from '@/features/nutrition/utils';
 import { useNutrition } from '@/features/nutrition/NutritionProvider';
 import { useActivity } from '../ActivityProvider';
 import { StepConnectModal } from '../components/StepConnectModal';
-import { useAlert } from '@/components/common';
+import { ShareJourneyModal } from '../components/ShareJourneyModal';
+import { useAlert, AppText } from '@/components/common';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'WeightStatistics'>;
 
@@ -44,8 +45,12 @@ export function WeightStatisticsScreen({ navigation }: Props) {
   const { colors: c } = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { state: nutritionState, addWeight } = useNutrition();
-  const { state: activityState } = useActivity();
+  const { state: activityState, refreshWeightLogs } = useActivity();
   const { showAlert } = useAlert();
+
+  useEffect(() => {
+    void refreshWeightLogs();
+  }, [refreshWeightLogs]);
 
   const isConnected =
     activityState.syncStatus.healthConnect === 'CONNECTED' ||
@@ -53,27 +58,221 @@ export function WeightStatisticsScreen({ navigation }: Props) {
 
   const [activeTab, setActiveTab] = useState<TimeTab>('1_month');
   const [monthOffset, setMonthOffset] = useState(0); // 0 = current month
+  const [sixMonthsOffset, setSixMonthsOffset] = useState(0);
+  const [yearOffset, setYearOffset] = useState(0);
   const [showConnectModal, setShowConnectModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [plotAreaWidth, setPlotAreaWidth] = useState(260);
 
-  // Month navigation calculation
-  const monthInfo = useMemo(() => {
-    const d = new Date();
-    d.setMonth(d.getMonth() + monthOffset);
-    return {
-      label: `Tháng ${d.getMonth() + 1}`,
-      year: d.getFullYear(),
-      month: d.getMonth() + 1,
-    };
-  }, [monthOffset]);
+  // Weight logs sorted chronologically (oldest to newest)
+  const sortedWeightLogs = useMemo(() => {
+    const raw: Array<{ date?: string; loggedAt?: string; weightKg: number }> =
+      activityState.weightLogs && activityState.weightLogs.length > 0
+        ? activityState.weightLogs
+        : (nutritionState.weightLogs as unknown as Array<{ date?: string; loggedAt?: string; weightKg: number }>) || [];
 
-  // Weight statistics
-  const weightLogs = nutritionState.weightLogs || [];
-  const latestWeight = weightLogs.length > 0 ? weightLogs[weightLogs.length - 1].weightKg : 50;
-  const initialWeight = weightLogs.length > 0 ? weightLogs[0].weightKg : 50;
+    const map = new Map<string, number>();
+    for (const item of raw) {
+      const d = item.date || (item.loggedAt ? item.loggedAt.split('T')[0] : '');
+      if (d) {
+        map.set(d, Number(item.weightKg));
+      }
+    }
+
+    const list = Array.from(map.entries()).map(([date, weightKg]) => ({
+      date,
+      weightKg,
+    }));
+
+    return list.sort((a, b) => a.date.localeCompare(b.date));
+  }, [activityState.weightLogs, nutritionState.weightLogs]);
+
+  const handlePrevTime = () => {
+    if (activeTab === '1_month') setMonthOffset((prev) => prev - 1);
+    else if (activeTab === '6_months') setSixMonthsOffset((prev) => prev - 1);
+    else setYearOffset((prev) => prev - 1);
+  };
+
+  const handleNextTime = () => {
+    if (activeTab === '1_month') setMonthOffset((prev) => Math.min(0, prev + 1));
+    else if (activeTab === '6_months') setSixMonthsOffset((prev) => Math.min(0, prev + 1));
+    else setYearOffset((prev) => Math.min(0, prev + 1));
+  };
+
+  const isLatestTime =
+    activeTab === '1_month'
+      ? monthOffset >= 0
+      : activeTab === '6_months'
+        ? sixMonthsOffset >= 0
+        : yearOffset >= 0;
+
+  const latestWeight =
+    sortedWeightLogs.length > 0
+      ? sortedWeightLogs[sortedWeightLogs.length - 1].weightKg
+      : 50;
+  const initialWeight =
+    sortedWeightLogs.length > 0 ? sortedWeightLogs[0].weightKg : latestWeight;
   const weightDifference = Number((latestWeight - initialWeight).toFixed(1));
 
   // Target weight (default 60kg from screenshot / goal)
   const targetWeight = 60;
+
+  // Real chart data points based on timeframe tab
+  const { chartPoints, timeInfo } = useMemo(() => {
+    const now = new Date();
+
+    if (activeTab === '6_months') {
+      const endTarget = new Date(now.getFullYear(), now.getMonth() + sixMonthsOffset * 6, 1);
+      const startTarget = new Date(endTarget.getFullYear(), endTarget.getMonth() - 5, 1);
+      const startLabel = `${String(startTarget.getMonth() + 1).padStart(2, '0')}/${startTarget.getFullYear()}`;
+      const endLabel = `${String(endTarget.getMonth() + 1).padStart(2, '0')}/${endTarget.getFullYear()}`;
+
+      const xLabels: string[] = [];
+      const points: Array<{
+        date: string;
+        label: string;
+        weightKg: number;
+        xPercent: number;
+      }> = [];
+
+      for (let i = 5; i >= 0; i--) {
+        const m = new Date(endTarget.getFullYear(), endTarget.getMonth() - i, 1);
+        const y = m.getFullYear();
+        const mon = m.getMonth();
+        const prefix = `${y}-${String(mon + 1).padStart(2, '0')}`;
+        const lbl = `Th ${mon + 1}`;
+        xLabels.push(lbl);
+
+        const inMonth = sortedWeightLogs.filter((l) => l.date.startsWith(prefix));
+        if (inMonth.length > 0) {
+          const latestInMonth = inMonth[inMonth.length - 1];
+          points.push({
+            date: latestInMonth.date,
+            label: lbl,
+            weightKg: latestInMonth.weightKg,
+            xPercent: (5 - i) / 5,
+          });
+        }
+      }
+
+      return {
+        chartPoints: points,
+        timeInfo: {
+          label: `${startLabel} - ${endLabel}`,
+          xLabels,
+        },
+      };
+    }
+
+    if (activeTab === '12_months') {
+      const targetYear = now.getFullYear() + yearOffset;
+      const xLabels = ['T1', 'T3', 'T5', 'T7', 'T9', 'T11'];
+      const points: Array<{
+        date: string;
+        label: string;
+        weightKg: number;
+        xPercent: number;
+      }> = [];
+
+      for (let m = 0; m < 12; m++) {
+        const prefix = `${targetYear}-${String(m + 1).padStart(2, '0')}`;
+        const inMonth = sortedWeightLogs.filter((l) => l.date.startsWith(prefix));
+        if (inMonth.length > 0) {
+          const latestInMonth = inMonth[inMonth.length - 1];
+          points.push({
+            date: latestInMonth.date,
+            label: `T${m + 1}`,
+            weightKg: latestInMonth.weightKg,
+            xPercent: m / 11,
+          });
+        }
+      }
+
+      return {
+        chartPoints: points,
+        timeInfo: {
+          label: `Năm ${targetYear}`,
+          xLabels,
+        },
+      };
+    }
+
+    // Default: 1_month
+    const d = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
+    const y = d.getFullYear();
+    const mon = d.getMonth();
+    const daysInMonth = new Date(y, mon + 1, 0).getDate();
+    const prefix = `${y}-${String(mon + 1).padStart(2, '0')}`;
+
+    const monthLogs = sortedWeightLogs.filter((l) => l.date.startsWith(prefix));
+    const points: Array<{
+      date: string;
+      label: string;
+      weightKg: number;
+      xPercent: number;
+    }> = [];
+
+    for (const log of monthLogs) {
+      const parts = log.date.split('-');
+      const day = parseInt(parts[2], 10);
+      if (!isNaN(day)) {
+        const xPercent = daysInMonth > 1 ? (day - 1) / (daysInMonth - 1) : 0.5;
+        points.push({
+          date: log.date,
+          label: `Ngày ${day}`,
+          weightKg: log.weightKg,
+          xPercent,
+        });
+      }
+    }
+
+    return {
+      chartPoints: points,
+      timeInfo: {
+        label: `Tháng ${mon + 1}/${y}`,
+        xLabels: ['01', '05', '10', '15', '20', '25', String(daysInMonth).padStart(2, '0')],
+      },
+    };
+  }, [activeTab, monthOffset, sixMonthsOffset, yearOffset, sortedWeightLogs]);
+
+  // Dynamic Y-axis scale based on actual weights and target
+  const { minScale, maxScale, weightTicks } = useMemo(() => {
+    const weightsToConsider = [targetWeight];
+    if (chartPoints.length > 0) {
+      chartPoints.forEach((p) => weightsToConsider.push(p.weightKg));
+    } else {
+      weightsToConsider.push(latestWeight);
+    }
+
+    const minW = Math.min(...weightsToConsider);
+    const maxW = Math.max(...weightsToConsider);
+    const span = Math.max(8, maxW - minW + 2);
+
+    let step = 3;
+    if (span <= 12) step = 3;
+    else if (span <= 16) step = 4;
+    else if (span <= 20) step = 5;
+    else if (span <= 32) step = 8;
+    else step = Math.ceil(span / 4 / 5) * 5;
+
+    let minScale = Math.floor((minW - 1) / step) * step;
+    let maxScale = minScale + step * 4;
+
+    while (maxScale < maxW + 0.5) {
+      maxScale += step;
+      minScale += step;
+    }
+
+    const ticks = [
+      maxScale,
+      minScale + step * 3,
+      minScale + step * 2,
+      minScale + step,
+      minScale,
+    ];
+
+    return { minScale, maxScale, weightTicks: ticks };
+  }, [chartPoints, targetWeight, latestWeight]);
 
   // BMI calculation (default height 170cm = 1.7m)
   const heightM = 1.7;
@@ -86,13 +285,19 @@ export function WeightStatisticsScreen({ navigation }: Props) {
     return { label: 'Béo phì', color: c.statusDanger, type: 'danger' as const };
   }, [bmiValue, c]);
 
-  // Y-axis ticks for weight chart: 61, 58, 55, 52, 49
-  const weightTicks = [61, 58, 55, 52, 49];
-  const minWeightTick = 49;
-  const maxWeightTick = 61;
-
-  // BMI Y-axis ticks: 19.0, 18.5, 18.0, 17.5, 17.0, 16.5, 16.0
-  const bmiTicks = [19.0, 18.5, 18.0, 17.5, 17.0, 16.5, 16.0];
+  // BMI Y-axis ticks dynamic around current BMI
+  const { bmiTicks, minBmiTick, maxBmiTick } = useMemo(() => {
+    const base = Math.floor((bmiValue - 1.5) * 2) / 2;
+    const ticks = [];
+    for (let i = 6; i >= 0; i--) {
+      ticks.push(Number((base + i * 0.5).toFixed(1)));
+    }
+    return {
+      bmiTicks: ticks,
+      minBmiTick: ticks[ticks.length - 1],
+      maxBmiTick: ticks[0],
+    };
+  }, [bmiValue]);
 
   return (
     <View style={[styles.container, { paddingTop: Math.max(8, insets.top) }]}>
@@ -117,9 +322,12 @@ export function WeightStatisticsScreen({ navigation }: Props) {
           onPress={() => navigation.navigate('RecordWeight')}
           style={styles.headerUpdateBtn}
           accessibilityRole="button"
-          accessibilityLabel="Cập nhật"
+          accessibilityLabel="Cập nhật cân nặng"
+          activeOpacity={0.8}
         >
-          <Text style={styles.headerUpdateBtnText}>Cập nhật</Text>
+          <AppText variant="labelLg" color={c.onBrand} style={styles.headerUpdateBtnText}>
+            Cập nhật
+          </AppText>
         </TouchableOpacity>
       </View>
 
@@ -166,20 +374,20 @@ export function WeightStatisticsScreen({ navigation }: Props) {
         {/* ── Month Navigator ─────────────────────────────────── */}
         <View style={styles.dateNavigator}>
           <TouchableOpacity
-            onPress={() => setMonthOffset((prev) => prev - 1)}
+            onPress={handlePrevTime}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             style={styles.dateNavBtn}
           >
             <ChevronLeftIcon size={16} color={c.textSecondary} />
           </TouchableOpacity>
 
-          <Text style={styles.dateRangeText}>{monthInfo.label}</Text>
+          <Text style={styles.dateRangeText}>{timeInfo.label}</Text>
 
           <TouchableOpacity
-            onPress={() => setMonthOffset((prev) => Math.min(0, prev + 1))}
-            disabled={monthOffset >= 0}
+            onPress={handleNextTime}
+            disabled={isLatestTime}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            style={[styles.dateNavBtn, monthOffset >= 0 && { opacity: 0.3 }]}
+            style={[styles.dateNavBtn, isLatestTime && { opacity: 0.3 }]}
           >
             <ChevronRightIcon size={16} color={c.textSecondary} />
           </TouchableOpacity>
@@ -190,12 +398,15 @@ export function WeightStatisticsScreen({ navigation }: Props) {
 
         {/* ── Weight Line Chart Area ─────────────────────────── */}
         <View style={styles.chartCard}>
-          {/* Ambient Glow */}
-          <View style={styles.chartAmbientGlow} />
-
           {/* Plot Area */}
-          <View style={styles.chartPlotArea}>
-            {/* Horizontal Dashed Lines with Ticks: 61, 58, 55, 52, 49 */}
+          <View
+            style={styles.chartPlotArea}
+            onLayout={(e) => {
+              const w = e.nativeEvent.layout.width;
+              if (w > 60) setPlotAreaWidth(w - 38);
+            }}
+          >
+            {/* Horizontal Dashed Lines with Ticks */}
             {weightTicks.map((tick) => (
               <View key={tick} style={styles.gridRow}>
                 <Text style={styles.yAxisLabel}>{tick}</Text>
@@ -203,38 +414,179 @@ export function WeightStatisticsScreen({ navigation }: Props) {
               </View>
             ))}
 
-            {/* Target Weight Line (white horizontal line at 60kg with hollow circle) */}
-            <View
-              style={[
-                styles.targetWeightLineContainer,
-                {
-                  bottom: ((targetWeight - minWeightTick) / (maxWeightTick - minWeightTick)) * 160 + 10,
-                },
-              ]}
-            >
-              <View style={styles.targetLineSolid} />
-              <View style={styles.targetCircleHandle} />
-            </View>
+            {/* SVG Plot Overlay: Target Line + Real Weight Data */}
+            <View style={styles.chartSvgOverlay} pointerEvents="none">
+              <Svg width={plotAreaWidth} height={180}>
+                <Defs>
+                  <LinearGradient id="weightGradient" x1="0" y1="0" x2="0" y2="1">
+                    <Stop offset="0" stopColor={c.brandSecondary} stopOpacity="0.4" />
+                    <Stop offset="1" stopColor={c.brandSecondary} stopOpacity="0.0" />
+                  </LinearGradient>
+                </Defs>
 
-            {/* Recorded Weight Line (purple line at 50kg) */}
-            <View
-              style={[
-                styles.recordedWeightLineContainer,
-                {
-                  bottom: ((latestWeight - minWeightTick) / (maxWeightTick - minWeightTick)) * 160 + 10,
-                },
-              ]}
-            >
-              <View style={styles.recordedDotStart} />
-              <View style={styles.recordedLineSolid} />
-              <View style={styles.recordedDotEnd} />
+                {/* Target Weight Line (horizontal line with hollow circle handle) */}
+                {(() => {
+                  const targetFraction = Math.max(
+                    0,
+                    Math.min(1, (targetWeight - minScale) / (maxScale - minScale))
+                  );
+                  const targetY = 180 - targetFraction * 180;
+                  return (
+                    <React.Fragment>
+                      <Line
+                        x1={0}
+                        y1={targetY}
+                        x2={plotAreaWidth - 10}
+                        y2={targetY}
+                        stroke={c.textPrimary}
+                        strokeWidth={2}
+                      />
+                      <Circle
+                        cx={plotAreaWidth - 6}
+                        cy={targetY}
+                        r={5}
+                        stroke={c.textPrimary}
+                        strokeWidth={2}
+                        fill={c.surfaceMid}
+                      />
+                    </React.Fragment>
+                  );
+                })()}
+
+                {/* Real Data Points and Connecting Curve */}
+                {(() => {
+                  const mapped = chartPoints.map((p) => {
+                    const x = Math.max(
+                      10,
+                      Math.min(plotAreaWidth - 14, p.xPercent * (plotAreaWidth - 28) + 14)
+                    );
+                    const fraction = Math.max(
+                      0,
+                      Math.min(1, (p.weightKg - minScale) / (maxScale - minScale))
+                    );
+                    const y = 180 - fraction * 180;
+                    return { ...p, x, y };
+                  });
+
+                  if (mapped.length === 0) {
+                    const latestFrac = Math.max(
+                      0,
+                      Math.min(1, (latestWeight - minScale) / (maxScale - minScale))
+                    );
+                    const latestY = 180 - latestFrac * 180;
+                    return (
+                      <Line
+                        x1={0}
+                        y1={latestY}
+                        x2={plotAreaWidth}
+                        y2={latestY}
+                        stroke={c.brandSecondary}
+                        strokeWidth={1.5}
+                        strokeDasharray="4 4"
+                        opacity={0.35}
+                      />
+                    );
+                  }
+
+                  if (mapped.length === 1) {
+                    const pt = mapped[0];
+                    return (
+                      <React.Fragment>
+                        <Line
+                          x1={0}
+                          y1={pt.y}
+                          x2={plotAreaWidth}
+                          y2={pt.y}
+                          stroke={c.brandSecondary}
+                          strokeWidth={2}
+                          strokeDasharray="4 4"
+                          opacity={0.5}
+                        />
+                        <Circle cx={pt.x} cy={pt.y} r={9} fill={c.brandSecondary} opacity={0.25} />
+                        <Circle
+                          cx={pt.x}
+                          cy={pt.y}
+                          r={5}
+                          fill={c.brandSecondary}
+                          stroke={c.surfaceMid}
+                          strokeWidth={2}
+                        />
+                      </React.Fragment>
+                    );
+                  }
+
+                  const pathD = mapped
+                    .map((pt, i) => `${i === 0 ? 'M' : 'L'} ${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`)
+                    .join(' ');
+                  const areaD = `${pathD} L ${mapped[mapped.length - 1].x.toFixed(1)} 180 L ${mapped[0].x.toFixed(1)} 180 Z`;
+
+                  return (
+                    <React.Fragment>
+                      <Path d={areaD} fill="url(#weightGradient)" />
+                      <Path d={pathD} stroke={c.brandSecondary} strokeWidth={2.5} fill="none" />
+                      {mapped.map((pt, idx) => {
+                        const isLast = idx === mapped.length - 1;
+                        return (
+                          <React.Fragment key={idx}>
+                            <Circle
+                              cx={pt.x}
+                              cy={pt.y}
+                              r={isLast ? 8 : 4.5}
+                              fill={c.brandSecondary}
+                              opacity={isLast ? 0.25 : 1}
+                            />
+                            <Circle
+                              cx={pt.x}
+                              cy={pt.y}
+                              r={isLast ? 5 : 3.5}
+                              fill={c.brandSecondary}
+                              stroke={c.surfaceMid}
+                              strokeWidth={1.5}
+                            />
+                          </React.Fragment>
+                        );
+                      })}
+                    </React.Fragment>
+                  );
+                })()}
+              </Svg>
+
+              {/* Value Badge above the latest recorded point */}
+              {chartPoints.length > 0 && (() => {
+                const mapped = chartPoints.map((p) => {
+                  const x = Math.max(
+                    10,
+                    Math.min(plotAreaWidth - 14, p.xPercent * (plotAreaWidth - 28) + 14)
+                  );
+                  const fraction = Math.max(
+                    0,
+                    Math.min(1, (p.weightKg - minScale) / (maxScale - minScale))
+                  );
+                  const y = 180 - fraction * 180;
+                  return { ...p, x, y };
+                });
+                const lastPt = mapped[mapped.length - 1];
+                return (
+                  <View
+                    style={[
+                      styles.pointBadge,
+                      {
+                        left: Math.max(0, Math.min(plotAreaWidth - 56, lastPt.x - 28)),
+                        top: Math.max(2, lastPt.y - 30),
+                      },
+                    ]}
+                  >
+                    <Text style={styles.pointBadgeText}>{lastPt.weightKg} kg</Text>
+                  </View>
+                );
+              })()}
             </View>
           </View>
 
-          {/* X-axis days: 01, 05, 10, 15, 20, 25, 31 */}
+          {/* X-axis labels */}
           <View style={styles.xAxisRow}>
-            {['01', '05', '10', '15', '20', '25', '31'].map((day) => (
-              <Text key={day} style={styles.xAxisLabel}>{day}</Text>
+            {timeInfo.xLabels.map((lbl) => (
+              <Text key={lbl} style={styles.xAxisLabel}>{lbl}</Text>
             ))}
           </View>
 
@@ -318,8 +670,10 @@ export function WeightStatisticsScreen({ navigation }: Props) {
         <View style={styles.progressPhotosRow}>
           <TouchableOpacity
             style={styles.addPhotoDashedBtn}
-            onPress={() => showAlert({ title: 'Thêm ảnh', message: 'Chọn ảnh từ thư viện để theo dõi tiến trình vóc dáng của bạn.', variant: 'info' })}
+            onPress={() => navigation.navigate('RecordWeight')}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Ghi lại cân nặng"
           >
             <PlusIcon size={24} color={c.textSecondary} strokeWidth={2} />
           </TouchableOpacity>
@@ -328,10 +682,14 @@ export function WeightStatisticsScreen({ navigation }: Props) {
         {/* Chia sẻ hành trình button */}
         <TouchableOpacity
           style={styles.shareJourneyBtn}
-          onPress={() => showAlert({ title: 'Chia sẻ hành trình', message: 'Chia sẻ tiến trình cân nặng của bạn lên bảng tin hoặc mạng xã hội.', variant: 'info' })}
+          onPress={() => setShowShareModal(true)}
           activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel="Chia sẻ hành trình"
         >
-          <Text style={styles.shareJourneyBtnText}>Chia sẻ hành trình</Text>
+          <AppText variant="labelLg" color={c.onBrand} style={styles.shareJourneyBtnText}>
+            Chia sẻ hành trình
+          </AppText>
         </TouchableOpacity>
 
         {/* ── Section: Chỉ số BMI ────────────────────────────── */}
@@ -384,7 +742,7 @@ export function WeightStatisticsScreen({ navigation }: Props) {
               style={[
                 styles.bmiPlotMarker,
                 {
-                  bottom: ((bmiValue - 16.0) / (19.0 - 16.0)) * 140,
+                  bottom: Math.max(0, Math.min(140, ((bmiValue - minBmiTick) / (maxBmiTick - minBmiTick)) * 140)),
                 },
               ]}
             >
@@ -401,7 +759,7 @@ export function WeightStatisticsScreen({ navigation }: Props) {
         </View>
 
         {/* ── Bottom Actions List ───────────────────────────── */}
-        <View style={styles.bottomActionsCard}>
+        {/* <View style={styles.bottomActionsCard}>
           <TouchableOpacity
             style={styles.actionRow}
             onPress={() => navigation.navigate('RecordWeight')}
@@ -413,17 +771,35 @@ export function WeightStatisticsScreen({ navigation }: Props) {
               <ChevronRightIcon size={16} color={c.textSecondary} />
             </View>
           </TouchableOpacity>
-        </View>
+        </View> */}
       </ScrollView>
 
       {/* ── Health Connect Modal ────────────────────────────── */}
       <StepConnectModal
         visible={showConnectModal}
         type="step"
-        title="Wao cần quyền truy cập dữ liệu cân nặng"
-        description="Kết nối với Health Connect để Wao có thể đồng bộ cân nặng tự động từ cân thông minh của bạn."
+        title="Kallo cần quyền truy cập dữ liệu cân nặng"
+        description="Kết nối với Health Connect để Kallo có thể đồng bộ cân nặng tự động từ cân thông minh của bạn."
         onClose={() => setShowConnectModal(false)}
         onSuccess={() => setShowConnectModal(false)}
+      />
+
+      {/* ── Chia sẻ hành trình Modal ─────────────────────────── */}
+      <ShareJourneyModal
+        visible={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        initialWeight={initialWeight}
+        currentWeight={latestWeight}
+        startDate={
+          sortedWeightLogs.length > 0 && sortedWeightLogs[0].date
+            ? sortedWeightLogs[0].date.split('-').reverse().join('/')
+            : undefined
+        }
+        currentDate={
+          sortedWeightLogs.length > 0 && sortedWeightLogs[sortedWeightLogs.length - 1].date
+            ? sortedWeightLogs[sortedWeightLogs.length - 1].date.split('-').reverse().join('/')
+            : undefined
+        }
       />
     </View>
   );
@@ -451,15 +827,16 @@ function createStyles(theme: ThemeContextValue) {
       alignItems: 'center',
     },
     headerUpdateBtn: {
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 14,
-      backgroundColor: c.brandPrimary + '26',
+      paddingHorizontal: 16,
+      paddingVertical: 7,
+      borderRadius: r.full,
+      backgroundColor: c.brandPrimary,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     headerUpdateBtnText: {
-      color: c.brandSecondary,
       fontSize: 13,
-      fontWeight: '700',
+      fontWeight: '600',
     },
     headerTitle: {
       color: c.textPrimary,
@@ -521,20 +898,12 @@ function createStyles(theme: ThemeContextValue) {
     chartCard: {
       backgroundColor: c.surfaceMid,
       borderRadius: 16,
+      borderColor: c.border,
       marginHorizontal: 16,
       padding: 16,
       overflow: 'hidden',
       position: 'relative',
       marginBottom: 16,
-    },
-    chartAmbientGlow: {
-      position: 'absolute',
-      top: 40,
-      left: '25%',
-      width: '50%',
-      height: 100,
-      borderRadius: 50,
-      backgroundColor: c.brandPrimary + '1A',
     },
     chartPlotArea: {
       height: 180,
@@ -558,6 +927,33 @@ function createStyles(theme: ThemeContextValue) {
       borderColor: c.surfaceBorder,
       borderStyle: 'dashed',
       marginLeft: 6,
+    },
+    chartSvgOverlay: {
+      position: 'absolute',
+      left: 32,
+      top: 0,
+      bottom: 0,
+      right: 6,
+    },
+    pointBadge: {
+      position: 'absolute',
+      backgroundColor: c.brandPrimary,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.15,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    pointBadgeText: {
+      color: '#FFFFFF',
+      fontSize: 11,
+      fontWeight: '700',
+      fontFamily: 'PlusJakartaSans_700Bold',
     },
     targetWeightLineContainer: {
       position: 'absolute',
@@ -716,8 +1112,9 @@ function createStyles(theme: ThemeContextValue) {
     },
     statBox: {
       flex: 1,
-      backgroundColor: c.surfaceHigh,
+      backgroundColor: c.surface,
       borderRadius: 16,
+      borderColor: c.border,
       paddingVertical: 14,
       paddingHorizontal: 8,
       alignItems: 'center',
@@ -754,18 +1151,22 @@ function createStyles(theme: ThemeContextValue) {
       backgroundColor: c.surfaceMid,
     },
     shareJourneyBtn: {
-      backgroundColor: c.brandPrimary + '26',
+      backgroundColor: c.brandPrimary,
       height: 48,
-      borderRadius: 24,
+      borderRadius: r.full,
       marginHorizontal: 16,
       alignItems: 'center',
       justifyContent: 'center',
       marginBottom: 16,
+      shadowColor: c.brandPrimary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 3,
     },
     shareJourneyBtnText: {
-      color: c.brandSecondary,
       fontSize: 15,
-      fontWeight: '700',
+      fontWeight: '600',
     },
     bmiCard: {
       backgroundColor: c.surfaceMid,

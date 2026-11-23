@@ -16,11 +16,13 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '@/navigation/types';
+import { useAlert } from '@/components/common';
 import { ChevronLeftIcon, ChevronRightIcon } from '@/components/icons';
 import { images } from '@/assets/images';
 import { useTheme, type ThemeContextValue } from '@/theme';
 import { useActivity } from '../ActivityProvider';
 import { calculateCaloriesBurned } from '../utils';
+import { getSportImageSource } from '../sportImages';
 import { useNutrition } from '@/features/nutrition/NutritionProvider';
 import { todayKey } from '@/features/nutrition/utils';
 
@@ -32,34 +34,6 @@ export type IntensityOption = {
   met: number;
 };
 
-// Sport image resolver
-function getSportImage(activityId: string, activityName: string): ImageSourcePropType {
-  const idLower = (activityId || '').toLowerCase();
-  const nameLower = (activityName || '').toLowerCase();
-
-  if (idLower.includes('australian_football') || nameLower.includes('bầu dục úc')) {
-    return images.australianFootball;
-  }
-  if (nameLower.includes('chạy') || nameLower.includes('run') || nameLower.includes('marathon') || nameLower.includes('điền kinh')) {
-    return images.runningTrack;
-  }
-  if (nameLower.includes('đạp xe') || nameLower.includes('cycl')) {
-    return images.cyclingTrack;
-  }
-  if (nameLower.includes('cầu lông') || nameLower.includes('badminton')) {
-    return images.badmintonCourt;
-  }
-  if (nameLower.includes('pickleball')) {
-    return images.pickleballCourt;
-  }
-  if (nameLower.includes('yoga') || nameLower.includes('thiền') || nameLower.includes('giãn cơ') || nameLower.includes('pilates')) {
-    return images.yogaPractice;
-  }
-
-  // Default to Australian football or running track as high-energy sport image
-  return images.australianFootball;
-}
-
 export function ActivityWorkoutScreen({ navigation, route }: Props) {
   const theme = useTheme();
   const { colors: c } = theme;
@@ -67,7 +41,8 @@ export function ActivityWorkoutScreen({ navigation, route }: Props) {
 
   const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
-  const { addActivityLog } = useActivity();
+  const { showAlert } = useAlert();
+  const { state: activityState, addActivityLog } = useActivity();
   const { state: nutritionState } = useNutrition();
 
 
@@ -171,6 +146,24 @@ export function ActivityWorkoutScreen({ navigation, route }: Props) {
   const handleSave = () => {
     if (!canSave) return;
 
+    const hasWeight =
+      (activityState?.weightLogs?.length ?? 0) > 0 || (nutritionState?.weightLogs?.length ?? 0) > 0;
+    if (!hasWeight) {
+      showAlert({
+        title: 'Cần cập nhật cân nặng',
+        message: 'Kallo cần cân nặng của bạn để đồng bộ bài tập với hệ thống.',
+        buttons: [
+          { text: 'Để sau', variant: 'outline' },
+          {
+            text: 'Ghi cân nặng ngay',
+            variant: 'primary',
+            onPress: () => navigation.navigate('RecordWeight', { initialWeight: 65, date: selectedDate }),
+          },
+        ],
+      });
+      return;
+    }
+
     const finalDur = durNum > 0 ? durNum : 30;
     const finalCal =
       calNum > 0
@@ -192,7 +185,7 @@ export function ActivityWorkoutScreen({ navigation, route }: Props) {
   // Image dimensions matching screenshots
   const heroWidth = Math.min(screenWidth * 0.74, 280);
   const heroHeight = Math.round(heroWidth * (9 / 16));
-  const heroImageSource = getSportImage(activityId, activityTitle);
+  const heroImageSource = getSportImageSource(activityId, activityTitle);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

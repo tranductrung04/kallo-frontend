@@ -17,3 +17,19 @@ export const ACTIVITY_CATALOG: ActivityCatalogItem[] = [
 export function findActivityMeta(type: ActivityType): ActivityCatalogItem {
   return ACTIVITY_CATALOG.find((item) => item.type === type) || ACTIVITY_CATALOG[ACTIVITY_CATALOG.length - 1];
 }
+
+export function mapBackendCodeToActivityType(code?: string): ActivityType {
+  if (!code) return 'other';
+  const upper = code.toUpperCase();
+  if (upper === 'WALK_BRISK' || upper === 'WALKING' || upper === 'HIKING') return 'walking';
+  if (upper === 'RUN_8KMH' || upper === 'RUNNING' || upper === 'RUNNING_FAST' || upper === 'JOGGING') return 'running';
+  if (upper === 'CYCLING_MODERATE' || upper === 'CYCLING') return 'cycling';
+  if (upper === 'SWIM_GENERAL' || upper === 'SWIMMING') return 'swimming';
+  if (upper === 'WEIGHT_TRAINING' || upper === 'GYM' || upper === 'CALISTHENICS' || upper === 'WEIGHT_LIFTING') return 'gym';
+  if (upper === 'YOGA_HATHA' || upper === 'YOGA' || upper === 'STRETCHING' || upper === 'BARRE') return 'yoga';
+  if (upper === 'BADMINTON') return 'badminton';
+  if (upper === 'PICKLEBALL') return 'pickleball';
+  if (upper === 'SOCCER' || upper === 'FOOTBALL' || upper === 'FUTSAL' || upper === 'BASKETBALL') return 'football';
+  if (upper === 'JUMP_ROPE') return 'jump_rope';
+  return 'other';
+}

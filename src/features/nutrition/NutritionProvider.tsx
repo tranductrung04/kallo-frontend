@@ -1,6 +1,8 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { randomUUID } from 'expo-crypto';
 import { api } from '@/services/api/client';
+import { createWeightLog, getWeightLogs } from '@/features/activity/api';
 import { starterFoods } from './catalog';
 import { latestWeight, summarizeLogs, todayKey } from './utils';
 import type { AddFoodLogInput, Food, FoodLog, MealSlot, NutritionContextValue, NutritionState } from './types';
@@ -26,6 +28,26 @@ export function NutritionProvider({ children }: React.PropsWithChildren) {
   }, []);
   useEffect(() => { if (ready) void AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state)).catch(() => undefined); }, [ready, state]);
   useEffect(() => { if (ready) void api.get(`/reports/dashboard?date=${encodeURIComponent(state.selectedDate)}`).catch(() => undefined); }, [ready, state.selectedDate]);
+  useEffect(() => {
+    if (ready) {
+      void getWeightLogs()
+        .then((serverWeights) => {
+          if (Array.isArray(serverWeights) && serverWeights.length > 0) {
+            setState((current) => {
+              const serverLogs = serverWeights.map((w) => ({
+                id: w.id,
+                date: w.loggedAt ? w.loggedAt.split('T')[0] : todayKey(),
+                weightKg: Number(w.weightKg),
+              }));
+              const serverDateSet = new Set(serverLogs.map((l) => l.date));
+              const localRemaining = current.weightLogs.filter((l) => !serverDateSet.has(l.date));
+              return { ...current, weightLogs: [...serverLogs, ...localRemaining] };
+            });
+          }
+        })
+        .catch(() => undefined);
+    }
+  }, [ready]);
 
   const foods = useMemo(() => [...starterFoods, ...state.customFoods], [state.customFoods]);
   const findFood = useCallback((foodId: string) => foods.find((food) => food.id === foodId), [foods]);
@@ -110,7 +132,17 @@ export function NutritionProvider({ children }: React.PropsWithChildren) {
     void api.post('/water-logs', { date, amountMl }).catch(() => undefined);
     return true;
   }, []);
-  const addWeight = useCallback((date: string, weightKg: number) => { if (!Number.isFinite(weightKg) || weightKg < 20 || weightKg > 300) return false; setState((current) => ({ ...current, weightLogs: [...current.weightLogs.filter((log) => log.date !== date), { id: id('weight'), date, weightKg }] })); void api.post('/weight-logs', { date, weightKg }).catch(() => undefined); return true; }, []);
+  const addWeight = useCallback((date: string, weightKg: number) => {
+    if (!Number.isFinite(weightKg) || weightKg < 20 || weightKg > 300) return false;
+    const clientUuid = randomUUID();
+    const loggedAt = date.includes('T') ? date : `${date}T12:00:00.000Z`;
+    setState((current) => ({
+      ...current,
+      weightLogs: [...current.weightLogs.filter((log) => log.date !== date), { id: clientUuid, date, weightKg }]
+    }));
+    void createWeightLog({ clientUuid, weightKg, loggedAt }).catch(() => undefined);
+    return true;
+  }, []);
   const saveCustomFood = useCallback((food: Omit<Food, 'id' | 'isCustom'> & { id?: string }) => { const foodId = food.id ?? id('custom'); setState((current) => ({ ...current, customFoods: [...current.customFoods.filter((item) => item.id !== foodId), { ...food, id: foodId, isCustom: true }] })); void api.post('/foods/custom', { ...food, id: foodId }).catch(() => undefined); return foodId; }, []);
   const value = useMemo<NutritionContextValue>(() => ({ state, ready, foods, findFood, getSummary, getLogs, addFoodLog, addMultipleFoodLogs, updateFoodLog, deleteFoodLog, copyMeal, addWater, addWeight, saveCustomFood, setSelectedDate: (date) => setState((current) => ({ ...current, selectedDate: date })), setWalkthroughSeen: () => setState((current) => ({ ...current, walkthroughSeen: true })) }), [state, ready, foods, findFood, getSummary, getLogs, addFoodLog, addMultipleFoodLogs, updateFoodLog, deleteFoodLog, copyMeal, addWater, addWeight, saveCustomFood]);
   return <NutritionContext.Provider value={value}>{children}</NutritionContext.Provider>;

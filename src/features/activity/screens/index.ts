@@ -14,3 +14,4 @@ export * from './StepDetailScreen';
 export * from './WorkoutStatisticsScreen';
 export * from './WeightStatisticsScreen';
 export * from './RecordWeightScreen';
+export * from './WorkoutLogScreen';

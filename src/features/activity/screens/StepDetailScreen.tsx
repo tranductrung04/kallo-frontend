@@ -43,14 +43,20 @@ export function StepDetailScreen({ navigation, route }: Props) {
   const theme = useTheme();
   const { colors: c } = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const { state, updateStepGoal } = useActivity();
+  const { state, updateStepGoal, getTotalStepsForDate } = useActivity();
 
   const isConnected =
     state.syncStatus.healthConnect === 'CONNECTED' ||
     (Platform.OS === 'ios' && state.syncStatus.appleHealth === 'CONNECTED');
 
+  const isIos = Platform.OS === 'ios';
+  const providerName = isIos ? 'Apple Health' : 'Health Connect';
+  const providerLogo = isIos ? images.appleHealthIcon : images.healthConnectIcon;
+
   const [activeTab, setActiveTab] = useState<TimeTab>('week');
   const [weekOffset, setWeekOffset] = useState(0); // 0 = current week, -1 = last week
+  const [monthOffset, setMonthOffset] = useState(0); // 0 = current month, -1 = last month
+  const [sixMonthsOffset, setSixMonthsOffset] = useState(0); // 0 = current 6 months
   const [showConnectModal, setShowConnectModal] = useState(
     route.params?.openConnectModal ?? !isConnected
   );
@@ -58,13 +64,22 @@ export function StepDetailScreen({ navigation, route }: Props) {
 
   const stepGoal = state.stepGoal || 3000;
 
-  // Week calculation
-  const weekInfo = useMemo(() => {
+  const getStepsForDate = (isoDate: string): number => {
+    if (getTotalStepsForDate) {
+      return getTotalStepsForDate(isoDate);
+    }
+    const syncLogsForDate = state.syncLogs.filter((l) => l.date === isoDate);
+    const totalSyncSteps = syncLogsForDate.reduce((sum, l) => sum + (l.steps || 0), 0);
+    return state.dailySummary[isoDate]?.totalSteps != null
+      ? state.dailySummary[isoDate].totalSteps
+      : totalSyncSteps;
+  };
+
+  // 1. Week Data (7 days: T2 - CN)
+  const weekData = useMemo(() => {
     const now = new Date();
-    // Offset by weeks
     now.setDate(now.getDate() + weekOffset * 7);
 
-    // Find Monday of this week (1 = Monday, 0 = Sunday)
     const day = now.getDay();
     const diffToMonday = day === 0 ? -6 : 1 - day;
     const monday = new Date(now);
@@ -72,17 +87,19 @@ export function StepDetailScreen({ navigation, route }: Props) {
 
     const days = [];
     const dayNames = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+    const todayIso = new Date().toISOString().split('T')[0];
 
     for (let i = 0; i < 7; i++) {
       const d = new Date(monday);
       d.setDate(monday.getDate() + i);
       const isoDate = d.toISOString().split('T')[0];
-      const dayLabel = `${d.getDate()}/${d.getMonth() + 1}`;
+      const steps = getStepsForDate(isoDate);
       days.push({
         name: dayNames[i],
         isoDate,
-        dayLabel,
-        isToday: isoDate === new Date().toISOString().split('T')[0],
+        steps,
+        achieved: steps >= stepGoal,
+        isToday: isoDate === todayIso,
       });
     }
 
@@ -91,44 +108,261 @@ export function StepDetailScreen({ navigation, route }: Props) {
     sunday.setDate(monday.getDate() + 6);
     const endLabel = `${sunday.getDate()}/${sunday.getMonth() + 1}`;
 
+    const totalThisWeek = days.reduce((sum, d) => sum + d.steps, 0);
+    const daysWithData = days.filter((d) => d.steps > 0).length || 1;
+    const thisWeekAvg = Math.round(totalThisWeek / daysWithData);
+
+    // Calculate last week
+    const lastMonday = new Date(monday);
+    lastMonday.setDate(monday.getDate() - 7);
+    let lastWeekTotal = 0;
+    let lastWeekDaysWithData = 0;
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(lastMonday);
+      d.setDate(lastMonday.getDate() + i);
+      const isoDate = d.toISOString().split('T')[0];
+      const steps = getStepsForDate(isoDate);
+      if (steps > 0) {
+        lastWeekTotal += steps;
+        lastWeekDaysWithData++;
+      }
+    }
+    const lastWeekAvg =
+      lastWeekDaysWithData > 0 ? Math.round(lastWeekTotal / lastWeekDaysWithData) : 0;
+
     return {
       dateRangeLabel: `${startLabel} - ${endLabel}`,
-      days,
+      items: days,
+      primaryAvg: totalThisWeek > 0 ? thisWeekAvg : 0,
+      secondaryAvg: lastWeekAvg,
+      primaryLabel: 'Trung bình tuần này',
+      secondaryLabel: 'Trung bình tuần trước',
     };
-  }, [weekOffset]);
+  }, [weekOffset, state.syncLogs, state.dailySummary, stepGoal]);
 
-  // Daily step data for the week
-  const weekStepData = useMemo(() => {
-    return weekInfo.days.map((d) => {
-      // Find sync log or activity steps for this date
-      const syncLogsForDate = state.syncLogs.filter((l) => l.date === d.isoDate);
-      const totalSyncSteps = syncLogsForDate.reduce((sum, l) => sum + (l.steps || 0), 0);
+  // 2. Month Data (4 or 5 weeks of the month)
+  const monthData = useMemo(() => {
+    const now = new Date();
+    const targetDate = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
+    const year = targetDate.getFullYear();
+    const month = targetDate.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const todayIso = new Date().toISOString().split('T')[0];
+
+    const weekRanges = [
+      { start: 1, end: 7, name: 'Tuần 1' },
+      { start: 8, end: 14, name: 'Tuần 2' },
+      { start: 15, end: 21, name: 'Tuần 3' },
+      { start: 22, end: 28, name: 'Tuần 4' },
+    ];
+    if (daysInMonth > 28) {
+      weekRanges.push({ start: 29, end: daysInMonth, name: 'Tuần 5' });
+    }
+
+    let monthTotalSteps = 0;
+    let monthDaysWithData = 0;
+
+    const items = weekRanges.map((w) => {
+      let bucketSteps = 0;
+      let bucketDaysWithData = 0;
+      let containsToday = false;
+
+      for (let dayNum = w.start; dayNum <= w.end; dayNum++) {
+        const mStr = String(month + 1).padStart(2, '0');
+        const dStr = String(dayNum).padStart(2, '0');
+        const isoDate = `${year}-${mStr}-${dStr}`;
+        const steps = getStepsForDate(isoDate);
+
+        if (isoDate === todayIso) {
+          containsToday = true;
+        }
+
+        if (steps > 0) {
+          bucketSteps += steps;
+          bucketDaysWithData++;
+          monthTotalSteps += steps;
+          monthDaysWithData++;
+        }
+      }
+
+      const avgBucketSteps =
+        bucketDaysWithData > 0 ? Math.round(bucketSteps / bucketDaysWithData) : 0;
+
       return {
-        ...d,
-        steps: totalSyncSteps,
-        achieved: totalSyncSteps >= stepGoal,
+        name: w.name,
+        isoDate: `${year}-${String(month + 1).padStart(2, '0')}-${String(w.start).padStart(2, '0')}`,
+        steps: avgBucketSteps,
+        achieved: avgBucketSteps >= stepGoal,
+        isToday: containsToday,
       };
     });
-  }, [weekInfo.days, state.syncLogs, stepGoal]);
 
-  // Average calculations
-  const { thisWeekAvg, lastWeekAvg } = useMemo(() => {
-    const totalThisWeek = weekStepData.reduce((sum, d) => sum + d.steps, 0);
-    // Number of days recorded or 7
-    const daysWithData = weekStepData.filter((d) => d.steps > 0).length || 1;
-    const thisAvg = Math.round(totalThisWeek / daysWithData);
+    const thisMonthAvg =
+      monthDaysWithData > 0 ? Math.round(monthTotalSteps / monthDaysWithData) : 0;
 
-    // Calculate last week roughly from existing logs or 0
+    // Last month avg
+    const prevMonthDate = new Date(year, month - 1, 1);
+    const prevYear = prevMonthDate.getFullYear();
+    const prevMonth = prevMonthDate.getMonth();
+    const prevDaysInMonth = new Date(prevYear, prevMonth + 1, 0).getDate();
+    let prevTotalSteps = 0;
+    let prevDaysWithData = 0;
+    for (let dayNum = 1; dayNum <= prevDaysInMonth; dayNum++) {
+      const mStr = String(prevMonth + 1).padStart(2, '0');
+      const dStr = String(dayNum).padStart(2, '0');
+      const isoDate = `${prevYear}-${mStr}-${dStr}`;
+      const steps = getStepsForDate(isoDate);
+      if (steps > 0) {
+        prevTotalSteps += steps;
+        prevDaysWithData++;
+      }
+    }
+    const lastMonthAvg =
+      prevDaysWithData > 0 ? Math.round(prevTotalSteps / prevDaysWithData) : 0;
+
     return {
-      thisWeekAvg: totalThisWeek > 0 ? thisAvg : 0,
-      lastWeekAvg: 0,
+      dateRangeLabel: `Tháng ${month + 1}/${year}`,
+      items,
+      primaryAvg: thisMonthAvg,
+      secondaryAvg: lastMonthAvg,
+      primaryLabel: 'Trung bình tháng này',
+      secondaryLabel: 'Trung bình tháng trước',
     };
-  }, [weekStepData]);
+  }, [monthOffset, state.syncLogs, state.dailySummary, stepGoal]);
+
+  // 3. Six Months Data (6 months: Th X - Th Y)
+  const sixMonthsData = useMemo(() => {
+    const now = new Date();
+    const endTarget = new Date(now.getFullYear(), now.getMonth() + sixMonthsOffset * 6, 1);
+    const currentMonthIndex = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    let totalPeriodSteps = 0;
+    let totalDaysWithData = 0;
+
+    const items = [];
+    for (let i = 5; i >= 0; i--) {
+      const mDate = new Date(endTarget.getFullYear(), endTarget.getMonth() - i, 1);
+      const year = mDate.getFullYear();
+      const month = mDate.getMonth();
+      const daysInM = new Date(year, month + 1, 0).getDate();
+
+      let mSteps = 0;
+      let mDaysWithData = 0;
+
+      for (let dayNum = 1; dayNum <= daysInM; dayNum++) {
+        const mStr = String(month + 1).padStart(2, '0');
+        const dStr = String(dayNum).padStart(2, '0');
+        const isoDate = `${year}-${mStr}-${dStr}`;
+        const steps = getStepsForDate(isoDate);
+        if (steps > 0) {
+          mSteps += steps;
+          mDaysWithData++;
+          totalPeriodSteps += steps;
+          totalDaysWithData++;
+        }
+      }
+
+      const avgSteps = mDaysWithData > 0 ? Math.round(mSteps / mDaysWithData) : 0;
+      const isCurrentMonth = year === currentYear && month === currentMonthIndex;
+
+      items.push({
+        name: `Th ${month + 1}`,
+        isoDate: `${year}-${String(month + 1).padStart(2, '0')}-01`,
+        steps: avgSteps,
+        achieved: avgSteps >= stepGoal,
+        isToday: isCurrentMonth,
+      });
+    }
+
+    const thisSixMonthsAvg =
+      totalDaysWithData > 0 ? Math.round(totalPeriodSteps / totalDaysWithData) : 0;
+
+    // Previous 6 months avg
+    let prevPeriodSteps = 0;
+    let prevDaysWithData = 0;
+    for (let i = 11; i >= 6; i--) {
+      const mDate = new Date(endTarget.getFullYear(), endTarget.getMonth() - i, 1);
+      const year = mDate.getFullYear();
+      const month = mDate.getMonth();
+      const daysInM = new Date(year, month + 1, 0).getDate();
+
+      for (let dayNum = 1; dayNum <= daysInM; dayNum++) {
+        const mStr = String(month + 1).padStart(2, '0');
+        const dStr = String(dayNum).padStart(2, '0');
+        const isoDate = `${year}-${mStr}-${dStr}`;
+        const steps = getStepsForDate(isoDate);
+        if (steps > 0) {
+          prevPeriodSteps += steps;
+          prevDaysWithData++;
+        }
+      }
+    }
+    const lastSixMonthsAvg =
+      prevDaysWithData > 0 ? Math.round(prevPeriodSteps / prevDaysWithData) : 0;
+
+    const firstMonthDate = new Date(endTarget.getFullYear(), endTarget.getMonth() - 5, 1);
+    const startRange = `${String(firstMonthDate.getMonth() + 1).padStart(2, '0')}/${firstMonthDate.getFullYear()}`;
+    const endRange = `${String(endTarget.getMonth() + 1).padStart(2, '0')}/${endTarget.getFullYear()}`;
+
+    return {
+      dateRangeLabel: `${startRange} - ${endRange}`,
+      items,
+      primaryAvg: thisSixMonthsAvg,
+      secondaryAvg: lastSixMonthsAvg,
+      primaryLabel: 'Trung bình 6 tháng này',
+      secondaryLabel: 'Trung bình 6 tháng trước',
+    };
+  }, [sixMonthsOffset, state.syncLogs, state.dailySummary, stepGoal]);
+
+  // Active dataset based on activeTab
+  const activeViewData = useMemo(() => {
+    switch (activeTab) {
+      case 'month':
+        return monthData;
+      case 'six_months':
+        return sixMonthsData;
+      case 'week':
+      default:
+        return weekData;
+    }
+  }, [activeTab, weekData, monthData, sixMonthsData]);
+
+  const handlePrevTime = () => {
+    if (activeTab === 'week') {
+      setWeekOffset((prev) => prev - 1);
+    } else if (activeTab === 'month') {
+      setMonthOffset((prev) => prev - 1);
+    } else {
+      setSixMonthsOffset((prev) => prev - 1);
+    }
+  };
+
+  const handleNextTime = () => {
+    if (activeTab === 'week') {
+      setWeekOffset((prev) => Math.min(0, prev + 1));
+    } else if (activeTab === 'month') {
+      setMonthOffset((prev) => Math.min(0, prev + 1));
+    } else {
+      setSixMonthsOffset((prev) => Math.min(0, prev + 1));
+    }
+  };
+
+  const isLatestTime =
+    activeTab === 'week'
+      ? weekOffset >= 0
+      : activeTab === 'month'
+        ? monthOffset >= 0
+        : sixMonthsOffset >= 0;
 
   // Max scale for chart
-  const maxStepsInWeek = Math.max(...weekStepData.map((d) => d.steps), stepGoal, 1000);
-  const chartMaxScale = Math.ceil(maxStepsInWeek / 1000) * 1000;
-  const avgSteps = thisWeekAvg;
+  const maxStepsInView = Math.max(
+    ...activeViewData.items.map((d) => d.steps),
+    stepGoal,
+    1000
+  );
+  const chartMaxScale = Math.ceil(maxStepsInView / 1000) * 1000;
+  const avgSteps = activeViewData.primaryAvg;
 
   return (
     <View style={[styles.container, { paddingTop: Math.max(8, insets.top) }]}>
@@ -197,20 +431,20 @@ export function StepDetailScreen({ navigation, route }: Props) {
         {/* ── Date Navigator ─────────────────────────────────── */}
         <View style={styles.dateNavigator}>
           <TouchableOpacity
-            onPress={() => setWeekOffset((prev) => prev - 1)}
+            onPress={handlePrevTime}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             style={styles.dateNavBtn}
           >
             <ChevronLeftIcon size={16} color={c.textSecondary} />
           </TouchableOpacity>
 
-          <Text style={styles.dateRangeText}>{weekInfo.dateRangeLabel}</Text>
+          <Text style={styles.dateRangeText}>{activeViewData.dateRangeLabel}</Text>
 
           <TouchableOpacity
-            onPress={() => setWeekOffset((prev) => Math.min(0, prev + 1))}
-            disabled={weekOffset >= 0}
+            onPress={handleNextTime}
+            disabled={isLatestTime}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            style={[styles.dateNavBtn, weekOffset >= 0 && { opacity: 0.3 }]}
+            style={[styles.dateNavBtn, isLatestTime && { opacity: 0.3 }]}
           >
             <ChevronRightIcon size={16} color={c.textSecondary} />
           </TouchableOpacity>
@@ -218,9 +452,6 @@ export function StepDetailScreen({ navigation, route }: Props) {
 
         {/* ── Step Bar Chart Area ────────────────────────────── */}
         <View style={styles.chartCard}>
-          {/* Ambient Glow */}
-          <View style={styles.chartAmbientGlow} />
-
           {/* Y-Axis Grid Lines & Labels */}
           <View style={styles.chartPlotArea}>
             {/* Ticks: 1.0, 0.8, 0.6, 0.4, 0.2, 0 */}
@@ -251,7 +482,7 @@ export function StepDetailScreen({ navigation, route }: Props) {
 
             {/* Bars container overlaying plot */}
             <View style={styles.barsContainer}>
-              {weekStepData.map((d, idx) => {
+              {activeViewData.items.map((d, idx) => {
                 const heightPercent = chartMaxScale > 0 ? Math.min(100, (d.steps / chartMaxScale) * 100) : 0;
                 return (
                   <View key={idx} style={styles.barCol}>
@@ -267,7 +498,7 @@ export function StepDetailScreen({ navigation, route }: Props) {
                         />
                       )}
                     </View>
-                    <Text style={[styles.xAxisLabel, d.isToday && styles.xAxisLabelToday]}>
+                    <Text style={[styles.xAxisLabel, d.isToday && styles.xAxisLabelToday]} numberOfLines={1}>
                       {d.name}
                     </Text>
                   </View>
@@ -290,8 +521,34 @@ export function StepDetailScreen({ navigation, route }: Props) {
           </View>
         </View>
 
-        {/* ── Banner: Connect Health Connect (if not connected) ── */}
-        {!isConnected && (
+        {/* ── Banner: Connect Health Connect or show connection status ── */}
+        {isConnected ? (
+          <TouchableOpacity
+            style={[styles.connectedBanner, { backgroundColor: c.surfaceHigh, borderColor: c.surfaceBorder }]}
+            onPress={() => navigation.navigate('HealthSync')}
+            activeOpacity={0.85}
+          >
+            <View style={styles.healthConnectIconBox}>
+              <Image
+                source={providerLogo}
+                style={styles.healthConnectImg}
+                resizeMode="contain"
+              />
+            </View>
+            <View style={styles.connectedBannerInfo}>
+              <View style={styles.connectedTitleRow}>
+                <Text style={[styles.connectedBannerTitle, { color: c.textPrimary }]}>
+                  {providerName} • Đã kết nối
+                </Text>
+                <View style={[styles.connectedDot, { backgroundColor: c.quickScanner }]} />
+              </View>
+              <Text style={[styles.connectedBannerSub, { color: c.textSecondary }]}>
+                Chạm để xem chi tiết hoặc đồng bộ dữ liệu
+              </Text>
+            </View>
+            <ChevronRightIcon size={18} color={c.textSecondary} />
+          </TouchableOpacity>
+        ) : (
           <TouchableOpacity
             style={styles.connectBanner}
             onPress={() => setShowConnectModal(true)}
@@ -299,13 +556,13 @@ export function StepDetailScreen({ navigation, route }: Props) {
           >
             <View style={styles.healthConnectIconBox}>
               <Image
-                source={images.healthConnectIcon}
+                source={providerLogo}
                 style={styles.healthConnectImg}
                 resizeMode="contain"
               />
             </View>
             <Text style={styles.connectBannerText}>
-              Kết nối Health Connect để tự động cập nhật.{' '}
+              Kết nối {providerName} để tự động cập nhật.{' '}
               <Text style={styles.connectBannerLink}>Kết nối ngay</Text>
             </Text>
           </TouchableOpacity>
@@ -334,26 +591,26 @@ export function StepDetailScreen({ navigation, route }: Props) {
           <View style={styles.twoColStatsRow}>
             <View style={styles.statCol}>
               <Text style={styles.statNumber}>
-                {formatNumber(thisWeekAvg)}{' '}
+                {formatNumber(activeViewData.primaryAvg)}{' '}
                 <Text style={styles.statUnit}>bước/ngày</Text>
               </Text>
-              <Text style={styles.statLabel}>Trung bình tuần này</Text>
+              <Text style={styles.statLabel}>{activeViewData.primaryLabel}</Text>
             </View>
 
             <View style={styles.statCol}>
               <Text style={styles.statNumber}>
-                {formatNumber(lastWeekAvg)}{' '}
+                {formatNumber(activeViewData.secondaryAvg)}{' '}
                 <Text style={styles.statUnit}>bước/ngày</Text>
               </Text>
-              <Text style={styles.statLabel}>Trung bình tuần trước</Text>
+              <Text style={styles.statLabel}>{activeViewData.secondaryLabel}</Text>
             </View>
           </View>
 
-          {/* 7 Days Circular Badges Row */}
+          {/* Circular Badges Row */}
           <View style={styles.weekCirclesRow}>
-            {weekStepData.map((d, idx) => (
+            {activeViewData.items.map((d, idx) => (
               <View key={idx} style={styles.weekDayCircleCol}>
-                <Text style={styles.circleDayName}>{d.name}</Text>
+                <Text style={styles.circleDayName} numberOfLines={1}>{d.name}</Text>
                 <View
                   style={[
                     styles.dayCircle,
@@ -482,11 +739,11 @@ export function StepDetailScreen({ navigation, route }: Props) {
             onPress={() => navigation.navigate('ActivityTracker')}
             activeOpacity={0.7}
           >
-            <Text style={styles.actionRowTitle}>Nhật ký bước chân</Text>
+            {/* <Text style={styles.actionRowTitle}>Nhật ký bước chân</Text>
             <View style={styles.actionRowRight}>
               <Text style={styles.actionRowValue}>Xem lịch sử</Text>
               <ChevronRightIcon size={16} color={c.textSecondary} />
-            </View>
+            </View> */}
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -630,15 +887,6 @@ function createStyles(theme: ThemeContextValue) {
       position: 'relative',
       marginBottom: 16,
     },
-    chartAmbientGlow: {
-      position: 'absolute',
-      top: 40,
-      left: '25%',
-      width: '50%',
-      height: 100,
-      borderRadius: 50,
-      backgroundColor: c.brandPrimary + '1A',
-    },
     chartPlotArea: {
       height: 180,
       position: 'relative',
@@ -763,6 +1011,38 @@ function createStyles(theme: ThemeContextValue) {
       alignItems: 'center',
       gap: 12,
     },
+    connectedBanner: {
+      borderRadius: 14,
+      padding: 12,
+      marginHorizontal: 16,
+      marginBottom: 16,
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderWidth: 1,
+      gap: 12,
+    },
+    connectedBannerInfo: {
+      flex: 1,
+    },
+    connectedTitleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      marginBottom: 2,
+    },
+    connectedBannerTitle: {
+      fontSize: 13,
+      fontWeight: '700',
+    },
+    connectedDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+    },
+    connectedBannerSub: {
+      fontSize: 12,
+      fontWeight: '500',
+    },
     healthConnectIconBox: {
       width: 38,
       height: 38,
@@ -854,6 +1134,7 @@ function createStyles(theme: ThemeContextValue) {
       marginBottom: 18,
     },
     weekDayCircleCol: {
+      flex: 1,
       alignItems: 'center',
       gap: 6,
     },

@@ -45,7 +45,20 @@ export function summarizeLogs(logs: FoodLog[], foods: Food[], waterMl: number, w
     if (!nutrition) return total;
     return { calories: total.calories + nutrition.calories, protein: total.protein + nutrition.protein, carbs: total.carbs + nutrition.carbs, fat: total.fat + nutrition.fat };
   }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
-  return { ...values, caloriesRemaining: Math.max(0, goals.calories - values.calories + caloriesBurned), waterMl, weightKg, targetWeightKg: goals.targetWeightKg, waterGoalMl: goals.waterMl, caloriesGoal: goals.calories, proteinGoal: goals.protein, carbsGoal: goals.carbs, fatGoal: goals.fat, caloriesBurned };
+  return {
+    ...values,
+    // Lượng calo đốt qua tập luyện không ảnh hưởng vào calo còn lại của mục tiêu ăn uống
+    caloriesRemaining: Math.max(0, goals.calories - values.calories),
+    waterMl,
+    weightKg,
+    targetWeightKg: goals.targetWeightKg,
+    waterGoalMl: goals.waterMl,
+    caloriesGoal: goals.calories,
+    proteinGoal: goals.protein,
+    carbsGoal: goals.carbs,
+    fatGoal: goals.fat,
+    caloriesBurned,
+  };
 }
 
 export function mealLabel(meal: MealSlot) {

@@ -7,7 +7,7 @@ import {
   View,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AppButton, AppCard, AppInput, AppText } from '@/components/common';
+import { AppButton, AppCard, AppInput, AppText, useAlert } from '@/components/common';
 import { CloseXIcon, FlameIcon } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
@@ -24,8 +24,15 @@ const DURATION_PRESETS = [15, 30, 45, 60];
 
 export function ActivityTrackerScreen({ navigation, route }: Props) {
   const theme = useTheme();
-  const { addActivityLog, deleteActivityLog, getActivitiesForDate, getTotalStepsForDate, getTotalCaloriesBurnedForDate } =
-    useActivity();
+  const { showAlert } = useAlert();
+  const {
+    state: activityState,
+    addActivityLog,
+    deleteActivityLog,
+    getActivitiesForDate,
+    getTotalStepsForDate,
+    getTotalCaloriesBurnedForDate,
+  } = useActivity();
 
   const selectedDate = route.params?.date || todayKey();
   const activities = getActivitiesForDate(selectedDate);
@@ -39,11 +46,28 @@ export function ActivityTrackerScreen({ navigation, route }: Props) {
 
   const currentMeta = findActivityMeta(selectedType);
   const durationNum = parseInt(durationStr, 10) || 0;
-  const userWeight = 65; // kg
+  const userWeight = activityState.weightLogs.length > 0 ? activityState.weightLogs[0].weightKg : 65;
   const estimatedCalories = calculateCaloriesBurned(currentMeta.met, userWeight, durationNum);
 
   const handleSaveActivity = () => {
     if (durationNum <= 0) return;
+
+    if (activityState.weightLogs.length === 0) {
+      showAlert({
+        title: 'Cần cập nhật cân nặng',
+        message: 'Kallo cần cân nặng của bạn để tính chính xác calo tiêu hao cho bài tập này.',
+        buttons: [
+          { text: 'Để sau', variant: 'outline' },
+          {
+            text: 'Ghi cân nặng ngay',
+            variant: 'primary',
+            onPress: () => navigation.navigate('RecordWeight', { initialWeight: 65, date: selectedDate }),
+          },
+        ],
+      });
+      return;
+    }
+
     const distanceKm = distanceStr ? parseFloat(distanceStr) : undefined;
 
     addActivityLog({

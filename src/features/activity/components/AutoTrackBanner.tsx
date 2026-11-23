@@ -1,7 +1,8 @@
 import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { images } from '@/assets/images';
 import { useTheme } from '@/theme';
+import { useActivity } from '../ActivityProvider';
 
 export type AutoTrackBannerProps = {
   onPress: () => void;
@@ -9,6 +10,13 @@ export type AutoTrackBannerProps = {
 
 export function AutoTrackBanner({ onPress }: AutoTrackBannerProps) {
   const { colors: c } = useTheme();
+  const { state } = useActivity();
+
+  const isIos = Platform.OS === 'ios';
+  const providerKey = isIos ? 'appleHealth' : 'healthConnect';
+  const providerName = isIos ? 'Apple Health' : 'Google Health Connect';
+  const providerLogo = isIos ? images.appleHealthIcon : images.healthConnectIcon;
+  const isConnected = state.syncStatus[providerKey] === 'CONNECTED';
 
   return (
     <View style={styles.autoTrackSection}>
@@ -19,20 +27,29 @@ export function AutoTrackBanner({ onPress }: AutoTrackBannerProps) {
         onPress={onPress}
         style={[styles.healthBannerCard, { backgroundColor: c.surfaceHigh, borderColor: c.surfaceBorder }]}
         accessibilityRole="button"
-        accessibilityLabel="Kết nối Google Health"
+        accessibilityLabel={`Kết nối ${providerName}`}
       >
         <View style={[styles.healthIconContainer, { backgroundColor: c.surfaceMid }]}>
           <Image
-            source={images.healthConnectIcon}
+            source={providerLogo}
             style={styles.healthIconImg}
             resizeMode="contain"
           />
         </View>
         <View style={styles.healthTextCol}>
           <Text style={[styles.healthCardTitle, { color: c.textPrimary }]}>
-            Kết nối Google Health để Wao tự theo dõi calo hoạt động cho bạn.
+            {isConnected
+              ? `Đã liên kết ${providerName}. Kallo tự động đồng bộ bước chân & calo.`
+              : `Kết nối ${providerName} để Kallo tự theo dõi calo hoạt động cho bạn.`}
           </Text>
-          <Text style={[styles.healthConnectLink, { color: c.brandSecondary }]}>Kết nối</Text>
+          <Text
+            style={[
+              styles.healthConnectLink,
+              { color: isConnected ? c.quickScanner : c.brandSecondary },
+            ]}
+          >
+            {isConnected ? 'Quản lý đồng bộ' : 'Kết nối'}
+          </Text>
         </View>
       </TouchableOpacity>
     </View>

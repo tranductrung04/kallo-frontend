@@ -86,7 +86,7 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       minWidth: 48,
       height: 48,
       borderRadius: r.full,
-      backgroundColor: c.brandSoftTint,
+      // backgroundColor: c.brandSoftTint,
       borderWidth: 1,
       borderColor: c.surfaceBorder,
       flexDirection: 'row',
