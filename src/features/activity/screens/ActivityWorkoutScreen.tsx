@@ -16,6 +16,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '@/navigation/types';
+import { useAlert } from '@/components/common';
 import { ChevronLeftIcon, ChevronRightIcon } from '@/components/icons';
 import { images } from '@/assets/images';
 import { useTheme, type ThemeContextValue } from '@/theme';
@@ -67,7 +68,8 @@ export function ActivityWorkoutScreen({ navigation, route }: Props) {
 
   const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
-  const { addActivityLog } = useActivity();
+  const { showAlert } = useAlert();
+  const { state: activityState, addActivityLog } = useActivity();
   const { state: nutritionState } = useNutrition();
 
 
@@ -170,6 +172,24 @@ export function ActivityWorkoutScreen({ navigation, route }: Props) {
 
   const handleSave = () => {
     if (!canSave) return;
+
+    const hasWeight =
+      (activityState?.weightLogs?.length ?? 0) > 0 || (nutritionState?.weightLogs?.length ?? 0) > 0;
+    if (!hasWeight) {
+      showAlert({
+        title: 'Cần cập nhật cân nặng',
+        message: 'Kallo cần cân nặng của bạn để đồng bộ bài tập với hệ thống.',
+        buttons: [
+          { text: 'Để sau', variant: 'outline' },
+          {
+            text: 'Ghi cân nặng ngay',
+            variant: 'primary',
+            onPress: () => navigation.navigate('RecordWeight', { initialWeight: 65, date: selectedDate }),
+          },
+        ],
+      });
+      return;
+    }
 
     const finalDur = durNum > 0 ? durNum : 30;
     const finalCal =

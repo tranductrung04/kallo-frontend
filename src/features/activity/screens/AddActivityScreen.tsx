@@ -11,6 +11,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '@/navigation/types';
+import { useAlert } from '@/components/common';
 import { ChevronLeftIcon, PlusIcon, SearchIcon } from '@/components/icons';
 import { useTheme, type ThemeContextValue } from '@/theme';
 import { useActivity } from '../ActivityProvider';
@@ -40,7 +41,8 @@ export function AddActivityScreen({ navigation, route }: Props) {
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const insets = useSafeAreaInsets();
-  const { addActivityLog } = useActivity();
+  const { showAlert } = useAlert();
+  const { state: activityState, addActivityLog } = useActivity();
   const { state: nutritionState } = useNutrition();
 
   const selectedDate = route.params?.date || nutritionState.selectedDate || todayKey();
@@ -124,34 +126,57 @@ export function AddActivityScreen({ navigation, route }: Props) {
     }
   };
 
+  const hasRecordedWeight =
+    (activityState?.weightLogs?.length ?? 0) > 0 || (nutritionState?.weightLogs?.length ?? 0) > 0;
+
   const handleItemPress = (item: ActivityItemMeta) => {
-    if (item.id === 'c_badminton') {
-      navigation.navigate('BadmintonWorkout', { date: selectedDate, activityName: item.name });
-      return;
-    }
-    if (item.id === 'y_yoga') {
-      navigation.navigate('YogaWorkout', { date: selectedDate, activityName: item.name });
-      return;
-    }
-    if (item.id === 'p_pickleball') {
-      navigation.navigate('PickleballWorkout', { date: selectedDate, activityName: item.name });
-      return;
-    }
-    if (item.id === 'c_running') {
-      navigation.navigate('RunningWorkout', { date: selectedDate, activityName: item.name });
-      return;
-    }
-    if (item.id === 'd_cycling') {
-      navigation.navigate('CyclingWorkout', { date: selectedDate, activityName: item.name });
+    const proceed = () => {
+      if (item.id === 'c_badminton') {
+        navigation.navigate('BadmintonWorkout', { date: selectedDate, activityName: item.name });
+        return;
+      }
+      if (item.id === 'y_yoga') {
+        navigation.navigate('YogaWorkout', { date: selectedDate, activityName: item.name });
+        return;
+      }
+      if (item.id === 'p_pickleball') {
+        navigation.navigate('PickleballWorkout', { date: selectedDate, activityName: item.name });
+        return;
+      }
+      if (item.id === 'c_running') {
+        navigation.navigate('RunningWorkout', { date: selectedDate, activityName: item.name });
+        return;
+      }
+      if (item.id === 'd_cycling') {
+        navigation.navigate('CyclingWorkout', { date: selectedDate, activityName: item.name });
+        return;
+      }
+
+      navigation.navigate('ActivityWorkout', {
+        activityId: item.id,
+        activityName: item.name,
+        met: item.met,
+        date: selectedDate,
+      });
+    };
+
+    if (!hasRecordedWeight) {
+      showAlert({
+        title: 'Cần cập nhật cân nặng',
+        message: 'Kallo cần cân nặng của bạn để tính chính xác calo tiêu hao cho các bài tập.',
+        buttons: [
+          { text: 'Tiếp tục', variant: 'outline', onPress: proceed },
+          {
+            text: 'Ghi cân nặng ngay',
+            variant: 'primary',
+            onPress: () => navigation.navigate('RecordWeight', { initialWeight: 65, date: selectedDate }),
+          },
+        ],
+      });
       return;
     }
 
-    navigation.navigate('ActivityWorkout', {
-      activityId: item.id,
-      activityName: item.name,
-      met: item.met,
-      date: selectedDate,
-    });
+    proceed();
   };
 
   const handleSaveCustomActivity = (
@@ -159,6 +184,25 @@ export function AddActivityScreen({ navigation, route }: Props) {
     durationMinutes: number,
     caloriesBurned: number
   ) => {
+    if (!hasRecordedWeight) {
+      showAlert({
+        title: 'Cần cập nhật cân nặng',
+        message: 'Kallo cần cân nặng của bạn để tính chính xác calo tiêu hao cho bài tập này.',
+        buttons: [
+          { text: 'Để sau', variant: 'outline' },
+          {
+            text: 'Ghi cân nặng ngay',
+            variant: 'primary',
+            onPress: () => {
+              setCustomModalVisible(false);
+              navigation.navigate('RecordWeight', { initialWeight: 65, date: selectedDate });
+            },
+          },
+        ],
+      });
+      return;
+    }
+
     addActivityLog({
       date: selectedDate,
       type: 'other',
