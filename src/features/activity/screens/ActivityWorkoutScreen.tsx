@@ -22,6 +22,7 @@ import { images } from '@/assets/images';
 import { useTheme, type ThemeContextValue } from '@/theme';
 import { useActivity } from '../ActivityProvider';
 import { calculateCaloriesBurned } from '../utils';
+import { getSportImageSource } from '../sportImages';
 import { useNutrition } from '@/features/nutrition/NutritionProvider';
 import { todayKey } from '@/features/nutrition/utils';
 
@@ -32,34 +33,6 @@ export type IntensityOption = {
   label: string;
   met: number;
 };
-
-// Sport image resolver
-function getSportImage(activityId: string, activityName: string): ImageSourcePropType {
-  const idLower = (activityId || '').toLowerCase();
-  const nameLower = (activityName || '').toLowerCase();
-
-  if (idLower.includes('australian_football') || nameLower.includes('bầu dục úc')) {
-    return images.australianFootball;
-  }
-  if (nameLower.includes('chạy') || nameLower.includes('run') || nameLower.includes('marathon') || nameLower.includes('điền kinh')) {
-    return images.runningTrack;
-  }
-  if (nameLower.includes('đạp xe') || nameLower.includes('cycl')) {
-    return images.cyclingTrack;
-  }
-  if (nameLower.includes('cầu lông') || nameLower.includes('badminton')) {
-    return images.badmintonCourt;
-  }
-  if (nameLower.includes('pickleball')) {
-    return images.pickleballCourt;
-  }
-  if (nameLower.includes('yoga') || nameLower.includes('thiền') || nameLower.includes('giãn cơ') || nameLower.includes('pilates')) {
-    return images.yogaPractice;
-  }
-
-  // Default to Australian football or running track as high-energy sport image
-  return images.australianFootball;
-}
 
 export function ActivityWorkoutScreen({ navigation, route }: Props) {
   const theme = useTheme();
@@ -212,7 +185,7 @@ export function ActivityWorkoutScreen({ navigation, route }: Props) {
   // Image dimensions matching screenshots
   const heroWidth = Math.min(screenWidth * 0.74, 280);
   const heroHeight = Math.round(heroWidth * (9 / 16));
-  const heroImageSource = getSportImage(activityId, activityTitle);
+  const heroImageSource = getSportImageSource(activityId, activityTitle);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

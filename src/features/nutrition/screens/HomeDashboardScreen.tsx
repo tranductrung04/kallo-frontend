@@ -8,6 +8,7 @@ import {
   Pressable,
   ScrollView,
   StatusBar,
+  TouchableOpacity,
   View,
   useWindowDimensions,
 } from 'react-native';
@@ -73,7 +74,12 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
 
   const { state, getSummary, addWater, setSelectedDate } = useNutrition();
-  const { getTotalCaloriesBurnedForDate, getTotalStepsForDate, state: activityState } = useActivity();
+  const {
+    getTotalCaloriesBurnedForDate,
+    getTotalStepsForDate,
+    getActivitiesForDate,
+    state: activityState,
+  } = useActivity();
   const { streak, badges, challenges, friends, incomingRequests } = useGamification();
   const [calendarModalVisible, setCalendarModalVisible] = useState(false);
   const [calorieGoalModalVisible, setCalorieGoalModalVisible] = useState(false);
@@ -96,6 +102,22 @@ export function HomeDashboardScreen({ navigation }: Props) {
     activityState.syncStatus.healthConnect === 'CONNECTED' ||
     (Platform.OS === 'ios' && activityState.syncStatus.appleHealth === 'CONNECTED');
 
+  const latestActivityName = useMemo(() => {
+    const dayActivities = getActivitiesForDate(selectedDate);
+    if (dayActivities.length > 0) {
+      return dayActivities[dayActivities.length - 1].name;
+    }
+    if (activityState.activityLogs && activityState.activityLogs.length > 0) {
+      const sorted = [...activityState.activityLogs].sort((a, b) => {
+        const timeA = a.timestamp || a.date;
+        const timeB = b.timestamp || b.date;
+        return timeB.localeCompare(timeA);
+      });
+      return sorted[0].name;
+    }
+    return null;
+  }, [getActivitiesForDate, selectedDate, activityState.activityLogs]);
+
   const handleStepCardPress = () => {
     root?.navigate('StepDetail', { openConnectModal: !isStepConnected });
   };
@@ -103,10 +125,10 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const weekDays = useMemo(() => getWeekDays(selectedDate), [selectedDate]);
   const dateTitle = useMemo(() => formatHeaderDate(selectedDate), [selectedDate]);
 
-  // Calories
+  // Calories (lượng calo đốt qua tập luyện không ảnh hưởng vào lượng calo nạp/còn lại)
   const caloriesGoal = summary.caloriesGoal || 1794;
   const caloriesConsumed = summary.calories || 0;
-  const caloriesRemaining = Math.max(0, caloriesGoal - caloriesConsumed + caloriesBurned);
+  const caloriesRemaining = Math.max(0, caloriesGoal - caloriesConsumed);
   const progress = caloriesGoal > 0 ? caloriesConsumed / caloriesGoal : 0;
   // Vẫn hiện một cung nhỏ khi chưa nạp calo (CircularProgress tự clamp 0–1)
   const ringValue = progress > 0 ? progress : 0.08;
@@ -670,13 +692,27 @@ export function HomeDashboardScreen({ navigation }: Props) {
             >
               <View style={styles.workoutTopRow}>
                 <AppText variant="labelLg">Tập luyện</AppText>
-                <View style={styles.plusCircleBtn}>
+                <TouchableOpacity
+                  style={styles.plusCircleBtn}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    root?.navigate('AddActivity', { date: selectedDate });
+                  }}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  accessibilityRole="button"
+                  accessibilityLabel="Thêm hoạt động"
+                >
                   <PlusIcon size={14} color={colors.onBrand} strokeWidth={2.5} />
-                </View>
+                </TouchableOpacity>
               </View>
               <View style={styles.workoutMiddle}>
-                <AppText variant="bodySm" color={colors.textSecondary} style={styles.workoutEmptyText}>
-                  Chưa có hoạt động...
+                <AppText
+                  variant="bodySm"
+                  color={latestActivityName ? colors.textPrimary : colors.textSecondary}
+                  numberOfLines={1}
+                  style={styles.workoutEmptyText}
+                >
+                  {latestActivityName || 'Chưa có hoạt động'}
                 </AppText>
                 <View style={styles.workoutDivider} />
               </View>

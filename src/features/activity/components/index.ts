@@ -6,3 +6,4 @@ export * from './AlphabetIndexSidebar';
 export * from './ActivityRowItem';
 export * from './ActivityTypeIcon';
 export * from './StepConnectModal';
+export * from './ShareJourneyModal';

@@ -61,6 +61,7 @@ export type RootStackParamList = {
   HealthSync: undefined;
   StepDetail: { openConnectModal?: boolean } | undefined;
   WorkoutStatistics: { openConnectModal?: boolean } | undefined;
+  WorkoutLog: { date?: string } | undefined;
   WeightStatistics: undefined;
   RecordWeight: { date?: string; initialWeight?: number } | undefined;
   BodyMetric: undefined;

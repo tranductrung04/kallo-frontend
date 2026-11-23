@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import * as ImagePicker from 'expo-image-picker';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import type { RootStackParamList } from '@/navigation/types';
 import { CalendarIcon, CloseXIcon, PlusIcon } from '@/components/icons';
@@ -90,35 +91,35 @@ export function RecordWeightScreen({ navigation, route }: Props) {
     setWeight((prev) => Math.min(300, Number((prev + 0.5).toFixed(1))));
   };
 
-  const handleAddPhoto = () => {
-    showAlert({
-      title: 'Thêm ảnh chụp',
-      message: 'Chọn nguồn ảnh',
-      variant: 'info',
-      buttons: [
-        {
-          text: 'Chụp ảnh mới',
-          variant: 'primary',
-          onPress: () =>
-            showAlert({
-              title: 'Thông báo',
-              message: 'Đã chụp ảnh tiến trình',
-              variant: 'success',
-            }),
-        },
-        {
-          text: 'Chọn từ thư viện',
-          variant: 'outline',
-          onPress: () =>
-            showAlert({
-              title: 'Thông báo',
-              message: 'Đã chọn ảnh từ thư viện',
-              variant: 'success',
-            }),
-        },
-        { text: 'Hủy', variant: 'secondary' },
-      ],
-    });
+  const handlePickFromLibrary = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        showAlert({
+          title: 'Quyền truy cập thư viện',
+          message: 'Kallo cần quyền truy cập thư viện ảnh để thêm ảnh cân nặng. Vui lòng cấp quyền trong cài đặt thiết bị.',
+          variant: 'warning',
+        });
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.85,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0 && result.assets[0].uri) {
+        setPhotoUri(result.assets[0].uri);
+      }
+    } catch {
+      showAlert({
+        title: 'Lỗi',
+        message: 'Không thể mở thư viện ảnh của thiết bị.',
+        variant: 'error',
+      });
+    }
   };
 
   const handleConfirmManualWeight = () => {
@@ -165,26 +166,66 @@ export function RecordWeightScreen({ navigation, route }: Props) {
         <View style={styles.photoSection}>
           <TouchableOpacity
             style={[styles.photoBox, { backgroundColor: c.surfaceHigh }]}
-            onPress={handleAddPhoto}
+            onPress={handlePickFromLibrary}
             activeOpacity={0.8}
-            accessibilityLabel="Thêm ảnh chụp"
+            accessibilityLabel={photoUri ? 'Thay đổi ảnh cân nặng' : 'Thêm ảnh chụp'}
             accessibilityRole="button"
           >
             {photoUri ? (
-              <Image source={{ uri: photoUri }} style={styles.photoPreview} resizeMode="cover" />
+              <View style={styles.photoPreviewWrapper}>
+                <Image source={{ uri: photoUri }} style={styles.photoPreview} resizeMode="cover" />
+                <TouchableOpacity
+                  style={styles.deletePhotoCircle}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    setPhotoUri(null);
+                  }}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  accessibilityRole="button"
+                  accessibilityLabel="Xóa ảnh"
+                >
+                  <CloseXIcon size={14} color="#FFFFFF" strokeWidth={2.5} />
+                </TouchableOpacity>
+              </View>
             ) : (
               <PhotoPlaceholderIcon size={76} color={c.surfaceBorder} bgColor={c.surfaceHigh} />
             )}
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.addPhotoBtn}
-            onPress={handleAddPhoto}
-            activeOpacity={0.8}
-          >
-            <PlusIcon size={16} color={c.brandSecondary} strokeWidth={2.5} />
-            <Text style={[styles.addPhotoBtnText, { color: c.brandSecondary }]}>Thêm ảnh chụp</Text>
-          </TouchableOpacity>
+          {photoUri ? (
+            <View style={styles.photoActionsRow}>
+              <TouchableOpacity
+                style={styles.addPhotoBtn}
+                onPress={handlePickFromLibrary}
+                activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="Thay đổi ảnh"
+              >
+                <Text style={[styles.addPhotoBtnText, { color: c.brandSecondary }]}>Thay đổi ảnh</Text>
+              </TouchableOpacity>
+              <Text style={[styles.photoActionDot, { color: c.textSecondary }]}>•</Text>
+              <TouchableOpacity
+                style={styles.addPhotoBtn}
+                onPress={() => setPhotoUri(null)}
+                activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="Xóa ảnh"
+              >
+                <Text style={[styles.addPhotoBtnText, { color: c.danger }]}>Xóa ảnh</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity
+              style={styles.addPhotoBtn}
+              onPress={handlePickFromLibrary}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel="Thêm ảnh chụp"
+            >
+              <PlusIcon size={16} color={c.brandSecondary} strokeWidth={2.5} />
+              <Text style={[styles.addPhotoBtnText, { color: c.brandSecondary }]}>Thêm ảnh chụp</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* ── Current Weight Label & Target ──────────────────── */}
@@ -362,9 +403,34 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
   },
+  photoPreviewWrapper: {
+    width: '100%',
+    height: '100%',
+    position: 'relative',
+  },
   photoPreview: {
     width: '100%',
     height: '100%',
+  },
+  deletePhotoCircle: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  photoActionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 14,
+  },
+  photoActionDot: {
+    fontSize: 14,
   },
   addPhotoBtn: {
     flexDirection: 'row',

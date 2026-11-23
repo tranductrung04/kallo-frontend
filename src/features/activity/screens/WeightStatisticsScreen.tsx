@@ -32,6 +32,7 @@ import { formatNumber, todayKey } from '@/features/nutrition/utils';
 import { useNutrition } from '@/features/nutrition/NutritionProvider';
 import { useActivity } from '../ActivityProvider';
 import { StepConnectModal } from '../components/StepConnectModal';
+import { ShareJourneyModal } from '../components/ShareJourneyModal';
 import { useAlert } from '@/components/common';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'WeightStatistics'>;
@@ -56,6 +57,7 @@ export function WeightStatisticsScreen({ navigation }: Props) {
   const [sixMonthsOffset, setSixMonthsOffset] = useState(0);
   const [yearOffset, setYearOffset] = useState(0);
   const [showConnectModal, setShowConnectModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // Time navigation calculation based on activeTab
   const timeInfo = useMemo(() => {
@@ -112,8 +114,8 @@ export function WeightStatisticsScreen({ navigation }: Props) {
     activeTab === '1_month'
       ? monthOffset >= 0
       : activeTab === '6_months'
-      ? sixMonthsOffset >= 0
-      : yearOffset >= 0;
+        ? sixMonthsOffset >= 0
+        : yearOffset >= 0;
 
   // Weight statistics
   const weightLogs =
@@ -367,8 +369,10 @@ export function WeightStatisticsScreen({ navigation }: Props) {
         <View style={styles.progressPhotosRow}>
           <TouchableOpacity
             style={styles.addPhotoDashedBtn}
-            onPress={() => showAlert({ title: 'Thêm ảnh', message: 'Chọn ảnh từ thư viện để theo dõi tiến trình vóc dáng của bạn.', variant: 'info' })}
+            onPress={() => navigation.navigate('RecordWeight')}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Ghi lại cân nặng"
           >
             <PlusIcon size={24} color={c.textSecondary} strokeWidth={2} />
           </TouchableOpacity>
@@ -377,8 +381,10 @@ export function WeightStatisticsScreen({ navigation }: Props) {
         {/* Chia sẻ hành trình button */}
         <TouchableOpacity
           style={styles.shareJourneyBtn}
-          onPress={() => showAlert({ title: 'Chia sẻ hành trình', message: 'Chia sẻ tiến trình cân nặng của bạn lên bảng tin hoặc mạng xã hội.', variant: 'info' })}
+          onPress={() => setShowShareModal(true)}
           activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel="Chia sẻ hành trình"
         >
           <Text style={styles.shareJourneyBtnText}>Chia sẻ hành trình</Text>
         </TouchableOpacity>
@@ -450,7 +456,7 @@ export function WeightStatisticsScreen({ navigation }: Props) {
         </View>
 
         {/* ── Bottom Actions List ───────────────────────────── */}
-        <View style={styles.bottomActionsCard}>
+        {/* <View style={styles.bottomActionsCard}>
           <TouchableOpacity
             style={styles.actionRow}
             onPress={() => navigation.navigate('RecordWeight')}
@@ -462,17 +468,35 @@ export function WeightStatisticsScreen({ navigation }: Props) {
               <ChevronRightIcon size={16} color={c.textSecondary} />
             </View>
           </TouchableOpacity>
-        </View>
+        </View> */}
       </ScrollView>
 
       {/* ── Health Connect Modal ────────────────────────────── */}
       <StepConnectModal
         visible={showConnectModal}
         type="step"
-        title="Wao cần quyền truy cập dữ liệu cân nặng"
-        description="Kết nối với Health Connect để Wao có thể đồng bộ cân nặng tự động từ cân thông minh của bạn."
+        title="Kallo cần quyền truy cập dữ liệu cân nặng"
+        description="Kết nối với Health Connect để Kallo có thể đồng bộ cân nặng tự động từ cân thông minh của bạn."
         onClose={() => setShowConnectModal(false)}
         onSuccess={() => setShowConnectModal(false)}
+      />
+
+      {/* ── Chia sẻ hành trình Modal ─────────────────────────── */}
+      <ShareJourneyModal
+        visible={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        initialWeight={initialWeight}
+        currentWeight={latestWeight}
+        startDate={
+          weightLogs.length > 0 && weightLogs[0].date
+            ? weightLogs[0].date.split('-').reverse().join('/')
+            : undefined
+        }
+        currentDate={
+          weightLogs.length > 0 && weightLogs[weightLogs.length - 1].date
+            ? weightLogs[weightLogs.length - 1].date.split('-').reverse().join('/')
+            : undefined
+        }
       />
     </View>
   );

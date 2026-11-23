@@ -43,6 +43,7 @@ import {
   PenLine,
   PersonStanding,
   Plus,
+  QrCode,
   RefreshCw,
   Send,
   Salad,
@@ -272,5 +273,6 @@ export const SquareIcon = fromLucide(Square, { defaultSize: 20 });
 export const SquareCheckIcon = fromLucide(SquareCheck, { defaultSize: 20 });
 export const CheckSquareIcon = SquareCheckIcon;
 export const StarIcon = fromLucide(Star, { defaultSize: 14, defaultColor: '#FACC15', defaultFill: '#FACC15' });
+export const QrCodeIcon = fromLucide(QrCode, { defaultSize: 24 });
 
 

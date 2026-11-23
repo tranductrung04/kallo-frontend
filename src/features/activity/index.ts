@@ -2,6 +2,7 @@ export * from './types';
 export * from './api';
 export * from './catalog';
 export * from './extendedActivities';
+export * from './sportImages';
 export * from './utils';
 export * from './ActivityProvider';
 export * from './components';

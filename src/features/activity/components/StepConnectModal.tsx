@@ -45,13 +45,13 @@ export function StepConnectModal({
 
   const defaultTitle =
     type === 'workout'
-      ? `Wao cần quyền truy cập dữ liệu tập luyện`
-      : `Wao cần quyền truy cập dữ liệu bước chân`;
+      ? `Kallo cần quyền truy cập dữ liệu tập luyện`
+      : `Kallo cần quyền truy cập dữ liệu bước chân`;
 
   const defaultDesc =
     type === 'workout'
-      ? `Wao cần quyền truy cập ${providerName} để ghi nhận dữ liệu tập luyện như số bước chân, calo tiêu hao, thời gian vận động...`
-      : `Kết nối với ${providerName} để Wao có thể đọc bước chân và hỗ trợ bạn theo dõi mức độ hoạt động mỗi ngày.`;
+      ? `Kallo cần quyền truy cập ${providerName} để ghi nhận dữ liệu tập luyện như số bước chân, calo tiêu hao, thời gian vận động...`
+      : `Kết nối với ${providerName} để Kallo có thể đọc bước chân và hỗ trợ bạn theo dõi mức độ hoạt động mỗi ngày.`;
 
   const finalTitle = title || defaultTitle;
   const finalDesc = description || defaultDesc;

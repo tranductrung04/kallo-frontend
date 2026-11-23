@@ -612,11 +612,13 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
         </View>
 
         {/* ── Bottom Actions List ───────────────────────────── */}
-        {/* <View style={styles.bottomActionsCard}>
+        <View style={styles.bottomActionsCard}>
           <TouchableOpacity
             style={styles.actionRow}
-            onPress={() => navigation.navigate('ActivityTracker')}
+            onPress={() => navigation.navigate('WorkoutLog')}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Nhật ký tập luyện"
           >
             <Text style={styles.actionRowTitle}>Nhật ký tập luyện</Text>
             <View style={styles.actionRowRight}>
@@ -624,7 +626,7 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
               <ChevronRightIcon size={16} color={c.textSecondary} />
             </View>
           </TouchableOpacity>
-        </View> */}
+        </View>
       </ScrollView>
 
       {/* ── Workout Connect Modal (Image 1) ───────────────── */}
