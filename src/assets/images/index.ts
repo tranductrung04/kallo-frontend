@@ -2,7 +2,6 @@ const imageFiles = {
   backIconMask: require('./common/back_icon_mask.png'),
   logoWhite: require('./common/logo_white.png'),
   kalloLogo: require('./common/logo.png'),
-  waoLogo: require('./common/logo.png'),
   avatar: require('./common/avatar.webp'),
   emptyState: require('./common/empty_state.webp'),
   searchNotFound: require('./common/search_not_found.webp'),

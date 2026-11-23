@@ -311,7 +311,6 @@ export function KalloShieldIcon({ size = 30 }: KalloShieldIconProps) {
     </Svg>
   );
 }
-export const WaoShieldIcon = KalloShieldIcon;
 
 /** Huy hiệu cuốn lịch mốc ngày phong cách sticker viền trắng / xám (3, 7, 14 ngày) */
 export function MilestoneCalendarBadge({
