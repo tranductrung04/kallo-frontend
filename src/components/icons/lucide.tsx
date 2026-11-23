@@ -38,6 +38,7 @@ import {
   Menu,
   MessageSquare,
   Mic,
+  Minus,
   Moon,
   PenLine,
   PersonStanding,
@@ -138,6 +139,7 @@ export const ChevronUpIcon = fromLucide(ChevronUp, { defaultSize: 20 });
 
 export const CloseXIcon = fromLucide(X, { defaultSize: 20, strokeWidth: 2.2 });
 export const PlusIcon = fromLucide(Plus, { defaultSize: 14, strokeWidth: 2.4 });
+export const MinusIcon = fromLucide(Minus, { defaultSize: 14, strokeWidth: 2.4 });
 
 export function CirclePlusIcon({
   size = 20,

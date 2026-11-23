@@ -352,8 +352,8 @@ export function StepDetailScreen({ navigation, route }: Props) {
     activeTab === 'week'
       ? weekOffset >= 0
       : activeTab === 'month'
-      ? monthOffset >= 0
-      : sixMonthsOffset >= 0;
+        ? monthOffset >= 0
+        : sixMonthsOffset >= 0;
 
   // Max scale for chart
   const maxStepsInView = Math.max(
@@ -452,9 +452,6 @@ export function StepDetailScreen({ navigation, route }: Props) {
 
         {/* ── Step Bar Chart Area ────────────────────────────── */}
         <View style={styles.chartCard}>
-          {/* Ambient Glow */}
-          <View style={styles.chartAmbientGlow} />
-
           {/* Y-Axis Grid Lines & Labels */}
           <View style={styles.chartPlotArea}>
             {/* Ticks: 1.0, 0.8, 0.6, 0.4, 0.2, 0 */}
@@ -742,11 +739,11 @@ export function StepDetailScreen({ navigation, route }: Props) {
             onPress={() => navigation.navigate('ActivityTracker')}
             activeOpacity={0.7}
           >
-            <Text style={styles.actionRowTitle}>Nhật ký bước chân</Text>
+            {/* <Text style={styles.actionRowTitle}>Nhật ký bước chân</Text>
             <View style={styles.actionRowRight}>
               <Text style={styles.actionRowValue}>Xem lịch sử</Text>
               <ChevronRightIcon size={16} color={c.textSecondary} />
-            </View>
+            </View> */}
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -889,15 +886,6 @@ function createStyles(theme: ThemeContextValue) {
       overflow: 'hidden',
       position: 'relative',
       marginBottom: 16,
-    },
-    chartAmbientGlow: {
-      position: 'absolute',
-      top: 40,
-      left: '25%',
-      width: '50%',
-      height: 100,
-      borderRadius: 50,
-      backgroundColor: c.brandPrimary + '1A',
     },
     chartPlotArea: {
       height: 180,

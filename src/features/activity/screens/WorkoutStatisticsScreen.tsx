@@ -265,8 +265,8 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
     activeTab === 'week'
       ? weekOffset >= 0
       : activeTab === 'month'
-      ? monthOffset >= 0
-      : sixMonthsOffset >= 0;
+        ? monthOffset >= 0
+        : sixMonthsOffset >= 0;
 
   const maxCaloInView = Math.max(...activeViewData.items.map((d) => d.calories), 500);
   const chartMaxScale = Math.ceil(maxCaloInView / 100) * 100;
@@ -398,9 +398,6 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
 
         {/* ── Workout Bar Chart Area ─────────────────────────── */}
         <View style={styles.chartCard}>
-          {/* Ambient Glow */}
-          <View style={styles.chartAmbientGlow} />
-
           {/* Y-Axis Grid Lines & Labels */}
           <View style={styles.chartPlotArea}>
             {[1.0, 0.8, 0.6, 0.4, 0.2, 0].map((tick) => {
@@ -615,7 +612,7 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
         </View>
 
         {/* ── Bottom Actions List ───────────────────────────── */}
-        <View style={styles.bottomActionsCard}>
+        {/* <View style={styles.bottomActionsCard}>
           <TouchableOpacity
             style={styles.actionRow}
             onPress={() => navigation.navigate('ActivityTracker')}
@@ -627,7 +624,7 @@ export function WorkoutStatisticsScreen({ navigation, route }: Props) {
               <ChevronRightIcon size={16} color={c.textSecondary} />
             </View>
           </TouchableOpacity>
-        </View>
+        </View> */}
       </ScrollView>
 
       {/* ── Workout Connect Modal (Image 1) ───────────────── */}
@@ -720,15 +717,6 @@ function createStyles(theme: ThemeContextValue) {
       overflow: 'hidden',
       position: 'relative',
       marginBottom: 16,
-    },
-    chartAmbientGlow: {
-      position: 'absolute',
-      top: 40,
-      left: '25%',
-      width: '50%',
-      height: 100,
-      borderRadius: 50,
-      backgroundColor: c.brandPrimary + '1A',
     },
     chartPlotArea: {
       height: 180,

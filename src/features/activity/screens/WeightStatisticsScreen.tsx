@@ -242,9 +242,6 @@ export function WeightStatisticsScreen({ navigation }: Props) {
 
         {/* ── Weight Line Chart Area ─────────────────────────── */}
         <View style={styles.chartCard}>
-          {/* Ambient Glow */}
-          <View style={styles.chartAmbientGlow} />
-
           {/* Plot Area */}
           <View style={styles.chartPlotArea}>
             {/* Horizontal Dashed Lines with Ticks: 61, 58, 55, 52, 49 */}
@@ -578,15 +575,6 @@ function createStyles(theme: ThemeContextValue) {
       overflow: 'hidden',
       position: 'relative',
       marginBottom: 16,
-    },
-    chartAmbientGlow: {
-      position: 'absolute',
-      top: 40,
-      left: '25%',
-      width: '50%',
-      height: 100,
-      borderRadius: 50,
-      backgroundColor: c.brandPrimary + '1A',
     },
     chartPlotArea: {
       height: 180,
