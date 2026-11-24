@@ -1,8 +1,3 @@
-// ─── Nocturne & Daylight Vitality — Elevation & Shadow System ───────────────
-// DESIGN.md: "Dark Mode: progressive surface luminance + ambient colored glows
-//             Light Mode: crisp white surface layering + soft tinted shadows"
-// ─────────────────────────────────────────────────────────────────────────────
-
 import type { ViewStyle } from 'react-native';
 
 export const shadows = {

@@ -3,7 +3,6 @@ import React from 'react';
 import * as WebBrowser from 'expo-web-browser';
 import { StatusBar } from 'expo-status-bar';
 
-// Hoàn tất phiên redirect nếu đang quay lại từ trình duyệt đăng nhập OAuth
 WebBrowser.maybeCompleteAuthSession();
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -16,8 +15,7 @@ import { MealPlanProvider } from '@/features/meal-plan';
 import { GamificationProvider } from '@/features/gamification';
 import { OfflineSyncProvider } from '@/services/offline';
 import { SystemProvider } from '@/features/system';
-import { AlertProvider, OfflineBanner } from '@/components/common';
-// AuthProvider owns token/profile routing state for Phase 2.
+import { AlertProvider, OfflineBanner, ToastProvider } from '@/components/common';
 
 function AppContent() {
   const theme = useTheme();
@@ -36,21 +34,23 @@ export default function App() {
       <SafeAreaProvider>
         <ThemeProvider>
           <AlertProvider>
-            <AuthProvider>
-              <OfflineSyncProvider>
-                <SystemProvider>
-                  <ActivityProvider>
-                    <NutritionProvider>
-                      <MealPlanProvider>
-                        <GamificationProvider>
-                          <AppContent />
-                        </GamificationProvider>
-                      </MealPlanProvider>
-                    </NutritionProvider>
-                  </ActivityProvider>
-                </SystemProvider>
-              </OfflineSyncProvider>
-            </AuthProvider>
+            <ToastProvider>
+              <AuthProvider>
+                <OfflineSyncProvider>
+                  <SystemProvider>
+                    <ActivityProvider>
+                      <NutritionProvider>
+                        <MealPlanProvider>
+                          <GamificationProvider>
+                            <AppContent />
+                          </GamificationProvider>
+                        </MealPlanProvider>
+                      </NutritionProvider>
+                    </ActivityProvider>
+                  </SystemProvider>
+                </OfflineSyncProvider>
+              </AuthProvider>
+            </ToastProvider>
           </AlertProvider>
         </ThemeProvider>
       </SafeAreaProvider>

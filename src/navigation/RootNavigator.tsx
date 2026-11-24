@@ -22,8 +22,11 @@ import { ChatHistoryScreen, NutritionChatScreen, VoiceLogModal } from '@/feature
 import {
   StreakDetailModal,
   StreakRulesScreen,
-  BadgesChallengesScreen,
+  GameHubScreen,
+  ChallengesScreen,
+  BadgesScreen,
   FriendsLeaderboardScreen,
+  FriendsListScreen,
   ChallengeDetailScreen,
   FriendSearchScreen,
   FriendRequestsScreen,
@@ -102,10 +105,13 @@ export function RootNavigator() {
         <Stack.Screen name="NutritionChat" component={NutritionChatScreen} options={{ headerShown: false }} />
         <Stack.Screen name="ChatHistory" component={ChatHistoryScreen} options={{ headerShown: false }} />
         <Stack.Screen name="VoiceLogModal" component={VoiceLogModal} options={{ headerShown: false, presentation: 'modal' }} />
+        <Stack.Screen name="GameHub" component={GameHubScreen} options={{ headerShown: false }} />
         <Stack.Screen name="StreakDetail" component={StreakDetailModal} options={{ headerShown: false, presentation: 'fullScreenModal' }} />
         <Stack.Screen name="StreakRules" component={StreakRulesScreen} options={{ headerShown: false, presentation: 'fullScreenModal' }} />
-        <Stack.Screen name="BadgesChallenges" component={BadgesChallengesScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Challenges" component={ChallengesScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Badges" component={BadgesScreen} options={{ headerShown: false }} />
         <Stack.Screen name="ChallengeDetail" component={ChallengeDetailScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="FriendsList" component={FriendsListScreen} options={{ headerShown: false }} />
         <Stack.Screen name="FriendsLeaderboard" component={FriendsLeaderboardScreen} options={{ headerShown: false }} />
         <Stack.Screen name="FriendSearch" component={FriendSearchScreen} options={{ headerShown: false }} />
         <Stack.Screen name="FriendRequests" component={FriendRequestsScreen} options={{ headerShown: false }} />

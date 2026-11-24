@@ -254,7 +254,7 @@ export function HealthMetricsScreen({ navigation, route }: Props) {
 
           {/* Subtitle / Description */}
           <AppText style={[styles.introSubtitle, { color: subtitleColor }]}>
-            {'Hãy ghi lại số đo mới nhất để Wao\ncùng bạn lưu trữ từng bước tiến của\ncơ thể nhé!'}
+            {'Hãy ghi lại số đo mới nhất để Kallo\ncùng bạn lưu trữ từng bước tiến của\ncơ thể nhé!'}
           </AppText>
         </ScrollView>
 

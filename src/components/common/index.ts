@@ -14,7 +14,6 @@ export { EmptyStateView } from './EmptyStateView';
 export type { EmptyStateViewProps, EmptyVariant } from './EmptyStateView';
 export { LoadingOverlay } from './LoadingOverlay';
 export type { LoadingOverlayProps } from './LoadingOverlay';
-// New DESIGN.md components
 export { QuickUtilityTile, QuickUtilityGrid, TILE_CONFIG } from './QuickUtilityTile';
 export type { QuickUtilityTileProps, QuickTileVariant, TileConfig } from './QuickUtilityTile';
 export { DateSelectorStrip, buildWeekDates } from './DateSelectorStrip';
@@ -34,5 +33,9 @@ export { MonthCalendarModal, DatePickerModal, formatFullCalendarTitle } from './
 export type { MonthCalendarModalProps, DatePickerModalProps } from './MonthCalendarModal';
 export { AppSwitch, ToggleSwitch } from './AppSwitch';
 export type { AppSwitchProps } from './AppSwitch';
+export { AppToast } from './AppToast';
+export type { AppToastProps, ToastType, ToastPosition, ToastAction, ToastItem } from './AppToast';
+export { ToastProvider, useToast, toast } from './ToastContext';
+export type { ToastOptions, ToastContextValue, PromiseToastMessages } from './ToastContext';
 
 

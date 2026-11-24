@@ -1,14 +1,3 @@
-// ─── HomeDashboardScreen styles — theme-aware ─────────────────────────────────
-// Chỉ còn layout + khoảng cách + nền/viền riêng của màn hình này.
-//   • Chữ      → <AppText variant color /> (typography nằm trong theme)
-//   • Card     → <AppCard />  (surface, viền, bo góc, shadow level1)
-//   • Nút      → <AppButton />
-//   • Thanh/vòng tiến độ → <ProgressBar /> / <CircularProgress />
-//
-// StyleSheet.create là static nên không gọi được useTheme(); dùng factory:
-//   const styles = useMemo(() => createStyles(theme, width), [theme, width]);
-// ─────────────────────────────────────────────────────────────────────────────
-
 import { StyleSheet, type ViewStyle } from 'react-native';
 import type { ThemeContextValue } from '@/theme';
 
@@ -36,7 +25,7 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       backgroundColor: c.canvasBase,
     },
     scrollContent: {
-      paddingBottom: s.lg,
+      paddingBottom: s.xl + s.md,
     },
     topHeroContainer: {
       backgroundColor: c.surfaceMid,
@@ -519,6 +508,9 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
     },
 
     // 9. Weight Card
+    weightCard: {
+      marginBottom: s.md,
+    },
     weightHeaderRow: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -585,10 +577,103 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
     },
     communityTextWrap: {
       flex: 1,
-      gap: 2,
+      justifyContent: 'center',
+      gap: 3,
+    },
+    communityRightWrap: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: s.xs + 2,
+    },
+    incomingBadge: {
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: r.full,
+    },
+    incomingBadgeText: {
+      fontSize: 11,
+      fontWeight: '700',
     },
     bold: {
       fontWeight: '700',
+    },
+    gameHubHeroCard: {
+      borderRadius: 20,
+      padding: s.md,
+      borderWidth: 1.5,
+      position: 'relative',
+      overflow: 'hidden',
+      gap: 12,
+      shadowColor: '#7B4FE0',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.08,
+      shadowRadius: 12,
+      elevation: 3,
+    },
+    gameHubGlowCircle: {
+      position: 'absolute',
+      top: -24,
+      right: -24,
+      width: 96,
+      height: 96,
+      borderRadius: 48,
+    },
+    gameHubHeroTopRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    gameHubIconAndTitle: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: s.sm + 4,
+      flex: 1,
+    },
+    gameHubIconBox: {
+      width: 44,
+      height: 44,
+      borderRadius: 14,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    gameHubTitleWrap: {
+      flex: 1,
+      gap: 2,
+    },
+    gameHubStandingPill: {
+      paddingHorizontal: 7,
+      paddingVertical: 1.5,
+      borderRadius: r.full,
+    },
+    gameHubPointsBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      paddingHorizontal: 9,
+      paddingVertical: 4,
+      borderRadius: r.full,
+      backgroundColor: c.vipStreakBg,
+    },
+    gameHubHeroDivider: {
+      height: 1,
+      width: '100%',
+    },
+    gameHubHeroBottomRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    gameHubHeroGapWrap: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      flex: 1,
+      marginRight: 8,
+    },
+    gameHubCtaAction: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 2,
     },
 
     // 10. Floating "Quay lại hôm nay" Button

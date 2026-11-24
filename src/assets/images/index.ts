@@ -2,7 +2,6 @@ const imageFiles = {
   backIconMask: require('./common/back_icon_mask.png'),
   logoWhite: require('./common/logo_white.png'),
   kalloLogo: require('./common/logo.png'),
-  waoLogo: require('./common/logo.png'),
   avatar: require('./common/avatar.webp'),
   emptyState: require('./common/empty_state.webp'),
   searchNotFound: require('./common/search_not_found.webp'),
@@ -145,6 +144,7 @@ const imageFiles = {
   congDongHoTro: require('./community/cong_dong_ho_tro.png'),
   mealPlanCardSample: require('./meal-plan/card_sample.png'),
   mascotAvatar: require('./onboarding/avatar_illustration.webp'),
+  poweruserActiveBg: require('./premium/poweruser_active_bg.webp'),
 } as const;
 export const images = imageFiles;
 export type ImageKey = keyof typeof imageFiles;

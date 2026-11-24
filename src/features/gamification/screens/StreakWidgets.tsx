@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { use } from 'react';
 import {
   Image,
   Pressable,
@@ -42,15 +42,21 @@ export function StreakHeroWidget({ currentStreak }: StreakHeroWidgetProps) {
 
 export type StreakActionCardWidgetProps = {
   streak?: number;
+  todayCompleted?: boolean;
+  atRisk?: boolean;
   onLogMeal?: () => void;
 };
 
 export function StreakActionCardWidget({
   streak = 0,
+  todayCompleted = false,
+  atRisk = false,
   onLogMeal,
 }: StreakActionCardWidgetProps) {
-  // Khi streak = 0: giữ thẻ hành động ghi món hiện tại và dùng ảnh fooddefault.webp
-  if (streak <= 0) {
+  const theme = useTheme();
+  const { colors, spacing } = theme;
+
+  if (streak <= 0 || !todayCompleted) {
     return (
       <View style={[styles.actionCard, { backgroundColor: 'rgba(255, 255, 255, 0.14)', borderColor: 'rgba(255, 255, 255, 0.2)' }]}>
         <View style={styles.foodAvatarContainer}>
@@ -63,7 +69,9 @@ export function StreakActionCardWidget({
 
         <View style={styles.actionCardRight}>
           <AppText style={styles.actionCardTitle}>
-            Ghi lại món bạn đã ăn hôm nay để tiếp tục duy trì chuỗi ngày của bạn!
+            {atRisk
+              ? 'Chuỗi của bạn có nguy cơ bị gián đoạn! Hãy ghi món hôm nay để tiếp tục duy trì chuỗi nhé.'
+              : 'Ghi lại món bạn đã ăn hôm nay để tiếp tục duy trì chuỗi ngày của bạn!'}
           </AppText>
 
           <TouchableOpacity
@@ -73,15 +81,15 @@ export function StreakActionCardWidget({
             accessibilityRole="button"
             accessibilityLabel="Ghi món"
           >
-            <CirclePlusIcon size={20} circleColor="#B066FE" plusColor="#1D172D" />
-            <AppText style={styles.logFoodButtonText}>Ghi món</AppText>
+            <CirclePlusIcon size={20} />
+            <AppText style={styles.logFoodButtonText}>Ghi món ngay</AppText>
           </TouchableOpacity>
         </View>
       </View>
     );
   }
 
-  // Khi streak > 0: hiển thị thẻ ăn mừng với biểu tượng pháo giấy chúc mừng
+  // Khi streak > 0 và đã hoàn thành hôm nay: hiển thị thẻ ăn mừng với biểu tượng pháo giấy chúc mừng
   return (
     <View style={styles.celebrationCard}>
       <View style={styles.celebrationBadgeWrap}>
@@ -90,7 +98,7 @@ export function StreakActionCardWidget({
 
       <View style={styles.celebrationTextWrap}>
         <AppText style={styles.celebrationTitle}>
-          Hãy tiếp tục kiên trì để tiến gần hơn tới mục tiêu của bạn.
+          Hôm nay bạn đã hoàn thành mục tiêu và duy trì chuỗi thành công! Hãy tiếp tục kiên trì nhé.
         </AppText>
       </View>
     </View>
@@ -188,7 +196,6 @@ export function StreakWeekWidget({
   targetDays = 3,
 }: StreakWeekWidgetProps) {
   const { colors: c } = useTheme();
-  // Danh sách các thứ trong tuần (T2 -> CN)
   const ALL_DAYS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
 
   // Xác định ngày bắt đầu của 7 ngày hiển thị:
@@ -221,7 +228,7 @@ export function StreakWeekWidget({
             <View key={`${item.dayLabel}-${item.index}`} style={styles.dayCol}>
               <View style={styles.dayIconSlot}>
                 {item.isCompleted ? (
-                  <FlameIcon size={34} color="#F44E42" coreColor="#FA9A91" />
+                  <FlameIcon size={34} color={c.trackerBurn} />
                 ) : item.isTarget ? (
                   <StreakGoalFlagIcon width={34} height={38} />
                 ) : (
@@ -269,11 +276,7 @@ export function StreakBottomStatsWidget({
         {/* Thẻ Chuỗi hiện tại */}
         <View style={[styles.statMiniCard, { backgroundColor: c.surfaceMid, borderColor: c.surfaceBorder }]}>
           <View style={styles.statIconWrap}>
-            <FlameIcon
-              size={34}
-              color="#F44E42"
-              coreColor="#FA9A91"
-            />
+            <FlameIcon size={34} color={c.trackerBurn} />
           </View>
           <View style={styles.statTextWrap}>
             <AppText style={styles.statLabel} color={c.textSecondary}>Chuỗi hiện tại</AppText>

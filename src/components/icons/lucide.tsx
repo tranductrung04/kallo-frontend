@@ -1,7 +1,10 @@
 import React from 'react';
 import {
+  AlarmClock,
   AlertTriangle,
   Armchair,
+  ArrowRight,
+  BadgeCheck,
   Bell,
   Bike,
   BookOpen,
@@ -9,6 +12,7 @@ import {
   Calendar,
   Candy,
   Check,
+  CheckCheck,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -20,11 +24,14 @@ import {
   ClipboardList,
   Clock,
   Cloud,
+  Crown,
   Droplet,
+  Droplets,
   Dumbbell,
   Flag,
   Flame,
   Footprints,
+  Gamepad2,
   GlassWater,
   Globe,
   Heart,
@@ -35,16 +42,20 @@ import {
   Lock,
   LogOut,
   Mail,
+  Medal,
   Menu,
   MessageSquare,
   Mic,
   Minus,
   Moon,
+  MoreVertical,
+  PartyPopper,
   PenLine,
   PersonStanding,
   Plus,
   QrCode,
   RefreshCw,
+  RotateCcw,
   Send,
   Salad,
   Scale,
@@ -55,15 +66,20 @@ import {
   Share2,
   ShieldCheck,
   Sparkles,
+  Sprout,
   Square,
   SquareCheck,
   Star,
   Sun,
+  Target,
   TriangleAlert,
   ThumbsDown,
   ThumbsUp,
+  TrendingUp,
   Trophy,
   User,
+  UserMinus,
+  UserPlus,
   Users,
   Utensils,
   Waves,
@@ -218,6 +234,10 @@ export const ShareNodesIcon = fromLucide(Share2, { defaultSize: 22 });
 export const UsersIcon = fromLucide(Users, { defaultSize: 22 });
 export const UserSingleIcon = fromLucide(User, { defaultSize: 22 });
 export const TrophyIcon = fromLucide(Trophy, { defaultSize: 22, defaultColor: '#F59E0B' });
+export const CrownIcon = fromLucide(Crown, { defaultSize: 22, defaultColor: '#F59E0B' });
+export const MedalIcon = fromLucide(Medal, { defaultSize: 22, defaultColor: '#F59E0B' });
+export const SproutIcon = fromLucide(Sprout, { defaultSize: 22, defaultColor: '#10B981' });
+export const DropletsIcon = fromLucide(Droplets, { defaultSize: 22, defaultColor: '#0284C7' });
 
 export const BookIcon = fromLucide(BookOpen, { defaultSize: 16, defaultColor: '#A59EBD' });
 export const BookOpenIcon = BookIcon;
@@ -272,7 +292,20 @@ export const ThumbsDownIcon = fromLucide(ThumbsDown, { defaultSize: 18 });
 export const SquareIcon = fromLucide(Square, { defaultSize: 20 });
 export const SquareCheckIcon = fromLucide(SquareCheck, { defaultSize: 20 });
 export const CheckSquareIcon = SquareCheckIcon;
-export const StarIcon = fromLucide(Star, { defaultSize: 14, defaultColor: '#FACC15', defaultFill: '#FACC15' });
+export const StarIcon = fromLucide(Star, { defaultSize: 14 });
 export const QrCodeIcon = fromLucide(QrCode, { defaultSize: 24 });
+export const GamepadIcon = fromLucide(Gamepad2, { defaultSize: 22 });
+export const UserPlusIcon = fromLucide(UserPlus, { defaultSize: 20 });
+export const PartyPopperIcon = fromLucide(PartyPopper, { defaultSize: 20, defaultColor: '#D97706' });
+export const TrendingUpIcon = fromLucide(TrendingUp, { defaultSize: 18 });
+export const RotateCcwIcon = fromLucide(RotateCcw, { defaultSize: 18 });
+export const AlarmClockIcon = fromLucide(AlarmClock, { defaultSize: 18 });
+export const BadgeCheckIcon = fromLucide(BadgeCheck, { defaultSize: 20 });
+export const TargetIcon = fromLucide(Target, { defaultSize: 22 });
+export const AlertCircleIcon = fromLucide(CircleAlert, { defaultSize: 18 });
+export const ArrowRightIcon = fromLucide(ArrowRight, { defaultSize: 18 });
+export const CheckCheckIcon = fromLucide(CheckCheck, { defaultSize: 22 });
+export const MoreVerticalIcon = fromLucide(MoreVertical, { defaultSize: 20 });
+export const UserMinusIcon = fromLucide(UserMinus, { defaultSize: 18 });
 
 

@@ -13,6 +13,15 @@ export type StreakInfo = {
 
 export type BadgeCategory = 'streak' | 'nutrition' | 'activity' | 'milestone';
 
+export type BadgeIconName =
+  | 'book-open'
+  | 'flame'
+  | 'users'
+  | 'calendar'
+  | 'trophy'
+  | 'crown'
+  | 'badge-check';
+
 export type Badge = {
   id: string;
   code: string;
@@ -23,6 +32,12 @@ export type Badge = {
   unlockedAt?: string;
   iconGlyph: string;
   points?: number;
+  condition?: string;
+  iconName?: BadgeIconName | string;
+  accentColor?: string;
+  secondaryColor?: string;
+  darkCanvasColor?: string;
+  glowColor?: string;
 };
 
 export type ChallengeStatus = 'available' | 'joined' | 'completed' | 'expired';
@@ -45,6 +60,9 @@ export type Challenge = {
   metric?: string;
   badgeReward?: Badge | null;
   status?: ChallengeStatus;
+  category?: 'water' | 'steps' | 'log' | 'calorie' | 'eating';
+  rewardBadgeTitle?: string;
+  highlightBadge?: string;
 };
 
 export type FriendStatus = 'friend' | 'pending_sent' | 'pending_received';
@@ -61,6 +79,12 @@ export type Friend = {
   isSharing: boolean;
   status: FriendStatus;
   since?: string;
+  tag?: string;
+  rankJump?: string;
+  activityStatus?: string;
+  verified?: boolean;
+  online?: boolean;
+  mutualFriendsCount?: number;
 };
 
 export type LeaderboardMetric = 'streak' | 'challenge' | 'steps';
@@ -70,9 +94,14 @@ export type LeaderboardEntry = {
   id: string;
   name: string;
   avatarGlyph: string;
+  avatarUrl?: string;
   score: number;
   unit: string;
   isCurrentUser?: boolean;
+  streakDays?: number;
+  tag?: string;
+  rankChange?: string;
+  subtitle?: string;
 };
 
 // ── New types for additional screens ──────────────────────────────────────────
@@ -92,6 +121,9 @@ export type FriendRequest = {
     id: string;
     displayName: string;
     avatarUrl?: string;
+    mutualFriendsCount?: number;
+    verified?: boolean;
+    online?: boolean;
   };
   status: 'PENDING' | 'ACCEPTED' | 'DECLINED';
   createdAt: string;

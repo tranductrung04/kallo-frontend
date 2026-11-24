@@ -1,9 +1,3 @@
-// ─── Nocturne & Daylight Vitality — Typography Scale ────────────────────────
-// Font: Plus Jakarta Sans (loaded via @expo-google-fonts/plus-jakarta-sans)
-// DESIGN.md: "exceptional clarity on high-DPI smartphone displays,
-//             crisp Vietnamese diacritical legibility"
-// ─────────────────────────────────────────────────────────────────────────────
-
 import type { TextStyle } from 'react-native';
 
 const fontFamily = {

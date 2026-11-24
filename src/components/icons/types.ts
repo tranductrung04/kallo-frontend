@@ -69,8 +69,6 @@ export type KalloShieldIconProps = {
   size?: number;
 };
 
-export type WaoShieldIconProps = KalloShieldIconProps;
-
 export type CirclePlusIconProps = {
   size?: number;
   circleColor?: string;

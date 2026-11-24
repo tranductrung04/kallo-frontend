@@ -642,7 +642,7 @@ export function StepDetailScreen({ navigation, route }: Props) {
           </View>
         </View>
 
-        {/* ── Tip Banner: Wao sync notice ───────────────────── */}
+        {/* ── Tip Banner: Kallo sync notice ───────────────────── */}
         <TouchableOpacity
           style={styles.tipNoticeBanner}
           onPress={() => {
@@ -651,7 +651,7 @@ export function StepDetailScreen({ navigation, route }: Props) {
           activeOpacity={0.9}
         >
           <Text style={styles.tipNoticeText}>
-            Wao có thể tự động bộ bước chân từ Health Connect.{' '}
+            Kallo có thể tự động bộ bước chân từ Health Connect.{' '}
             <Text style={styles.tipNoticeLink}>Kết nối ngay</Text> để ghi lại bước chân mỗi ngày.
           </Text>
         </TouchableOpacity>

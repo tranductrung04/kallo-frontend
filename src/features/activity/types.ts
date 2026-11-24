@@ -110,10 +110,16 @@ export type ActivityState = {
   error: string | null;
 };
 
+export type ActivityLogInput = Omit<ActivityLog, 'id' | 'caloriesBurned'> & {
+  caloriesBurned?: number;
+  id?: string;
+  silentToast?: boolean;
+};
+
 export type ActivityContextValue = {
   state: ActivityState;
   ready: boolean;
-  addActivityLog: (log: Omit<ActivityLog, 'id' | 'caloriesBurned'> & { caloriesBurned?: number; id?: string }) => ActivityLog;
+  addActivityLog: (log: ActivityLogInput) => ActivityLog;
   deleteActivityLog: (id: string) => void;
   getActivitiesForDate: (date: string) => ActivityLog[];
   getTotalCaloriesBurnedForDate: (date: string) => number;
