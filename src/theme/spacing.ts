@@ -1,7 +1,3 @@
-// ─── Nocturne & Daylight Vitality — Spacing & Radii ─────────────────────────
-// DESIGN.md: "Mobile viewport ergonomics with native safe-area compliance"
-// ─────────────────────────────────────────────────────────────────────────────
-
 export const spacing = {
   xs: 4,    // 0.25rem (space-xs)
   sm: 8,    // 0.5rem  (space-sm)

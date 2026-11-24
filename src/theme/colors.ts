@@ -1,8 +1,3 @@
-// ─── Nocturne & Daylight Vitality — Semantic Token System ───────────────────
-// DESIGN.md: "Palette is engineered around adaptive depth layers"
-// 3-layer depth: canvas-base → surface-mid → surface-high
-// ─────────────────────────────────────────────────────────────────────────────
-
 export const colors = {
     light: {
         // Canvas & Surfaces (Daylight Vitality)
