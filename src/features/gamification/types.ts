@@ -61,6 +61,9 @@ export type Friend = {
   isSharing: boolean;
   status: FriendStatus;
   since?: string;
+  tag?: string;
+  rankJump?: string;
+  activityStatus?: string;
 };
 
 export type LeaderboardMetric = 'streak' | 'challenge' | 'steps';
@@ -70,9 +73,14 @@ export type LeaderboardEntry = {
   id: string;
   name: string;
   avatarGlyph: string;
+  avatarUrl?: string;
   score: number;
   unit: string;
   isCurrentUser?: boolean;
+  streakDays?: number;
+  tag?: string;
+  rankChange?: string;
+  subtitle?: string;
 };
 
 // ── New types for additional screens ──────────────────────────────────────────

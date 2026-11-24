@@ -597,6 +597,83 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
     bold: {
       fontWeight: '700',
     },
+    gameHubHeroCard: {
+      borderRadius: 20,
+      padding: s.md,
+      borderWidth: 1.5,
+      position: 'relative',
+      overflow: 'hidden',
+      gap: 12,
+      shadowColor: '#7B4FE0',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.08,
+      shadowRadius: 12,
+      elevation: 3,
+    },
+    gameHubGlowCircle: {
+      position: 'absolute',
+      top: -24,
+      right: -24,
+      width: 96,
+      height: 96,
+      borderRadius: 48,
+    },
+    gameHubHeroTopRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    gameHubIconAndTitle: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: s.sm + 4,
+      flex: 1,
+    },
+    gameHubIconBox: {
+      width: 44,
+      height: 44,
+      borderRadius: 14,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    gameHubTitleWrap: {
+      flex: 1,
+      gap: 2,
+    },
+    gameHubStandingPill: {
+      paddingHorizontal: 7,
+      paddingVertical: 1.5,
+      borderRadius: r.full,
+    },
+    gameHubPointsBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      paddingHorizontal: 9,
+      paddingVertical: 4,
+      borderRadius: r.full,
+    },
+    gameHubHeroDivider: {
+      height: 1,
+      width: '100%',
+    },
+    gameHubHeroBottomRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    gameHubHeroGapWrap: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      flex: 1,
+      marginRight: 8,
+    },
+    gameHubCtaAction: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 2,
+    },
 
     // 10. Floating "Quay lại hôm nay" Button
     floatingTodayWrapper: {

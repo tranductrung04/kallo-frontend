@@ -22,6 +22,7 @@ import { ChatHistoryScreen, NutritionChatScreen, VoiceLogModal } from '@/feature
 import {
   StreakDetailModal,
   StreakRulesScreen,
+  GameHubScreen,
   BadgesChallengesScreen,
   FriendsLeaderboardScreen,
   ChallengeDetailScreen,
@@ -102,6 +103,7 @@ export function RootNavigator() {
         <Stack.Screen name="NutritionChat" component={NutritionChatScreen} options={{ headerShown: false }} />
         <Stack.Screen name="ChatHistory" component={ChatHistoryScreen} options={{ headerShown: false }} />
         <Stack.Screen name="VoiceLogModal" component={VoiceLogModal} options={{ headerShown: false, presentation: 'modal' }} />
+        <Stack.Screen name="GameHub" component={GameHubScreen} options={{ headerShown: false }} />
         <Stack.Screen name="StreakDetail" component={StreakDetailModal} options={{ headerShown: false, presentation: 'fullScreenModal' }} />
         <Stack.Screen name="StreakRules" component={StreakRulesScreen} options={{ headerShown: false, presentation: 'fullScreenModal' }} />
         <Stack.Screen name="BadgesChallenges" component={BadgesChallengesScreen} options={{ headerShown: false }} />

@@ -66,6 +66,7 @@ export type GamificationContextValue = {
   incomingRequests: FriendRequest[];
   outgoingRequests: FriendRequest[];
   activeToast: GameEvent | null;
+  userPoints: number;
   freezeStreak: () => boolean;
   unlockBadge: (badgeId: string) => void;
   joinChallenge: (challengeId: string) => void;
@@ -419,17 +420,19 @@ export function GamificationProvider({ children }: React.PropsWithChildren) {
     [friends]
   );
 
+  const userPoints = IS_DEMO_MODE ? 720 : 0;
+
   const getLeaderboard = useCallback(
     (metric: LeaderboardMetric): LeaderboardEntry[] => {
       return buildLeaderboard(metric, friends, {
         name: 'Tôi',
         streak: streak.currentStreak,
-        challengeScore: IS_DEMO_MODE ? 350 : 0,
+        challengeScore: userPoints,
         weeklySteps: IS_DEMO_MODE ? 48500 : 0,
         isSharing: gameSettings.sharePoints,
       });
     },
-    [friends, streak.currentStreak, gameSettings.sharePoints]
+    [friends, streak.currentStreak, userPoints, gameSettings.sharePoints]
   );
 
   const value: GamificationContextValue = {
@@ -445,6 +448,7 @@ export function GamificationProvider({ children }: React.PropsWithChildren) {
     incomingRequests,
     outgoingRequests,
     activeToast,
+    userPoints,
     freezeStreak,
     unlockBadge,
     joinChallenge,

@@ -128,11 +128,13 @@ function BadgeVisual({
   return config.renderIcon(size, color);
 }
 
-export function BadgesChallengesScreen({ navigation }: Props) {
+export function BadgesChallengesScreen({ navigation, route }: Props) {
   const theme = useTheme();
   const { badges, challenges, joinChallenge } = useGamification();
 
-  const [activeTab, setActiveTab] = useState<'badges' | 'challenges'>('badges');
+  const [activeTab, setActiveTab] = useState<'badges' | 'challenges'>(
+    route?.params?.initialTab ?? 'badges'
+  );
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
   const [challengeFilter, setChallengeFilter] = useState<'all' | 'joined' | 'available'>('all');
 

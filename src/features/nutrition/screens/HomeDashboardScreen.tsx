@@ -53,10 +53,12 @@ import {
   FiberIcon,
   FlagIcon,
   FlameIcon,
+  GamepadIcon,
   WheatIcon,
   LightningIcon,
   PlusIcon,
   SaltIcon,
+  StarIcon,
   SugarIcon,
   TrophyIcon,
   UsersIcon,
@@ -82,7 +84,22 @@ export function HomeDashboardScreen({ navigation }: Props) {
     getActivitiesForDate,
     state: activityState,
   } = useActivity();
-  const { streak, badges, challenges, friends, incomingRequests, refreshStreak } = useGamification();
+  const {
+    streak,
+    badges,
+    challenges,
+    friends,
+    incomingRequests,
+    userPoints,
+    getLeaderboard,
+    refreshStreak,
+  } = useGamification();
+
+  const userRank = useMemo(() => {
+    const list = getLeaderboard('challenge');
+    const entry = list.find((e) => e.isCurrentUser);
+    return entry ? entry.rank : 5;
+  }, [getLeaderboard]);
 
   useFocusEffect(
     useCallback(() => {
@@ -837,13 +854,132 @@ export function HomeDashboardScreen({ navigation }: Props) {
             </View>
           </AppCard>
 
-          {/* ── 10. Thử thách & Cộng đồng (Gamification Cards) ─────────── */}
+          {/* ── 10. Game Hub & Thử thách (Gamification Section) ─────────── */}
           <View style={styles.sectionBlock}>
             <View style={styles.sectionHeaderRow}>
-              <AppText variant="headlineSm">Thử thách & Cộng đồng</AppText>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <AppText variant="headlineSm">Thử thách & Game Hub</AppText>
+                <View
+                  style={{
+                    backgroundColor: colors.vipStreak,
+                    paddingHorizontal: 6,
+                    paddingVertical: 1,
+                    borderRadius: 8,
+                  }}
+                >
+                  <AppText variant="labelSm" color="#FFFFFF" style={{ fontSize: 9, fontWeight: '700' }}>
+                    MỚI
+                  </AppText>
+                </View>
+              </View>
+              <TouchableOpacity
+                onPress={() => root?.navigate('GameHub')}
+                accessibilityLabel="Vào Game Hub"
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <AppText variant="labelMd" color={colors.brandPrimary} style={{ fontWeight: '700' }}>
+                  Vào Game Hub →
+                </AppText>
+              </TouchableOpacity>
             </View>
 
             <View style={styles.communityGrid}>
+              {/* Featured Game Hub Hero Card */}
+              <TouchableOpacity
+                activeOpacity={0.88}
+                onPress={() => root?.navigate('GameHub')}
+                accessibilityRole="button"
+                accessibilityLabel="Vào Game Hub Kallo"
+                style={[
+                  styles.gameHubHeroCard,
+                  {
+                    backgroundColor:
+                      theme.scheme === 'dark' ? 'rgba(123, 79, 224, 0.16)' : '#F6F1FF',
+                    borderColor:
+                      theme.scheme === 'dark' ? 'rgba(164, 118, 254, 0.28)' : '#E4DCF9',
+                  },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.gameHubGlowCircle,
+                    {
+                      backgroundColor:
+                        theme.scheme === 'dark'
+                          ? 'rgba(158, 100, 247, 0.2)'
+                          : 'rgba(123, 79, 224, 0.08)',
+                    },
+                  ]}
+                />
+
+                <View style={styles.gameHubHeroTopRow}>
+                  <View style={styles.gameHubIconAndTitle}>
+                    <View
+                      style={[
+                        styles.gameHubIconBox,
+                        {
+                          backgroundColor:
+                            theme.scheme === 'dark'
+                              ? 'rgba(164, 118, 254, 0.3)'
+                              : '#E9DDFF',
+                        },
+                      ]}
+                    >
+                      <GamepadIcon size={24} color={colors.brandPrimary} />
+                    </View>
+                    <View style={styles.gameHubTitleWrap}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <AppText variant="labelLg" color={colors.textPrimary} style={{ fontWeight: '700' }}>
+                          Game Hub
+                        </AppText>
+                        <View style={[styles.gameHubStandingPill, { backgroundColor: colors.brandSoftTint }]}>
+                          <AppText variant="labelSm" color={colors.brandPrimary} style={{ fontSize: 10, fontWeight: '700' }}>
+                            Hạng #{userRank}
+                          </AppText>
+                        </View>
+                      </View>
+                      <AppText variant="caption" color={colors.textSecondary}>
+                        Đua top bảng xếp hạng cùng {friends.length || 12} bạn bè
+                      </AppText>
+                    </View>
+                  </View>
+
+                  <View style={[styles.gameHubPointsBadge, { backgroundColor: 'rgba(217, 119, 6, 0.15)' }]}>
+                    <StarIcon size={13} color={colors.vipStreak} />
+                    <AppText variant="labelSm" color={colors.vipStreak} style={{ fontWeight: '700' }}>
+                      {userPoints || 720} đ
+                    </AppText>
+                  </View>
+                </View>
+
+                <View
+                  style={[
+                    styles.gameHubHeroDivider,
+                    {
+                      backgroundColor:
+                        theme.scheme === 'dark' ? 'rgba(255,255,255,0.08)' : '#EBE5F7',
+                    },
+                  ]}
+                />
+
+                <View style={styles.gameHubHeroBottomRow}>
+                  <View style={styles.gameHubHeroGapWrap}>
+                    <LightningIcon size={14} color={colors.vipStreak} />
+                    <AppText variant="caption" color={colors.textSecondary} numberOfLines={1}>
+                      Còn <AppText variant="caption" color={colors.textPrimary} style={{ fontWeight: '700' }}>140 điểm</AppText> để vượt Minh Anh
+                    </AppText>
+                  </View>
+
+                  <View style={styles.gameHubCtaAction}>
+                    <AppText variant="labelSm" color={colors.brandPrimary} style={{ fontWeight: '700' }}>
+                      Khám phá
+                    </AppText>
+                    <ChevronRightIcon size={16} color={colors.brandPrimary} />
+                  </View>
+                </View>
+              </TouchableOpacity>
+
+              {/* Card 1: Huy hiệu & Thử thách */}
               <AppCard
                 style={styles.communityCard}
                 onPress={() => root?.navigate('BadgesChallenges')}
@@ -880,6 +1016,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
                 </View>
               </AppCard>
 
+              {/* Card 2: Bảng xếp hạng Bạn bè */}
               <AppCard
                 style={styles.communityCard}
                 onPress={() => root?.navigate('FriendsLeaderboard')}
@@ -891,7 +1028,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
                 <View style={styles.communityTextWrap}>
                   <AppText variant="labelLg" color={colors.textPrimary}>Bảng xếp hạng Bạn bè</AppText>
                   <AppText variant="caption" color={colors.textSecondary}>
-                    {friends.length} bạn bè
+                    {friends.length || 12} bạn bè
                   </AppText>
                 </View>
                 <View style={styles.communityRightWrap}>

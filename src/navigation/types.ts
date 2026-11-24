@@ -73,9 +73,10 @@ export type RootStackParamList = {
   NutritionChat: { initialPrompt?: string; conversationId?: string } | undefined;
   ChatHistory: undefined;
   VoiceLogModal: { date?: string; meal?: MealSlot } | undefined;
+  GameHub: undefined;
   StreakDetail: undefined;
   StreakRules: undefined;
-  BadgesChallenges: undefined;
+  BadgesChallenges: { initialTab?: 'badges' | 'challenges' } | undefined;
   ChallengeDetail: { challengeId: string };
   FriendsLeaderboard: undefined;
   FriendSearch: undefined;

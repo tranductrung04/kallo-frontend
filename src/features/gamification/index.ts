@@ -5,6 +5,7 @@ export * from './GamificationProvider';
 export * from './screens/StreakDetailModal';
 export * from './screens/StreakRulesModal';
 export * from './screens/StreakWidgets';
+export * from './screens/GameHubScreen';
 export * from './screens/BadgesChallengesScreen';
 export * from './screens/FriendsLeaderboardScreen';
 export * from './screens/ChallengeDetailScreen';

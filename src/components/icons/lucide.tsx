@@ -27,6 +27,7 @@ import {
   Flag,
   Flame,
   Footprints,
+  Gamepad2,
   GlassWater,
   Globe,
   Heart,
@@ -43,11 +44,13 @@ import {
   Mic,
   Minus,
   Moon,
+  PartyPopper,
   PenLine,
   PersonStanding,
   Plus,
   QrCode,
   RefreshCw,
+  RotateCcw,
   Send,
   Salad,
   Scale,
@@ -66,8 +69,10 @@ import {
   TriangleAlert,
   ThumbsDown,
   ThumbsUp,
+  TrendingUp,
   Trophy,
   User,
+  UserPlus,
   Users,
   Utensils,
   Waves,
@@ -282,5 +287,10 @@ export const SquareCheckIcon = fromLucide(SquareCheck, { defaultSize: 20 });
 export const CheckSquareIcon = SquareCheckIcon;
 export const StarIcon = fromLucide(Star, { defaultSize: 14, defaultColor: '#FACC15', defaultFill: '#FACC15' });
 export const QrCodeIcon = fromLucide(QrCode, { defaultSize: 24 });
+export const GamepadIcon = fromLucide(Gamepad2, { defaultSize: 22 });
+export const UserPlusIcon = fromLucide(UserPlus, { defaultSize: 20 });
+export const PartyPopperIcon = fromLucide(PartyPopper, { defaultSize: 20, defaultColor: '#D97706' });
+export const TrendingUpIcon = fromLucide(TrendingUp, { defaultSize: 18 });
+export const RotateCcwIcon = fromLucide(RotateCcw, { defaultSize: 18 });
 
 
