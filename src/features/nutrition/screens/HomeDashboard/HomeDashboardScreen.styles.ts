@@ -652,6 +652,7 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       paddingHorizontal: 9,
       paddingVertical: 4,
       borderRadius: r.full,
+      backgroundColor: c.vipStreakBg,
     },
     gameHubHeroDivider: {
       height: 1,

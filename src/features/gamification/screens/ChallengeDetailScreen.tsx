@@ -406,10 +406,7 @@ export function ChallengeDetailScreen({ route, navigation }: Props) {
                 style={[
                   styles.rewardIconBox,
                   {
-                    backgroundColor:
-                      theme.scheme === 'dark'
-                        ? 'rgba(217, 119, 6, 0.22)'
-                        : '#FFDCC3',
+                    backgroundColor: c.vipStreakBg,
                   },
                 ]}
               >
@@ -417,7 +414,7 @@ export function ChallengeDetailScreen({ route, navigation }: Props) {
               </View>
               <View style={styles.rewardTextWrap}>
                 <AppText variant="labelLg" color={c.textPrimary} style={styles.boldText}>
-                  +{challenge.rewardPoints} điểm thưởng rèn luyện
+                  +{challenge.rewardPoints} đ thưởng rèn luyện
                 </AppText>
                 <AppText variant="bodySm" color={c.textSecondary} numberOfLines={1}>
                   Cộng trực tiếp vào bảng xếp hạng tuần

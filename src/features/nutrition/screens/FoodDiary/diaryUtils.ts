@@ -44,18 +44,21 @@ export function getMealSlotLabel(meal: MealSlot): string {
 /** Tiêu đề ngày hiển thị trên header (Hôm nay, Hôm qua, Ngày mai, hoặc ngày thường như "25 thg 10") */
 export function getDateTitle(dateKey: string): string {
   const today = todayKey();
-  if (dateKey === today) return 'Hôm nay';
+  if (!dateKey || dateKey === 'today' || dateKey === today) return 'Hôm nay';
   if (dateKey === offsetDate(today, -1)) return 'Hôm qua';
   if (dateKey === offsetDate(today, 1)) return 'Ngày mai';
 
   const d = new Date(`${dateKey}T12:00:00`);
+  if (isNaN(d.getTime())) return 'Hôm nay';
   return `${d.getDate()} thg ${d.getMonth() + 1}`;
 }
 
 /** Tiêu đề ngày đầy đủ cho lịch mở rộng (ví dụ: "Hôm nay, 21 Tháng 10") */
 export function getFullDateHeaderTitle(dateKey: string): string {
   const today = todayKey();
+  if (!dateKey || dateKey === 'today') dateKey = today;
   const d = new Date(`${dateKey}T12:00:00`);
+  if (isNaN(d.getTime())) return 'Hôm nay';
   const day = d.getDate();
   const month = d.getMonth() + 1;
 

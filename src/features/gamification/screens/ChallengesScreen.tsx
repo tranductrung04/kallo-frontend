@@ -9,8 +9,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppButton, AppText } from '@/components/common';
 import {
-  AlarmClockIcon,
-  BellIcon,
   CalendarIcon,
   ChevronLeftIcon,
   CirclePlusIcon,
@@ -20,9 +18,6 @@ import {
   FootprintsIcon,
   LightningBoltIcon,
   SparklesIcon,
-  StarIcon,
-  TrophyIcon,
-  UserSingleIcon,
 } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme, type ThemeContextValue } from '@/theme';
@@ -224,20 +219,12 @@ export function ChallengesScreen({ navigation, hideTopBar, onTabChange }: Challe
             style={[
               styles.rewardPill,
               {
-                backgroundColor:
-                  theme.scheme === 'dark'
-                    ? 'rgba(217, 119, 6, 0.22)'
-                    : '#FFDCC3',
+                backgroundColor: c.vipStreakBg,
               },
             ]}
           >
-            {isSteps || isCalorie ? (
-              <StarIcon size={13} color={c.vipStreak} />
-            ) : (
-              <TrophyIcon size={13} color={c.vipStreak} />
-            )}
-            <AppText variant="labelSm" color={c.vipStreak} style={styles.boldText}>
-              +{challenge.rewardPoints} điểm
+            <AppText variant="labelSm" color={c.vipStreak} style={{ fontWeight: '700' }}>
+              +{challenge.rewardPoints} đ
             </AppText>
           </View>
         </View>
@@ -407,16 +394,12 @@ export function ChallengesScreen({ navigation, hideTopBar, onTabChange }: Challe
           style={[
             styles.totalPointsPill,
             {
-              backgroundColor:
-                theme.scheme === 'dark'
-                  ? 'rgba(217, 119, 6, 0.22)'
-                  : '#FFDCC3',
+              backgroundColor: c.vipStreakBg,
             },
           ]}
         >
-          <StarIcon size={16} color={c.vipStreak} />
-          <AppText variant="labelMd" color={c.vipStreak} style={styles.boldText}>
-            {userPoints || 320} điểm
+          <AppText variant="labelSm" color={c.vipStreak} style={{ fontWeight: '700' }}>
+            {userPoints || 120} đ
           </AppText>
         </View>
       </View>
@@ -549,11 +532,6 @@ function createStyles(theme: ThemeContextValue) {
       paddingHorizontal: 12,
       paddingVertical: 6,
       borderRadius: 16,
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.06,
-      shadowRadius: 2,
-      elevation: 1,
     },
     segmentedTabBar: {
       flexDirection: 'row',

@@ -216,10 +216,7 @@ export function BadgeDetailBottomSheet({
                     style={[
                       styles.infoCard,
                       {
-                        backgroundColor:
-                          theme.scheme === 'dark'
-                            ? 'rgba(217, 119, 6, 0.22)'
-                            : '#FFDCC3',
+                        backgroundColor: c.vipStreakBg,
                       },
                     ]}
                   >
@@ -240,12 +237,12 @@ export function BadgeDetailBottomSheet({
                       PHẦN THƯỞNG
                     </AppText>
                     <AppText
-                      variant="labelMd"
+                      variant="labelSm"
                       color={c.vipStreak}
-                      style={styles.boldText}
+                      style={{ fontWeight: '700' }}
                       numberOfLines={1}
                     >
-                      +{badge.points || 20} điểm
+                      +{badge.points || 20} đ
                     </AppText>
                   </View>
                 </View>

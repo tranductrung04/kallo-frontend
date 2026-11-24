@@ -47,7 +47,7 @@ export function getBadgeVisualConfig(badge: Badge): BadgeVisualConfig {
       glowColor: 'rgba(6, 182, 212, 0.35)',
       glyph: '📝',
       condition: badge.condition || '1 lần ghi nhật ký',
-      pointsText: `+${badge.points || 10} điểm`,
+      pointsText: `+${badge.points || 10} đ`,
     };
   }
 
@@ -61,7 +61,7 @@ export function getBadgeVisualConfig(badge: Badge): BadgeVisualConfig {
       glowColor: 'rgba(249, 115, 22, 0.35)',
       glyph: '🔥',
       condition: badge.condition || '7 ngày liên tiếp',
-      pointsText: `+${badge.points || 20} điểm`,
+      pointsText: `+${badge.points || 20} đ`,
     };
   }
 
@@ -75,7 +75,7 @@ export function getBadgeVisualConfig(badge: Badge): BadgeVisualConfig {
       glowColor: 'rgba(139, 92, 246, 0.35)',
       glyph: '👥',
       condition: badge.condition || 'Kết bạn với 1 người',
-      pointsText: `+${badge.points || 10} điểm`,
+      pointsText: `+${badge.points || 10} đ`,
     };
   }
 
@@ -89,7 +89,7 @@ export function getBadgeVisualConfig(badge: Badge): BadgeVisualConfig {
       glowColor: 'rgba(16, 185, 129, 0.35)',
       glyph: '📅',
       condition: badge.condition || '30 ngày liên tiếp',
-      pointsText: `+${badge.points || 50} điểm`,
+      pointsText: `+${badge.points || 50} đ`,
     };
   }
 
@@ -103,7 +103,7 @@ export function getBadgeVisualConfig(badge: Badge): BadgeVisualConfig {
       glowColor: 'rgba(245, 158, 11, 0.35)',
       glyph: '🏆',
       condition: badge.condition || 'Hoàn thành 1 thử thách',
-      pointsText: `+${badge.points || 20} điểm`,
+      pointsText: `+${badge.points || 20} đ`,
     };
   }
 
@@ -117,7 +117,7 @@ export function getBadgeVisualConfig(badge: Badge): BadgeVisualConfig {
       glowColor: 'rgba(225, 29, 72, 0.35)',
       glyph: '👑',
       condition: badge.condition || '100 ngày liên tiếp',
-      pointsText: `+${badge.points || 150} điểm`,
+      pointsText: `+${badge.points || 150} đ`,
     };
   }
 
@@ -131,7 +131,7 @@ export function getBadgeVisualConfig(badge: Badge): BadgeVisualConfig {
       glowColor: 'rgba(99, 102, 241, 0.35)',
       glyph: '⭐',
       condition: badge.condition || 'Hoàn thành 5 thử thách',
-      pointsText: `+${badge.points || 60} điểm`,
+      pointsText: `+${badge.points || 60} đ`,
     };
   }
 
@@ -143,7 +143,7 @@ export function getBadgeVisualConfig(badge: Badge): BadgeVisualConfig {
     glowColor: badge.glowColor || 'rgba(245, 158, 11, 0.35)',
     glyph: badge.iconGlyph || '🏆',
     condition: badge.condition || 'Hoàn thành mục tiêu',
-    pointsText: `+${badge.points || 20} điểm`,
+    pointsText: `+${badge.points || 20} đ`,
   };
 }
 
@@ -681,7 +681,7 @@ export function buildLeaderboard(
   rawList.sort((a, b) => b.score - a.score);
 
   const unit =
-    metric === 'streak' ? 'ngày' : metric === 'challenge' ? 'điểm' : 'bước';
+    metric === 'streak' ? 'ngày' : metric === 'challenge' ? 'đ' : 'bước';
 
   return rawList.map((item, index) => ({
     rank: index + 1,

@@ -17,6 +17,7 @@ import { ChevronLeftIcon, InfoIcon } from '@/components/icons';
 import { useAlert } from '@/components/common';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
+import { todayKey } from '@/features/nutrition/utils';
 import { useGamification } from '../GamificationProvider';
 import {
   StreakActionCardWidget,
@@ -65,9 +66,8 @@ export function StreakDetailModal({ navigation }: Props) {
   };
 
   const handleAddMealPress = () => {
-    const today = new Date().toISOString().slice(0, 10);
     (navigation as any).navigate('FoodSearch', {
-      date: today,
+      date: todayKey(),
       meal: 'snack',
     });
   };

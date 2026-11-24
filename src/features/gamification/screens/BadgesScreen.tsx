@@ -242,9 +242,7 @@ export function BadgesScreen({ navigation, hideTopBar, onTabChange }: BadgesScre
                       styles.badgePointsChip,
                       {
                         backgroundColor: isUnlocked
-                          ? theme.scheme === 'dark'
-                            ? 'rgba(217, 119, 6, 0.22)'
-                            : '#FFDCC3'
+                          ? c.vipStreakBg
                           : c.surfaceHigh,
                       },
                     ]}
@@ -253,9 +251,9 @@ export function BadgesScreen({ navigation, hideTopBar, onTabChange }: BadgesScre
                     <AppText
                       variant="labelSm"
                       color={isUnlocked ? c.vipStreak : c.textSecondary}
-                      style={styles.boldText}
+                      style={{ fontWeight: '700' }}
                     >
-                      +{badge.points || 20} điểm
+                      +{badge.points || 20} đ
                     </AppText>
                   </View>
 

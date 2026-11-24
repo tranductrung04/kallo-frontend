@@ -171,16 +171,13 @@ export function BadgeCelebrationModal({
             style={[
               styles.rewardPill,
               {
-                backgroundColor:
-                  theme.scheme === 'dark'
-                    ? 'rgba(217, 119, 6, 0.22)'
-                    : '#FFDCC3',
+                backgroundColor: c.vipStreakBg,
               },
             ]}
           >
             <StarIcon size={18} color={c.vipStreak} />
-            <AppText variant="labelLg" color={c.vipStreak} style={styles.boldText}>
-              +{badge.points || 20} điểm rèn luyện
+            <AppText variant="labelLg" color={c.vipStreak} style={{ fontWeight: '700' }}>
+              +{badge.points || 20} đ rèn luyện
             </AppText>
           </View>
 

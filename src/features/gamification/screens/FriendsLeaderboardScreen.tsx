@@ -18,7 +18,6 @@ import {
   CrownIcon,
   FlameIcon,
   FootprintsIcon,
-  MailInboxIcon,
   PartyPopperIcon,
   RotateCcwIcon,
   StarIcon,
@@ -29,6 +28,7 @@ import {
 } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme, type ThemeContextValue } from '@/theme';
+import { todayKey } from '@/features/nutrition/utils';
 import type { LeaderboardMetric } from '../types';
 import { useGamification } from '../GamificationProvider';
 
@@ -88,7 +88,7 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
         : metric === 'steps'
           ? 48500
           : (userPoints || 720),
-    unit: metric === 'streak' ? 'ngày' : metric === 'steps' ? 'bước' : 'điểm',
+    unit: metric === 'streak' ? 'ngày' : metric === 'steps' ? 'bước' : 'đ',
   };
 
   // ── Render Loading Skeleton ────────────────────────────────────────────────
@@ -437,7 +437,7 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
                     ) : metric === 'steps' ? (
                       <FootprintsIcon size={12} color={c.brandPrimary} />
                     ) : (
-                      <StarIcon size={12} color={c.vipStreak} />
+                      <TrophyIcon size={12} color={c.vipStreak} />
                     )}
                     <AppText
                       variant="labelSm"
@@ -480,7 +480,7 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
                     ) : metric === 'steps' ? (
                       <FootprintsIcon size={13} color={c.vipStreak} />
                     ) : (
-                      <StarIcon size={13} color={c.vipStreak} />
+                      <TrophyIcon size={13} color={c.vipStreak} />
                     )}
                     <AppText variant="labelSm" color={c.vipStreak} style={styles.bold}>
                       {metric === 'streak'
@@ -519,7 +519,7 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
                     ) : metric === 'steps' ? (
                       <FootprintsIcon size={12} color={c.brandPrimary} />
                     ) : (
-                      <StarIcon size={12} color={c.vipStreak} />
+                      <TrophyIcon size={12} color={c.vipStreak} />
                     )}
                     <AppText
                       variant="labelSm"
@@ -600,7 +600,7 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
                         ) : metric === 'steps' ? (
                           <FootprintsIcon size={13} color={c.brandPrimary} />
                         ) : (
-                          <StarIcon size={13} color={c.vipStreak} />
+                          <TrophyIcon size={13} color={c.vipStreak} />
                         )}
                         <AppText
                           variant="labelMd"
@@ -662,18 +662,26 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
                     ? 'Chuỗi lửa đang cháy ổn định'
                     : metric === 'steps'
                       ? 'Còn 2.700 bước để vượt Minh Anh'
-                      : 'Còn 140 điểm để vượt Minh Anh'}
+                      : 'Còn 140 đ để vượt Minh Anh'}
                 </AppText>
               </View>
             </View>
 
             <View style={styles.stickyRightScore}>
               <View style={styles.scoreCol}>
-                <AppText variant="labelLg" color={c.brandPrimary} style={styles.bold}>
+                <AppText
+                  variant="labelLg"
+                  color={metric === 'challenge' ? c.vipStreak : c.brandPrimary}
+                  style={[styles.bold, { fontWeight: '700' }]}
+                >
                   {userEntry.score.toLocaleString('vi-VN')}
                 </AppText>
-                <AppText variant="labelSm" color={c.textSecondary} style={{ fontSize: 10 }}>
-                  {metric === 'streak' ? 'ngày' : metric === 'steps' ? 'bước' : 'điểm'}
+                <AppText
+                  variant="labelSm"
+                  color={metric === 'challenge' ? c.vipStreak : c.textSecondary}
+                  style={{ fontSize: 10, fontWeight: '700' }}
+                >
+                  {metric === 'streak' ? 'ngày' : metric === 'steps' ? 'bước' : 'đ'}
                 </AppText>
               </View>
               <View style={styles.stickyTrendingBox}>
@@ -693,11 +701,11 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
               </View>
               <TouchableOpacity
                 style={styles.recordNowBtn}
-                onPress={() => navigation.navigate('FoodSearch', { date: 'today', meal: 'breakfast' })}
+                onPress={() => navigation.navigate('FoodSearch', { date: todayKey(), meal: 'breakfast' })}
                 activeOpacity={0.85}
               >
                 <AppText variant="labelSm" color={c.onBrand} style={styles.bold}>
-                  Ghi nhận ngay →
+                  Ghi nhận ngay
                 </AppText>
               </TouchableOpacity>
             </View>

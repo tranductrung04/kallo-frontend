@@ -186,9 +186,8 @@ export function GameHubScreen({ navigation }: Props) {
             </View>
 
             <View style={styles.pointsPill}>
-              <StarIcon size={14} color={c.vipStreak} />
-              <AppText variant="labelLg" color={c.vipStreak} style={styles.pointsText}>
-                {currentPoints} điểm
+              <AppText variant="labelSm" color={c.vipStreak} style={{ fontWeight: '700' }}>
+                {currentPoints} đ
               </AppText>
             </View>
           </View>
@@ -199,7 +198,7 @@ export function GameHubScreen({ navigation }: Props) {
             <View style={styles.heroGapLeft}>
               <LightningBoltIcon size={18} color={c.vipStreak} />
               <AppText variant="bodySm" color={c.textSecondary} numberOfLines={1}>
-                Còn <AppText variant="bodySm" color={c.textPrimary} style={styles.bold}>140 điểm</AppText> để vượt Minh Anh
+                Còn <AppText variant="bodySm" color={c.textPrimary} style={styles.bold}>140 đ</AppText> để vượt Minh Anh
               </AppText>
             </View>
             <TouchableOpacity
@@ -476,7 +475,7 @@ export function GameHubScreen({ navigation }: Props) {
                 Khám phá thử thách
               </AppText>
               <AppText variant="labelSm" color={c.vipStreak} style={styles.semiBold}>
-                Tới +200 điểm
+                Tới +200 đ
               </AppText>
             </TouchableOpacity>
           </ScrollView>
@@ -788,7 +787,7 @@ function createStyles(theme: ThemeContextValue) {
       paddingHorizontal: 12,
       paddingVertical: 6,
       borderRadius: r.full,
-      backgroundColor: isDark ? 'rgba(245, 158, 11, 0.18)' : '#FEF3C7',
+      backgroundColor: c.vipStreakBg,
     },
     pointsText: {
       fontWeight: '700',
@@ -1028,7 +1027,7 @@ function createStyles(theme: ThemeContextValue) {
       paddingHorizontal: 8,
       paddingVertical: 2,
       borderRadius: 10,
-      backgroundColor: isDark ? 'rgba(245, 158, 11, 0.18)' : '#FEF3C7',
+      backgroundColor: c.vipStreakBg,
     },
     exploreCard: {
       width: 200,

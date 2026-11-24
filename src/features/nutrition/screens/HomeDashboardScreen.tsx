@@ -858,7 +858,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
           <View style={styles.sectionBlock}>
             <View style={styles.sectionHeaderRow}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <AppText variant="headlineSm">Thử thách & Game Hub</AppText>
+                <AppText variant="headlineSm">Game Hub</AppText>
                 <View
                   style={{
                     backgroundColor: colors.vipStreak,
@@ -920,9 +920,6 @@ export function HomeDashboardScreen({ navigation }: Props) {
                     </View>
                     <View style={styles.gameHubTitleWrap}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <AppText variant="labelLg" color={colors.textPrimary} style={{ fontWeight: '700' }}>
-                          Game Hub
-                        </AppText>
                         <View style={[styles.gameHubStandingPill, { backgroundColor: colors.brandSoftTint }]}>
                           <AppText variant="labelSm" color={colors.brandPrimary} style={{ fontSize: 10, fontWeight: '700' }}>
                             Hạng #{userRank}
@@ -935,7 +932,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
                     </View>
                   </View>
 
-                  <View style={[styles.gameHubPointsBadge, { backgroundColor: 'rgba(217, 119, 6, 0.15)' }]}>
+                  <View style={[styles.gameHubPointsBadge, { backgroundColor: colors.vipStreakBg }]}>
                     <AppText variant="labelSm" color={colors.vipStreak} style={{ fontWeight: '700' }}>
                       {userPoints} đ
                     </AppText>

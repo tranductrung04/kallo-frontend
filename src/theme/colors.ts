@@ -28,6 +28,7 @@ export const colors = {
         // Utility & Tracking
         quickScanner: '#16A34A',
         vipStreak: '#D97706',
+        vipStreakBg: 'rgba(217, 119, 6, 0.15)',
         trackerWater: '#0891B2',
         trackerBurn: '#EF4444',
         trackerWeight: '#D97706',
@@ -80,6 +81,7 @@ export const colors = {
         fiber: '#16A34A',
         water: '#0891B2',
         streak: '#D97706',
+        streakBg: 'rgba(217, 119, 6, 0.15)',
         warning: '#C2410C',
         danger: '#D92D20',
     },
@@ -113,6 +115,7 @@ export const colors = {
         // Utility & Tracking
         quickScanner: '#22C55E',
         vipStreak: '#F59E0B',
+        vipStreakBg: 'rgba(245, 158, 11, 0.18)',
         trackerWater: '#22D3EE',
         trackerBurn: '#EF4444',
         trackerWeight: '#FBBF24',
@@ -165,6 +168,7 @@ export const colors = {
         fiber: '#4ADE80',
         water: '#22D3EE',
         streak: '#F59E0B',
+        streakBg: 'rgba(245, 158, 11, 0.18)',
         warning: '#FB923C',
         danger: '#FF5A5F',
     },
