@@ -45,6 +45,9 @@ export type Challenge = {
   metric?: string;
   badgeReward?: Badge | null;
   status?: ChallengeStatus;
+  category?: 'water' | 'steps' | 'log' | 'calorie' | 'eating';
+  rewardBadgeTitle?: string;
+  highlightBadge?: string;
 };
 
 export type FriendStatus = 'friend' | 'pending_sent' | 'pending_received';

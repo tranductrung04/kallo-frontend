@@ -1,7 +1,9 @@
 import React from 'react';
 import {
+  AlarmClock,
   AlertTriangle,
   Armchair,
+  BadgeCheck,
   Bell,
   Bike,
   BookOpen,
@@ -66,6 +68,7 @@ import {
   SquareCheck,
   Star,
   Sun,
+  Target,
   TriangleAlert,
   ThumbsDown,
   ThumbsUp,
@@ -292,5 +295,9 @@ export const UserPlusIcon = fromLucide(UserPlus, { defaultSize: 20 });
 export const PartyPopperIcon = fromLucide(PartyPopper, { defaultSize: 20, defaultColor: '#D97706' });
 export const TrendingUpIcon = fromLucide(TrendingUp, { defaultSize: 18 });
 export const RotateCcwIcon = fromLucide(RotateCcw, { defaultSize: 18 });
+export const AlarmClockIcon = fromLucide(AlarmClock, { defaultSize: 18 });
+export const BadgeCheckIcon = fromLucide(BadgeCheck, { defaultSize: 20 });
+export const TargetIcon = fromLucide(Target, { defaultSize: 22 });
+export const AlertCircleIcon = fromLucide(CircleAlert, { defaultSize: 18 });
 
 
