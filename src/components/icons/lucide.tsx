@@ -12,6 +12,7 @@ import {
   Calendar,
   Candy,
   Check,
+  CheckCheck,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -47,6 +48,7 @@ import {
   Mic,
   Minus,
   Moon,
+  MoreVertical,
   PartyPopper,
   PenLine,
   PersonStanding,
@@ -76,6 +78,7 @@ import {
   TrendingUp,
   Trophy,
   User,
+  UserMinus,
   UserPlus,
   Users,
   Utensils,
@@ -301,5 +304,8 @@ export const BadgeCheckIcon = fromLucide(BadgeCheck, { defaultSize: 20 });
 export const TargetIcon = fromLucide(Target, { defaultSize: 22 });
 export const AlertCircleIcon = fromLucide(CircleAlert, { defaultSize: 18 });
 export const ArrowRightIcon = fromLucide(ArrowRight, { defaultSize: 18 });
+export const CheckCheckIcon = fromLucide(CheckCheck, { defaultSize: 22 });
+export const MoreVerticalIcon = fromLucide(MoreVertical, { defaultSize: 20 });
+export const UserMinusIcon = fromLucide(UserMinus, { defaultSize: 18 });
 
 

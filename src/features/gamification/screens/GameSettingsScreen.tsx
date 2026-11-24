@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   ScrollView,
   Share,
@@ -8,15 +8,16 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AppCard, AppSwitch, AppText } from '@/components/common';
+import { AppSwitch, AppText } from '@/components/common';
 import {
   ChevronLeftIcon,
   ClipboardCopyIcon,
   ShareNodesIcon,
   ShieldSecurityIcon,
+  UserSingleIcon,
 } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
-import { useTheme } from '@/theme';
+import { useTheme, type ThemeContextValue } from '@/theme';
 import { useGamification } from '../GamificationProvider';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GameSettings'>;
@@ -24,6 +25,8 @@ type Props = NativeStackScreenProps<RootStackParamList, 'GameSettings'>;
 export function GameSettingsScreen({ navigation }: Props) {
   const theme = useTheme();
   const { colors: c } = theme;
+  const isDark = theme.scheme === 'dark';
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const { gameSettings, updateGameSettings } = useGamification();
 
   const handleCopyCode = async () => {
@@ -50,70 +53,114 @@ export function GameSettingsScreen({ navigation }: Props) {
     <SafeAreaView edges={['top']} style={[styles.safe, { backgroundColor: c.canvasBase }]}>
       {/* ── Top Bar ─────────────────────────────────────────────────── */}
       <View style={[styles.topBar, { borderBottomColor: c.surfaceBorder }]}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-        >
-          <ChevronLeftIcon size={24} color={c.textPrimary} />
-        </TouchableOpacity>
-        <AppText variant="headlineSm" color={c.textPrimary} style={styles.topBarTitle}>
-          Cài đặt trò chơi & Riêng tư
-        </AppText>
-        <View style={styles.backButtonPlaceholder} />
+        <View style={styles.topBarLeft}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            accessibilityRole="button"
+            accessibilityLabel="Quay lại"
+          >
+            <ChevronLeftIcon size={24} color={c.textPrimary} />
+          </TouchableOpacity>
+          <AppText variant="headlineSm" color={c.textPrimary} numberOfLines={1} style={styles.boldText}>
+            Cài đặt trò chơi & Riêng tư
+          </AppText>
+        </View>
+
+        <View style={[styles.avatarCircle, { backgroundColor: c.brandPrimary }]}>
+          <UserSingleIcon size={16} color="#FFFFFF" />
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* ── 1. Friend Code Section ─────────────────────────────────── */}
-        <AppText variant="headlineSm" color={c.textPrimary}>
-          Mã kết bạn cá nhân
-        </AppText>
+        {/* ── 1. Friend Code Bento Card ───────────────────────────────── */}
+        <View style={styles.sectionHeader}>
+          <AppText variant="headlineSm" color={c.textPrimary} style={styles.boldText}>
+            Mã kết bạn cá nhân
+          </AppText>
+          <AppText variant="bodySm" color={c.textSecondary}>
+            Dùng để kết nối trực tiếp với bạn bè
+          </AppText>
+        </View>
 
-        <AppCard style={styles.codeCard}>
-          <AppText variant="caption" color={c.textSecondary}>
+        <View
+          style={[
+            styles.cardBento,
+            {
+              backgroundColor: c.surfaceMid,
+              borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+            },
+          ]}
+        >
+          <AppText variant="caption" color={c.textSecondary} style={{ letterSpacing: 1.2 }}>
             MÃ KẾT BẠN CỦA BẠN (DUY NHẤT)
           </AppText>
-          <AppText variant="headlineXl" color={c.brandPrimary} style={styles.friendCodeText}>
-            {gameSettings.friendCode}
-          </AppText>
+
+          <View style={[styles.codeDisplayBox, { backgroundColor: c.surfaceMuted }]}>
+            <AppText variant="headlineXl" color={c.brandPrimary} style={styles.friendCodeText}>
+              {gameSettings.friendCode}
+            </AppText>
+          </View>
 
           <AppText variant="bodySm" color={c.textSecondary} align="center" style={styles.codeDesc}>
-            Chia sẻ mã kết bạn này để bạn bè có thể tìm kiếm và kết nối ngay cả khi bạn tắt chế độ tìm kiếm công khai.
+            Chia sẻ mã này để bạn bè có thể tìm kiếm và kết nối ngay cả khi bạn tắt chế độ tìm kiếm công khai.
           </AppText>
 
           <View style={styles.codeButtonRow}>
             <TouchableOpacity
-              style={[styles.codeBtn, { backgroundColor: c.surfaceHigh, borderColor: c.surfaceBorder }]}
+              style={[
+                styles.codeBtn,
+                { backgroundColor: c.surfaceHigh, borderColor: c.surfaceBorder },
+              ]}
               onPress={handleCopyCode}
+              activeOpacity={0.8}
             >
               <ClipboardCopyIcon size={18} color={c.textPrimary} />
-              <AppText variant="bodySm" color={c.textPrimary} style={styles.bold}>
+              <AppText variant="labelMd" color={c.textPrimary} style={styles.boldText}>
                 Sao chép mã
               </AppText>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.codeBtn, { backgroundColor: c.brandAction, borderColor: c.brandAction }]}
+              style={[
+                styles.codeBtn,
+                { backgroundColor: c.brandAction, borderColor: c.brandAction },
+              ]}
               onPress={handleShareCode}
+              activeOpacity={0.8}
             >
-              <ShareNodesIcon size={18} color={c.onBrand} />
-              <AppText variant="bodySm" color={c.onBrand} style={styles.bold}>
+              <ShareNodesIcon size={18} color="#FFFFFF" />
+              <AppText variant="labelMd" color="#FFFFFF" style={styles.boldText}>
                 Chia sẻ ngay
               </AppText>
             </TouchableOpacity>
           </View>
-        </AppCard>
+        </View>
 
-        {/* ── 2. Privacy Settings ────────────────────────────────────── */}
-        <AppText variant="headlineSm" color={c.textPrimary}>
-          Quyền riêng tư bảng xếp hạng
-        </AppText>
+        {/* ── 2. Privacy Settings Bento Card ─────────────────────────── */}
+        <View style={styles.sectionHeader}>
+          <AppText variant="headlineSm" color={c.textPrimary} style={styles.boldText}>
+            Quyền riêng tư bảng xếp hạng
+          </AppText>
+          <AppText variant="bodySm" color={c.textSecondary}>
+            Kiểm soát thông tin hiển thị trên bảng thi đua bạn bè
+          </AppText>
+        </View>
 
-        <AppCard style={styles.settingsGroupCard}>
+        <View
+          style={[
+            styles.cardBento,
+            {
+              backgroundColor: c.surfaceMid,
+              borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+            },
+          ]}
+        >
           {/* Toggle 1: Discoverable */}
           <View style={styles.settingItem}>
             <View style={styles.settingTextCol}>
-              <AppText variant="bodyMd" color={c.textPrimary} style={styles.bold}>
+              <AppText variant="bodyMd" color={c.textPrimary} style={styles.boldText}>
                 Cho phép tìm kiếm qua tên
               </AppText>
               <AppText variant="caption" color={c.textSecondary}>
@@ -132,7 +179,7 @@ export function GameSettingsScreen({ navigation }: Props) {
           {/* Toggle 2: Share Streak */}
           <View style={styles.settingItem}>
             <View style={styles.settingTextCol}>
-              <AppText variant="bodyMd" color={c.textPrimary} style={styles.bold}>
+              <AppText variant="bodyMd" color={c.textPrimary} style={styles.boldText}>
                 Chia sẻ chuỗi Streak
               </AppText>
               <AppText variant="caption" color={c.textSecondary}>
@@ -151,7 +198,7 @@ export function GameSettingsScreen({ navigation }: Props) {
           {/* Toggle 3: Share Points */}
           <View style={styles.settingItem}>
             <View style={styles.settingTextCol}>
-              <AppText variant="bodyMd" color={c.textPrimary} style={styles.bold}>
+              <AppText variant="bodyMd" color={c.textPrimary} style={styles.boldText}>
                 Chia sẻ điểm Thử thách
               </AppText>
               <AppText variant="caption" color={c.textSecondary}>
@@ -170,7 +217,7 @@ export function GameSettingsScreen({ navigation }: Props) {
           {/* Toggle 4: Share Steps */}
           <View style={styles.settingItem}>
             <View style={styles.settingTextCol}>
-              <AppText variant="bodyMd" color={c.textPrimary} style={styles.bold}>
+              <AppText variant="bodyMd" color={c.textPrimary} style={styles.boldText}>
                 Chia sẻ số bước chân tuần
               </AppText>
               <AppText variant="caption" color={c.textSecondary}>
@@ -183,13 +230,23 @@ export function GameSettingsScreen({ navigation }: Props) {
               accessibilityLabel="Chia sẻ số bước chân tuần"
             />
           </View>
-        </AppCard>
+        </View>
 
-        {/* ── 3. Security Commitment Card ────────────────────────────── */}
-        <View style={[styles.securityCard, { backgroundColor: c.surfaceHigh, borderColor: c.quickScanner }]}>
-          <ShieldSecurityIcon size={28} color={c.quickScanner} />
+        {/* ── 3. Security Commitment Bento Card ──────────────────────── */}
+        <View
+          style={[
+            styles.securityCard,
+            {
+              backgroundColor: c.surfaceMid,
+              borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+            },
+          ]}
+        >
+          <View style={[styles.shieldIconBox, { backgroundColor: c.brandSoftTint }]}>
+            <ShieldSecurityIcon size={24} color={c.brandPrimary} />
+          </View>
           <View style={styles.securityTextWrap}>
-            <AppText variant="headlineSm" color={c.quickScanner}>
+            <AppText variant="labelLg" color={c.textPrimary} style={styles.boldText}>
               Cam kết bảo mật dữ liệu sức khỏe
             </AppText>
             <AppText variant="bodySm" color={c.textSecondary} style={styles.securityDesc}>
@@ -202,103 +259,143 @@ export function GameSettingsScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1 },
-  topBar: {
-    height: 52,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-  },
-  backButton: {
-    width: 36,
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  topBarTitle: {
-    flex: 1,
-    textAlign: 'center',
-  },
-  backButtonPlaceholder: {
-    width: 36,
-  },
-  content: {
-    padding: 16,
-    gap: 16,
-    paddingBottom: 40,
-  },
-  codeCard: {
-    alignItems: 'center',
-    padding: 20,
-    borderRadius: 22,
-    gap: 8,
-  },
-  friendCodeText: {
-    letterSpacing: 4,
-    fontWeight: '800',
-    marginVertical: 4,
-  },
-  codeDesc: {
-    lineHeight: 20,
-    maxWidth: 300,
-  },
-  codeButtonRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginTop: 10,
-    width: '100%',
-  },
-  codeBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 12,
-    borderRadius: 14,
-    borderWidth: 1,
-  },
-  bold: { fontWeight: '700' },
-  settingsGroupCard: {
-    padding: 16,
-    borderRadius: 22,
-    gap: 14,
-  },
-  settingItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 4,
-  },
-  settingTextCol: {
-    flex: 1,
-    paddingRight: 16,
-    gap: 2,
-  },
-  divider: {
-    height: 1,
-    width: '100%',
-  },
-  securityCard: {
-    flexDirection: 'row',
-    padding: 16,
-    borderRadius: 20,
-    borderWidth: 1,
-    gap: 14,
-    alignItems: 'flex-start',
-  },
-  shieldEmoji: {
-    fontSize: 30,
-    marginTop: 2,
-  },
-  securityTextWrap: {
-    flex: 1,
-    gap: 4,
-  },
-  securityDesc: {
-    lineHeight: 20,
-  },
-});
+function createStyles(theme: ThemeContextValue) {
+  const { colors: c } = theme;
+  const isDark = theme.scheme === 'dark';
+
+  return StyleSheet.create({
+    safe: {
+      flex: 1,
+    },
+    topBar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+    },
+    topBarLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      flex: 1,
+    },
+    backButton: {
+      width: 40,
+      height: 40,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 20,
+    },
+    avatarCircle: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.12,
+      shadowRadius: 2,
+      elevation: 2,
+    },
+    content: {
+      padding: 16,
+      gap: 14,
+      paddingBottom: 40,
+    },
+    sectionHeader: {
+      gap: 2,
+      marginTop: 4,
+    },
+    cardBento: {
+      borderRadius: 20,
+      padding: 18,
+      gap: 14,
+      borderWidth: 1,
+      shadowColor: isDark ? '#000000' : 'rgba(123, 79, 224, 0.08)',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.08,
+      shadowRadius: 10,
+      elevation: 2,
+    },
+    codeDisplayBox: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 14,
+      borderRadius: 14,
+      marginVertical: 4,
+    },
+    friendCodeText: {
+      letterSpacing: 4,
+      fontWeight: '800',
+    },
+    codeDesc: {
+      lineHeight: 20,
+      paddingHorizontal: 8,
+    },
+    codeButtonRow: {
+      flexDirection: 'row',
+      gap: 12,
+      marginTop: 6,
+      width: '100%',
+    },
+    codeBtn: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      paddingVertical: 12,
+      borderRadius: 14,
+      borderWidth: 1,
+    },
+    settingItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 6,
+    },
+    settingTextCol: {
+      flex: 1,
+      paddingRight: 16,
+      gap: 3,
+    },
+    divider: {
+      height: 1,
+      width: '100%',
+    },
+    securityCard: {
+      flexDirection: 'row',
+      padding: 16,
+      borderRadius: 20,
+      borderWidth: 1,
+      gap: 14,
+      alignItems: 'flex-start',
+      shadowColor: isDark ? '#000000' : 'rgba(123, 79, 224, 0.08)',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.08,
+      shadowRadius: 10,
+      elevation: 2,
+      marginTop: 4,
+    },
+    shieldIconBox: {
+      width: 44,
+      height: 44,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    securityTextWrap: {
+      flex: 1,
+      gap: 4,
+    },
+    securityDesc: {
+      lineHeight: 20,
+    },
+    boldText: {
+      fontWeight: '700',
+    },
+  });
+}

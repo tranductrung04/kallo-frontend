@@ -80,6 +80,7 @@ export type RootStackParamList = {
   Challenges: undefined;
   Badges: undefined;
   ChallengeDetail: { challengeId: string };
+  FriendsList: undefined;
   FriendsLeaderboard: undefined;
   FriendSearch: undefined;
   FriendRequests: undefined;

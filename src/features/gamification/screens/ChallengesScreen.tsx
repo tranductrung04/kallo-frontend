@@ -29,11 +29,13 @@ import { useTheme, type ThemeContextValue } from '@/theme';
 import type { Challenge } from '../types';
 import { useGamification } from '../GamificationProvider';
 
-interface Props {
+export interface ChallengesScreenProps {
   navigation: NativeStackNavigationProp<RootStackParamList, any>;
+  hideTopBar?: boolean;
+  onTabChange?: (tab: 'challenges' | 'badges') => void;
 }
 
-export function ChallengesScreen({ navigation }: Props) {
+export function ChallengesScreen({ navigation, hideTopBar, onTabChange }: ChallengesScreenProps) {
   const theme = useTheme();
   const { colors: c } = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -254,28 +256,28 @@ export function ChallengesScreen({ navigation }: Props) {
     );
   };
 
-  return (
-    <SafeAreaView edges={['top']} style={[styles.safe, { backgroundColor: c.canvasBase }]}>
-      {/* ── Top Bar (Dedicated Thử thách Header) ───────────────────── */}
-      <View style={[styles.topBar, { borderBottomColor: c.surfaceBorder }]}>
-        <View style={styles.topBarLeft}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-            accessibilityRole="button"
-            accessibilityLabel="Quay lại"
-          >
-            <ChevronLeftIcon size={22} color={c.textPrimary} />
-          </TouchableOpacity>
+  const content = (
+    <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <View style={styles.challengesContainer}>
+        {/* Header Bar: Title + Total Points Pill (as seen in Screenshot 2) */}
+        <View style={styles.challengesHeaderBar}>
+          <View style={styles.titleColumn}>
+            <View style={styles.titleWithBadgeRow}>
+              <AppText variant="headlineMd" color={c.textPrimary} style={styles.boldText}>
+                Thử thách
+              </AppText>
+              <View style={[styles.countBadge, { backgroundColor: c.brandSoftTint }]}>
+                <AppText variant="labelSm" color={c.brandPrimary} style={styles.boldText}>
+                  {joinedChallenges.length || 3}
+                </AppText>
+              </View>
+            </View>
+            <AppText variant="bodySm" color={c.textSecondary}>
+              Chinh phục thói quen, nhận quà rực rỡ
+            </AppText>
+          </View>
 
-          <AppText variant="headlineSm" color={c.textPrimary} style={styles.boldText}>
-            Thử thách
-          </AppText>
-        </View>
-
-        <View style={styles.topBarRight}>
-          {/* Gold Points Pill */}
+          {/* Total Points Pill */}
           <View
             style={[
               styles.totalPointsPill,
@@ -289,16 +291,13 @@ export function ChallengesScreen({ navigation }: Props) {
           >
             <StarIcon size={16} color={c.vipStreak} />
             <AppText variant="labelMd" color={c.vipStreak} style={styles.boldText}>
-              {userPoints || 150} điểm
+              {userPoints || 320} điểm
             </AppText>
           </View>
         </View>
-      </View>
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.challengesContainer}>
-          {/* Segmented Tabs Navigation */}
-          <View style={[styles.segmentedTabBar, { backgroundColor: c.surfaceHigh }]}>
+        {/* Segmented Tabs Navigation */}
+        <View style={[styles.segmentedTabBar, { backgroundColor: c.surfaceHigh }]}>
             <TouchableOpacity
               style={[
                 styles.segmentedTabItem,
@@ -414,6 +413,79 @@ export function ChallengesScreen({ navigation }: Props) {
           )}
         </View>
       </ScrollView>
+  );
+
+  if (hideTopBar) {
+    return content;
+  }
+
+  return (
+    <SafeAreaView edges={['top']} style={[styles.safe, { backgroundColor: c.canvasBase }]}>
+      {/* ── Top Bar (Game Header with Segmented Tabs) ──────────────── */}
+      <View style={[styles.topBar, { borderBottomColor: c.surfaceBorder }]}>
+        <View style={styles.topBarLeft}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            accessibilityRole="button"
+            accessibilityLabel="Quay lại"
+          >
+            <ChevronLeftIcon size={22} color={c.textPrimary} />
+          </TouchableOpacity>
+
+          <View style={[styles.fireCircle, { backgroundColor: c.brandAction }]}>
+            <FlameIcon size={18} color="#FFFFFF" />
+          </View>
+          <AppText variant="headlineSm" color={c.textPrimary} style={styles.boldText}>
+            Game
+          </AppText>
+        </View>
+
+        {/* Segmented Tab Pill: [ Thử thách | Huy hiệu ] */}
+        <View style={[styles.headerSegmentedPill, { backgroundColor: c.surfaceHigh }]}>
+          <TouchableOpacity
+            style={[
+              styles.headerSegmentItem,
+              styles.headerSegmentItemActive,
+              { backgroundColor: c.surfaceMid },
+            ]}
+            activeOpacity={0.8}
+          >
+            <AppText variant="labelSm" color={c.brandPrimary} style={styles.boldText}>
+              Thử thách
+            </AppText>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.headerSegmentItem}
+            onPress={() => onTabChange ? onTabChange('badges') : navigation.navigate('Badges')}
+            activeOpacity={0.8}
+          >
+            <AppText variant="labelSm" color={c.textSecondary}>
+              Huy hiệu
+            </AppText>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.topBarRight}>
+          <TouchableOpacity
+            style={[styles.iconButton, { backgroundColor: c.surfaceHigh }]}
+            onPress={() => navigation.navigate('FriendRequests')}
+            accessibilityRole="button"
+            accessibilityLabel="Thông báo"
+          >
+            <BellIcon size={18} color={c.textSecondary} />
+            <View style={[styles.notificationDot, { backgroundColor: c.brandAction }]} />
+          </TouchableOpacity>
+
+          <View style={[styles.avatarCircle, { backgroundColor: c.brandPrimary }]}>
+            <UserSingleIcon size={15} color="#FFFFFF" />
+          </View>
+        </View>
+      </View>
+
+      {content}
     </SafeAreaView>
   );
 }
@@ -438,10 +510,36 @@ function createStyles(theme: ThemeContextValue) {
       alignItems: 'center',
       gap: 8,
     },
+    headerSegmentedPill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderRadius: 20,
+      padding: 3,
+    },
+    headerSegmentItem: {
+      paddingHorizontal: 12,
+      paddingVertical: 5,
+      borderRadius: 16,
+    },
+    headerSegmentItemActive: {
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+      elevation: 2,
+    },
     topBarRight: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 8,
+    },
+    notificationDot: {
+      position: 'absolute',
+      top: 6,
+      right: 6,
+      width: 7,
+      height: 7,
+      borderRadius: 3.5,
     },
     backButton: {
       width: 36,

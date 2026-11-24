@@ -82,6 +82,9 @@ export type Friend = {
   tag?: string;
   rankJump?: string;
   activityStatus?: string;
+  verified?: boolean;
+  online?: boolean;
+  mutualFriendsCount?: number;
 };
 
 export type LeaderboardMetric = 'streak' | 'challenge' | 'steps';
@@ -118,6 +121,9 @@ export type FriendRequest = {
     id: string;
     displayName: string;
     avatarUrl?: string;
+    mutualFriendsCount?: number;
+    verified?: boolean;
+    online?: boolean;
   };
   status: 'PENDING' | 'ACCEPTED' | 'DECLINED';
   createdAt: string;

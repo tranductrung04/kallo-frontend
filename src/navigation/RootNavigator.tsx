@@ -27,6 +27,7 @@ import {
   ChallengesScreen,
   BadgesScreen,
   FriendsLeaderboardScreen,
+  FriendsListScreen,
   ChallengeDetailScreen,
   FriendSearchScreen,
   FriendRequestsScreen,
@@ -112,6 +113,7 @@ export function RootNavigator() {
         <Stack.Screen name="Challenges" component={ChallengesScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Badges" component={BadgesScreen} options={{ headerShown: false }} />
         <Stack.Screen name="ChallengeDetail" component={ChallengeDetailScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="FriendsList" component={FriendsListScreen} options={{ headerShown: false }} />
         <Stack.Screen name="FriendsLeaderboard" component={FriendsLeaderboardScreen} options={{ headerShown: false }} />
         <Stack.Screen name="FriendSearch" component={FriendSearchScreen} options={{ headerShown: false }} />
         <Stack.Screen name="FriendRequests" component={FriendRequestsScreen} options={{ headerShown: false }} />

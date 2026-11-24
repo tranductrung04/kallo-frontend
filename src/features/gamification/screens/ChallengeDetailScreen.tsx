@@ -76,15 +76,15 @@ export function ChallengeDetailScreen({ route, navigation }: Props) {
   const isCalorie = challenge.id === 'challenge-calorie-10d' || challenge.category === 'calorie';
   const isLargeNumber = challenge.targetProgress >= 1000 || String(challenge.currentProgress).length > 3;
 
-  const formatNum = (num: number) => num.toLocaleString('vi-VN');
+  const formatNum = (num: number) => String(num).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
   const formattedMetric = useMemo(() => {
     if (challenge.metric) {
       return challenge.metric.replace(/\b(\d{4,})\b/g, (match) =>
-        Number(match).toLocaleString('vi-VN')
+        formatNum(Number(match))
       );
     }
-    return `${challenge.targetProgress.toLocaleString('vi-VN')} ${challenge.unit}`;
+    return `${formatNum(challenge.targetProgress)} ${challenge.unit}`;
   }, [challenge.metric, challenge.targetProgress, challenge.unit]);
 
   const rewardBadgeTitle = useMemo(() => {
@@ -157,6 +157,10 @@ export function ChallengeDetailScreen({ route, navigation }: Props) {
           <AppText variant="headlineSm" color={c.textPrimary} numberOfLines={1} style={styles.boldText}>
             Chi Tiết Nhiệm Vụ
           </AppText>
+        </View>
+
+        <View style={[styles.avatarCircle, { backgroundColor: c.brandPrimary }]}>
+          <UserSingleIcon size={16} color="#FFFFFF" />
         </View>
       </View>
 
@@ -320,49 +324,43 @@ export function ChallengeDetailScreen({ route, navigation }: Props) {
             </Svg>
 
             {/* Radial Center Text */}
-            {isLargeNumber ? (
-              <View style={styles.largeCenterWrap}>
-                <AppText
-                  variant="headlineMd"
-                  color={c.textPrimary}
-                  style={styles.largeStatCurrent}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                >
-                  {formatNum(challenge.currentProgress)}
-                </AppText>
-                <AppText
-                  variant="labelMd"
-                  color={c.textSecondary}
-                  style={styles.largeStatTarget}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                >
-                  / {formatNum(challenge.targetProgress)}
-                </AppText>
-                <AppText variant="labelSm" color={c.textSecondary} style={styles.radialSubLabel}>
-                  {challenge.unit} đạt chỉ tiêu
-                </AppText>
-              </View>
-            ) : (
-              <View style={styles.radialCenterWrap}>
+            <View style={styles.radialCenterWrap}>
+              {isLargeNumber ? (
+                <View style={styles.largeNumbersRow}>
+                  <AppText
+                    variant="headlineSm"
+                    color={c.textPrimary}
+                    style={styles.largeCurrentText}
+                    numberOfLines={1}
+                  >
+                    {formatNum(challenge.currentProgress)}
+                  </AppText>
+                  <AppText
+                    variant="labelMd"
+                    color={c.textSecondary}
+                    style={styles.largeTargetText}
+                    numberOfLines={1}
+                  >
+                    /{formatNum(challenge.targetProgress)}
+                  </AppText>
+                </View>
+              ) : (
                 <AppText
                   variant="headlineLg"
                   color={c.textPrimary}
                   style={styles.statNumeric}
                   numberOfLines={1}
-                  adjustsFontSizeToFit
                 >
                   {challenge.currentProgress}
                   <AppText variant="headlineSm" color={c.textSecondary}>
                     /{challenge.targetProgress}
                   </AppText>
                 </AppText>
-                <AppText variant="labelSm" color={c.textSecondary} style={styles.radialSubLabel}>
-                  {challenge.unit} đạt chỉ tiêu
-                </AppText>
-              </View>
-            )}
+              )}
+              <AppText variant="labelSm" color={c.textSecondary} style={styles.radialSubLabel}>
+                {challenge.unit} đạt chỉ tiêu
+              </AppText>
+            </View>
           </View>
 
           {/* 7 Day Dots Indicator */}
@@ -660,27 +658,24 @@ function createStyles(theme: ThemeContextValue) {
       position: 'absolute',
       alignItems: 'center',
       justifyContent: 'center',
-      width: 120,
+      width: 130,
     },
-    largeCenterWrap: {
-      position: 'absolute',
-      alignItems: 'center',
+    largeNumbersRow: {
+      flexDirection: 'row',
+      alignItems: 'baseline',
       justifyContent: 'center',
-      width: 126,
-      paddingHorizontal: 4,
-      gap: 1,
+      maxWidth: 126,
     },
-    largeStatCurrent: {
-      fontSize: 22,
-      lineHeight: 26,
+    largeCurrentText: {
+      fontSize: 19,
+      lineHeight: 23,
       fontWeight: '700',
-      textAlign: 'center',
     },
-    largeStatTarget: {
+    largeTargetText: {
       fontSize: 13,
-      lineHeight: 16,
+      lineHeight: 17,
       fontWeight: '600',
-      textAlign: 'center',
+      marginLeft: 1,
     },
     statNumeric: {
       fontSize: 28,

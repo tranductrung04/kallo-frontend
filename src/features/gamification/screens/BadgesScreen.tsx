@@ -11,6 +11,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppText } from '@/components/common';
 import {
   BadgeCheckIcon,
+  BellIcon,
   BookOpenIcon,
   CalendarIcon,
   CheckIcon,
@@ -31,11 +32,13 @@ import { getBadgeVisualConfig, type BadgeVisualConfig } from '../utils';
 import { BadgeCelebrationModal } from '../components/BadgeCelebrationModal';
 import { BadgeDetailBottomSheet } from '../components/BadgeDetailBottomSheet';
 
-interface Props {
+export interface BadgesScreenProps {
   navigation: NativeStackNavigationProp<RootStackParamList, any>;
+  hideTopBar?: boolean;
+  onTabChange?: (tab: 'challenges' | 'badges') => void;
 }
 
-export function BadgesScreen({ navigation }: Props) {
+export function BadgesScreen({ navigation, hideTopBar, onTabChange }: BadgesScreenProps) {
   const theme = useTheme();
   const { colors: c } = theme;
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -79,47 +82,8 @@ export function BadgesScreen({ navigation }: Props) {
     }
   };
 
-  return (
-    <SafeAreaView edges={['top']} style={[styles.safe, { backgroundColor: c.canvasBase }]}>
-      {/* ── Top Bar (Dedicated Huy hiệu Header) ─────────────────────── */}
-      <View style={[styles.topBar, { borderBottomColor: c.surfaceBorder }]}>
-        <View style={styles.topBarLeft}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-            accessibilityRole="button"
-            accessibilityLabel="Quay lại"
-          >
-            <ChevronLeftIcon size={22} color={c.textPrimary} />
-          </TouchableOpacity>
-
-          <AppText variant="headlineSm" color={c.textPrimary} style={styles.boldText}>
-            Huy Hiệu
-          </AppText>
-        </View>
-
-        <View style={styles.topBarRight}>
-          {/* Gold Points Pill */}
-          <View
-            style={[
-              styles.headerBadgePointsPill,
-              {
-                backgroundColor:
-                  theme.scheme === 'dark'
-                    ? 'rgba(217, 119, 6, 0.22)'
-                    : '#FFDCC3',
-              },
-            ]}
-          >
-            <StarIcon size={16} color={c.vipStreak} />
-            <AppText variant="labelMd" color={c.vipStreak} style={styles.boldText}>
-              {totalBadgePoints || 150} điểm
-            </AppText>
-          </View>
-        </View>
-      </View>
-
+  const content = (
+    <>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.badgesSection}>
           {/* Summary Card with Lavender Glow & Mini-Ring Progress */}
@@ -328,6 +292,80 @@ export function BadgesScreen({ navigation }: Props) {
         badge={selectedBadge}
         onClose={() => setSelectedBadge(null)}
       />
+    </>
+  );
+
+  if (hideTopBar) {
+    return content;
+  }
+
+  return (
+    <SafeAreaView edges={['top']} style={[styles.safe, { backgroundColor: c.canvasBase }]}>
+      {/* ── Top Bar (Game Header with Segmented Tabs) ──────────────── */}
+      <View style={[styles.topBar, { borderBottomColor: c.surfaceBorder }]}>
+        <View style={styles.topBarLeft}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            accessibilityRole="button"
+            accessibilityLabel="Quay lại"
+          >
+            <ChevronLeftIcon size={22} color={c.textPrimary} />
+          </TouchableOpacity>
+
+          <View style={[styles.fireCircle, { backgroundColor: c.brandAction }]}>
+            <FlameIcon size={18} color="#FFFFFF" />
+          </View>
+          <AppText variant="headlineSm" color={c.textPrimary} style={styles.boldText}>
+            Game
+          </AppText>
+        </View>
+
+        {/* Segmented Tab Pill: [ Thử thách | Huy hiệu ] */}
+        <View style={[styles.headerSegmentedPill, { backgroundColor: c.surfaceHigh }]}>
+          <TouchableOpacity
+            style={styles.headerSegmentItem}
+            onPress={() => onTabChange ? onTabChange('challenges') : navigation.navigate('Challenges')}
+            activeOpacity={0.8}
+          >
+            <AppText variant="labelSm" color={c.textSecondary}>
+              Thử thách
+            </AppText>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.headerSegmentItem,
+              styles.headerSegmentItemActive,
+              { backgroundColor: c.surfaceMid },
+            ]}
+            activeOpacity={0.8}
+          >
+            <AppText variant="labelSm" color={c.brandPrimary} style={styles.boldText}>
+              Huy hiệu
+            </AppText>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.topBarRight}>
+          <TouchableOpacity
+            style={[styles.iconButton, { backgroundColor: c.surfaceHigh }]}
+            onPress={() => navigation.navigate('FriendRequests')}
+            accessibilityRole="button"
+            accessibilityLabel="Thông báo"
+          >
+            <BellIcon size={18} color={c.textSecondary} />
+            <View style={[styles.notificationDot, { backgroundColor: c.brandAction }]} />
+          </TouchableOpacity>
+
+          <View style={[styles.avatarCircle, { backgroundColor: c.brandPrimary }]}>
+            <UserSingleIcon size={15} color="#FFFFFF" />
+          </View>
+        </View>
+      </View>
+
+      {content}
     </SafeAreaView>
   );
 }
@@ -352,10 +390,50 @@ function createStyles(theme: ThemeContextValue) {
       alignItems: 'center',
       gap: 8,
     },
+    fireCircle: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    headerSegmentedPill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderRadius: 20,
+      padding: 3,
+    },
+    headerSegmentItem: {
+      paddingHorizontal: 12,
+      paddingVertical: 5,
+      borderRadius: 16,
+    },
+    headerSegmentItemActive: {
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+      elevation: 2,
+    },
     topBarRight: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 8,
+    },
+    notificationDot: {
+      position: 'absolute',
+      top: 6,
+      right: 6,
+      width: 7,
+      height: 7,
+      borderRadius: 3.5,
+    },
+    iconButton: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     backButton: {
       width: 36,

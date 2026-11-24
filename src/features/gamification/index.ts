@@ -10,6 +10,7 @@ export * from './screens/BadgesChallengesScreen';
 export * from './screens/ChallengesScreen';
 export * from './screens/BadgesScreen';
 export * from './screens/FriendsLeaderboardScreen';
+export * from './screens/FriendsListScreen';
 export * from './screens/ChallengeDetailScreen';
 export * from './screens/FriendSearchScreen';
 export * from './screens/FriendRequestsScreen';

@@ -121,18 +121,13 @@ export function GameHubScreen({ navigation }: Props) {
             accessibilityRole="button"
             accessibilityLabel={`Chuỗi ${streak.currentStreak || 7} ngày`}
           >
-            <FlameIcon size={15} color={c.vipStreak} />
-            <AppText variant="labelSm" color={c.vipStreak} style={styles.streakText}>
-              {streak.currentStreak || 7} NGÀY
+            <FlameIcon
+              size={20}
+              color={streak.currentStreak > 0 ? c.trackerBurn : c.textSecondary}
+            />
+            <AppText variant="headlineSm" style={styles.streakText}>
+              {streak.currentStreak || 0}
             </AppText>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.profileAvatar}
-            onPress={() => navigation.navigate('StreakDetail')}
-            accessibilityLabel="Hồ sơ cá nhân"
-          >
-            <UserSingleIcon size={16} color={c.onBrand} />
           </TouchableOpacity>
         </View>
       </View>
@@ -577,7 +572,11 @@ export function GameHubScreen({ navigation }: Props) {
         {/* ── Section: Friends ───────────────────────────────────────── */}
         <View style={styles.sectionWrap}>
           <View style={styles.friendsCard}>
-            <View style={styles.friendsTopRow}>
+            <TouchableOpacity
+              style={styles.friendsTopRow}
+              activeOpacity={0.85}
+              onPress={() => navigation.navigate('FriendsList')}
+            >
               <View style={styles.avatarsOverlapRow}>
                 {activeFriends.map((f, i) => (
                   <View key={f.id || i} style={[styles.friendAvatarWrap, { zIndex: 10 - i }]}>
@@ -592,10 +591,16 @@ export function GameHubScreen({ navigation }: Props) {
                   </View>
                 )}
               </View>
-              <AppText variant="bodySm" color={c.textSecondary} style={styles.semiBold}>
-                {friends.length || 12} bạn bè đang hoạt động
-              </AppText>
-            </View>
+
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <AppText variant="bodySm" color={c.textSecondary} style={styles.semiBold}>
+                  {friends.length || 12} bạn bè đang hoạt động
+                </AppText>
+                <AppText variant="labelSm" color={c.brandPrimary} style={styles.bold}>
+                  →
+                </AppText>
+              </View>
+            </TouchableOpacity>
 
             <View style={styles.friendsButtonsRow}>
               <TouchableOpacity
@@ -681,7 +686,6 @@ function createStyles(theme: ThemeContextValue) {
       paddingHorizontal: 10,
       paddingVertical: 5,
       borderRadius: r.full,
-      backgroundColor: isDark ? 'rgba(245, 158, 11, 0.18)' : '#FEF3C7',
     },
     streakText: {
       fontWeight: '700',
