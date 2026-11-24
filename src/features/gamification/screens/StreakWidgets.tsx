@@ -196,7 +196,6 @@ export function StreakWeekWidget({
   targetDays = 3,
 }: StreakWeekWidgetProps) {
   const { colors: c } = useTheme();
-  // Danh sách các thứ trong tuần (T2 -> CN)
   const ALL_DAYS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
 
   // Xác định ngày bắt đầu của 7 ngày hiển thị:
@@ -229,7 +228,7 @@ export function StreakWeekWidget({
             <View key={`${item.dayLabel}-${item.index}`} style={styles.dayCol}>
               <View style={styles.dayIconSlot}>
                 {item.isCompleted ? (
-                  <FlameIcon size={34} color="#F44E42" coreColor="#FA9A91" />
+                  <FlameIcon size={34} color={c.trackerBurn} />
                 ) : item.isTarget ? (
                   <StreakGoalFlagIcon width={34} height={38} />
                 ) : (
@@ -277,11 +276,7 @@ export function StreakBottomStatsWidget({
         {/* Thẻ Chuỗi hiện tại */}
         <View style={[styles.statMiniCard, { backgroundColor: c.surfaceMid, borderColor: c.surfaceBorder }]}>
           <View style={styles.statIconWrap}>
-            <FlameIcon
-              size={34}
-              color="#F44E42"
-              coreColor="#FA9A91"
-            />
+            <FlameIcon size={34} color={c.trackerBurn} />
           </View>
           <View style={styles.statTextWrap}>
             <AppText style={styles.statLabel} color={c.textSecondary}>Chuỗi hiện tại</AppText>

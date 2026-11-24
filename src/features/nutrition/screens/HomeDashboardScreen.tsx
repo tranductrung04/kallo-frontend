@@ -872,15 +872,6 @@ export function HomeDashboardScreen({ navigation }: Props) {
                   </AppText>
                 </View>
               </View>
-              <TouchableOpacity
-                onPress={() => root?.navigate('GameHub')}
-                accessibilityLabel="Vào Game Hub"
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              >
-                <AppText variant="labelMd" color={colors.brandPrimary} style={{ fontWeight: '700' }}>
-                  Vào Game Hub →
-                </AppText>
-              </TouchableOpacity>
             </View>
 
             <View style={styles.communityGrid}>
@@ -978,70 +969,6 @@ export function HomeDashboardScreen({ navigation }: Props) {
                   </View>
                 </View>
               </TouchableOpacity>
-
-              {/* Card 1: Huy hiệu & Thử thách */}
-              <AppCard
-                style={styles.communityCard}
-                onPress={() => root?.navigate('BadgesChallenges')}
-                accessibilityLabel="Huy hiệu & Thử thách"
-              >
-                <View
-                  style={[
-                    styles.communityIconBox,
-                    {
-                      backgroundColor:
-                        theme.scheme === 'dark'
-                          ? 'rgba(245, 158, 11, 0.15)'
-                          : 'rgba(217, 119, 6, 0.12)',
-                    },
-                  ]}
-                >
-                  <TrophyIcon size={22} color={colors.vipStreak} />
-                </View>
-                <View style={styles.communityTextWrap}>
-                  <AppText variant="labelLg" color={colors.textPrimary}>Huy hiệu & Thử thách</AppText>
-                  <AppText variant="caption" color={colors.textSecondary}>
-                    {unlockedBadgesCount}/{badges.length} huy hiệu
-                  </AppText>
-                </View>
-                <View style={styles.communityRightWrap}>
-                  {joinedChallengesCount > 0 && (
-                    <View style={[styles.incomingBadge, { backgroundColor: colors.brandAction }]}>
-                      <AppText variant="labelSm" color={colors.onBrand} style={styles.incomingBadgeText}>
-                        {joinedChallengesCount} tham gia
-                      </AppText>
-                    </View>
-                  )}
-                  <ChevronRightIcon size={20} color={colors.textDisabled} />
-                </View>
-              </AppCard>
-
-              {/* Card 2: Bảng xếp hạng Bạn bè */}
-              <AppCard
-                style={styles.communityCard}
-                onPress={() => root?.navigate('FriendsLeaderboard')}
-                accessibilityLabel="Bảng xếp hạng Bạn bè"
-              >
-                <View style={[styles.communityIconBox, { backgroundColor: colors.brandSoftTint }]}>
-                  <UsersIcon size={22} color={colors.brandPrimary} />
-                </View>
-                <View style={styles.communityTextWrap}>
-                  <AppText variant="labelLg" color={colors.textPrimary}>Bảng xếp hạng Bạn bè</AppText>
-                  <AppText variant="caption" color={colors.textSecondary}>
-                    {friends.length || 12} bạn bè
-                  </AppText>
-                </View>
-                <View style={styles.communityRightWrap}>
-                  {incomingRequests.length > 0 && (
-                    <View style={[styles.incomingBadge, { backgroundColor: colors.brandAction }]}>
-                      <AppText variant="labelSm" color={colors.onBrand} style={styles.incomingBadgeText}>
-                        {incomingRequests.length} lời mời
-                      </AppText>
-                    </View>
-                  )}
-                  <ChevronRightIcon size={20} color={colors.textDisabled} />
-                </View>
-              </AppCard>
             </View>
           </View>
         </View>
