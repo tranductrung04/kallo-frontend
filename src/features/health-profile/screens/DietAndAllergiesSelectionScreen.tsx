@@ -17,7 +17,7 @@ import { CheckIcon, ChevronLeftIcon, CloseXIcon, PlusIcon } from '@/components/i
 import { useTheme } from '@/theme';
 import { AnimatedCard, AnimatedRadio } from '../components';
 import { useHealthProfileDraft } from '../hooks/useHealthProfileDraft';
-import { COMMON_ALLERGIES } from '../types';
+import { COMMON_ALLERGIES, STANDARD_ALLERGENS } from '../types';
 
 interface DietAndAllergiesSelectionScreenProps {
   navigation?: any;
@@ -82,6 +82,24 @@ export function DietAndAllergiesSelectionScreen({
   };
 
   const handleNext = () => {
+    // Map selected allergies to standard backend ingredient IDs
+    const ingredientIds: string[] = [];
+    draft.allergies.forEach((name) => {
+      const found = STANDARD_ALLERGENS.find(
+        (a) =>
+          a.nameVi.toLowerCase().includes(name.toLowerCase()) ||
+          name.toLowerCase().includes(a.nameVi.toLowerCase()) ||
+          a.name.toLowerCase().includes(name.toLowerCase())
+      );
+      if (found && !ingredientIds.includes(found.id)) {
+        ingredientIds.push(found.id);
+      }
+    });
+
+    if (ingredientIds.length > 0) {
+      updateDraft('allergyIngredientIds', ingredientIds);
+    }
+
     if (onNext) {
       onNext();
     } else if (navigation?.navigate) {

@@ -70,10 +70,14 @@ export function RootNavigator() {
           ) : null,
       })}
     >
-      {status === 'signedOut' || status === 'needsVerification' ? <Stack.Screen name="Auth" component={AuthNavigator} options={{ headerShown: false }} /> : status === 'needsProfile' ? <Stack.Screen name="Onboarding" component={OnboardingNavigator} options={{ headerShown: false }} /> : <>
-        <Stack.Screen name="MainTabs" component={MainTabNavigator} options={{ headerShown: false }} />
+      {status === 'signedOut' || status === 'needsVerification' ? (
+        <Stack.Screen name="Auth" component={AuthNavigator} options={{ headerShown: false }} />
+      ) : status === 'needsProfile' ? (
         <Stack.Screen name="Onboarding" component={OnboardingNavigator} options={{ headerShown: false }} />
-        <Stack.Screen name="ComponentShowcase" component={ComponentShowcaseScreen} options={{ title: 'Bộ UI Kit' }} />
+      ) : (
+        <>
+          <Stack.Screen name="MainTabs" component={MainTabNavigator} options={{ headerShown: false }} />
+          <Stack.Screen name="ComponentShowcase" component={ComponentShowcaseScreen} options={{ title: 'Bộ UI Kit' }} />
         <Stack.Screen name="AIScanPlaceholder" component={ScanPlaceholderScreen} options={{ title: 'AI Meal Scan' }} />
         <Stack.Screen name="FoodSearch" component={FoodSearchScreen} options={{ headerShown: false }} />
         <Stack.Screen name="FoodDetail" component={FoodDetailScreen} options={{ title: 'Chi tiết món ăn' }} />
@@ -122,7 +126,9 @@ export function RootNavigator() {
         <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} options={{ title: 'Đổi mật khẩu' }} />
         <Stack.Screen name="ReportOverview" component={ReportOverviewScreen} options={{ headerShown: false }} />
 
-      </>}
-    </Stack.Navigator></NavigationContainer>;
+      </>
+      )}
+    </Stack.Navigator>
+  </NavigationContainer>;
 }
 const styles = StyleSheet.create({ splash: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14 } });

@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { images } from '@/assets/images';
-import { AppButton, AppText } from '@/components/common';
+import { AppButton, AppText, useAlert } from '@/components/common';
 import { ChevronLeftIcon } from '@/components/icons';
 import { useTheme } from '@/theme';
 import { useHealthProfileDraft } from '../hooks/useHealthProfileDraft';
@@ -122,7 +122,37 @@ export function TargetWeightSelectionScreen({
     }
   };
 
+  const { showAlert } = useAlert();
+
+  const minSafeWeight = useMemo(() => {
+    const h = heightCm / 100;
+    return parseFloat((18.5 * h * h).toFixed(1));
+  }, [heightCm]);
+
+  const maxSafeWeight = useMemo(() => {
+    const h = heightCm / 100;
+    return parseFloat((35.0 * h * h).toFixed(1));
+  }, [heightCm]);
+
   const handleNext = () => {
+    if (draft.goal === 'lose' && bmiVal < 18.5) {
+      showAlert({
+        variant: 'danger',
+        title: 'Mục tiêu chưa an toàn',
+        message: `Cân nặng ${targetWeight} kg khiến chỉ số BMI đạt ${bmiVal} (< 18.5 - thiếu cân nghiêm trọng). Để đảm bảo an toàn sức khỏe y sinh, mức cân mục tiêu tối thiểu phải từ ${minSafeWeight} kg trở lên.`,
+      });
+      return;
+    }
+
+    if (draft.goal === 'gain' && bmiVal > 35) {
+      showAlert({
+        variant: 'danger',
+        title: 'Mục tiêu quá cao',
+        message: `Cân nặng ${targetWeight} kg khiến chỉ số BMI đạt ${bmiVal} (> 35 - béo phì nguy hiểm). Mức cân mục tiêu an toàn tối đa là ${maxSafeWeight} kg.`,
+      });
+      return;
+    }
+
     updateDraft('targetWeight', targetWeight.toFixed(1));
     if (draft.goal === 'maintain') {
       updateDraft('weeklyRate', '0');
