@@ -252,32 +252,6 @@ export function useHealthProfileDraft(
     }));
   };
 
-  const populateFromProfile = (profile: HealthProfileResponse) => {
-    setDraft((current) => ({
-      ...current,
-      gender: fromBackendGender(profile.gender),
-      age: String(
-        profile.age ||
-          (profile.birthDate
-            ? new Date().getFullYear() -
-              parseInt(profile.birthDate.split("-")[0], 10)
-            : 25),
-      ),
-      height: String(profile.heightCm),
-      weight: String(profile.weightKg),
-      targetWeight: String(profile.targetWeightKg),
-      weeklyRate: String(profile.weeklyRateKg),
-      activity: fromBackendActivityLevel(profile.activityLevel),
-      goal: fromBackendGoalType(profile.goalType),
-      allergies: profile.allergies || [],
-      macros: {
-        protein: profile.proteinPct || 20,
-        carbs: profile.carbsPct || 50,
-        fat: profile.fatPct || 30,
-      },
-    }));
-  };
-
   const saveProfile = async (
     overrideResult?: HealthProfileCalculationResult,
   ): Promise<{ ok: boolean; error?: string }> => {
@@ -435,7 +409,6 @@ export function useHealthProfileDraft(
     toggleHealthCondition,
     setDietaryPreference,
     validateHealthMetrics,
-    populateFromProfile,
     populateFromProfile,
     saveProfile,
   };
