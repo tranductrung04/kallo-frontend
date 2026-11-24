@@ -399,7 +399,7 @@ export function ChallengesScreen({ navigation, hideTopBar, onTabChange }: Challe
           ]}
         >
           <AppText variant="labelSm" color={c.vipStreak} style={{ fontWeight: '700' }}>
-            {userPoints || 120} đ
+            {userPoints} đ
           </AppText>
         </View>
       </View>
