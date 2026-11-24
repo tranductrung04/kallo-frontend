@@ -158,10 +158,6 @@ export function ChallengeDetailScreen({ route, navigation }: Props) {
             Chi Tiết Nhiệm Vụ
           </AppText>
         </View>
-
-        <View style={[styles.avatarCircle, { backgroundColor: c.brandPrimary }]}>
-          <UserSingleIcon size={16} color="#FFFFFF" />
-        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>

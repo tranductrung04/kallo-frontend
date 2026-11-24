@@ -936,9 +936,8 @@ export function HomeDashboardScreen({ navigation }: Props) {
                   </View>
 
                   <View style={[styles.gameHubPointsBadge, { backgroundColor: 'rgba(217, 119, 6, 0.15)' }]}>
-                    <StarIcon size={13} color={colors.vipStreak} />
                     <AppText variant="labelSm" color={colors.vipStreak} style={{ fontWeight: '700' }}>
-                      {userPoints || 720} đ
+                      {userPoints} đ
                     </AppText>
                   </View>
                 </View>

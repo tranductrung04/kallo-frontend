@@ -314,55 +314,32 @@ export function BadgesScreen({ navigation, hideTopBar, onTabChange }: BadgesScre
             <ChevronLeftIcon size={22} color={c.textPrimary} />
           </TouchableOpacity>
 
-          <View style={[styles.fireCircle, { backgroundColor: c.brandAction }]}>
-            <FlameIcon size={18} color="#FFFFFF" />
-          </View>
           <AppText variant="headlineSm" color={c.textPrimary} style={styles.boldText}>
-            Game
+            Huy hiệu
           </AppText>
         </View>
 
-        {/* Segmented Tab Pill: [ Thử thách | Huy hiệu ] */}
-        <View style={[styles.headerSegmentedPill, { backgroundColor: c.surfaceHigh }]}>
-          <TouchableOpacity
-            style={styles.headerSegmentItem}
-            onPress={() => onTabChange ? onTabChange('challenges') : navigation.navigate('Challenges')}
-            activeOpacity={0.8}
-          >
-            <AppText variant="labelSm" color={c.textSecondary}>
-              Thử thách
-            </AppText>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.headerSegmentItem,
-              styles.headerSegmentItemActive,
-              { backgroundColor: c.surfaceMid },
-            ]}
-            activeOpacity={0.8}
-          >
-            <AppText variant="labelSm" color={c.brandPrimary} style={styles.boldText}>
-              Huy hiệu
-            </AppText>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.topBarRight}>
-          <TouchableOpacity
-            style={[styles.iconButton, { backgroundColor: c.surfaceHigh }]}
-            onPress={() => navigation.navigate('FriendRequests')}
-            accessibilityRole="button"
-            accessibilityLabel="Thông báo"
-          >
-            <BellIcon size={18} color={c.textSecondary} />
-            <View style={[styles.notificationDot, { backgroundColor: c.brandAction }]} />
-          </TouchableOpacity>
-
-          <View style={[styles.avatarCircle, { backgroundColor: c.brandPrimary }]}>
-            <UserSingleIcon size={15} color="#FFFFFF" />
-          </View>
-        </View>
+        {/* Reward Points Pill */}
+        {/* <View
+          style={[
+            styles.rewardPill,
+            {
+              backgroundColor:
+                theme.scheme === 'dark'
+                  ? 'rgba(217, 119, 6, 0.22)'
+                  : '#FFDCC3',
+            },
+          ]}
+        >
+          {isSteps || isCalorie ? (
+            <StarIcon size={13} color={c.vipStreak} />
+          ) : (
+            <TrophyIcon size={13} color={c.vipStreak} />
+          )}
+          <AppText variant="labelSm" color={c.vipStreak} style={styles.boldText}>
+            +{challenge.rewardPoints} điểm
+          </AppText>
+        </View> */}
       </View>
 
       {content}

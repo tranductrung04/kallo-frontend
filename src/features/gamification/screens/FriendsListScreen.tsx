@@ -20,6 +20,7 @@ import {
   UserPlusIcon,
   UserSingleIcon,
   UsersIcon,
+  MailInboxIcon
 } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme, type ThemeContextValue } from '@/theme';
@@ -97,16 +98,6 @@ export function FriendsListScreen({ navigation }: Props) {
         </View>
 
         <View style={styles.topBarRight}>
-          {/* Add Friend Shortcut */}
-          <TouchableOpacity
-            style={[styles.iconButton, { backgroundColor: c.surfaceHigh }]}
-            onPress={() => navigation.navigate('FriendSearch')}
-            accessibilityRole="button"
-            accessibilityLabel="Thêm bạn"
-          >
-            <UserPlusIcon size={18} color={c.textSecondary} />
-          </TouchableOpacity>
-
           {/* Friend Requests Shortcut */}
           <TouchableOpacity
             style={[styles.iconButton, { backgroundColor: c.surfaceHigh }]}
@@ -114,7 +105,7 @@ export function FriendsListScreen({ navigation }: Props) {
             accessibilityRole="button"
             accessibilityLabel="Lời mời kết bạn"
           >
-            <UsersIcon size={18} color={c.textSecondary} />
+            <MailInboxIcon size={18} color={c.textSecondary} />
             {incomingRequests.length > 0 && (
               <View style={[styles.requestBadge, { backgroundColor: c.vipStreak }]}>
                 <AppText variant="labelSm" color="#FFFFFF" style={styles.badgeCountText}>
@@ -123,11 +114,6 @@ export function FriendsListScreen({ navigation }: Props) {
               </View>
             )}
           </TouchableOpacity>
-
-          {/* User Avatar */}
-          <View style={[styles.avatarCircle, { backgroundColor: c.brandPrimary }]}>
-            <UserSingleIcon size={16} color="#FFFFFF" />
-          </View>
         </View>
       </View>
 

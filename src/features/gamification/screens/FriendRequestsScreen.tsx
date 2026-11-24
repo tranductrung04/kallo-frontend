@@ -91,12 +91,6 @@ export function FriendRequestsScreen({ navigation }: Props) {
             Lời Mời Kết Bạn
           </AppText>
         </View>
-
-        <View style={styles.topBarRight}>
-          <View style={[styles.avatarCircle, { backgroundColor: c.brandPrimary }]}>
-            <UserSingleIcon size={16} color="#FFFFFF" />
-          </View>
-        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>

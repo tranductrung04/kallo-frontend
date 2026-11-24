@@ -86,8 +86,8 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
       metric === 'streak'
         ? (streak.currentStreak || 6)
         : metric === 'steps'
-        ? 48500
-        : (userPoints || 720),
+          ? 48500
+          : (userPoints || 720),
     unit: metric === 'streak' ? 'ngày' : metric === 'steps' ? 'bước' : 'điểm',
   };
 
@@ -197,25 +197,6 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
           >
             <UserPlusIcon size={18} color={c.textSecondary} />
           </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.iconBtn}
-            onPress={() => navigation.navigate('FriendRequests')}
-            accessibilityLabel="Lời mời kết bạn"
-          >
-            <MailInboxIcon size={18} color={c.textSecondary} />
-            {incomingRequests.length > 0 && (
-              <View style={styles.notifBadge}>
-                <AppText variant="labelSm" color={c.onBrand} style={styles.notifText}>
-                  {incomingRequests.length}
-                </AppText>
-              </View>
-            )}
-          </TouchableOpacity>
-
-          <View style={styles.avatarSmall}>
-            <UserSingleIcon size={16} color={c.onBrand} />
-          </View>
         </View>
       </View>
 
@@ -466,8 +447,8 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
                       {metric === 'streak'
                         ? `${rank2.score} ngày`
                         : metric === 'steps'
-                        ? `${rank2.score.toLocaleString('vi-VN')} bước`
-                        : `${rank2.score.toLocaleString('vi-VN')} đ`}
+                          ? `${rank2.score.toLocaleString('vi-VN')} bước`
+                          : `${rank2.score.toLocaleString('vi-VN')} đ`}
                     </AppText>
                   </View>
                   <View style={[styles.podiumStand, { height: 48 }]}>
@@ -505,8 +486,8 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
                       {metric === 'streak'
                         ? `${rank1.score} ngày`
                         : metric === 'steps'
-                        ? `${rank1.score.toLocaleString('vi-VN')} bước`
-                        : `${rank1.score.toLocaleString('vi-VN')} đ`}
+                          ? `${rank1.score.toLocaleString('vi-VN')} bước`
+                          : `${rank1.score.toLocaleString('vi-VN')} đ`}
                     </AppText>
                   </View>
                   <View style={[styles.podiumStand, { height: 80, backgroundColor: c.brandSoftTint }]}>
@@ -548,8 +529,8 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
                       {metric === 'streak'
                         ? `${rank3.score} ngày`
                         : metric === 'steps'
-                        ? `${rank3.score.toLocaleString('vi-VN')} bước`
-                        : `${rank3.score.toLocaleString('vi-VN')} đ`}
+                          ? `${rank3.score.toLocaleString('vi-VN')} bước`
+                          : `${rank3.score.toLocaleString('vi-VN')} đ`}
                     </AppText>
                   </View>
                   <View style={[styles.podiumStand, { height: 36 }]}>
@@ -629,8 +610,8 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
                           {metric === 'streak'
                             ? `${entry.score} ngày`
                             : metric === 'steps'
-                            ? `${entry.score.toLocaleString('vi-VN')} bước`
-                            : `${entry.score.toLocaleString('vi-VN')} đ`}
+                              ? `${entry.score.toLocaleString('vi-VN')} bước`
+                              : `${entry.score.toLocaleString('vi-VN')} đ`}
                         </AppText>
                       </View>
                     </View>
@@ -680,8 +661,8 @@ export function FriendsLeaderboardScreen({ navigation }: Props) {
                   {metric === 'streak'
                     ? 'Chuỗi lửa đang cháy ổn định'
                     : metric === 'steps'
-                    ? 'Còn 2.700 bước để vượt Minh Anh'
-                    : 'Còn 140 điểm để vượt Minh Anh'}
+                      ? 'Còn 2.700 bước để vượt Minh Anh'
+                      : 'Còn 140 điểm để vượt Minh Anh'}
                 </AppText>
               </View>
             </View>

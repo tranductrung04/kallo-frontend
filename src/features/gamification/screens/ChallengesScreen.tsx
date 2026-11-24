@@ -259,160 +259,123 @@ export function ChallengesScreen({ navigation, hideTopBar, onTabChange }: Challe
   const content = (
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <View style={styles.challengesContainer}>
-        {/* Header Bar: Title + Total Points Pill (as seen in Screenshot 2) */}
-        <View style={styles.challengesHeaderBar}>
-          <View style={styles.titleColumn}>
-            <View style={styles.titleWithBadgeRow}>
-              <AppText variant="headlineMd" color={c.textPrimary} style={styles.boldText}>
-                Thử thách
-              </AppText>
-              <View style={[styles.countBadge, { backgroundColor: c.brandSoftTint }]}>
-                <AppText variant="labelSm" color={c.brandPrimary} style={styles.boldText}>
-                  {joinedChallenges.length || 3}
-                </AppText>
-              </View>
-            </View>
-            <AppText variant="bodySm" color={c.textSecondary}>
-              Chinh phục thói quen, nhận quà rực rỡ
-            </AppText>
-          </View>
-
-          {/* Total Points Pill */}
-          <View
-            style={[
-              styles.totalPointsPill,
-              {
-                backgroundColor:
-                  theme.scheme === 'dark'
-                    ? 'rgba(217, 119, 6, 0.22)'
-                    : '#FFDCC3',
-              },
-            ]}
-          >
-            <StarIcon size={16} color={c.vipStreak} />
-            <AppText variant="labelMd" color={c.vipStreak} style={styles.boldText}>
-              {userPoints || 320} điểm
-            </AppText>
-          </View>
-        </View>
-
         {/* Segmented Tabs Navigation */}
         <View style={[styles.segmentedTabBar, { backgroundColor: c.surfaceHigh }]}>
-            <TouchableOpacity
-              style={[
-                styles.segmentedTabItem,
-                challengeSubTab === 'explore' && [
-                  styles.segmentedTabItemActive,
-                  { backgroundColor: c.surfaceMid },
-                ],
-              ]}
-              onPress={() => setChallengeSubTab('explore')}
+          <TouchableOpacity
+            style={[
+              styles.segmentedTabItem,
+              challengeSubTab === 'explore' && [
+                styles.segmentedTabItemActive,
+                { backgroundColor: c.surfaceMid },
+              ],
+            ]}
+            onPress={() => setChallengeSubTab('explore')}
+          >
+            <AppText
+              variant="labelMd"
+              color={challengeSubTab === 'explore' ? c.brandPrimary : c.textSecondary}
+              style={challengeSubTab === 'explore' ? styles.boldText : undefined}
             >
-              <AppText
-                variant="labelMd"
-                color={challengeSubTab === 'explore' ? c.brandPrimary : c.textSecondary}
-                style={challengeSubTab === 'explore' ? styles.boldText : undefined}
-              >
-                Khám phá
-              </AppText>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.segmentedTabItem,
-                challengeSubTab === 'joined' && [
-                  styles.segmentedTabItemActive,
-                  { backgroundColor: c.surfaceMid },
-                ],
-              ]}
-              onPress={() => setChallengeSubTab('joined')}
-            >
-              <View style={styles.tabWithDotRow}>
-                <AppText
-                  variant="labelMd"
-                  color={challengeSubTab === 'joined' ? c.brandPrimary : c.textSecondary}
-                  style={challengeSubTab === 'joined' ? styles.boldText : undefined}
-                >
-                  Đang tham gia
-                </AppText>
-                <View style={[styles.activeDot, { backgroundColor: c.brandAction }]} />
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.segmentedTabItem,
-                challengeSubTab === 'completed' && [
-                  styles.segmentedTabItemActive,
-                  { backgroundColor: c.surfaceMid },
-                ],
-              ]}
-              onPress={() => setChallengeSubTab('completed')}
-            >
-              <AppText
-                variant="labelMd"
-                color={challengeSubTab === 'completed' ? c.brandPrimary : c.textSecondary}
-                style={challengeSubTab === 'completed' ? styles.boldText : undefined}
-              >
-                Đã hoàn thành
-              </AppText>
-            </TouchableOpacity>
-          </View>
-
-          {/* Motivational Mini Banner */}
-          <View style={[styles.motivationalBanner, { backgroundColor: c.surfaceMuted }]}>
-            <View style={styles.motivationalLeft}>
-              <View style={[styles.bannerBoltCircle, { backgroundColor: c.brandSoftTint }]}>
-                <LightningBoltIcon size={18} color={c.brandSecondary} />
-              </View>
-              <View style={styles.bannerTextColumn}>
-                <AppText variant="labelMd" color={c.textPrimary} style={styles.boldText} numberOfLines={1}>
-                  Chuỗi năng động tuần này
-                </AppText>
-                <AppText variant="bodySm" color={c.textSecondary} numberOfLines={1}>
-                  Hoàn thành 2 thử thách nữa để mở rương
-                </AppText>
-              </View>
-            </View>
-            <AppText variant="labelSm" color={c.brandPrimary} style={styles.bannerCountRatio}>
-              2/4
+              Khám phá
             </AppText>
-          </View>
+          </TouchableOpacity>
 
-          {/* Challenges List */}
-          <View style={styles.challengesListWrap}>
-            {displayChallenges.length === 0 ? (
-              <View style={[styles.emptyBox, { backgroundColor: c.surfaceMid }]}>
-                <SparklesIcon size={32} color={c.brandPrimary} />
-                <AppText variant="headlineSm" color={c.textPrimary} style={{ marginTop: 8 }}>
-                  Chưa có thử thách nào
-                </AppText>
-                <AppText variant="bodySm" color={c.textSecondary} align="center">
-                  {challengeSubTab === 'completed'
-                    ? 'Hoàn thành các nhiệm vụ tuần để ghi dấu chiến tích tại đây!'
-                    : 'Hãy chọn một thử thách mới để bứt phá giới hạn nhé.'}
-                </AppText>
-              </View>
-            ) : (
-              displayChallenges.map(renderChallengeCard)
-            )}
-          </View>
-
-          {/* Micro Interaction Footer CTA */}
-          {challengeSubTab !== 'explore' && (
-            <TouchableOpacity
-              activeOpacity={0.85}
-              style={[styles.footerCtaBtn, { backgroundColor: c.surfaceHigh }]}
-              onPress={() => setChallengeSubTab('explore')}
-            >
-              <CirclePlusIcon size={20} color={c.brandPrimary} />
-              <AppText variant="labelLg" color={c.brandPrimary} style={styles.boldText}>
-                Tham gia thêm thử thách mới
+          <TouchableOpacity
+            style={[
+              styles.segmentedTabItem,
+              challengeSubTab === 'joined' && [
+                styles.segmentedTabItemActive,
+                { backgroundColor: c.surfaceMid },
+              ],
+            ]}
+            onPress={() => setChallengeSubTab('joined')}
+          >
+            <View style={styles.tabWithDotRow}>
+              <AppText
+                variant="labelMd"
+                color={challengeSubTab === 'joined' ? c.brandPrimary : c.textSecondary}
+                style={challengeSubTab === 'joined' ? styles.boldText : undefined}
+              >
+                Đang tham gia
               </AppText>
-            </TouchableOpacity>
+              <View style={[styles.activeDot, { backgroundColor: c.brandAction }]} />
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.segmentedTabItem,
+              challengeSubTab === 'completed' && [
+                styles.segmentedTabItemActive,
+                { backgroundColor: c.surfaceMid },
+              ],
+            ]}
+            onPress={() => setChallengeSubTab('completed')}
+          >
+            <AppText
+              variant="labelMd"
+              color={challengeSubTab === 'completed' ? c.brandPrimary : c.textSecondary}
+              style={challengeSubTab === 'completed' ? styles.boldText : undefined}
+            >
+              Đã hoàn thành
+            </AppText>
+          </TouchableOpacity>
+        </View>
+
+        {/* Motivational Mini Banner */}
+        <View style={[styles.motivationalBanner, { backgroundColor: c.surfaceMuted }]}>
+          <View style={styles.motivationalLeft}>
+            <View style={[styles.bannerBoltCircle, { backgroundColor: c.brandSoftTint }]}>
+              <LightningBoltIcon size={18} color={c.brandSecondary} />
+            </View>
+            <View style={styles.bannerTextColumn}>
+              <AppText variant="labelMd" color={c.textPrimary} style={styles.boldText} numberOfLines={1}>
+                Chuỗi năng động tuần này
+              </AppText>
+              <AppText variant="bodySm" color={c.textSecondary} numberOfLines={1}>
+                Hoàn thành 2 thử thách nữa để mở rương
+              </AppText>
+            </View>
+          </View>
+          <AppText variant="labelSm" color={c.brandPrimary} style={styles.bannerCountRatio}>
+            2/4
+          </AppText>
+        </View>
+
+        {/* Challenges List */}
+        <View style={styles.challengesListWrap}>
+          {displayChallenges.length === 0 ? (
+            <View style={[styles.emptyBox, { backgroundColor: c.surfaceMid }]}>
+              <SparklesIcon size={32} color={c.brandPrimary} />
+              <AppText variant="headlineSm" color={c.textPrimary} style={{ marginTop: 8 }}>
+                Chưa có thử thách nào
+              </AppText>
+              <AppText variant="bodySm" color={c.textSecondary} align="center">
+                {challengeSubTab === 'completed'
+                  ? 'Hoàn thành các nhiệm vụ tuần để ghi dấu chiến tích tại đây!'
+                  : 'Hãy chọn một thử thách mới để bứt phá giới hạn nhé.'}
+              </AppText>
+            </View>
+          ) : (
+            displayChallenges.map(renderChallengeCard)
           )}
         </View>
-      </ScrollView>
+
+        {/* Micro Interaction Footer CTA */}
+        {challengeSubTab !== 'explore' && (
+          <TouchableOpacity
+            activeOpacity={0.85}
+            style={[styles.footerCtaBtn, { backgroundColor: c.surfaceHigh }]}
+            onPress={() => setChallengeSubTab('explore')}
+          >
+            <CirclePlusIcon size={20} color={c.brandPrimary} />
+            <AppText variant="labelLg" color={c.brandPrimary} style={styles.boldText}>
+              Tham gia thêm thử thách mới
+            </AppText>
+          </TouchableOpacity>
+        )}
+      </View>
+    </ScrollView>
   );
 
   if (hideTopBar) {
@@ -434,54 +397,27 @@ export function ChallengesScreen({ navigation, hideTopBar, onTabChange }: Challe
             <ChevronLeftIcon size={22} color={c.textPrimary} />
           </TouchableOpacity>
 
-          <View style={[styles.fireCircle, { backgroundColor: c.brandAction }]}>
-            <FlameIcon size={18} color="#FFFFFF" />
-          </View>
           <AppText variant="headlineSm" color={c.textPrimary} style={styles.boldText}>
-            Game
+            Thử thách
           </AppText>
         </View>
 
-        {/* Segmented Tab Pill: [ Thử thách | Huy hiệu ] */}
-        <View style={[styles.headerSegmentedPill, { backgroundColor: c.surfaceHigh }]}>
-          <TouchableOpacity
-            style={[
-              styles.headerSegmentItem,
-              styles.headerSegmentItemActive,
-              { backgroundColor: c.surfaceMid },
-            ]}
-            activeOpacity={0.8}
-          >
-            <AppText variant="labelSm" color={c.brandPrimary} style={styles.boldText}>
-              Thử thách
-            </AppText>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.headerSegmentItem}
-            onPress={() => onTabChange ? onTabChange('badges') : navigation.navigate('Badges')}
-            activeOpacity={0.8}
-          >
-            <AppText variant="labelSm" color={c.textSecondary}>
-              Huy hiệu
-            </AppText>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.topBarRight}>
-          <TouchableOpacity
-            style={[styles.iconButton, { backgroundColor: c.surfaceHigh }]}
-            onPress={() => navigation.navigate('FriendRequests')}
-            accessibilityRole="button"
-            accessibilityLabel="Thông báo"
-          >
-            <BellIcon size={18} color={c.textSecondary} />
-            <View style={[styles.notificationDot, { backgroundColor: c.brandAction }]} />
-          </TouchableOpacity>
-
-          <View style={[styles.avatarCircle, { backgroundColor: c.brandPrimary }]}>
-            <UserSingleIcon size={15} color="#FFFFFF" />
-          </View>
+        {/* Total Points Pill */}
+        <View
+          style={[
+            styles.totalPointsPill,
+            {
+              backgroundColor:
+                theme.scheme === 'dark'
+                  ? 'rgba(217, 119, 6, 0.22)'
+                  : '#FFDCC3',
+            },
+          ]}
+        >
+          <StarIcon size={16} color={c.vipStreak} />
+          <AppText variant="labelMd" color={c.vipStreak} style={styles.boldText}>
+            {userPoints || 320} điểm
+          </AppText>
         </View>
       </View>
 

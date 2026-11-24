@@ -6,7 +6,6 @@ export * from './screens/StreakDetailModal';
 export * from './screens/StreakRulesModal';
 export * from './screens/StreakWidgets';
 export * from './screens/GameHubScreen';
-export * from './screens/BadgesChallengesScreen';
 export * from './screens/ChallengesScreen';
 export * from './screens/BadgesScreen';
 export * from './screens/FriendsLeaderboardScreen';

@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
   },
   topBarTitle: {
     flex: 1,
-    textAlign: 'center',
+    // textAlign: 'center',
   },
   backButtonPlaceholder: {
     width: 36,

@@ -144,10 +144,10 @@ export function GameHubScreen({ navigation }: Props) {
           <View style={styles.canvasActions}>
             <TouchableOpacity
               style={styles.iconButton}
-              onPress={() => navigation.navigate('FriendRequests')}
-              accessibilityLabel="Hộp thư bạn bè"
+              onPress={() => navigation.navigate('FriendsList')}
+              accessibilityLabel="Danh sách bạn bè"
             >
-              <MailInboxIcon size={20} color={c.textSecondary} />
+              <UsersIcon size={18} color={c.textSecondary} />
               {incomingRequests.length > 0 && (
                 <View style={styles.badgeDot}>
                   <AppText variant="labelSm" color={c.onBrand} style={styles.badgeText}>
@@ -207,7 +207,7 @@ export function GameHubScreen({ navigation }: Props) {
               accessibilityLabel="Xem bảng xếp hạng"
             >
               <AppText variant="labelMd" color={c.brandPrimary} style={styles.bold}>
-                Xem BXH →
+                Xem BXH
               </AppText>
             </TouchableOpacity>
           </View>
@@ -231,7 +231,7 @@ export function GameHubScreen({ navigation }: Props) {
               accessibilityLabel="Xem tất cả bảng xếp hạng"
             >
               <AppText variant="labelLg" color={c.brandPrimary} style={styles.bold}>
-                Xem tất cả →
+                Xem tất cả
               </AppText>
             </TouchableOpacity>
           </View>
@@ -361,18 +361,13 @@ export function GameHubScreen({ navigation }: Props) {
               <AppText variant="headlineSm" color={c.textPrimary} style={styles.sectionTitle}>
                 Thử thách đang tham gia
               </AppText>
-              <View style={styles.countBadge}>
-                <AppText variant="labelSm" color={c.brandPrimary} style={styles.bold}>
-                  {challenges.filter((ch) => ch.isJoined).length || 3}
-                </AppText>
-              </View>
             </View>
             <TouchableOpacity
               onPress={() => navigation.navigate('Challenges')}
               accessibilityLabel="Xem tất cả thử thách"
             >
               <AppText variant="labelLg" color={c.brandPrimary} style={styles.bold}>
-                Xem tất cả →
+                Xem tất cả
               </AppText>
             </TouchableOpacity>
           </View>
@@ -503,7 +498,7 @@ export function GameHubScreen({ navigation }: Props) {
                 style={{ marginLeft: 6 }}
               >
                 <AppText variant="labelLg" color={c.brandPrimary} style={styles.bold}>
-                  Xem tất cả →
+                  Xem tất cả
                 </AppText>
               </TouchableOpacity>
             </View>
@@ -577,24 +572,9 @@ export function GameHubScreen({ navigation }: Props) {
               activeOpacity={0.85}
               onPress={() => navigation.navigate('FriendsList')}
             >
-              <View style={styles.avatarsOverlapRow}>
-                {activeFriends.map((f, i) => (
-                  <View key={f.id || i} style={[styles.friendAvatarWrap, { zIndex: 10 - i }]}>
-                    <Image source={{ uri: f.avatarUrl }} style={styles.friendAvatarImg} />
-                  </View>
-                ))}
-                {remainingFriendsCount > 0 && (
-                  <View style={[styles.friendOverflowBadge, { zIndex: 5 }]}>
-                    <AppText variant="labelSm" color={c.brandPrimary} style={styles.bold}>
-                      +{remainingFriendsCount}
-                    </AppText>
-                  </View>
-                )}
-              </View>
-
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                 <AppText variant="bodySm" color={c.textSecondary} style={styles.semiBold}>
-                  {friends.length || 12} bạn bè đang hoạt động
+                  {friends.length || 0} bạn bè đang hoạt động
                 </AppText>
                 <AppText variant="labelSm" color={c.brandPrimary} style={styles.bold}>
                   →
@@ -688,8 +668,10 @@ function createStyles(theme: ThemeContextValue) {
       borderRadius: r.full,
     },
     streakText: {
+      fontSize: 16,
+      lineHeight: 20,
+      fontFamily: 'PlusJakartaSans_700Bold',
       fontWeight: '700',
-      fontSize: 11,
     },
     profileAvatar: {
       width: 32,

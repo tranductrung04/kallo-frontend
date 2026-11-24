@@ -67,10 +67,6 @@ export function GameSettingsScreen({ navigation }: Props) {
             Cài đặt trò chơi & Riêng tư
           </AppText>
         </View>
-
-        <View style={[styles.avatarCircle, { backgroundColor: c.brandPrimary }]}>
-          <UserSingleIcon size={16} color="#FFFFFF" />
-        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
