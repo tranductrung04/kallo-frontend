@@ -24,6 +24,8 @@ import {
   StreakRulesScreen,
   GameHubScreen,
   BadgesChallengesScreen,
+  ChallengesScreen,
+  BadgesScreen,
   FriendsLeaderboardScreen,
   ChallengeDetailScreen,
   FriendSearchScreen,
@@ -107,6 +109,8 @@ export function RootNavigator() {
         <Stack.Screen name="StreakDetail" component={StreakDetailModal} options={{ headerShown: false, presentation: 'fullScreenModal' }} />
         <Stack.Screen name="StreakRules" component={StreakRulesScreen} options={{ headerShown: false, presentation: 'fullScreenModal' }} />
         <Stack.Screen name="BadgesChallenges" component={BadgesChallengesScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Challenges" component={ChallengesScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Badges" component={BadgesScreen} options={{ headerShown: false }} />
         <Stack.Screen name="ChallengeDetail" component={ChallengeDetailScreen} options={{ headerShown: false }} />
         <Stack.Screen name="FriendsLeaderboard" component={FriendsLeaderboardScreen} options={{ headerShown: false }} />
         <Stack.Screen name="FriendSearch" component={FriendSearchScreen} options={{ headerShown: false }} />

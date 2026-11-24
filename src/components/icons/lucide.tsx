@@ -3,6 +3,7 @@ import {
   AlarmClock,
   AlertTriangle,
   Armchair,
+  ArrowRight,
   BadgeCheck,
   Bell,
   Bike,
@@ -299,5 +300,6 @@ export const AlarmClockIcon = fromLucide(AlarmClock, { defaultSize: 18 });
 export const BadgeCheckIcon = fromLucide(BadgeCheck, { defaultSize: 20 });
 export const TargetIcon = fromLucide(Target, { defaultSize: 22 });
 export const AlertCircleIcon = fromLucide(CircleAlert, { defaultSize: 18 });
+export const ArrowRightIcon = fromLucide(ArrowRight, { defaultSize: 18 });
 
 

@@ -10,8 +10,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppText } from '@/components/common';
 import {
+  BadgeCheckIcon,
+  BookOpenIcon,
+  CalendarIcon,
   ChevronLeftIcon,
   CirclePlusIcon,
+  CrownIcon,
   DropletsIcon,
   FlameIcon,
   FootprintsIcon,
@@ -31,6 +35,7 @@ import {
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme, type ThemeContextValue } from '@/theme';
 import { useGamification } from '../GamificationProvider';
+import { getBadgeVisualConfig } from '../utils';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GameHub'>;
 
@@ -368,7 +373,7 @@ export function GameHubScreen({ navigation }: Props) {
               </View>
             </View>
             <TouchableOpacity
-              onPress={() => navigation.navigate('BadgesChallenges', { initialTab: 'challenges' })}
+              onPress={() => navigation.navigate('Challenges')}
               accessibilityLabel="Xem tất cả thử thách"
             >
               <AppText variant="labelLg" color={c.brandPrimary} style={styles.bold}>
@@ -471,7 +476,7 @@ export function GameHubScreen({ navigation }: Props) {
             {/* Explore Card CTA */}
             <TouchableOpacity
               style={styles.exploreCard}
-              onPress={() => navigation.navigate('BadgesChallenges', { initialTab: 'challenges' })}
+              onPress={() => navigation.navigate('Challenges')}
               activeOpacity={0.85}
             >
               <View style={styles.exploreIconCircle}>
@@ -498,7 +503,7 @@ export function GameHubScreen({ navigation }: Props) {
                 Đã đạt {unlockedBadges.length}/{totalBadges}
               </AppText>
               <TouchableOpacity
-                onPress={() => navigation.navigate('BadgesChallenges', { initialTab: 'badges' })}
+                onPress={() => navigation.navigate('Badges')}
                 accessibilityLabel="Xem tất cả huy hiệu"
                 style={{ marginLeft: 6 }}
               >
@@ -511,78 +516,60 @@ export function GameHubScreen({ navigation }: Props) {
 
           <View style={styles.badgesCard}>
             <View style={styles.badgesGrid}>
-              {/* Badge 1: Streak */}
-              <TouchableOpacity
-                style={styles.badgeCol}
-                onPress={() => navigation.navigate('BadgesChallenges', { initialTab: 'badges' })}
-              >
-                <View style={[styles.badgeIconContainer, { backgroundColor: isDark ? 'rgba(239, 68, 68, 0.18)' : '#FEF2F2' }]}>
-                  <FlameIcon size={24} color={c.macroProtein} />
-                  <View style={styles.checkCircle}>
-                    <AppText style={styles.checkText}>✓</AppText>
-                  </View>
-                </View>
-                <AppText variant="labelSm" color={c.textPrimary} style={styles.badgeName} numberOfLines={1}>
-                  Chuỗi 7 ngày
-                </AppText>
-                <AppText variant="labelSm" color={c.vipStreak} style={styles.bold}>
-                  +20đ
-                </AppText>
-              </TouchableOpacity>
+              {badges.slice(0, 4).map((badge) => {
+                const visuals = getBadgeVisualConfig(badge);
+                const isUnlocked = badge.isUnlocked;
 
-              {/* Badge 2: First Log */}
-              <TouchableOpacity
-                style={styles.badgeCol}
-                onPress={() => navigation.navigate('BadgesChallenges', { initialTab: 'badges' })}
-              >
-                <View style={[styles.badgeIconContainer, { backgroundColor: isDark ? 'rgba(22, 163, 74, 0.18)' : '#F0FDF4' }]}>
-                  <SproutIcon size={24} color={c.quickScanner} />
-                  <View style={styles.checkCircle}>
-                    <AppText style={styles.checkText}>✓</AppText>
-                  </View>
-                </View>
-                <AppText variant="labelSm" color={c.textPrimary} style={styles.badgeName} numberOfLines={1}>
-                  Lần ghi đầu
-                </AppText>
-                <AppText variant="labelSm" color={c.vipStreak} style={styles.bold}>
-                  +10đ
-                </AppText>
-              </TouchableOpacity>
-
-              {/* Badge 3: First Friend */}
-              <TouchableOpacity
-                style={styles.badgeCol}
-                onPress={() => navigation.navigate('BadgesChallenges', { initialTab: 'badges' })}
-              >
-                <View style={[styles.badgeIconContainer, { backgroundColor: c.brandSoftTint }]}>
-                  <UsersIcon size={24} color={c.brandPrimary} />
-                  <View style={styles.checkCircle}>
-                    <AppText style={styles.checkText}>✓</AppText>
-                  </View>
-                </View>
-                <AppText variant="labelSm" color={c.textPrimary} style={styles.badgeName} numberOfLines={1}>
-                  Bạn bè đầu
-                </AppText>
-                <AppText variant="labelSm" color={c.vipStreak} style={styles.bold}>
-                  +10đ
-                </AppText>
-              </TouchableOpacity>
-
-              {/* Badge 4: Locked */}
-              <TouchableOpacity
-                style={[styles.badgeCol, { opacity: 0.7 }]}
-                onPress={() => navigation.navigate('BadgesChallenges', { initialTab: 'badges' })}
-              >
-                <View style={[styles.badgeIconContainer, { backgroundColor: c.surfaceHigh }]}>
-                  <LockClosedIcon size={20} color={c.textDisabled} />
-                </View>
-                <AppText variant="labelSm" color={c.textSecondary} style={styles.badgeName} numberOfLines={1}>
-                  +{Math.max(0, totalBadges - 3)} khác
-                </AppText>
-                <AppText variant="labelSm" color={c.textDisabled}>
-                  Chưa mở
-                </AppText>
-              </TouchableOpacity>
+                return (
+                  <TouchableOpacity
+                    key={badge.id}
+                    style={[styles.badgeCol, !isUnlocked && { opacity: 0.75 }]}
+                    onPress={() => navigation.navigate('Badges')}
+                  >
+                    <View
+                      style={[
+                        styles.badgeIconContainer,
+                        {
+                          backgroundColor: isUnlocked
+                            ? visuals.primaryColor
+                            : c.surfaceHigh,
+                        },
+                      ]}
+                    >
+                      {visuals.iconName === 'flame' ? (
+                        <FlameIcon size={24} color={isUnlocked ? '#FFFFFF' : c.textDisabled} />
+                      ) : visuals.iconName === 'book-open' ? (
+                        <BookOpenIcon size={24} color={isUnlocked ? '#FFFFFF' : c.textDisabled} />
+                      ) : visuals.iconName === 'users' ? (
+                        <UsersIcon size={24} color={isUnlocked ? '#FFFFFF' : c.textDisabled} />
+                      ) : visuals.iconName === 'calendar' ? (
+                        <CalendarIcon size={22} color={isUnlocked ? '#FFFFFF' : c.textDisabled} />
+                      ) : visuals.iconName === 'crown' ? (
+                        <CrownIcon size={24} color={isUnlocked ? '#FFFFFF' : c.textDisabled} />
+                      ) : visuals.iconName === 'badge-check' ? (
+                        <BadgeCheckIcon size={24} color={isUnlocked ? '#FFFFFF' : c.textDisabled} />
+                      ) : (
+                        <TrophyIcon size={24} color={isUnlocked ? '#FFFFFF' : c.textDisabled} />
+                      )}
+                      {isUnlocked ? (
+                        <View style={styles.checkCircle}>
+                          <AppText style={styles.checkText}>✓</AppText>
+                        </View>
+                      ) : (
+                        <View style={[styles.checkCircle, { backgroundColor: c.surfaceBorder }]}>
+                          <LockClosedIcon size={8} color={c.textSecondary} />
+                        </View>
+                      )}
+                    </View>
+                    <AppText variant="labelSm" color={c.textPrimary} style={styles.badgeName} numberOfLines={1}>
+                      {badge.title}
+                    </AppText>
+                    <AppText variant="labelSm" color={isUnlocked ? c.vipStreak : c.textDisabled} style={styles.bold}>
+                      {isUnlocked ? `+${badge.points}đ` : 'Chưa mở'}
+                    </AppText>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           </View>
         </View>

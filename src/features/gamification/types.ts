@@ -13,6 +13,15 @@ export type StreakInfo = {
 
 export type BadgeCategory = 'streak' | 'nutrition' | 'activity' | 'milestone';
 
+export type BadgeIconName =
+  | 'book-open'
+  | 'flame'
+  | 'users'
+  | 'calendar'
+  | 'trophy'
+  | 'crown'
+  | 'badge-check';
+
 export type Badge = {
   id: string;
   code: string;
@@ -23,6 +32,12 @@ export type Badge = {
   unlockedAt?: string;
   iconGlyph: string;
   points?: number;
+  condition?: string;
+  iconName?: BadgeIconName | string;
+  accentColor?: string;
+  secondaryColor?: string;
+  darkCanvasColor?: string;
+  glowColor?: string;
 };
 
 export type ChallengeStatus = 'available' | 'joined' | 'completed' | 'expired';

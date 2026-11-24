@@ -7,6 +7,8 @@ export * from './screens/StreakRulesModal';
 export * from './screens/StreakWidgets';
 export * from './screens/GameHubScreen';
 export * from './screens/BadgesChallengesScreen';
+export * from './screens/ChallengesScreen';
+export * from './screens/BadgesScreen';
 export * from './screens/FriendsLeaderboardScreen';
 export * from './screens/ChallengeDetailScreen';
 export * from './screens/FriendSearchScreen';
@@ -14,4 +16,6 @@ export * from './screens/FriendRequestsScreen';
 export * from './screens/FriendProfileScreen';
 export * from './screens/GameSettingsScreen';
 export * from './components/GameEventToast';
+export * from './components/BadgeCelebrationModal';
+export * from './components/BadgeDetailBottomSheet';
 

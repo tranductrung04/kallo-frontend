@@ -22,79 +22,246 @@ export function checkDailyGoalAchieved(
   return Math.abs(caloriesIn - caloriesGoal) <= tolerance;
 }
 
+export interface BadgeVisualConfig {
+  iconName: 'book-open' | 'flame' | 'users' | 'calendar' | 'trophy' | 'crown' | 'badge-check';
+  primaryColor: string;
+  secondaryColor: string;
+  darkCanvasColor: string;
+  glowColor: string;
+  glyph: string;
+  condition: string;
+  pointsText: string;
+}
+
+export function getBadgeVisualConfig(badge: Badge): BadgeVisualConfig {
+  const code = (badge.code || '').toUpperCase();
+  const id = (badge.id || '').toLowerCase();
+
+  // 1. First Log: Book/Diary - Cyan/Sky
+  if (code === 'FIRST_LOG' || id === 'badge-first-log') {
+    return {
+      iconName: 'book-open',
+      primaryColor: '#06B6D4',
+      secondaryColor: '#0284C7',
+      darkCanvasColor: '#0E7490',
+      glowColor: 'rgba(6, 182, 212, 0.35)',
+      glyph: '📝',
+      condition: badge.condition || '1 lần ghi nhật ký',
+      pointsText: `+${badge.points || 10} điểm`,
+    };
+  }
+
+  // 2. Streak 7: Flame - Amber/Orange
+  if (code === 'STREAK_7' || id === 'badge-streak-7' || id === 'streak-7') {
+    return {
+      iconName: 'flame',
+      primaryColor: '#F97316',
+      secondaryColor: '#EA580C',
+      darkCanvasColor: '#9A3412',
+      glowColor: 'rgba(249, 115, 22, 0.35)',
+      glyph: '🔥',
+      condition: badge.condition || '7 ngày liên tiếp',
+      pointsText: `+${badge.points || 20} điểm`,
+    };
+  }
+
+  // 3. First Friend: Users - Purple/Violet
+  if (code === 'FIRST_FRIEND' || id === 'badge-first-friend' || id.includes('friend')) {
+    return {
+      iconName: 'users',
+      primaryColor: '#8B5CF6',
+      secondaryColor: '#6D28D9',
+      darkCanvasColor: '#4C1D95',
+      glowColor: 'rgba(139, 92, 246, 0.35)',
+      glyph: '👥',
+      condition: badge.condition || 'Kết bạn với 1 người',
+      pointsText: `+${badge.points || 10} điểm`,
+    };
+  }
+
+  // 4. Streak 30: Calendar - Emerald Green
+  if (code === 'STREAK_30' || id === 'badge-streak-30' || id.includes('30')) {
+    return {
+      iconName: 'calendar',
+      primaryColor: '#10B981',
+      secondaryColor: '#059669',
+      darkCanvasColor: '#065F46',
+      glowColor: 'rgba(16, 185, 129, 0.35)',
+      glyph: '📅',
+      condition: badge.condition || '30 ngày liên tiếp',
+      pointsText: `+${badge.points || 50} điểm`,
+    };
+  }
+
+  // 5. Challenger: Trophy - Amber/Gold
+  if (code === 'CHALLENGER' || id === 'badge-challenger') {
+    return {
+      iconName: 'trophy',
+      primaryColor: '#F59E0B',
+      secondaryColor: '#D97706',
+      darkCanvasColor: '#78350F',
+      glowColor: 'rgba(245, 158, 11, 0.35)',
+      glyph: '🏆',
+      condition: badge.condition || 'Hoàn thành 1 thử thách',
+      pointsText: `+${badge.points || 20} điểm`,
+    };
+  }
+
+  // 6. Streak 100: Crown - Ruby/Rose
+  if (code === 'STREAK_100' || id === 'badge-streak-100' || id.includes('100')) {
+    return {
+      iconName: 'crown',
+      primaryColor: '#E11D48',
+      secondaryColor: '#BE123C',
+      darkCanvasColor: '#881337',
+      glowColor: 'rgba(225, 29, 72, 0.35)',
+      glyph: '👑',
+      condition: badge.condition || '100 ngày liên tiếp',
+      pointsText: `+${badge.points || 150} điểm`,
+    };
+  }
+
+  // 7. Challenger 5-Star: BadgeCheck - Indigo/Royal Violet
+  if (code === 'CHALLENGER_5STAR' || id === 'badge-challenger-5star' || id.includes('5star') || id.includes('star')) {
+    return {
+      iconName: 'badge-check',
+      primaryColor: '#6366F1',
+      secondaryColor: '#4338CA',
+      darkCanvasColor: '#312E81',
+      glowColor: 'rgba(99, 102, 241, 0.35)',
+      glyph: '⭐',
+      condition: badge.condition || 'Hoàn thành 5 thử thách',
+      pointsText: `+${badge.points || 60} điểm`,
+    };
+  }
+
+  return {
+    iconName: (badge.iconName as any) || 'trophy',
+    primaryColor: badge.accentColor || '#F59E0B',
+    secondaryColor: badge.secondaryColor || '#D97706',
+    darkCanvasColor: badge.darkCanvasColor || '#78350F',
+    glowColor: badge.glowColor || 'rgba(245, 158, 11, 0.35)',
+    glyph: badge.iconGlyph || '🏆',
+    condition: badge.condition || 'Hoàn thành mục tiêu',
+    pointsText: `+${badge.points || 20} điểm`,
+  };
+}
+
 export const INITIAL_BADGES: Badge[] = [
+  {
+    id: 'badge-first-log',
+    code: 'FIRST_LOG',
+    title: 'Lần ghi đầu tiên',
+    description: 'Ghi nhận bữa ăn hoặc vận động đầu tiên vào nhật ký Kallo để bắt đầu hành trình sức khỏe.',
+    category: 'nutrition',
+    isUnlocked: true,
+    unlockedAt: '10/11/2026',
+    iconGlyph: '📝',
+    iconName: 'book-open',
+    accentColor: '#06B6D4',
+    secondaryColor: '#0284C7',
+    darkCanvasColor: '#0E7490',
+    glowColor: 'rgba(6, 182, 212, 0.35)',
+    points: 10,
+    condition: '1 lần ghi nhật ký',
+  },
   {
     id: 'badge-streak-7',
     code: 'STREAK_7',
     title: 'Chuỗi 7 ngày',
-    description: 'Duy trì chuỗi hoàn thành mục tiêu 7 ngày liên tiếp',
+    description: 'Hoàn thành mục tiêu hằng ngày 7 ngày liên tiếp để xây dựng thói quen chăm sóc sức khỏe vững vàng.',
     category: 'streak',
     isUnlocked: true,
-    unlockedAt: '2026-10-15',
+    unlockedAt: '12/11/2026',
     iconGlyph: '🔥',
+    iconName: 'flame',
+    accentColor: '#F97316',
+    secondaryColor: '#EA580C',
+    darkCanvasColor: '#9A3412',
+    glowColor: 'rgba(249, 115, 22, 0.35)',
     points: 20,
-  },
-  {
-    id: 'badge-first-log',
-    code: 'FIRST_LOG',
-    title: 'Lần ghi đầu',
-    description: 'Ghi nhận bữa ăn đầu tiên vào nhật ký Kallo',
-    category: 'nutrition',
-    isUnlocked: true,
-    unlockedAt: '2026-10-10',
-    iconGlyph: '🌱',
-    points: 10,
+    condition: '7 ngày liên tiếp',
   },
   {
     id: 'badge-first-friend',
     code: 'FIRST_FRIEND',
-    title: 'Bạn bè đầu',
-    description: 'Kết nối người bạn đầu tiên để cùng thi đua',
+    title: 'Người bạn đầu tiên',
+    description: 'Kết nối người bạn đầu tiên để cùng nhau thi đua và rèn luyện thói quen dinh dưỡng lành mạnh.',
     category: 'milestone',
     isUnlocked: true,
-    unlockedAt: '2026-10-12',
+    unlockedAt: '14/11/2026',
     iconGlyph: '👥',
+    iconName: 'users',
+    accentColor: '#8B5CF6',
+    secondaryColor: '#6D28D9',
+    darkCanvasColor: '#4C1D95',
+    glowColor: 'rgba(139, 92, 246, 0.35)',
     points: 10,
-  },
-  {
-    id: 'badge-water-hero',
-    code: 'WATER_HERO',
-    title: 'Thủy thần Kallo',
-    description: 'Uống đủ 2.000 ml nước trong ngày',
-    category: 'nutrition',
-    isUnlocked: false,
-    iconGlyph: '💧',
-    points: 30,
+    condition: 'Kết bạn với 1 người',
   },
   {
     id: 'badge-streak-30',
     code: 'STREAK_30',
-    title: 'Bền bỉ 30 ngày',
-    description: 'Duy trì chuỗi hoàn thành mục tiêu 30 ngày liên tiếp',
+    title: 'Chuỗi 30 ngày',
+    description: 'Duy trì chuỗi hoàn thành mục tiêu 30 ngày liên tục không gián đoạn để biến kỷ luật thành lối sống.',
     category: 'streak',
     isUnlocked: false,
-    iconGlyph: '🏆',
+    iconGlyph: '📅',
+    iconName: 'calendar',
+    accentColor: '#10B981',
+    secondaryColor: '#059669',
+    darkCanvasColor: '#065F46',
+    glowColor: 'rgba(16, 185, 129, 0.35)',
     points: 50,
+    condition: '30 ngày liên tiếp',
   },
   {
-    id: 'badge-steps-10k',
-    code: 'STEPS_10K',
-    title: 'Vạn bước chân',
-    description: 'Chinh phục 10.000 bước chân trong một ngày',
-    category: 'activity',
-    isUnlocked: false,
-    iconGlyph: '👟',
-    points: 40,
-  },
-  {
-    id: 'badge-macro-master',
-    code: 'MACRO_MASTER',
-    title: 'Bậc thầy Macro',
-    description: 'Đạt chuẩn tỷ lệ Protein, Carbs, Fat trong sai số 5%',
+    id: 'badge-challenger',
+    code: 'CHALLENGER',
+    title: 'Thử thách gia',
+    description: 'Hoàn thành thử thách cộng đồng đầu tiên để chứng minh ý chí bứt phá giới hạn bản thân.',
     category: 'milestone',
     isUnlocked: false,
-    iconGlyph: '⚖️',
-    points: 50,
+    iconGlyph: '🏆',
+    iconName: 'trophy',
+    accentColor: '#F59E0B',
+    secondaryColor: '#D97706',
+    darkCanvasColor: '#78350F',
+    glowColor: 'rgba(245, 158, 11, 0.35)',
+    points: 20,
+    condition: 'Hoàn thành 1 thử thách',
+  },
+  {
+    id: 'badge-streak-100',
+    code: 'STREAK_100',
+    title: 'Chuỗi 100 ngày',
+    description: 'Kỷ lục bền bỉ với 100 ngày kiên trì rèn luyện sức khỏe, ghi danh vào bảng vàng kiên định.',
+    category: 'streak',
+    isUnlocked: false,
+    iconGlyph: '🎖️',
+    iconName: 'crown',
+    accentColor: '#E11D48',
+    secondaryColor: '#BE123C',
+    darkCanvasColor: '#881337',
+    glowColor: 'rgba(225, 29, 72, 0.35)',
+    points: 150,
+    condition: '100 ngày liên tiếp',
+  },
+  {
+    id: 'badge-challenger-5star',
+    code: 'CHALLENGER_5STAR',
+    title: 'Thử thách gia 5 sao',
+    description: 'Chinh phục thành công 5 thử thách sức khỏe khác nhau trên Kallo và nhận danh hiệu cao quý.',
+    category: 'milestone',
+    isUnlocked: false,
+    iconGlyph: '⭐',
+    iconName: 'badge-check',
+    accentColor: '#6366F1',
+    secondaryColor: '#4338CA',
+    darkCanvasColor: '#312E81',
+    glowColor: 'rgba(99, 102, 241, 0.35)',
+    points: 60,
+    condition: 'Hoàn thành 5 thử thách',
   },
 ];
 

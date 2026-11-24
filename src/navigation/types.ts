@@ -77,6 +77,8 @@ export type RootStackParamList = {
   StreakDetail: undefined;
   StreakRules: undefined;
   BadgesChallenges: { initialTab?: 'badges' | 'challenges' } | undefined;
+  Challenges: undefined;
+  Badges: undefined;
   ChallengeDetail: { challengeId: string };
   FriendsLeaderboard: undefined;
   FriendSearch: undefined;
