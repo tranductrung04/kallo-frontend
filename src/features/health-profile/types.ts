@@ -106,13 +106,14 @@ export function fromBackendGoalType(goal?: BackendGoalType | string): GoalType {
 // ── Backend API Request / Response Types ─────────────────────────────────────
 export type HealthProfileRequestPayload = {
   gender: BackendGender;
-  birthDate: string; // YYYY-MM-DD
+  dob: string; // YYYY-MM-DD (khớp với ProfileRequestDto Spring Boot)
+  birthDate?: string; // Tương thích ngược
   heightCm: number;
   weightKg: number;
   activityLevel: BackendActivityLevel;
   goalType: BackendGoalType;
-  targetWeightKg?: number;
-  weeklyRateKg?: number;
+  targetWeightKg?: number | null;
+  weeklyRateKg?: number | null;
   customProteinPct?: number;
   customCarbsPct?: number;
   customFatPct?: number;
@@ -120,40 +121,98 @@ export type HealthProfileRequestPayload = {
   allergies?: string[];
 };
 
+export type MacronutrientsResponse = {
+  proteinGrams: number;
+  fatGrams: number;
+  carbGrams: number;
+};
+
 export type HealthProfileResponse = {
-  id: string;
+  id?: string;
   userId: string;
   gender: BackendGender;
-  birthDate: string;
+  dob: string;
+  birthDate?: string;
   age: number;
   heightCm: number;
   weightKg: number;
   activityLevel: BackendActivityLevel;
   goalType: BackendGoalType;
-  targetWeightKg: number;
+  targetWeightKg: number | null;
   weeklyRateKg: number;
   bmi: number;
-  bmiCategory: BackendBmiCategory;
-  bmiCategoryVi: string;
+  bmiCategory?: BackendBmiCategory;
+  bmiCategoryVi?: string;
   bmr: number;
   tdee: number;
   dailyCalorieGoal: number;
-  safetyClamped: boolean;
-  proteinGoalG: number;
-  carbsGoalG: number;
-  fatGoalG: number;
-  proteinPct: number;
-  carbsPct: number;
-  fatPct: number;
-  customMacro: boolean;
-  waterGoalMl: number;
-  allergies: string[];
+  macronutrients?: MacronutrientsResponse;
+  waterLiters: number;
+  rateClamped: boolean;
   recalculationRecommended: boolean;
   recommendedTdee?: number | null;
   recommendedDailyCalorieGoal?: number | null;
   latestLoggedWeightKg?: number | null;
+  goalAdvice?: string | null;
+  version?: number;
+  // Các thuộc tính tiện ích tương thích UI cũ
+  safetyClamped?: boolean;
+  proteinGoalG?: number;
+  carbsGoalG?: number;
+  fatGoalG?: number;
+  proteinPct?: number;
+  carbsPct?: number;
+  fatPct?: number;
+  customMacro?: boolean;
+  waterGoalMl?: number;
+  allergies?: string[];
   createdAt?: string;
   updatedAt?: string;
+};
+
+// ── Bệnh mạn tính (Chronic Conditions) Types ─────────────────────────────────
+export type ChronicConditionResponse = {
+  id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  isActive: boolean;
+};
+
+export type UserChronicConditionItemRequest = {
+  conditionId: string;
+  diagnosedAt?: string | null;
+  note?: string | null;
+};
+
+export type UpdateUserChronicConditionsRequest = {
+  conditions: UserChronicConditionItemRequest[];
+};
+
+export type UserChronicConditionResponse = {
+  conditionId: string;
+  code: string;
+  name: string;
+  description?: string | null;
+  diagnosedAt?: string | null;
+  note?: string | null;
+};
+
+// ── Dị ứng thực phẩm (Allergies) Types ──────────────────────────────────────
+export type UserAllergyItemRequest = {
+  ingredientId: string;
+  note?: string | null;
+};
+
+export type UpdateUserAllergiesRequest = {
+  allergies: UserAllergyItemRequest[];
+};
+
+export type UserAllergyResponse = {
+  ingredientId: string;
+  name: string;
+  note?: string | null;
+  active: boolean;
 };
 
 // Kept for backward compatibility with local cache/drafts
@@ -205,6 +264,8 @@ export type HealthProfileDraft = {
   dietaryPreference: string;
   healthConditions: string[];
   macros: MacroPercentages;
+  chronicConditionIds?: string[];
+  allergyIngredientIds?: string[];
 };
 
 export const COMMON_ALLERGIES = [
@@ -214,6 +275,22 @@ export const COMMON_ALLERGIES = [
   'Trứng gà/vịt',
   'Gluten / Lúa mì',
   'Đậu nành',
+];
+
+export const STANDARD_ALLERGENS: Array<{
+  id: string;
+  name: string;
+  nameVi: string;
+}> = [
+  { id: '00000000-0000-0000-0000-000000000001', name: 'Peanuts (Lạc / Đậu phộng)', nameVi: 'Đậu phộng / Lạc' },
+  { id: '00000000-0000-0000-0000-000000000002', name: "Cow's Milk (Sữa bò)", nameVi: 'Sữa & Chế phẩm sữa bò' },
+  { id: '00000000-0000-0000-0000-000000000003', name: 'Eggs (Trứng)', nameVi: 'Trứng gà / Trứng vịt' },
+  { id: '00000000-0000-0000-0000-000000000004', name: 'Tree Nuts (Hạt cây)', nameVi: 'Hạt điều, hạnh nhân, óc chó' },
+  { id: '00000000-0000-0000-0000-000000000005', name: 'Soybeans (Đậu nành)', nameVi: 'Đậu nành & Chế phẩm' },
+  { id: '00000000-0000-0000-0000-000000000006', name: 'Wheat (Lúa mì / Gluten)', nameVi: 'Gluten / Bột mì' },
+  { id: '00000000-0000-0000-0000-000000000007', name: 'Fish (Cá)', nameVi: 'Cá biển & Cá nước ngọt' },
+  { id: '00000000-0000-0000-0000-000000000008', name: 'Crustacean Shellfish (Hải sản có vỏ)', nameVi: 'Tôm, cua, ốc, nghêu, sò' },
+  { id: '00000000-0000-0000-0000-000000000009', name: 'Sesame (Vừng / Mè)', nameVi: 'Mè đen / Vừng' },
 ];
 
 export const ACTIVITY_OPTIONS: Array<[ActivityLevel, string]> = [

@@ -62,19 +62,32 @@ export function GoalSelectionScreen({
   const theme = useTheme();
   const isDark = theme.scheme === 'dark';
   const { draft, updateDraft } = useHealthProfileDraft();
-  const [selectedGoal, setSelectedGoal] = useState<GoalType>(draft.goal || 'gain');
+
+  const parsedAge = parseInt(draft.age, 10);
+  const isUnderage = !isNaN(parsedAge) && parsedAge > 0 && parsedAge < 18;
+
+  const [selectedGoal, setSelectedGoal] = useState<GoalType>(
+    isUnderage ? 'maintain' : draft.goal || 'gain'
+  );
+
+  React.useEffect(() => {
+    if (isUnderage && selectedGoal !== 'maintain') {
+      setSelectedGoal('maintain');
+    }
+  }, [isUnderage]);
 
   const handleNext = () => {
-    updateDraft('goal', selectedGoal);
-    updateDraft('macros', defaultMacroPercentages(selectedGoal));
-    if (selectedGoal === 'maintain') {
+    const finalGoal = isUnderage ? 'maintain' : selectedGoal;
+    updateDraft('goal', finalGoal);
+    updateDraft('macros', defaultMacroPercentages(finalGoal));
+    if (finalGoal === 'maintain') {
       updateDraft('weeklyRate', '0');
     } else if (!draft.weeklyRate || draft.weeklyRate === '0') {
       updateDraft('weeklyRate', '0.5');
     }
 
     if (onNext) {
-      onNext(selectedGoal);
+      onNext(finalGoal);
     } else if (navigation?.navigate) {
       navigation.navigate('TargetWeightSelection');
     }
@@ -137,10 +150,33 @@ export function GoalSelectionScreen({
         </View>
       </View>
 
+      {/* ── Underage Safety Notice (Nếu < 18 tuổi) ─────────────── */}
+      {isUnderage && (
+        <View
+          style={{
+            marginHorizontal: 16,
+            marginBottom: 12,
+            padding: 12,
+            borderRadius: 12,
+            backgroundColor: isDark ? 'rgba(239, 68, 68, 0.15)' : '#FEF2F2',
+            borderWidth: 1,
+            borderColor: isDark ? '#B91C1C' : '#FECACA',
+          }}
+        >
+          <AppText
+            variant="caption"
+            style={{ color: isDark ? '#FCA5A5' : '#B91C1C', lineHeight: 18 }}
+          >
+            ⚠️ Theo quy tắc an toàn y sinh Kallo: Bạn chưa đủ 18 tuổi ({parsedAge} tuổi), hệ thống tự động khóa chế độ Duy trì cân nặng để đảm bảo phát triển thể chất toàn diện.
+          </AppText>
+        </View>
+      )}
+
       {/* ── Goal Option Cards ──────────────────────────────────── */}
       <View style={styles.cardsContainer}>
         {GOAL_ITEMS.map((item) => {
           const isSelected = selectedGoal === item.key;
+          const isDisabled = isUnderage && item.key !== 'maintain';
           const iconColor = isSelected
             ? isDark
               ? '#C084FC'
@@ -153,13 +189,17 @@ export function GoalSelectionScreen({
             <AnimatedCard
               key={item.key}
               selected={isSelected}
-              onPress={() => setSelectedGoal(item.key)}
-              style={styles.goalCard}
+              onPress={() => {
+                if (!isDisabled) {
+                  setSelectedGoal(item.key);
+                }
+              }}
+              style={[styles.goalCard, isDisabled && { opacity: 0.45 }]}
               selectedBorderColor={theme.colors.brandPrimary}
               selectedBgColor={isDark ? '#231742' : theme.colors.brandSoftTint}
               unselectedBorderColor={isDark ? '#2E2352' : theme.colors.surfaceBorder}
               unselectedBgColor={isDark ? '#1A1433' : theme.colors.surfaceMid}
-              activeScale={0.965}
+              activeScale={isDisabled ? 1 : 0.965}
               accessibilityLabel={`${item.title}, ${item.subtitle}`}
               accessibilityRole="radio"
             >

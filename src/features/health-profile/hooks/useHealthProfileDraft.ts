@@ -4,6 +4,8 @@ import { useAuth } from '@/features/auth/AuthProvider';
 import { IS_DEMO_MODE } from '@/features/auth/localAccount';
 import {
   saveHealthProfile,
+  updateUserChronicConditions,
+  updateUserAllergies,
   getApiErrorMessage,
 } from '../api';
 import {
@@ -13,6 +15,7 @@ import {
   fromBackendGender,
   fromBackendActivityLevel,
   fromBackendGoalType,
+  STANDARD_ALLERGENS,
   type HealthProfileCalculationResult,
   type HealthProfileDraft,
   type HealthProfileRequestPayload,
@@ -238,37 +241,39 @@ export function useHealthProfileDraft(draftStorageKey = HEALTH_PROFILE_DRAFT_KEY
     setSaving(true);
     setError(undefined);
     try {
-      // 1. Prepare backend payload with UPPERCASE enums matching Spring Boot DTO
+      // 1. Prepare backend payload with UPPERCASE enums matching Spring Boot DTO & DB constraint
+      const computedDob = `${new Date().getFullYear() - age}-01-01`;
+      const isMaintain = (draft.goal || 'maintain') === 'maintain';
+
       const backendPayload: HealthProfileRequestPayload = {
         gender: toBackendGender(draft.gender || 'female'),
-        birthDate: `${new Date().getFullYear() - age}-01-01`,
+        dob: computedDob,
+        birthDate: computedDob,
         heightCm: height,
         weightKg: weight,
         activityLevel: toBackendActivityLevel(draft.activity || 'moderate'),
         goalType: toBackendGoalType(draft.goal || 'maintain'),
-        targetWeightKg: targetWeight,
-        weeklyRateKg: weeklyRate,
-        customProteinPct: finalResult.macros.protein,
-        customCarbsPct: finalResult.macros.carbs,
-        customFatPct: finalResult.macros.fat,
-        customWaterGoalMl: Math.round(weight * 35),
-        allergies: draft.allergies?.length ? draft.allergies : undefined,
+        targetWeightKg: isMaintain ? null : targetWeight,
+        weeklyRateKg: isMaintain ? 0.0 : weeklyRate,
       };
 
       // 2. Prepare local cache fallback
       const localProfile = {
         nickname: draft.nickname?.trim() || undefined,
         gender: draft.gender || 'female',
-        birthDate: `${new Date().getFullYear() - age}-01-01`,
+        dob: computedDob,
+        birthDate: computedDob,
         heightCm: height,
         weightKg: weight,
         activityLevel: draft.activity || 'moderate',
         goalType: draft.goal || 'maintain',
-        targetWeightKg: targetWeight,
-        weeklyRateKg: weeklyRate,
+        targetWeightKg: isMaintain ? null : targetWeight,
+        weeklyRateKg: isMaintain ? 0.0 : weeklyRate,
         allergies: draft.allergies || [],
         dietaryPreference: draft.dietaryPreference || 'standard',
         healthConditions: draft.healthConditions || [],
+        chronicConditionIds: draft.chronicConditionIds || [],
+        allergyIngredientIds: draft.allergyIngredientIds || [],
         bmi: finalResult.bmi,
         bmr: finalResult.bmr,
         tdee: finalResult.tdee,
@@ -292,6 +297,46 @@ export function useHealthProfileDraft(draftStorageKey = HEALTH_PROFILE_DRAFT_KEY
 
       // 3. Real backend request - errors will be caught and reported
       const serverProfile = await saveHealthProfile(backendPayload);
+
+      // 4. Sync Chronic Conditions to Backend (nếu có lựa chọn ID)
+      try {
+        if (draft.chronicConditionIds && draft.chronicConditionIds.length > 0) {
+          await updateUserChronicConditions({
+            conditions: draft.chronicConditionIds.map((id) => ({
+              conditionId: id,
+            })),
+          });
+        }
+      } catch (condErr) {
+        console.warn('Không thể đồng bộ bệnh mạn tính:', condErr);
+      }
+
+      // 5. Sync Allergies to Backend (nếu có lựa chọn ID hoặc tag tiêu chuẩn)
+      try {
+        const allergyIds: string[] = [];
+        if (draft.allergyIngredientIds?.length) {
+          allergyIds.push(...draft.allergyIngredientIds);
+        } else if (draft.allergies?.length) {
+          draft.allergies.forEach((name) => {
+            const found = STANDARD_ALLERGENS.find(
+              (item) =>
+                item.nameVi.toLowerCase().includes(name.toLowerCase()) ||
+                item.name.toLowerCase().includes(name.toLowerCase())
+            );
+            if (found && !allergyIds.includes(found.id)) {
+              allergyIds.push(found.id);
+            }
+          });
+        }
+
+        if (allergyIds.length > 0) {
+          await updateUserAllergies({
+            allergies: allergyIds.map((id) => ({ ingredientId: id })),
+          });
+        }
+      } catch (allergyErr) {
+        console.warn('Không thể đồng bộ dị ứng:', allergyErr);
+      }
 
       // Persist both server response and local attributes
       await AsyncStorage.setItem(

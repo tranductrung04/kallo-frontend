@@ -19,6 +19,7 @@ import { AppButton, AppCard, AppInput, AppSwitch, AppText, useAlert } from '@/co
 import {
   BellIcon,
   CalendarIcon,
+  CheckIcon,
   ClockIcon,
   CloseXIcon,
   CutleryIcon,
@@ -54,14 +55,30 @@ import {
   calculateBmr,
   calculateTdee,
 } from '@/features/profile/utils/calculations';
-import { saveHealthProfile, getHealthProfile } from '@/features/health-profile/api';
+import {
+  saveHealthProfile,
+  getHealthProfile,
+  recalculateHealthProfile,
+  getSystemChronicConditions,
+  getUserChronicConditions,
+  updateUserChronicConditions,
+  getUserAllergies,
+  updateUserAllergies,
+} from '@/features/health-profile/api';
 import {
   toBackendGender,
   toBackendActivityLevel,
   toBackendGoalType,
   fromBackendGender,
   fromBackendActivityLevel,
+  fromBackendGoalType,
+  STANDARD_ALLERGENS,
   type HealthProfileRequestPayload,
+  type HealthProfileResponse,
+  type ChronicConditionResponse,
+  type UserChronicConditionResponse,
+  type UserAllergyResponse,
+  type ActivityLevel,
 } from '@/features/health-profile/types';
 
 type Props = BottomTabScreenProps<MainTabParamList, 'Profile'>;
@@ -87,6 +104,9 @@ export function AccountProfileScreen({ navigation }: Props) {
   const [showCustomizeGoalsModal, setShowCustomizeGoalsModal] = useState(false);
   const [showEditNameModal, setShowEditNameModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEditPhysicalModal, setShowEditPhysicalModal] = useState(false);
+  const [showChronicModal, setShowChronicModal] = useState(false);
+  const [showAllergiesModal, setShowAllergiesModal] = useState(false);
 
   // User Profile State
   const displayName = user?.displayName || 'Nam';
@@ -100,28 +120,111 @@ export function AccountProfileScreen({ navigation }: Props) {
   const [heightCm, setHeightCm] = useState(160);
   const [weightKg, setWeightKg] = useState(60);
   const [gender, setGender] = useState<'male' | 'female'>('male');
-  const [activityLevel, setActivityLevel] = useState<'sedentary' | 'light' | 'moderate' | 'high' | 'veryHigh'>('light');
+  const [activityLevel, setActivityLevel] = useState<ActivityLevel>('moderate');
+
+  // Backend Health Profile State
+  const [profileData, setProfileData] = useState<HealthProfileResponse | null>(null);
+  const [recalculating, setRecalculating] = useState(false);
+
+  // Form states for Edit Physical Profile
+  const [editGender, setEditGender] = useState<'male' | 'female'>('male');
+  const [editHeight, setEditHeight] = useState('160');
+  const [editWeight, setEditWeight] = useState('60');
+  const [editGoal, setEditGoal] = useState<'lose' | 'maintain' | 'gain'>('maintain');
+  const [editTargetWeight, setEditTargetWeight] = useState('60');
+  const [editWeeklyRate, setEditWeeklyRate] = useState('0.5');
+  const [editActivity, setEditActivity] = useState<ActivityLevel>('moderate');
+  const [savingPhysical, setSavingPhysical] = useState(false);
+
+  // Chronic conditions & allergies states
+  const [systemConditions, setSystemConditions] = useState<ChronicConditionResponse[]>([]);
+  const [userConditions, setUserConditions] = useState<UserChronicConditionResponse[]>([]);
+  const [selectedConditionIds, setSelectedConditionIds] = useState<string[]>([]);
+  const [savingConditions, setSavingConditions] = useState(false);
+
+  const [userAllergies, setUserAllergies] = useState<UserAllergyResponse[]>([]);
+  const [selectedAllergyIds, setSelectedAllergyIds] = useState<string[]>([]);
+  const [savingAllergies, setSavingAllergies] = useState(false);
+
+  const applyProfileData = (p: any) => {
+    if (!p) return;
+    setProfileData(p);
+    if (p.age) setAge(Number(p.age));
+    if (p.heightCm) {
+      setHeightCm(Number(p.heightCm));
+      setEditHeight(String(p.heightCm));
+    }
+    if (p.weightKg) {
+      setWeightKg(Number(p.weightKg));
+      setEditWeight(String(p.weightKg));
+    }
+    if (p.gender) {
+      const g = p.gender === 'female' || p.gender === 'FEMALE' ? 'female' : 'male';
+      setGender(g);
+      setEditGender(g);
+    }
+    if (p.activityLevel) {
+      const act = fromBackendActivityLevel(p.activityLevel);
+      setActivityLevel(act);
+      setEditActivity(act);
+    }
+    if (p.goalType) {
+      const gType = fromBackendGoalType(p.goalType);
+      setEditGoal(gType);
+    }
+    if (p.targetWeightKg) {
+      setEditTargetWeight(String(p.targetWeightKg));
+    }
+    if (p.weeklyRateKg !== undefined && p.weeklyRateKg !== null) {
+      setEditWeeklyRate(String(p.weeklyRateKg));
+    }
+    if (p.dailyCalorieGoal) setTargetCalories(Math.round(p.dailyCalorieGoal));
+
+    // Handle macros from response
+    if (p.macronutrients) {
+      const { proteinGrams: pG, carbGrams: cG, fatGrams: fG } = p.macronutrients;
+      const totalKcal = p.dailyCalorieGoal || (pG * 4 + cG * 4 + fG * 9);
+      if (totalKcal > 0) {
+        setProteinPercent(Math.round(((pG * 4) / totalKcal) * 100));
+        setCarbsPercent(Math.round(((cG * 4) / totalKcal) * 100));
+        setFatPercent(Math.round(((fG * 9) / totalKcal) * 100));
+      }
+    }
+  };
+
+  const loadData = async () => {
+    try {
+      const raw = await AsyncStorage.getItem('@kallo/health-profile');
+      if (raw) {
+        applyProfileData(JSON.parse(raw));
+      }
+      const fresh = await getHealthProfile().catch(() => null);
+      if (fresh) {
+        applyProfileData(fresh);
+        await AsyncStorage.setItem('@kallo/health-profile', JSON.stringify(fresh));
+      }
+    } catch {
+      // ignore
+    }
+
+    try {
+      const [sys, userConds, userAllerg] = await Promise.all([
+        getSystemChronicConditions().catch(() => []),
+        getUserChronicConditions().catch(() => []),
+        getUserAllergies().catch(() => []),
+      ]);
+      setSystemConditions(sys || []);
+      setUserConditions(userConds || []);
+      setSelectedConditionIds((userConds || []).map((c) => c.conditionId));
+      setUserAllergies(userAllerg || []);
+      setSelectedAllergyIds((userAllerg || []).map((a) => a.ingredientId));
+    } catch {
+      // ignore
+    }
+  };
 
   useEffect(() => {
-    void (async () => {
-      try {
-        const raw = await AsyncStorage.getItem('@kallo/health-profile');
-        if (raw) {
-          const p = JSON.parse(raw);
-          if (p.age) setAge(Number(p.age));
-          if (p.heightCm) setHeightCm(Number(p.heightCm));
-          if (p.weightKg) setWeightKg(Number(p.weightKg));
-          if (p.dailyCalorieGoal) setTargetCalories(Number(p.dailyCalorieGoal));
-          if (p.proteinPct) setProteinPercent(Number(p.proteinPct));
-          if (p.carbsPct) setCarbsPercent(Number(p.carbsPct));
-          if (p.fatPct) setFatPercent(Number(p.fatPct));
-          if (p.gender) setGender(p.gender === 'female' || p.gender === 'FEMALE' ? 'female' : 'male');
-          if (p.activityLevel) setActivityLevel(fromBackendActivityLevel(p.activityLevel));
-        }
-      } catch {
-        // ignore
-      }
-    })();
+    void loadData();
   }, []);
 
   // Nutrition goals & Macro State
@@ -249,16 +352,19 @@ export function AccountProfileScreen({ navigation }: Props) {
       const raw = await AsyncStorage.getItem('@kallo/health-profile');
       if (raw) {
         const existing = JSON.parse(raw);
-        if (existing.gender && existing.birthDate) {
+        if (existing.gender && (existing.dob || existing.birthDate)) {
+          const birthDateVal = existing.dob || existing.birthDate;
+          const isMaintain = toBackendGoalType(existing.goalType) === 'MAINTAIN_WEIGHT';
           const updatePayload: HealthProfileRequestPayload = {
             gender: toBackendGender(existing.gender),
-            birthDate: existing.birthDate,
+            dob: birthDateVal,
+            birthDate: birthDateVal,
             heightCm: existing.heightCm || heightCm,
             weightKg: existing.weightKg || weightKg,
             activityLevel: toBackendActivityLevel(existing.activityLevel),
             goalType: toBackendGoalType(existing.goalType),
-            targetWeightKg: existing.targetWeightKg,
-            weeklyRateKg: existing.weeklyRateKg,
+            targetWeightKg: isMaintain ? null : existing.targetWeightKg,
+            weeklyRateKg: isMaintain ? 0.0 : existing.weeklyRateKg,
             customProteinPct: proteinPercent,
             customCarbsPct: carbsPercent,
             customFatPct: fatPercent,
@@ -284,6 +390,175 @@ export function AccountProfileScreen({ navigation }: Props) {
       message: 'Mục tiêu dinh dưỡng của bạn đã được cập nhật.',
       variant: 'success',
     });
+  };
+
+  const handleRecalculate = async () => {
+    setRecalculating(true);
+    try {
+      const updated = await recalculateHealthProfile();
+      applyProfileData(updated);
+      await AsyncStorage.setItem('@kallo/health-profile', JSON.stringify(updated));
+
+      if (updated.goalAdvice === 'TARGET_REACHED') {
+        showAlert({
+          variant: 'success',
+          title: '🎉 Chúc mừng bạn đã chạm đích!',
+          message:
+            'Bạn đã đạt mốc cân nặng mục tiêu thành công! Kallo đã tự động điều chỉnh kế hoạch sang "Duy trì cân nặng" để bảo toàn vóc dáng.',
+        });
+      } else {
+        showAlert({
+          variant: 'success',
+          title: 'Tối ưu lại Calo thành công',
+          message: `Mục tiêu dinh dưỡng mới: ${Math.round(updated.dailyCalorieGoal)} kcal/ngày (TDEE: ${Math.round(updated.tdee)} kcal).`,
+        });
+      }
+    } catch (err) {
+      showAlert({
+        variant: 'danger',
+        title: 'Lỗi',
+        message: 'Không thể tính toán lại lúc này. Vui lòng thử lại sau.',
+      });
+    } finally {
+      setRecalculating(false);
+    }
+  };
+
+  const handleSavePhysicalProfile = async () => {
+    const h = parseFloat(editHeight);
+    const w = parseFloat(editWeight);
+    const targetW = parseFloat(editTargetWeight);
+    const rate = parseFloat(editWeeklyRate);
+
+    if (isNaN(h) || h < 50 || h > 250) {
+      showAlert({ variant: 'danger', title: 'Lỗi', message: 'Chiều cao phải từ 50 đến 250 cm.' });
+      return;
+    }
+    if (isNaN(w) || w < 20 || w > 300) {
+      showAlert({ variant: 'danger', title: 'Lỗi', message: 'Cân nặng phải từ 20 đến 300 kg.' });
+      return;
+    }
+
+    if (age < 18 && editGoal !== 'maintain') {
+      showAlert({
+        variant: 'danger',
+        title: 'Quy chuẩn an toàn y sinh',
+        message: 'Người dưới 18 tuổi chỉ được chọn Duy trì cân nặng để đảm bảo phát triển thể chất.',
+      });
+      return;
+    }
+
+    if (editGoal !== 'maintain') {
+      if (isNaN(targetW) || targetW < 20 || targetW > 300) {
+        showAlert({ variant: 'danger', title: 'Lỗi', message: 'Cân nặng mục tiêu phải từ 20 đến 300 kg.' });
+        return;
+      }
+      const targetBmi = targetW / ((h / 100) * (h / 100));
+      if (editGoal === 'lose' && targetBmi < 18.5) {
+        showAlert({
+          variant: 'danger',
+          title: 'Mục tiêu chưa an toàn',
+          message: `Mục tiêu cân nặng khiến BMI đạt ${targetBmi.toFixed(1)} (< 18.5 - thiếu cân nghiêm trọng). Vui lòng chọn mục tiêu an toàn hơn.`,
+        });
+        return;
+      }
+      if (editGoal === 'gain' && targetBmi > 35) {
+        showAlert({
+          variant: 'danger',
+          title: 'Mục tiêu quá cao',
+          message: `Mục tiêu cân nặng khiến BMI đạt ${targetBmi.toFixed(1)} (> 35 - béo phì nguy hiểm).`,
+        });
+        return;
+      }
+      if (isNaN(rate) || rate <= 0 || rate > 1.5) {
+        showAlert({ variant: 'danger', title: 'Lỗi', message: 'Tốc độ thay đổi cân nặng mỗi tuần phải từ 0.01 đến 1.5 kg/tuần.' });
+        return;
+      }
+    }
+
+    setSavingPhysical(true);
+    try {
+      const computedDob = profileData?.dob || `${new Date().getFullYear() - age}-01-01`;
+      const isMaintain = editGoal === 'maintain';
+
+      const payload: HealthProfileRequestPayload = {
+        gender: toBackendGender(editGender),
+        dob: computedDob,
+        birthDate: computedDob,
+        heightCm: h,
+        weightKg: w,
+        activityLevel: toBackendActivityLevel(editActivity),
+        goalType: toBackendGoalType(editGoal),
+        targetWeightKg: isMaintain ? null : targetW,
+        weeklyRateKg: isMaintain ? 0.0 : rate,
+      };
+
+      const updated = await saveHealthProfile(payload);
+      applyProfileData(updated);
+      await AsyncStorage.setItem('@kallo/health-profile', JSON.stringify(updated));
+      setShowEditPhysicalModal(false);
+      showAlert({
+        variant: 'success',
+        title: 'Cập nhật thành công',
+        message: 'Hồ sơ thể chất và chỉ số dinh dưỡng đã được đồng bộ với máy chủ.',
+      });
+    } catch (err) {
+      showAlert({
+        variant: 'danger',
+        title: 'Lỗi cập nhật',
+        message: getApiErrorMessage(err),
+      });
+    } finally {
+      setSavingPhysical(false);
+    }
+  };
+
+  const handleSaveChronicConditions = async () => {
+    setSavingConditions(true);
+    try {
+      const res = await updateUserChronicConditions({
+        conditions: selectedConditionIds.map((id) => ({ conditionId: id })),
+      });
+      setUserConditions(res || []);
+      setShowChronicModal(false);
+      showAlert({
+        variant: 'success',
+        title: 'Cập nhật thành công',
+        message: 'Danh sách bệnh mạn tính đã được lưu vào hồ sơ.',
+      });
+    } catch (err) {
+      showAlert({
+        variant: 'danger',
+        title: 'Lỗi',
+        message: getApiErrorMessage(err),
+      });
+    } finally {
+      setSavingConditions(false);
+    }
+  };
+
+  const handleSaveAllergies = async () => {
+    setSavingAllergies(true);
+    try {
+      const res = await updateUserAllergies({
+        allergies: selectedAllergyIds.map((id) => ({ ingredientId: id })),
+      });
+      setUserAllergies(res || []);
+      setShowAllergiesModal(false);
+      showAlert({
+        variant: 'success',
+        title: 'Cập nhật thành công',
+        message: 'Danh sách dị ứng thực phẩm đã được lưu vào hồ sơ.',
+      });
+    } catch (err) {
+      showAlert({
+        variant: 'danger',
+        title: 'Lỗi',
+        message: getApiErrorMessage(err),
+      });
+    } finally {
+      setSavingAllergies(false);
+    }
   };
 
   return (
@@ -391,6 +666,52 @@ export function AccountProfileScreen({ navigation }: Props) {
           </View>
         </View>
 
+        {/* ── Recalculate Recommendation Banner ────────────────────────── */}
+        {profileData?.recalculationRecommended && (
+          <View
+            style={{
+              marginHorizontal: 16,
+              marginBottom: 16,
+              padding: 14,
+              borderRadius: 16,
+              backgroundColor: isDark ? 'rgba(139, 87, 232, 0.15)' : '#F3E8FF',
+              borderWidth: 1,
+              borderColor: theme.colors.brandPrimary,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 12,
+            }}
+          >
+            <View style={{ flex: 1, gap: 4 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <LightningIcon size={16} color={theme.colors.brandPrimary} />
+                <AppText variant="labelLg" style={{ color: theme.colors.brandPrimary, fontWeight: '700' }}>
+                  Đề xuất cập nhật Calo & TDEE
+                </AppText>
+              </View>
+              <AppText variant="caption" color={theme.colors.textSecondary}>
+                Cân nặng mới ({profileData.latestLoggedWeightKg} kg) đã được ghi nhận. Đề xuất: {profileData.recommendedDailyCalorieGoal || 'tối ưu'} kcal/ngày.
+              </AppText>
+            </View>
+            <TouchableOpacity
+              onPress={handleRecalculate}
+              disabled={recalculating}
+              style={{
+                paddingVertical: 8,
+                paddingHorizontal: 14,
+                backgroundColor: theme.colors.brandPrimary,
+                borderRadius: 10,
+                opacity: recalculating ? 0.7 : 1,
+              }}
+            >
+              <AppText variant="labelMd" style={{ color: '#FFFFFF', fontWeight: '600' }}>
+                {recalculating ? 'Đang tính...' : 'Áp dụng'}
+              </AppText>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* ── Physical Metrics Pill & Sub-actions ──────────────────────── */}
         <View style={styles.metricsCapsuleWrapper}>
           <View
@@ -427,13 +748,15 @@ export function AccountProfileScreen({ navigation }: Props) {
             </View>
           </View>
 
-          <View style={styles.metricsPillsRow}>
+          <View style={[styles.metricsPillsRow, { flexWrap: 'wrap', gap: 8 }]}>
             <AppButton
               label="Chỉ số sức khỏe"
               variant="outline"
               style={[
                 styles.subActionPill,
                 {
+                  flex: 1,
+                  minWidth: '45%',
                   backgroundColor: theme.colors.surface,
                   borderColor: theme.colors.brandAction,
                 },
@@ -442,16 +765,48 @@ export function AccountProfileScreen({ navigation }: Props) {
             />
 
             <AppButton
-              label="Hồ sơ thể chất"
+              label="Sửa thể chất"
               variant="outline"
               style={[
                 styles.subActionPill,
                 {
+                  flex: 1,
+                  minWidth: '45%',
                   backgroundColor: theme.colors.surface,
                   borderColor: theme.colors.brandAction,
                 },
               ]}
-              onPress={() => root?.navigate('Onboarding', { screen: 'Onboarding' })}
+              onPress={() => setShowEditPhysicalModal(true)}
+            />
+
+            <AppButton
+              label={`Bệnh nền (${userConditions.length})`}
+              variant="outline"
+              style={[
+                styles.subActionPill,
+                {
+                  flex: 1,
+                  minWidth: '45%',
+                  backgroundColor: theme.colors.surface,
+                  borderColor: userConditions.length > 0 ? theme.colors.macroFats : theme.colors.surfaceBorder,
+                },
+              ]}
+              onPress={() => setShowChronicModal(true)}
+            />
+
+            <AppButton
+              label={`Dị ứng (${userAllergies.length})`}
+              variant="outline"
+              style={[
+                styles.subActionPill,
+                {
+                  flex: 1,
+                  minWidth: '45%',
+                  backgroundColor: theme.colors.surface,
+                  borderColor: userAllergies.length > 0 ? theme.colors.macroProtein : theme.colors.surfaceBorder,
+                },
+              ]}
+              onPress={() => setShowAllergiesModal(true)}
             />
           </View>
         </View>
@@ -1340,6 +1695,350 @@ export function AccountProfileScreen({ navigation }: Props) {
                 />
               </View>
             </View>
+          </View>
+        </View>
+      </Modal>
+      {/* ── 6. Edit Physical Profile Modal (Chỉnh sửa hồ sơ thể chất) ─── */}
+      <Modal
+        visible={showEditPhysicalModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowEditPhysicalModal(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.surfaceMid, maxHeight: '90%' }]}>
+            <View style={styles.modalHeaderRow}>
+              <AppText variant="headlineSm">Chỉnh sửa thể chất & Mục tiêu</AppText>
+              <TouchableOpacity onPress={() => setShowEditPhysicalModal(false)}>
+                <CloseXIcon size={20} color={theme.colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false} style={{ marginVertical: 8 }}>
+              {/* Giới tính */}
+              <AppText variant="labelLg" style={{ marginBottom: 6 }}>Giới tính sinh học</AppText>
+              <View style={{ flexDirection: 'row', gap: 10, marginBottom: 14 }}>
+                <TouchableOpacity
+                  onPress={() => setEditGender('male')}
+                  style={{
+                    flex: 1,
+                    paddingVertical: 10,
+                    borderRadius: 10,
+                    alignItems: 'center',
+                    backgroundColor: editGender === 'male' ? theme.colors.brandPrimary : theme.colors.surface,
+                    borderWidth: 1,
+                    borderColor: editGender === 'male' ? theme.colors.brandPrimary : theme.colors.surfaceBorder,
+                  }}
+                >
+                  <AppText variant="bodyMd" style={{ color: editGender === 'male' ? '#FFFFFF' : theme.colors.textPrimary }}>
+                    Nam (MALE)
+                  </AppText>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setEditGender('female')}
+                  style={{
+                    flex: 1,
+                    paddingVertical: 10,
+                    borderRadius: 10,
+                    alignItems: 'center',
+                    backgroundColor: editGender === 'female' ? theme.colors.brandPrimary : theme.colors.surface,
+                    borderWidth: 1,
+                    borderColor: editGender === 'female' ? theme.colors.brandPrimary : theme.colors.surfaceBorder,
+                  }}
+                >
+                  <AppText variant="bodyMd" style={{ color: editGender === 'female' ? '#FFFFFF' : theme.colors.textPrimary }}>
+                    Nữ (FEMALE)
+                  </AppText>
+                </TouchableOpacity>
+              </View>
+
+              {/* Chiều cao & Cân nặng */}
+              <View style={{ flexDirection: 'row', gap: 12, marginBottom: 14 }}>
+                <View style={{ flex: 1 }}>
+                  <AppText variant="labelLg" style={{ marginBottom: 6 }}>Chiều cao (cm)</AppText>
+                  <AppInput
+                    value={editHeight}
+                    onChangeText={setEditHeight}
+                    keyboardType="numeric"
+                    placeholder="160"
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <AppText variant="labelLg" style={{ marginBottom: 6 }}>Cân nặng (kg)</AppText>
+                  <AppInput
+                    value={editWeight}
+                    onChangeText={setEditWeight}
+                    keyboardType="numeric"
+                    placeholder="60"
+                  />
+                </View>
+              </View>
+
+              {/* Mức độ vận động */}
+              <AppText variant="labelLg" style={{ marginBottom: 6 }}>Mức độ vận động</AppText>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 14 }}>
+                {[
+                  ['sedentary', 'Ít vận động'],
+                  ['light', 'Nhẹ (1-3 ngày/tuần)'],
+                  ['moderate', 'Vừa (3-5 ngày/tuần)'],
+                  ['high', 'Nhiều (6-7 ngày/tuần)'],
+                  ['veryHigh', 'Rất nhiều (VĐV)'],
+                ].map(([lvl, label]) => {
+                  const isSel = editActivity === lvl;
+                  return (
+                    <TouchableOpacity
+                      key={lvl}
+                      onPress={() => setEditActivity(lvl as ActivityLevel)}
+                      style={{
+                        paddingHorizontal: 12,
+                        paddingVertical: 8,
+                        borderRadius: 8,
+                        backgroundColor: isSel ? theme.colors.brandPrimary : theme.colors.surface,
+                        borderWidth: 1,
+                        borderColor: isSel ? theme.colors.brandPrimary : theme.colors.surfaceBorder,
+                      }}
+                    >
+                      <AppText variant="caption" style={{ color: isSel ? '#FFFFFF' : theme.colors.textPrimary, fontWeight: isSel ? '700' : '400' }}>
+                        {label}
+                      </AppText>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+
+              {/* Mục tiêu */}
+              <AppText variant="labelLg" style={{ marginBottom: 6 }}>Mục tiêu vóc dáng</AppText>
+              <View style={{ flexDirection: 'row', gap: 8, marginBottom: 14 }}>
+                {[
+                  ['lose', 'Giảm cân'],
+                  ['maintain', 'Giữ cân'],
+                  ['gain', 'Tăng cân'],
+                ].map(([g, label]) => {
+                  const isSel = editGoal === g;
+                  const isDis = age < 18 && g !== 'maintain';
+                  return (
+                    <TouchableOpacity
+                      key={g}
+                      disabled={isDis}
+                      onPress={() => setEditGoal(g as any)}
+                      style={{
+                        flex: 1,
+                        paddingVertical: 10,
+                        borderRadius: 10,
+                        alignItems: 'center',
+                        backgroundColor: isSel ? theme.colors.brandPrimary : theme.colors.surface,
+                        borderWidth: 1,
+                        borderColor: isSel ? theme.colors.brandPrimary : theme.colors.surfaceBorder,
+                        opacity: isDis ? 0.4 : 1,
+                      }}
+                    >
+                      <AppText variant="bodySm" style={{ color: isSel ? '#FFFFFF' : theme.colors.textPrimary, fontWeight: isSel ? '700' : '400' }}>
+                        {label}
+                      </AppText>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+
+              {/* Cân nặng mục tiêu & Tốc độ nếu không phải maintain */}
+              {editGoal !== 'maintain' && (
+                <View style={{ flexDirection: 'row', gap: 12, marginBottom: 14 }}>
+                  <View style={{ flex: 1 }}>
+                    <AppText variant="labelLg" style={{ marginBottom: 6 }}>Mục tiêu (kg)</AppText>
+                    <AppInput
+                      value={editTargetWeight}
+                      onChangeText={setEditTargetWeight}
+                      keyboardType="numeric"
+                      placeholder="55"
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <AppText variant="labelLg" style={{ marginBottom: 6 }}>Tốc độ (kg/tuần)</AppText>
+                    <AppInput
+                      value={editWeeklyRate}
+                      onChangeText={setEditWeeklyRate}
+                      keyboardType="numeric"
+                      placeholder="0.5"
+                    />
+                  </View>
+                </View>
+              )}
+            </ScrollView>
+
+            <AppButton
+              label="Lưu hồ sơ thể chất"
+              variant="primary"
+              loading={savingPhysical}
+              onPress={handleSavePhysicalProfile}
+            />
+          </View>
+        </View>
+      </Modal>
+
+      {/* ── 7. Chronic Conditions Modal (Quản lý bệnh mạn tính) ───────── */}
+      <Modal
+        visible={showChronicModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowChronicModal(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.surfaceMid, maxHeight: '85%' }]}>
+            <View style={styles.modalHeaderRow}>
+              <AppText variant="headlineSm">Quản lý bệnh mạn tính</AppText>
+              <TouchableOpacity onPress={() => setShowChronicModal(false)}>
+                <CloseXIcon size={20} color={theme.colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
+            <AppText variant="caption" color={theme.colors.textSecondary} style={{ marginBottom: 12 }}>
+              Chọn các bệnh lý bạn đang theo dõi để Kallo tự động tối ưu hóa chế độ dinh dưỡng và cảnh báo món ăn phù hợp.
+            </AppText>
+
+            <ScrollView showsVerticalScrollIndicator={false} style={{ marginVertical: 8 }}>
+              {(systemConditions.length > 0 ? systemConditions : [
+                { id: 'e6f98765-4321-4321-4321-fedcba987654', code: 'DIABETES_T2', name: 'Tiểu đường tuýp 2', description: 'Đái tháo đường không phụ thuộc insulin' },
+                { id: 'd5e87654-3210-3210-3210-edcba9876543', code: 'HYPERTENSION', name: 'Tăng huyết áp', description: 'Huyết áp tâm thu >= 140 hoặc tâm trương >= 90 mmHg' },
+                { id: 'c4d76543-2109-2109-2109-dcba98765432', code: 'GERD', name: 'Trào ngược dạ dày thực quản (GERD)', description: 'Ợ chua, đau rát thượng vị' },
+                { id: 'b3c65432-1098-1098-1098-cba987654321', code: 'HYPERLIPIDEMIA', name: 'Rối loạn lipid máu (Mỡ máu cao)', description: 'Cholesterol hoặc Triglyceride tăng cao' },
+                { id: 'a2b54321-0987-0987-0987-ba9876543210', code: 'GOUT', name: 'Bệnh Gút (Gout)', description: 'Axit uric máu tăng cao, lắng đọng khớp' },
+              ]).map((c: any) => {
+                const isSelected = selectedConditionIds.includes(c.id);
+                return (
+                  <TouchableOpacity
+                    key={c.id}
+                    onPress={() => {
+                      setSelectedConditionIds((prev) =>
+                        prev.includes(c.id) ? prev.filter((id) => id !== c.id) : [...prev, c.id]
+                      );
+                    }}
+                    style={{
+                      padding: 12,
+                      borderRadius: 12,
+                      marginBottom: 8,
+                      backgroundColor: isSelected ? (isDark ? '#2D1B4E' : '#F3E8FF') : theme.colors.surface,
+                      borderWidth: 1,
+                      borderColor: isSelected ? theme.colors.brandPrimary : theme.colors.surfaceBorder,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <View style={{ flex: 1, paddingRight: 10 }}>
+                      <AppText variant="bodyMd" style={{ fontWeight: '600', color: isSelected ? theme.colors.brandPrimary : theme.colors.textPrimary }}>
+                        {c.name}
+                      </AppText>
+                      {c.description ? (
+                        <AppText variant="caption" color={theme.colors.textSecondary} style={{ marginTop: 2 }}>
+                          {c.description}
+                        </AppText>
+                      ) : null}
+                    </View>
+                    <View
+                      style={{
+                        width: 22,
+                        height: 22,
+                        borderRadius: 6,
+                        borderWidth: 1.5,
+                        borderColor: isSelected ? theme.colors.brandPrimary : theme.colors.surfaceBorder,
+                        backgroundColor: isSelected ? theme.colors.brandPrimary : 'transparent',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      {isSelected && <CheckIcon size={14} color="#FFFFFF" strokeWidth={2.5} />}
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+
+            <AppButton
+              label="Lưu bệnh mạn tính"
+              variant="primary"
+              loading={savingConditions}
+              onPress={handleSaveChronicConditions}
+            />
+          </View>
+        </View>
+      </Modal>
+
+      {/* ── 8. Allergies Modal (Quản lý dị ứng thực phẩm) ─────────────── */}
+      <Modal
+        visible={showAllergiesModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowAllergiesModal(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.surfaceMid, maxHeight: '85%' }]}>
+            <View style={styles.modalHeaderRow}>
+              <AppText variant="headlineSm">Quản lý dị ứng thực phẩm</AppText>
+              <TouchableOpacity onPress={() => setShowAllergiesModal(false)}>
+                <CloseXIcon size={20} color={theme.colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
+            <AppText variant="caption" color={theme.colors.textSecondary} style={{ marginBottom: 12 }}>
+              Các nguyên liệu được chọn sẽ được Kallo tự động gắn cờ cảnh báo an toàn y sinh khi quét món ăn hoặc gợi ý thực đơn.
+            </AppText>
+
+            <ScrollView showsVerticalScrollIndicator={false} style={{ marginVertical: 8 }}>
+              {STANDARD_ALLERGENS.map((a) => {
+                const isSelected = selectedAllergyIds.includes(a.id);
+                return (
+                  <TouchableOpacity
+                    key={a.id}
+                    onPress={() => {
+                      setSelectedAllergyIds((prev) =>
+                        prev.includes(a.id) ? prev.filter((id) => id !== a.id) : [...prev, a.id]
+                      );
+                    }}
+                    style={{
+                      padding: 12,
+                      borderRadius: 12,
+                      marginBottom: 8,
+                      backgroundColor: isSelected ? (isDark ? '#2D1B4E' : '#F3E8FF') : theme.colors.surface,
+                      borderWidth: 1,
+                      borderColor: isSelected ? theme.colors.brandPrimary : theme.colors.surfaceBorder,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <View style={{ flex: 1, paddingRight: 10 }}>
+                      <AppText variant="bodyMd" style={{ fontWeight: '600', color: isSelected ? theme.colors.brandPrimary : theme.colors.textPrimary }}>
+                        {a.nameVi}
+                      </AppText>
+                      <AppText variant="caption" color={theme.colors.textSecondary} style={{ marginTop: 2 }}>
+                        {a.name}
+                      </AppText>
+                    </View>
+                    <View
+                      style={{
+                        width: 22,
+                        height: 22,
+                        borderRadius: 6,
+                        borderWidth: 1.5,
+                        borderColor: isSelected ? theme.colors.brandPrimary : theme.colors.surfaceBorder,
+                        backgroundColor: isSelected ? theme.colors.brandPrimary : 'transparent',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      {isSelected && <CheckIcon size={14} color="#FFFFFF" strokeWidth={2.5} />}
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+
+            <AppButton
+              label="Lưu danh sách dị ứng"
+              variant="primary"
+              loading={savingAllergies}
+              onPress={handleSaveAllergies}
+            />
           </View>
         </View>
       </Modal>

@@ -28,6 +28,7 @@ import {
   WheatIcon,
 } from '@/components/icons';
 import { useTheme } from '@/theme';
+import { useAuth } from '@/features/auth/AuthProvider';
 import { useHealthProfileDraft } from '../hooks/useHealthProfileDraft';
 import {
   calculateDailyCalorieGoal,
@@ -50,6 +51,7 @@ export function PlanResultScreen({
 }: PlanResultScreenProps) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
+  const { status } = useAuth();
   const isDark = theme.scheme === 'dark';
   const {
     draft,
@@ -205,29 +207,24 @@ export function PlanResultScreen({
       if (res.ok) {
         if (onFinish) {
           onFinish();
-        } else {
-          // If in Onboarding navigator, try reset to MainTabs via RootNavigator
+        } else if (status === 'signedIn') {
+          // If already signed in, navigate back or return to MainTabs
           try {
             const parent = navigation?.getParent?.();
-            if (parent?.reset) {
-              parent.reset({
-                index: 0,
-                routes: [{ name: 'MainTabs' as any }],
-              });
+            if (parent?.canGoBack?.() && parent.canGoBack()) {
+              parent.goBack();
             } else if (parent?.navigate) {
               parent.navigate('MainTabs' as any);
-            } else if (navigation?.reset) {
-              navigation.reset({
-                index: 0,
-                routes: [{ name: 'MainTabs' as any }],
-              });
             } else if (navigation?.navigate) {
               navigation.navigate('MainTabs' as any);
             }
           } catch {
-            // RootNavigator switch via auth status automatically transitions
+            // Ignored
           }
         }
+        // When status is 'needsProfile', saveProfile() has called completeOnboarding(),
+        // transitioning auth status to 'signedIn'. RootNavigator automatically re-renders,
+        // unmounting OnboardingNavigator and mounting MainTabs without requiring manual reset.
       } else {
         showAlert({
           variant: 'error',

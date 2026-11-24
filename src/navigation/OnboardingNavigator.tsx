@@ -111,7 +111,7 @@ export function OnboardingNavigator() {
         options={{ animation: 'fade' }}
       />
       <Stack.Screen
-        name="Onboarding"
+        name="OnboardingFlow"
         component={OnboardingScreen}
         options={{ animation: 'slide_from_right' }}
       />

@@ -22,7 +22,14 @@ import {
   CircularProgress,
   MonthCalendarModal,
   QuickUtilityGrid,
+  useAlert,
 } from '@/components/common';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  getHealthProfile,
+  recalculateHealthProfile,
+  type HealthProfileResponse,
+} from '@/features/health-profile/api';
 import type { MainTabParamList, RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
 import { images } from '@/assets/images';
@@ -97,6 +104,64 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const todaySteps = getTotalStepsForDate(selectedDate);
   const summary = getSummary(selectedDate, caloriesBurned);
   const root = navigation.getParent() as RootNavigation | undefined;
+  const { showAlert } = useAlert();
+
+  const [healthProfile, setHealthProfile] = useState<HealthProfileResponse | null>(null);
+  const [recalculating, setRecalculating] = useState(false);
+
+  React.useEffect(() => {
+    let isMounted = true;
+    void (async () => {
+      try {
+        const raw = await AsyncStorage.getItem('@kallo/health-profile');
+        if (raw && isMounted) {
+          setHealthProfile(JSON.parse(raw));
+        }
+        const fresh = await getHealthProfile();
+        if (isMounted && fresh) {
+          setHealthProfile(fresh);
+          await AsyncStorage.setItem('@kallo/health-profile', JSON.stringify(fresh));
+        }
+      } catch {
+        // ignore
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleRecalculate = async () => {
+    setRecalculating(true);
+    try {
+      const updated = await recalculateHealthProfile();
+      setHealthProfile(updated);
+      await AsyncStorage.setItem('@kallo/health-profile', JSON.stringify(updated));
+
+      if (updated.goalAdvice === 'TARGET_REACHED') {
+        showAlert({
+          variant: 'success',
+          title: '🎉 Chúc mừng bạn đã chạm đích!',
+          message:
+            'Bạn đã đạt mốc cân nặng mục tiêu thành công! Kallo đã tự động điều chỉnh kế hoạch sang "Duy trì cân nặng" để bảo toàn vóc dáng.',
+        });
+      } else {
+        showAlert({
+          variant: 'success',
+          title: 'Tối ưu lại Calo thành công',
+          message: `Mục tiêu dinh dưỡng mới: ${Math.round(updated.dailyCalorieGoal)} kcal/ngày (TDEE: ${Math.round(updated.tdee)} kcal).`,
+        });
+      }
+    } catch (err) {
+      showAlert({
+        variant: 'danger',
+        title: 'Lỗi',
+        message: 'Không thể tính toán lại lúc này. Vui lòng thử lại sau.',
+      });
+    } finally {
+      setRecalculating(false);
+    }
+  };
 
   const isStepConnected =
     activityState.syncStatus.healthConnect === 'CONNECTED' ||
@@ -427,6 +492,52 @@ export function HomeDashboardScreen({ navigation }: Props) {
               })}
             </View>
           </View>
+
+          {/* ── Recalculate Recommendation Banner ────────────────────────── */}
+          {healthProfile?.recalculationRecommended && (
+            <View
+              style={{
+                marginHorizontal: 16,
+                marginBottom: 16,
+                padding: 14,
+                borderRadius: 16,
+                backgroundColor: colors.brandSoftTint,
+                borderWidth: 1,
+                borderColor: colors.brandPrimary,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 12,
+              }}
+            >
+              <View style={{ flex: 1, gap: 4 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <LightningIcon size={16} color={colors.brandPrimary} />
+                  <AppText variant="labelLg" style={{ color: colors.brandPrimary, fontWeight: '700' }}>
+                    Đề xuất cập nhật Calo
+                  </AppText>
+                </View>
+                <AppText variant="caption" color={colors.textSecondary}>
+                  Cân nặng mới nhất ({healthProfile.latestLoggedWeightKg} kg) đã thay đổi. Bạn có muốn cập nhật lại chỉ số Calo & TDEE theo cân nặng mới?
+                </AppText>
+              </View>
+              <TouchableOpacity
+                onPress={handleRecalculate}
+                disabled={recalculating}
+                style={{
+                  paddingVertical: 8,
+                  paddingHorizontal: 14,
+                  backgroundColor: colors.brandPrimary,
+                  borderRadius: 10,
+                  opacity: recalculating ? 0.7 : 1,
+                }}
+              >
+                <AppText variant="labelMd" style={{ color: '#FFFFFF', fontWeight: '600' }}>
+                  {recalculating ? 'Đang tính...' : 'Áp dụng'}
+                </AppText>
+              </TouchableOpacity>
+            </View>
+          )}
 
           {/* ── 3. Mục tiêu calo (Calorie Target) ────────────────────────── */}
           <View style={styles.calorieSection}>

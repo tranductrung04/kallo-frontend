@@ -34,7 +34,7 @@ export type OnboardingStackParamList = {
   ProfileSummary: undefined;
   CalculatingPlan: undefined;
   PlanResult: undefined;
-  Onboarding: { nickname?: string; gender?: string; height?: string; weight?: string; goal?: string; targetWeight?: string; activity?: string } | undefined;
+  OnboardingFlow: { nickname?: string; gender?: string; height?: string; weight?: string; goal?: string; targetWeight?: string; activity?: string } | undefined;
 };
 export type RootStackParamList = {
   Splash: undefined;

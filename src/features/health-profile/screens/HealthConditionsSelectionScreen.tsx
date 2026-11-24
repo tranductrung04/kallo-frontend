@@ -27,6 +27,8 @@ import {
 import { useTheme } from '@/theme';
 import { AnimatedCard, AnimatedCheckbox } from '../components';
 import { useHealthProfileDraft } from '../hooks/useHealthProfileDraft';
+import { getSystemChronicConditions } from '../api';
+import type { ChronicConditionResponse } from '../types';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -140,7 +142,25 @@ export function HealthConditionsSelectionScreen({
   const insets = useSafeAreaInsets();
   const theme = useTheme();
   const isDark = theme.scheme === 'dark';
-  const { draft, toggleHealthCondition } = useHealthProfileDraft();
+  const { draft, toggleHealthCondition, updateDraft } = useHealthProfileDraft();
+  const [systemConditions, setSystemConditions] = useState<ChronicConditionResponse[]>([]);
+
+  React.useEffect(() => {
+    let isMounted = true;
+    void (async () => {
+      try {
+        const items = await getSystemChronicConditions();
+        if (isMounted && items && items.length > 0) {
+          setSystemConditions(items);
+        }
+      } catch {
+        // Fallback to offline defaults
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const [selectedConditions, setSelectedConditions] = useState<string[]>(
     draft.healthConditions && draft.healthConditions.length > 0
@@ -165,6 +185,27 @@ export function HealthConditionsSelectionScreen({
   };
 
   const handleNext = () => {
+    // Map selected condition keys to backend UUIDs
+    const conditionIds: string[] = [];
+    selectedConditions.forEach((key) => {
+      if (key === 'none') return;
+      const found = systemConditions.find(
+        (c) =>
+          c.id === key ||
+          c.code.toLowerCase().includes(key.toLowerCase()) ||
+          key.toLowerCase().includes(c.code.toLowerCase())
+      );
+      if (found) {
+        conditionIds.push(found.id);
+      } else if (key.length === 36) {
+        conditionIds.push(key);
+      }
+    });
+
+    if (conditionIds.length > 0) {
+      updateDraft('chronicConditionIds', conditionIds);
+    }
+
     if (onNext) {
       onNext();
     } else if (navigation?.navigate) {

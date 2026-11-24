@@ -133,16 +133,10 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
         return;
       }
 
-      // Chỉ điều hướng đến Onboarding nếu vừa đăng ký mới (chưa hoàn thành bước thiết lập hồ sơ)
-      const pendingOnboarding = await AsyncStorage.getItem('@kallo/pending-onboarding');
-      if (pendingOnboarding === 'true') {
-        if (mountedRef.current) setStatus('needsProfile');
-        return;
-      }
-
       // Xác minh hồ sơ sức khỏe trên backend (hoặc local cache nếu offline)
       try {
         const healthProfile = await getHealthProfile();
+        await AsyncStorage.removeItem('@kallo/pending-onboarding');
         await AsyncStorage.setItem('@kallo/health-profile', JSON.stringify(healthProfile));
         if (mountedRef.current) {
           setStatus('signedIn');
@@ -157,6 +151,7 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
         // Trường hợp lỗi mạng, kiểm tra cache local đã lưu trước đó
         const cachedProfile = await AsyncStorage.getItem('@kallo/health-profile');
         if (cachedProfile) {
+          await AsyncStorage.removeItem('@kallo/pending-onboarding');
           if (mountedRef.current) setStatus('signedIn');
         } else {
           await AsyncStorage.setItem('@kallo/pending-onboarding', 'true');
@@ -212,15 +207,28 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
         return result;
       }
 
-      // Nếu tài khoản chưa hoàn tất hồ sơ sức khỏe -> chuyển sang Onboarding
-      if (result.profileCompleted === false) {
-        await AsyncStorage.setItem('@kallo/pending-onboarding', 'true');
-        setStatus('needsProfile');
+      // Nếu tài khoản đã hoàn tất hồ sơ sức khỏe -> vào thẳng màn hình chính (Dashboard)
+      if (result.profileCompleted === true) {
+        await AsyncStorage.removeItem('@kallo/pending-onboarding');
+        setStatus('signedIn');
         return result;
       }
 
-      await AsyncStorage.removeItem('@kallo/pending-onboarding');
-      setStatus('signedIn');
+      // Nếu backend báo profileCompleted false, kiểm tra trực tiếp getHealthProfile() để tránh lệch cờ
+      try {
+        const profile = await getHealthProfile();
+        if (profile) {
+          await AsyncStorage.removeItem('@kallo/pending-onboarding');
+          await AsyncStorage.setItem('@kallo/health-profile', JSON.stringify(profile));
+          setStatus('signedIn');
+          return result;
+        }
+      } catch {
+        // Thực sự chưa có hồ sơ
+      }
+
+      await AsyncStorage.setItem('@kallo/pending-onboarding', 'true');
+      setStatus('needsProfile');
       return result;
     } catch (requestError) {
       const errorMsg = getApiErrorMessage(requestError);
@@ -259,20 +267,33 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
         return result;
       }
 
+      if (result.profileCompleted === true) {
+        await AsyncStorage.removeItem('@kallo/pending-onboarding');
+        setStatus('signedIn');
+        return result;
+      }
+
       // Lần đầu đăng ký hoặc chưa tạo hồ sơ -> điều hướng đến Onboarding
       const isNewUser = Boolean(
         (result as any)?.isNewUser ?? (result as any)?.newUser
       );
-      const isProfileIncomplete = result.profileCompleted === false;
 
-      if (isNewUser || isProfileIncomplete) {
-        await AsyncStorage.setItem('@kallo/pending-onboarding', 'true');
-        setStatus('needsProfile');
-      } else {
-        // Đăng nhập Google bằng tài khoản đã có hồ sơ -> vào thẳng màn hình chính (signedIn)
-        await AsyncStorage.removeItem('@kallo/pending-onboarding');
-        setStatus('signedIn');
+      if (!isNewUser) {
+        try {
+          const profile = await getHealthProfile();
+          if (profile) {
+            await AsyncStorage.removeItem('@kallo/pending-onboarding');
+            await AsyncStorage.setItem('@kallo/health-profile', JSON.stringify(profile));
+            setStatus('signedIn');
+            return result;
+          }
+        } catch {
+          // Thực sự chưa có hồ sơ
+        }
       }
+
+      await AsyncStorage.setItem('@kallo/pending-onboarding', 'true');
+      setStatus('needsProfile');
       return result;
     } catch (requestError) {
       const errorMsg = getApiErrorMessage(requestError);
