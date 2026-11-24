@@ -1,7 +1,12 @@
-export type Gender = 'male' | 'female' | 'other';
-export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'high' | 'veryHigh';
-export type GoalType = 'lose' | 'maintain' | 'gain';
-export type MacroName = 'protein' | 'carbs' | 'fat';
+export type Gender = "male" | "female" | "other";
+export type ActivityLevel =
+  | "sedentary"
+  | "light"
+  | "moderate"
+  | "high"
+  | "veryHigh";
+export type GoalType = "lose" | "maintain" | "gain";
+export type MacroName = "protein" | "carbs" | "fat";
 
 export type MacroPercentages = Record<MacroName, number>;
 export type MacroTargets = MacroPercentages & {
@@ -11,95 +16,103 @@ export type MacroTargets = MacroPercentages & {
 };
 
 // ── Backend Enums (exact match with Spring Boot BE) ──────────────────────────
-export type BackendGender = 'MALE' | 'FEMALE' | 'OTHER';
+export type BackendGender = "MALE" | "FEMALE" | "OTHER";
 export type BackendActivityLevel =
-  | 'SEDENTARY'
-  | 'LIGHTLY_ACTIVE'
-  | 'MODERATELY_ACTIVE'
-  | 'VERY_ACTIVE'
-  | 'EXTRA_ACTIVE';
-export type BackendGoalType = 'LOSE_WEIGHT' | 'MAINTAIN_WEIGHT' | 'GAIN_WEIGHT';
-export type BackendBmiCategory = 'UNDERWEIGHT' | 'NORMAL' | 'OVERWEIGHT' | 'OBESE';
+  | "SEDENTARY"
+  | "LIGHTLY_ACTIVE"
+  | "MODERATELY_ACTIVE"
+  | "VERY_ACTIVE"
+  | "EXTRA_ACTIVE";
+export type BackendGoalType = "LOSE_WEIGHT" | "MAINTAIN_WEIGHT" | "GAIN_WEIGHT";
+export type BackendBmiCategory =
+  | "UNDERWEIGHT"
+  | "NORMAL"
+  | "OVERWEIGHT"
+  | "OBESE";
 
 // ── Bi-directional Mappers (FE UI <-> BE API) ───────────────────────────────
 export function toBackendGender(gender?: Gender): BackendGender {
   switch (gender) {
-    case 'male':
-      return 'MALE';
-    case 'female':
-      return 'FEMALE';
-    case 'other':
+    case "male":
+      return "MALE";
+    case "female":
+      return "FEMALE";
+    case "other":
     default:
-      return 'OTHER';
+      return "OTHER";
   }
 }
 
 export function fromBackendGender(gender?: BackendGender | string): Gender {
   switch (gender) {
-    case 'MALE':
-      return 'male';
-    case 'FEMALE':
-      return 'female';
+    case "MALE":
+      return "male";
+    case "FEMALE":
+      return "female";
     default:
-      return 'other';
+      return "other";
   }
 }
 
-export function toBackendActivityLevel(level?: ActivityLevel): BackendActivityLevel {
+export function toBackendActivityLevel(
+  level?: ActivityLevel,
+): BackendActivityLevel {
   switch (level) {
-    case 'sedentary':
-      return 'SEDENTARY';
-    case 'light':
-      return 'LIGHTLY_ACTIVE';
-    case 'moderate':
-      return 'MODERATELY_ACTIVE';
-    case 'high':
-      return 'VERY_ACTIVE';
-    case 'veryHigh':
-      return 'EXTRA_ACTIVE';
+    case "sedentary":
+      return "SEDENTARY";
+    case "light":
+      return "LIGHTLY_ACTIVE";
+    case "moderate":
+      return "MODERATELY_ACTIVE";
+    case "high":
+      return "VERY_ACTIVE";
+    case "veryHigh":
+      return "EXTRA_ACTIVE";
     default:
-      return 'MODERATELY_ACTIVE';
+      return "MODERATELY_ACTIVE";
   }
 }
 
-export function fromBackendActivityLevel(level?: BackendActivityLevel | string): ActivityLevel {
+export function fromBackendActivityLevel(
+  level?: BackendActivityLevel | string,
+): ActivityLevel {
   switch (level) {
-    case 'SEDENTARY':
-      return 'sedentary';
-    case 'LIGHTLY_ACTIVE':
-      return 'light';
-    case 'MODERATELY_ACTIVE':
-      return 'moderate';
-    case 'VERY_ACTIVE':
-      return 'high';
-    case 'EXTRA_ACTIVE':
-      return 'veryHigh';
+    case "SEDENTARY":
+      return "sedentary";
+    case "LIGHTLY_ACTIVE":
+      return "light";
+    case "MODERATELY_ACTIVE":
+      return "moderate";
+    case "VERY_ACTIVE":
+      return "high";
+    case "EXTRA_ACTIVE":
+      return "veryHigh";
     default:
-      return 'moderate';
+      return "moderate";
   }
 }
 
 export function toBackendGoalType(goal?: GoalType): BackendGoalType {
   switch (goal) {
-    case 'lose':
-      return 'LOSE_WEIGHT';
-    case 'gain':
-      return 'GAIN_WEIGHT';
-    case 'maintain':
+    case "lose":
+      return "LOSE_WEIGHT";
+    case "gain":
+      return "GAIN_WEIGHT";
+    case "maintain":
     default:
-      return 'MAINTAIN_WEIGHT';
+      return "MAINTAIN_WEIGHT";
   }
 }
 
 export function fromBackendGoalType(goal?: BackendGoalType | string): GoalType {
   switch (goal) {
-    case 'LOSE_WEIGHT':
-      return 'lose';
-    case 'GAIN_WEIGHT':
-      return 'gain';
-    case 'MAINTAIN_WEIGHT':
+    case "LOSE_WEIGHT":
+      return "lose";
+    case "GAIN_WEIGHT":
+      return "gain";
+    case "MAINTAIN_WEIGHT":
     default:
-      return 'maintain';
+      return "maintain";
   }
 }
 
@@ -269,12 +282,12 @@ export type HealthProfileDraft = {
 };
 
 export const COMMON_ALLERGIES = [
-  'Hải sản',
-  'Sữa & Chế phẩm sữa',
-  'Đậu phộng & Hạt',
-  'Trứng gà/vịt',
-  'Gluten / Lúa mì',
-  'Đậu nành',
+  "Hải sản",
+  "Sữa & Chế phẩm sữa",
+  "Đậu phộng & Hạt",
+  "Trứng gà/vịt",
+  "Gluten / Lúa mì",
+  "Đậu nành",
 ];
 
 export const STANDARD_ALLERGENS: Array<{
@@ -282,27 +295,63 @@ export const STANDARD_ALLERGENS: Array<{
   name: string;
   nameVi: string;
 }> = [
-  { id: '00000000-0000-0000-0000-000000000001', name: 'Peanuts (Lạc / Đậu phộng)', nameVi: 'Đậu phộng / Lạc' },
-  { id: '00000000-0000-0000-0000-000000000002', name: "Cow's Milk (Sữa bò)", nameVi: 'Sữa & Chế phẩm sữa bò' },
-  { id: '00000000-0000-0000-0000-000000000003', name: 'Eggs (Trứng)', nameVi: 'Trứng gà / Trứng vịt' },
-  { id: '00000000-0000-0000-0000-000000000004', name: 'Tree Nuts (Hạt cây)', nameVi: 'Hạt điều, hạnh nhân, óc chó' },
-  { id: '00000000-0000-0000-0000-000000000005', name: 'Soybeans (Đậu nành)', nameVi: 'Đậu nành & Chế phẩm' },
-  { id: '00000000-0000-0000-0000-000000000006', name: 'Wheat (Lúa mì / Gluten)', nameVi: 'Gluten / Bột mì' },
-  { id: '00000000-0000-0000-0000-000000000007', name: 'Fish (Cá)', nameVi: 'Cá biển & Cá nước ngọt' },
-  { id: '00000000-0000-0000-0000-000000000008', name: 'Crustacean Shellfish (Hải sản có vỏ)', nameVi: 'Tôm, cua, ốc, nghêu, sò' },
-  { id: '00000000-0000-0000-0000-000000000009', name: 'Sesame (Vừng / Mè)', nameVi: 'Mè đen / Vừng' },
+  {
+    id: "00000000-0000-0000-0000-000000000001",
+    name: "Peanuts (Lạc / Đậu phộng)",
+    nameVi: "Đậu phộng / Lạc",
+  },
+  {
+    id: "00000000-0000-0000-0000-000000000002",
+    name: "Cow's Milk (Sữa bò)",
+    nameVi: "Sữa & Chế phẩm sữa bò",
+  },
+  {
+    id: "00000000-0000-0000-0000-000000000003",
+    name: "Eggs (Trứng)",
+    nameVi: "Trứng gà / Trứng vịt",
+  },
+  {
+    id: "00000000-0000-0000-0000-000000000004",
+    name: "Tree Nuts (Hạt cây)",
+    nameVi: "Hạt điều, hạnh nhân, óc chó",
+  },
+  {
+    id: "00000000-0000-0000-0000-000000000005",
+    name: "Soybeans (Đậu nành)",
+    nameVi: "Đậu nành & Chế phẩm",
+  },
+  {
+    id: "00000000-0000-0000-0000-000000000006",
+    name: "Wheat (Lúa mì / Gluten)",
+    nameVi: "Gluten / Bột mì",
+  },
+  {
+    id: "00000000-0000-0000-0000-000000000007",
+    name: "Fish (Cá)",
+    nameVi: "Cá biển & Cá nước ngọt",
+  },
+  {
+    id: "00000000-0000-0000-0000-000000000008",
+    name: "Crustacean Shellfish (Hải sản có vỏ)",
+    nameVi: "Tôm, cua, ốc, nghêu, sò",
+  },
+  {
+    id: "00000000-0000-0000-0000-000000000009",
+    name: "Sesame (Vừng / Mè)",
+    nameVi: "Mè đen / Vừng",
+  },
 ];
 
 export const ACTIVITY_OPTIONS: Array<[ActivityLevel, string]> = [
-  ['sedentary', 'Ít vận động'],
-  ['light', 'Nhẹ'],
-  ['moderate', 'Vừa'],
-  ['high', 'Nhiều'],
-  ['veryHigh', 'Rất nhiều'],
+  ["sedentary", "Ít vận động"],
+  ["light", "Nhẹ"],
+  ["moderate", "Vừa"],
+  ["high", "Nhiều"],
+  ["veryHigh", "Rất nhiều"],
 ];
 
 export const GOAL_OPTIONS: Array<[GoalType, string]> = [
-  ['lose', 'Giảm cân'],
-  ['maintain', 'Giữ cân'],
-  ['gain', 'Tăng cân'],
+  ["lose", "Giảm cân"],
+  ["maintain", "Giữ cân"],
+  ["gain", "Tăng cân"],
 ];

@@ -1,5 +1,9 @@
-import { api } from '@/services/api/client';
-import { getApiErrorMessage, getApiErrorCode, type ApiResponse } from '@/features/auth/api';
+import { api } from "@/services/api/client";
+import {
+  getApiErrorMessage,
+  getApiErrorCode,
+  type ApiResponse,
+} from "@/features/auth/api";
 import type {
   HealthProfileRequestPayload,
   HealthProfileResponse,
@@ -8,15 +12,19 @@ import type {
   UpdateUserChronicConditionsRequest,
   UserAllergyResponse,
   UpdateUserAllergiesRequest,
-} from './types';
+} from "./types";
 
 export { getApiErrorMessage, getApiErrorCode };
 export type { HealthProfileResponse };
 export type HealthProfile = HealthProfileResponse;
 
 function unwrapResponse<T>(response: { data: any }): T {
-  if (response.data && typeof response.data === 'object') {
-    if ('data' in response.data && response.data.data !== undefined && response.data.data !== null) {
+  if (response.data && typeof response.data === "object") {
+    if (
+      "data" in response.data &&
+      response.data.data !== undefined &&
+      response.data.data !== null
+    ) {
       return response.data.data;
     }
     return response.data;
@@ -25,12 +33,14 @@ function unwrapResponse<T>(response: { data: any }): T {
 }
 
 function normalizeProfile(raw: any): HealthProfileResponse {
-  if (!raw || typeof raw !== 'object') return raw;
+  if (!raw || typeof raw !== "object") return raw;
   const dob = raw.dob || raw.birthDate;
-  const waterLiters = raw.waterLiters ?? (raw.waterGoalMl ? raw.waterGoalMl / 1000 : 2.0);
+  const waterLiters =
+    raw.waterLiters ?? (raw.waterGoalMl ? raw.waterGoalMl / 1000 : 2.0);
   const rateClamped = raw.rateClamped ?? raw.safetyClamped ?? false;
 
-  const proteinGrams = raw.macronutrients?.proteinGrams ?? raw.proteinGoalG ?? 100;
+  const proteinGrams =
+    raw.macronutrients?.proteinGrams ?? raw.proteinGoalG ?? 100;
   const carbGrams = raw.macronutrients?.carbGrams ?? raw.carbsGoalG ?? 150;
   const fatGrams = raw.macronutrients?.fatGrams ?? raw.fatGoalG ?? 45;
 
@@ -59,7 +69,9 @@ function normalizeProfile(raw: any): HealthProfileResponse {
  * Trả về 404 (PROFILE_NOT_FOUND) nếu chưa tạo hồ sơ.
  */
 export async function getHealthProfile(): Promise<HealthProfileResponse> {
-  const response = await api.get<ApiResponse<HealthProfileResponse>>('/v1/users/me/profile');
+  const response = await api.get<ApiResponse<HealthProfileResponse>>(
+    "/v1/users/me/profile",
+  );
   const data = unwrapResponse<HealthProfileResponse>(response);
   return normalizeProfile(data);
 }
@@ -69,7 +81,7 @@ export async function getHealthProfile(): Promise<HealthProfileResponse> {
  * Endpoint: PUT /api/v1/users/me/profile
  */
 export async function saveHealthProfile(
-  payload: HealthProfileRequestPayload
+  payload: HealthProfileRequestPayload,
 ): Promise<HealthProfileResponse> {
   // Chuẩn hoá payload khớp với ProfileRequestDto Spring Boot
   const cleanPayload = {
@@ -79,13 +91,15 @@ export async function saveHealthProfile(
     weightKg: payload.weightKg,
     activityLevel: payload.activityLevel,
     goalType: payload.goalType,
-    targetWeightKg: payload.goalType === 'MAINTAIN_WEIGHT' ? null : payload.targetWeightKg,
-    weeklyRateKg: payload.goalType === 'MAINTAIN_WEIGHT' ? 0.0 : payload.weeklyRateKg,
+    targetWeightKg:
+      payload.goalType === "MAINTAIN_WEIGHT" ? null : payload.targetWeightKg,
+    weeklyRateKg:
+      payload.goalType === "MAINTAIN_WEIGHT" ? 0.0 : payload.weeklyRateKg,
   };
 
   const response = await api.put<ApiResponse<HealthProfileResponse>>(
-    '/v1/users/me/profile',
-    cleanPayload
+    "/v1/users/me/profile",
+    cleanPayload,
   );
   const data = unwrapResponse<HealthProfileResponse>(response);
   return normalizeProfile(data);
@@ -97,7 +111,7 @@ export async function saveHealthProfile(
  */
 export async function recalculateHealthProfile(): Promise<HealthProfileResponse> {
   const response = await api.post<ApiResponse<HealthProfileResponse>>(
-    '/v1/users/me/profile/recalculate'
+    "/v1/users/me/profile/recalculate",
   );
   const data = unwrapResponse<HealthProfileResponse>(response);
   return normalizeProfile(data);
@@ -107,9 +121,11 @@ export async function recalculateHealthProfile(): Promise<HealthProfileResponse>
  * 4. Lấy danh mục bệnh mạn tính hệ thống.
  * Endpoint: GET /api/v1/chronic-conditions
  */
-export async function getSystemChronicConditions(): Promise<ChronicConditionResponse[]> {
+export async function getSystemChronicConditions(): Promise<
+  ChronicConditionResponse[]
+> {
   const response = await api.get<ApiResponse<ChronicConditionResponse[]>>(
-    '/v1/chronic-conditions'
+    "/v1/chronic-conditions",
   );
   return unwrapResponse<ChronicConditionResponse[]>(response);
 }
@@ -118,9 +134,11 @@ export async function getSystemChronicConditions(): Promise<ChronicConditionResp
  * 5. Lấy danh sách bệnh mạn tính của người dùng hiện tại.
  * Endpoint: GET /api/v1/users/me/chronic-conditions
  */
-export async function getUserChronicConditions(): Promise<UserChronicConditionResponse[]> {
+export async function getUserChronicConditions(): Promise<
+  UserChronicConditionResponse[]
+> {
   const response = await api.get<ApiResponse<UserChronicConditionResponse[]>>(
-    '/v1/users/me/chronic-conditions'
+    "/v1/users/me/chronic-conditions",
   );
   return unwrapResponse<UserChronicConditionResponse[]>(response);
 }
@@ -130,11 +148,11 @@ export async function getUserChronicConditions(): Promise<UserChronicConditionRe
  * Endpoint: PUT /api/v1/users/me/chronic-conditions
  */
 export async function updateUserChronicConditions(
-  payload: UpdateUserChronicConditionsRequest
+  payload: UpdateUserChronicConditionsRequest,
 ): Promise<UserChronicConditionResponse[]> {
   const response = await api.put<ApiResponse<UserChronicConditionResponse[]>>(
-    '/v1/users/me/chronic-conditions',
-    payload
+    "/v1/users/me/chronic-conditions",
+    payload,
   );
   return unwrapResponse<UserChronicConditionResponse[]>(response);
 }
@@ -145,7 +163,7 @@ export async function updateUserChronicConditions(
  */
 export async function getUserAllergies(): Promise<UserAllergyResponse[]> {
   const response = await api.get<ApiResponse<UserAllergyResponse[]>>(
-    '/v1/users/me/allergies'
+    "/v1/users/me/allergies",
   );
   return unwrapResponse<UserAllergyResponse[]>(response);
 }
@@ -155,11 +173,11 @@ export async function getUserAllergies(): Promise<UserAllergyResponse[]> {
  * Endpoint: PUT /api/v1/users/me/allergies
  */
 export async function updateUserAllergies(
-  payload: UpdateUserAllergiesRequest
+  payload: UpdateUserAllergiesRequest,
 ): Promise<UserAllergyResponse[]> {
   const response = await api.put<ApiResponse<UserAllergyResponse[]>>(
-    '/v1/users/me/allergies',
-    payload
+    "/v1/users/me/allergies",
+    payload,
   );
   return unwrapResponse<UserAllergyResponse[]>(response);
 }
