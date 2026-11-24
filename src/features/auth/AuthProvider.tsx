@@ -63,7 +63,7 @@ type AuthContextValue = {
   clearError: () => void;
 };
 
-const AuthContext = createContext<AuthContextValue | null>(null);
+export const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: React.PropsWithChildren) {
   const [status, setStatus] = useState<AuthStatus>("loading");

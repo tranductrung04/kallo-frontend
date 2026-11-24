@@ -401,7 +401,7 @@ export function VoiceLogModal({ navigation, route }: Props) {
                   },
                 ]}
               >
-                {'Nhấn nút mic và đọc rõ ràng tên món và\nkhối lượng nếu cần để Wao tìm cho bạn\nnhé'}
+                {'Nhấn nút mic và đọc rõ ràng tên món và\nkhối lượng nếu cần để Kallo tìm cho bạn\nnhé'}
               </Text>
             </View>
 

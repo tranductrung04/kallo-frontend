@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   Image,
+  RefreshControl,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -10,11 +11,13 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import { images } from '@/assets/images';
 import { ChevronLeftIcon, InfoIcon } from '@/components/icons';
 import { useAlert } from '@/components/common';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
+import { todayKey } from '@/features/nutrition/utils';
 import { useGamification } from '../GamificationProvider';
 import {
   StreakActionCardWidget,
@@ -34,8 +37,14 @@ export function StreakDetailModal({ navigation }: Props) {
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const [heroHeight, setHeroHeight] = useState<number>(0);
   const [isRulesVisible, setIsRulesVisible] = useState(false);
-  const { streak, freezeStreak } = useGamification();
+  const { streak, freezeStreak, refreshStreak, isStreakLoading } = useGamification();
   const { showAlert, showConfirm } = useAlert();
+
+  useFocusEffect(
+    useCallback(() => {
+      void refreshStreak();
+    }, [refreshStreak])
+  );
 
   // Danh sách các ngày trong tuần (T2 -> CN)
   const weekDays = useMemo(
@@ -57,9 +66,8 @@ export function StreakDetailModal({ navigation }: Props) {
   };
 
   const handleAddMealPress = () => {
-    const today = new Date().toISOString().slice(0, 10);
     (navigation as any).navigate('FoodSearch', {
-      date: today,
+      date: todayKey(),
       meal: 'snack',
     });
   };
@@ -116,6 +124,14 @@ export function StreakDetailModal({ navigation }: Props) {
           { paddingBottom: insets.bottom + 36 },
         ]}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isStreakLoading}
+            onRefresh={refreshStreak}
+            tintColor="#FFFFFF"
+            colors={[c.brandPrimary || '#8A5AEB']}
+          />
+        }
       >
         {/* ── 1. Top Hero Card with Background ────────────────────────── */}
         <View
@@ -175,6 +191,8 @@ export function StreakDetailModal({ navigation }: Props) {
             {/* Callout Action Card (streak=0: fooddefault; streak>0: celebration card) */}
             <StreakActionCardWidget
               streak={currentStreak}
+              todayCompleted={streak.todayCompleted ?? (currentStreak > 0 && streak.isMaintainedToday)}
+              atRisk={streak.atRisk}
               onLogMeal={handleAddMealPress}
             />
           </View>

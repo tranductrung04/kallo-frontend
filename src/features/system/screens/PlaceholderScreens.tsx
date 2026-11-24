@@ -65,7 +65,7 @@ export function ProfileScreen({ navigation }: ProfileProps) {
         <AppText color={theme.colors.textMuted}>Thiết lập sức khỏe, mục tiêu và tùy chọn ứng dụng.</AppText>
       </AppCard>
       <AppButton label="Chuỗi ngày Kallo Streak" variant="secondary" onPress={() => root?.navigate('StreakDetail')} />
-      <AppButton label="Huy hiệu & Thử thách" variant="secondary" onPress={() => root?.navigate('BadgesChallenges')} />
+      <AppButton label="Huy hiệu & Thử thách" variant="secondary" onPress={() => root?.navigate('Challenges')} />
       <AppButton label="Bảng xếp hạng bạn bè" variant="secondary" onPress={() => root?.navigate('FriendsLeaderboard')} />
       <AppButton label="Trợ lý Kallo AI" variant="secondary" onPress={() => root?.navigate('NutritionChat')} />
       <AppButton label="Kế hoạch Thực đơn AI" variant="secondary" onPress={() => root?.navigate('MealPlanOverview')} />

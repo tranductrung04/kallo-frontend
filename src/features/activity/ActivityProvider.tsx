@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { randomUUID } from 'expo-crypto';
 import { api } from '@/services/api/client';
 import { todayKey } from '@/features/nutrition/utils';
+import { toast } from '@/components/common';
 import { findActivityMeta, mapBackendCodeToActivityType } from './catalog';
 import {
   aggregateDailyActivity,
@@ -307,7 +308,7 @@ export function ActivityProvider({ children }: React.PropsWithChildren) {
 
   // ── Add Activity Log ──────────────────────────────────────────
   const addActivityLog = useCallback(
-    (input: Omit<ActivityLog, 'id' | 'caloriesBurned'> & { caloriesBurned?: number; id?: string }): ActivityLog => {
+    (input: Omit<ActivityLog, 'id' | 'caloriesBurned'> & { caloriesBurned?: number; id?: string; silentToast?: boolean }): ActivityLog => {
       const meta = findActivityMeta(input.type);
       const latestWeight =
         state.weightLogs.length > 0 ? state.weightLogs[0].weightKg : 65;
@@ -337,6 +338,21 @@ export function ActivityProvider({ children }: React.PropsWithChildren) {
         source: input.source || 'MANUAL',
         timestamp: startedAt,
       };
+
+      // Toast notification: hiển thị thông báo thêm hoạt động thành công
+      if (!input.silentToast) {
+        const details = [
+          `${log.durationMinutes} phút`,
+          log.distanceKm ? `${log.distanceKm} km` : null,
+          `-${log.caloriesBurned} kcal`,
+        ]
+          .filter(Boolean)
+          .join(' • ');
+
+        toast.success(`Đã ghi nhận ${log.name} (${details})`, {
+          title: 'Thêm hoạt động thành công',
+        });
+      }
 
       // Optimistic update
       setState((prev) => {

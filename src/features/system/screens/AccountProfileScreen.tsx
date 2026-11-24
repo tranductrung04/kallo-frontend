@@ -731,19 +731,12 @@ export function AccountProfileScreen({ navigation }: Props) {
         <View style={styles.vipBannerCard}>
           <View style={styles.vipBannerContent}>
             <AppText variant="labelLg" style={styles.vipBannerTitle}>
-              Miễn phí 14 ngày toàn bộ tính năng
+              Đua top bảng xếp hạng cùng bạn bè
             </AppText>
             <TouchableOpacity
               activeOpacity={0.85}
               style={styles.vipBannerButton}
-              onPress={() =>
-                showAlert({
-                  variant: "info",
-                  title: "Kallo Premium VIP",
-                  message:
-                    "Kích hoạt 14 ngày dùng thử miễn phí toàn bộ tính năng: Quét AI không giới hạn, phân tích thực đơn chuyên sâu và mở khóa toàn bộ huy hiệu!",
-                })
-              }
+              onPress={() => root?.navigate("GameHub")}
             >
               <AppText variant="labelMd" style={styles.vipBannerButtonText}>
                 Trải nghiệm ngay

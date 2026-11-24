@@ -1,5 +1,11 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthContext } from '@/features/auth/AuthProvider';
+import { IS_DEMO_MODE } from '@/features/auth/localAccount';
+import { NutritionContext } from '@/features/nutrition/NutritionProvider';
+import { todayKey } from '@/features/nutrition/utils';
+import { getAccessToken } from '@/services/api/tokenStorage';
+import { getStreak, getStreakApiErrorMessage } from './api';
 import type {
   Badge,
   Challenge,
@@ -23,10 +29,35 @@ import {
   MOCK_SEARCH_USERS,
 } from './utils';
 
-const STORAGE_KEY = '@kallo/gamification-v2';
+const STORAGE_KEY = IS_DEMO_MODE ? '@kallo/gamification-demo-v1' : '@kallo/gamification-prod-v1';
+
+const DEMO_STREAK: StreakInfo = {
+  currentStreak: 7,
+  longestStreak: 12,
+  freezeDaysRemaining: 2,
+  isMaintainedToday: true,
+  isFrozenToday: false,
+  lastCompletedDate: '2026-10-15',
+  todayCompleted: true,
+  atRisk: false,
+};
+
+const INITIAL_STREAK: StreakInfo = {
+  currentStreak: 0,
+  longestStreak: 0,
+  freezeDaysRemaining: 2,
+  isMaintainedToday: false,
+  isFrozenToday: false,
+  lastCompletedDate: undefined,
+  todayCompleted: false,
+  atRisk: false,
+};
 
 export type GamificationContextValue = {
   streak: StreakInfo;
+  isStreakLoading: boolean;
+  streakError: string | null;
+  refreshStreak: () => Promise<StreakInfo | null>;
   badges: Badge[];
   challenges: Challenge[];
   friends: Friend[];
@@ -35,6 +66,7 @@ export type GamificationContextValue = {
   incomingRequests: FriendRequest[];
   outgoingRequests: FriendRequest[];
   activeToast: GameEvent | null;
+  userPoints: number;
   freezeStreak: () => boolean;
   unlockBadge: (badgeId: string) => void;
   joinChallenge: (challengeId: string) => void;
@@ -57,31 +89,108 @@ export type GamificationContextValue = {
 const GamificationContext = createContext<GamificationContextValue | null>(null);
 
 export function GamificationProvider({ children }: React.PropsWithChildren) {
-  const [streak, setStreak] = useState<StreakInfo>({
-    currentStreak: 7,
-    longestStreak: 12,
-    freezeDaysRemaining: 2,
-    isMaintainedToday: true,
-    isFrozenToday: false,
-    lastCompletedDate: '2026-10-15',
-    todayCompleted: true,
-    atRisk: false,
-  });
+  const auth = useContext(AuthContext);
+  const nutrition = useContext(NutritionContext);
+  const [streak, setStreak] = useState<StreakInfo>(IS_DEMO_MODE ? DEMO_STREAK : INITIAL_STREAK);
 
-  const [badges, setBadges] = useState<Badge[]>(INITIAL_BADGES);
-  const [challenges, setChallenges] = useState<Challenge[]>(INITIAL_CHALLENGES);
-  const [friends, setFriends] = useState<Friend[]>(INITIAL_FRIENDS);
+  const [isStreakLoading, setIsStreakLoading] = useState(false);
+  const [streakError, setStreakError] = useState<string | null>(null);
+  const [isReady, setIsReady] = useState(false);
+
+  const [badges, setBadges] = useState<Badge[]>(
+    IS_DEMO_MODE
+      ? INITIAL_BADGES
+      : INITIAL_BADGES.map((b) => ({ ...b, isUnlocked: false, unlockedAt: undefined }))
+  );
+  const [challenges, setChallenges] = useState<Challenge[]>(
+    IS_DEMO_MODE
+      ? INITIAL_CHALLENGES
+      : INITIAL_CHALLENGES.map((c) => ({ ...c, isJoined: false, isCompleted: false, currentProgress: 0 }))
+  );
+  const [friends, setFriends] = useState<Friend[]>(IS_DEMO_MODE ? INITIAL_FRIENDS : []);
   const [gameSettings, setGameSettings] = useState<GameSettings>(INITIAL_GAME_SETTINGS);
-  const [incomingRequests, setIncomingRequests] = useState<FriendRequest[]>(INITIAL_INCOMING_REQUESTS);
-  const [outgoingRequests, setOutgoingRequests] = useState<FriendRequest[]>(INITIAL_OUTGOING_REQUESTS);
+  const [incomingRequests, setIncomingRequests] = useState<FriendRequest[]>(
+    IS_DEMO_MODE ? INITIAL_INCOMING_REQUESTS : []
+  );
+  const [outgoingRequests, setOutgoingRequests] = useState<FriendRequest[]>(
+    IS_DEMO_MODE ? INITIAL_OUTGOING_REQUESTS : []
+  );
   const [activeToast, setActiveToast] = useState<GameEvent | null>(null);
 
   const isSharingPrivacy = gameSettings.sharePoints || gameSettings.shareStreak;
 
+  // Tự động kiểm tra và cập nhật streak khi có món ăn được ghi nhận hôm nay (Offline-First)
+  useEffect(() => {
+    if (!nutrition?.ready) return;
+    const today = todayKey();
+    const hasMealToday = nutrition.state.foodLogs.some((log) => log.date === today);
+
+    if (hasMealToday) {
+      setStreak((prev) => {
+        if (prev.todayCompleted && prev.currentStreak > 0) return prev;
+        const newCurrent = prev.currentStreak > 0 ? prev.currentStreak : 1;
+        return {
+          ...prev,
+          currentStreak: newCurrent,
+          longestStreak: Math.max(prev.longestStreak, newCurrent),
+          todayCompleted: true,
+          isMaintainedToday: true,
+          atRisk: false,
+          lastCompletedDate: today,
+        };
+      });
+    }
+  }, [nutrition?.ready, nutrition?.state.foodLogs]);
+
+  const refreshStreak = useCallback(async (): Promise<StreakInfo | null> => {
+    if (IS_DEMO_MODE) {
+      return null;
+    }
+    try {
+      const token = await getAccessToken();
+      if (!token) {
+        return null;
+      }
+      setIsStreakLoading(true);
+      setStreakError(null);
+      const res = await getStreak();
+      let updated: StreakInfo | null = null;
+      setStreak((prev) => {
+        const today = todayKey();
+        const hasMealToday = nutrition?.state.foodLogs.some((log) => log.date === today) ?? false;
+        const isTodayDone = res.todayCompleted || hasMealToday;
+        const current = res.currentStreak > 0 ? res.currentStreak : (hasMealToday ? Math.max(prev.currentStreak, 1) : 0);
+        const longest = Math.max(res.longestStreak, current, prev.longestStreak);
+
+        updated = {
+          ...prev,
+          currentStreak: current,
+          longestStreak: longest,
+          lastCompletedDate: isTodayDone ? today : (res.lastCompletedDate ?? undefined),
+          todayCompleted: isTodayDone,
+          isMaintainedToday: isTodayDone,
+          atRisk: isTodayDone ? false : res.atRisk,
+        };
+        return updated;
+      });
+      return updated;
+    } catch (err) {
+      const msg = getStreakApiErrorMessage(err);
+      setStreakError(msg);
+      console.warn('[GamificationProvider] getStreak failed (offline fallback active):', err);
+      return null;
+    } finally {
+      setIsStreakLoading(false);
+    }
+  }, [nutrition?.state.foodLogs]);
+
   // Restore cache
   useEffect(() => {
     void AsyncStorage.getItem(STORAGE_KEY).then((data) => {
-      if (!data) return;
+      if (!data) {
+        setIsReady(true);
+        return;
+      }
       try {
         const parsed = JSON.parse(data);
         if (parsed.streak) setStreak(parsed.streak);
@@ -94,8 +203,16 @@ export function GamificationProvider({ children }: React.PropsWithChildren) {
       } catch {
         /* Ignore invalid cache */
       }
+      setIsReady(true);
     });
   }, []);
+
+  // Fetch streak once cache is ready and user is signed in
+  useEffect(() => {
+    if (isReady && (!auth || auth.status === 'signedIn')) {
+      void refreshStreak();
+    }
+  }, [isReady, auth?.status, refreshStreak]);
 
   // Save changes
   useEffect(() => {
@@ -127,6 +244,7 @@ export function GamificationProvider({ children }: React.PropsWithChildren) {
       ...prev,
       freezeDaysRemaining: prev.freezeDaysRemaining - 1,
       isFrozenToday: true,
+      atRisk: false,
     }));
     return true;
   }, [streak.freezeDaysRemaining, streak.isFrozenToday]);
@@ -274,6 +392,9 @@ export function GamificationProvider({ children }: React.PropsWithChildren) {
 
   const searchUsers = useCallback(
     (query: string): UserSearchResult[] => {
+      if (!IS_DEMO_MODE) {
+        return [];
+      }
       const q = query.trim().toLowerCase();
       if (!q) return [];
       // Match by friend code
@@ -299,21 +420,26 @@ export function GamificationProvider({ children }: React.PropsWithChildren) {
     [friends]
   );
 
+  const userPoints = IS_DEMO_MODE ? 720 : 0;
+
   const getLeaderboard = useCallback(
     (metric: LeaderboardMetric): LeaderboardEntry[] => {
       return buildLeaderboard(metric, friends, {
         name: 'Tôi',
         streak: streak.currentStreak,
-        challengeScore: 350,
-        weeklySteps: 48500,
+        challengeScore: userPoints,
+        weeklySteps: IS_DEMO_MODE ? 48500 : 0,
         isSharing: gameSettings.sharePoints,
       });
     },
-    [friends, streak.currentStreak, gameSettings.sharePoints]
+    [friends, streak.currentStreak, userPoints, gameSettings.sharePoints]
   );
 
   const value: GamificationContextValue = {
     streak,
+    isStreakLoading,
+    streakError,
+    refreshStreak,
     badges,
     challenges,
     friends,
@@ -322,6 +448,7 @@ export function GamificationProvider({ children }: React.PropsWithChildren) {
     incomingRequests,
     outgoingRequests,
     activeToast,
+    userPoints,
     freezeStreak,
     unlockBadge,
     joinChallenge,

@@ -32,7 +32,8 @@ export function FoodSearchScreen({ navigation, route }: Props) {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { foods, state } = useNutrition();
 
-  const [date, setDate] = useState(route.params.date || todayKey());
+  const initialDate = route.params?.date === 'today' || !route.params?.date ? todayKey() : route.params.date;
+  const [date, setDate] = useState(initialDate);
   const [selectedHour, setSelectedHour] = useState(route.params.hour || '11:00');
   const [meal, setMeal] = useState<MealSlot>(
     route.params.meal || getMealSlotForHour(selectedHour)

@@ -113,7 +113,7 @@ export function StepConnectModal({
               source={images.trackerLogo}
               style={styles.appLogo}
               resizeMode="contain"
-              accessibilityLabel="Wao App"
+              accessibilityLabel="Kallo App"
             />
 
             <Image

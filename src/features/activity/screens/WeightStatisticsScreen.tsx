@@ -318,6 +318,8 @@ export function WeightStatisticsScreen({ navigation }: Props) {
           <ChevronLeftIcon size={22} color={c.textPrimary} />
         </TouchableOpacity>
 
+        <Text style={styles.headerTitle}>Thống kê cân nặng</Text>
+
         <TouchableOpacity
           onPress={() => navigation.navigate('RecordWeight')}
           style={styles.headerUpdateBtn}

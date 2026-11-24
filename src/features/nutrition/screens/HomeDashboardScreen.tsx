@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   Image,
@@ -15,6 +15,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   AppButton,
   AppCard,
@@ -53,15 +54,18 @@ import { createStyles } from './HomeDashboard/HomeDashboardScreen.styles';
 import {
   BowlFoodPlusIcon,
   CalendarIcon,
+  ChevronRightIcon,
   CutleryIcon,
   DropletIcon,
   FiberIcon,
   FlagIcon,
   FlameIcon,
+  GamepadIcon,
   WheatIcon,
   LightningIcon,
   PlusIcon,
   SaltIcon,
+  StarIcon,
   SugarIcon,
   TrophyIcon,
   UsersIcon,
@@ -87,7 +91,44 @@ export function HomeDashboardScreen({ navigation }: Props) {
     getActivitiesForDate,
     state: activityState,
   } = useActivity();
-  const { streak, badges, challenges, friends, incomingRequests } = useGamification();
+  const {
+    streak,
+    badges,
+    challenges,
+    friends,
+    incomingRequests,
+    userPoints,
+    getLeaderboard,
+    refreshStreak,
+  } = useGamification();
+
+  const pointsLeaderboard = useMemo(() => getLeaderboard('challenge'), [getLeaderboard]);
+  const userRankEntry = useMemo(
+    () => pointsLeaderboard.find((e) => e.isCurrentUser),
+    [pointsLeaderboard]
+  );
+  const userRank = userRankEntry ? userRankEntry.rank : null;
+
+  const higherPlayer = useMemo(() => {
+    if (!userRankEntry || userRankEntry.rank <= 1) return null;
+    return pointsLeaderboard.find((e) => e.rank === userRankEntry.rank - 1);
+  }, [userRankEntry, pointsLeaderboard]);
+
+  const pointsToOvertake = useMemo(() => {
+    if (!higherPlayer || !userRankEntry) return 0;
+    return Math.max(1, higherPlayer.score - userRankEntry.score + 1);
+  }, [higherPlayer, userRankEntry]);
+
+  const activeChallenge = useMemo(
+    () => challenges.find((c) => c.isJoined && !c.isCompleted),
+    [challenges]
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      void refreshStreak();
+    }, [refreshStreak])
+  );
   const [calendarModalVisible, setCalendarModalVisible] = useState(false);
   const [calorieGoalModalVisible, setCalorieGoalModalVisible] = useState(false);
   const [calorieIntakeModalVisible, setCalorieIntakeModalVisible] = useState(false);
@@ -166,6 +207,15 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const isStepConnected =
     activityState.syncStatus.healthConnect === 'CONNECTED' ||
     (Platform.OS === 'ios' && activityState.syncStatus.appleHealth === 'CONNECTED');
+
+  const unlockedBadgesCount = useMemo(
+    () => badges.filter((b) => b.isUnlocked).length,
+    [badges]
+  );
+  const joinedChallengesCount = useMemo(
+    () => challenges.filter((c) => c.isJoined).length,
+    [challenges]
+  );
 
   const latestActivityName = useMemo(() => {
     const dayActivities = getActivitiesForDate(selectedDate);
@@ -891,6 +941,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
           <AppCard
             accessibilityLabel="Thống kê cân nặng"
             onPress={() => root?.navigate('WeightStatistics')}
+            style={styles.weightCard}
           >
             <View style={styles.weightHeaderRow}>
               <Image
@@ -930,48 +981,178 @@ export function HomeDashboardScreen({ navigation }: Props) {
             </View>
           </AppCard>
 
-          {/* ── 10. Thử thách & Cộng đồng (Gamification Cards) ─────────── */}
+          {/* ── 10. Game Hub & Thử thách (Gamification Section) ─────────── */}
           <View style={styles.sectionBlock}>
             <View style={styles.sectionHeaderRow}>
-              <AppText variant="headlineSm">Thử thách & Cộng đồng</AppText>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <AppText variant="headlineSm">Game Hub</AppText>
+                <View
+                  style={{
+                    backgroundColor: colors.vipStreak,
+                    paddingHorizontal: 6,
+                    paddingVertical: 1,
+                    borderRadius: 8,
+                  }}
+                >
+                  <AppText variant="labelSm" color="#FFFFFF" style={{ fontSize: 9, fontWeight: '700' }}>
+                    MỚI
+                  </AppText>
+                </View>
+              </View>
             </View>
 
             <View style={styles.communityGrid}>
-              <AppCard
-                style={styles.communityCard}
-                onPress={() => root?.navigate('BadgesChallenges')}
+              {/* Featured Game Hub Hero Card */}
+              <TouchableOpacity
+                activeOpacity={0.88}
+                onPress={() => root?.navigate('GameHub')}
+                accessibilityRole="button"
+                accessibilityLabel="Vào Game Hub Kallo"
+                style={[
+                  styles.gameHubHeroCard,
+                  {
+                    backgroundColor:
+                      theme.scheme === 'dark' ? 'rgba(123, 79, 224, 0.16)' : '#F6F1FF',
+                    borderColor:
+                      theme.scheme === 'dark' ? 'rgba(164, 118, 254, 0.28)' : '#E4DCF9',
+                  },
+                ]}
               >
-                <View style={[styles.communityIconBox, { backgroundColor: colors.brandSoftTint }]}>
-                  <TrophyIcon size={22} color={colors.vipStreak} />
-                </View>
-                <View style={styles.communityTextWrap}>
-                  <AppText variant="labelLg" color={colors.textPrimary}>Huy hiệu & Thử thách</AppText>
-                  <AppText variant="caption" color={colors.textSecondary}>
-                    {badges.filter((b) => b.isUnlocked).length}/{badges.length} huy hiệu • {challenges.filter((c) => c.isJoined).length} đang tham gia
-                  </AppText>
-                </View>
-                <AppText variant="caption" color={colors.brandPrimary} style={styles.bold}>
-                  Xem →
-                </AppText>
-              </AppCard>
+                <View
+                  style={[
+                    styles.gameHubGlowCircle,
+                    {
+                      backgroundColor:
+                        theme.scheme === 'dark'
+                          ? 'rgba(158, 100, 247, 0.2)'
+                          : 'rgba(123, 79, 224, 0.08)',
+                    },
+                  ]}
+                />
 
-              <AppCard
-                style={styles.communityCard}
-                onPress={() => root?.navigate('FriendsLeaderboard')}
-              >
-                <View style={[styles.communityIconBox, { backgroundColor: colors.brandSoftTint }]}>
-                  <UsersIcon size={22} color={colors.brandPrimary} />
+                <View style={styles.gameHubHeroTopRow}>
+                  <View style={styles.gameHubIconAndTitle}>
+                    <View
+                      style={[
+                        styles.gameHubIconBox,
+                        {
+                          backgroundColor:
+                            theme.scheme === 'dark'
+                              ? 'rgba(164, 118, 254, 0.3)'
+                              : '#E9DDFF',
+                        },
+                      ]}
+                    >
+                      <GamepadIcon size={24} color={colors.brandPrimary} />
+                    </View>
+                    <View style={styles.gameHubTitleWrap}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <View style={[styles.gameHubStandingPill, { backgroundColor: colors.brandSoftTint }]}>
+                          <AppText variant="labelSm" color={colors.brandPrimary} style={{ fontSize: 10, fontWeight: '700' }}>
+                            {userRank ? `Hạng #${userRank}` : 'Chưa có hạng'}
+                          </AppText>
+                        </View>
+                      </View>
+                      <AppText variant="caption" color={colors.textSecondary}>
+                        {friends.length > 0
+                          ? `Đua top bảng xếp hạng cùng ${friends.length} bạn bè`
+                          : 'Đua top bảng xếp hạng cùng bạn bè'}
+                      </AppText>
+                    </View>
+                  </View>
+
+                  <View style={[styles.gameHubPointsBadge, { backgroundColor: colors.vipStreakBg }]}>
+                    <AppText variant="labelSm" color={colors.vipStreak} style={{ fontWeight: '700' }}>
+                      {userPoints ?? 0} đ
+                    </AppText>
+                  </View>
                 </View>
-                <View style={styles.communityTextWrap}>
-                  <AppText variant="labelLg" color={colors.textPrimary}>Bảng xếp hạng Bạn bè</AppText>
-                  <AppText variant="caption" color={colors.textSecondary}>
-                    {friends.length} bạn bè {incomingRequests.length > 0 ? `• ${incomingRequests.length} lời mời mới` : ''}
-                  </AppText>
+
+                <View
+                  style={[
+                    styles.gameHubHeroDivider,
+                    {
+                      backgroundColor:
+                        theme.scheme === 'dark' ? 'rgba(255,255,255,0.08)' : '#EBE5F7',
+                    },
+                  ]}
+                />
+
+                <View style={styles.gameHubHeroBottomRow}>
+                  <View style={styles.gameHubHeroGapWrap}>
+                    <LightningIcon size={14} color={colors.vipStreak} />
+                    {!userRank ? (
+                      <AppText variant="caption" color={colors.textSecondary} numberOfLines={1}>
+                        Tham gia thử thách để xuất hiện trên BXH
+                      </AppText>
+                    ) : userRank === 1 ? (
+                      <AppText variant="caption" color={colors.textSecondary} numberOfLines={1}>
+                        Bạn đang dẫn đầu BXH tuần này! 👑
+                      </AppText>
+                    ) : higherPlayer ? (
+                      <AppText variant="caption" color={colors.textSecondary} numberOfLines={1}>
+                        Còn <AppText variant="caption" color={colors.textPrimary} style={{ fontWeight: '700' }}>{pointsToOvertake} đ</AppText> để vượt {higherPlayer.name}
+                      </AppText>
+                    ) : (
+                      <AppText variant="caption" color={colors.textSecondary} numberOfLines={1}>
+                        Hoàn thành thử thách để bứt phá thứ hạng
+                      </AppText>
+                    )}
+                  </View>
+
+                  <View style={styles.gameHubCtaAction}>
+                    <AppText variant="labelSm" color={colors.brandPrimary} style={{ fontWeight: '700' }}>
+                      Khám phá
+                    </AppText>
+                    <ChevronRightIcon size={16} color={colors.brandPrimary} />
+                  </View>
                 </View>
-                <AppText variant="caption" color={colors.brandPrimary} style={styles.bold}>
-                  Xem →
-                </AppText>
-              </AppCard>
+              </TouchableOpacity>
+
+              {/* Active Challenge Card (nếu người dùng có thử thách đang tham gia) */}
+              {activeChallenge && (
+                <AppCard
+                  style={styles.communityCard}
+                  onPress={() => root?.navigate('ChallengeDetail', { challengeId: activeChallenge.id })}
+                  accessibilityLabel={`Thử thách: ${activeChallenge.title}`}
+                >
+                  <View
+                    style={[
+                      styles.communityIconBox,
+                      {
+                        backgroundColor:
+                          activeChallenge.category === 'water'
+                            ? colors.brandSoftTint
+                            : theme.scheme === 'dark'
+                              ? 'rgba(245, 158, 11, 0.15)'
+                              : 'rgba(217, 119, 6, 0.12)',
+                      },
+                    ]}
+                  >
+                    {activeChallenge.category === 'water' ? (
+                      <DropletIcon size={22} color={colors.trackerWater} />
+                    ) : (
+                      <TrophyIcon size={22} color={colors.vipStreak} />
+                    )}
+                  </View>
+                  <View style={styles.communityTextWrap}>
+                    <AppText variant="labelLg" color={colors.textPrimary} numberOfLines={1}>
+                      {activeChallenge.title}
+                    </AppText>
+                    <AppText variant="caption" color={colors.textSecondary}>
+                      {activeChallenge.currentProgress.toLocaleString('vi-VN')}/{activeChallenge.targetProgress.toLocaleString('vi-VN')} {activeChallenge.unit} ({activeChallenge.targetProgress > 0 ? Math.min(100, Math.round((activeChallenge.currentProgress / activeChallenge.targetProgress) * 100)) : 0}%)
+                    </AppText>
+                  </View>
+                  <View style={styles.communityRightWrap}>
+                    <View style={[styles.incomingBadge, { backgroundColor: colors.vipStreakBg }]}>
+                      <AppText variant="labelSm" color={colors.vipStreak} style={{ fontSize: 11, fontWeight: '700' }}>
+                        +{activeChallenge.rewardPoints} đ
+                      </AppText>
+                    </View>
+                    <ChevronRightIcon size={20} color={colors.textDisabled} />
+                  </View>
+                </AppCard>
+              )}
             </View>
           </View>
         </View>

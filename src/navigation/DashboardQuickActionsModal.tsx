@@ -17,7 +17,7 @@ import type { MealSlot } from '@/features/nutrition/types';
 import { useNutrition } from '@/features/nutrition/NutritionProvider';
 import { todayKey } from '@/features/nutrition/utils';
 import { useTheme } from '@/theme';
-import { TILE_CONFIG, useAlert } from '@/components/common';
+import { TILE_CONFIG, toast, useAlert } from '@/components/common';
 import {
   AppleScanIcon,
   BodyStickFigureIcon,
@@ -167,6 +167,9 @@ export function DashboardQuickActionsModal({
   const handleConfirmWater = () => {
     const amountMl = Math.round(waterLiters * 1000);
     addWater(selectedDate, amountMl);
+    toast.success(`Đã ghi nhận +${amountMl}ml nước thành công!`, {
+      title: 'Uống nước',
+    });
     onClose();
     setViewMode('actions');
     setWaterLiters(0.20);
