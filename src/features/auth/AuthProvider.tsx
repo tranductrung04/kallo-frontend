@@ -440,6 +440,39 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
     };
     await AsyncStorage.setItem(LOCAL_SESSION_KEY, "true");
     await AsyncStorage.removeItem("@kallo/pending-onboarding");
+    const cachedProfile = await AsyncStorage.getItem("@kallo/health-profile");
+    if (!cachedProfile) {
+      const demoProfile: HealthProfile = {
+        userId: "demo-user-id",
+        gender: "MALE",
+        dob: "1998-05-15",
+        birthDate: "1998-05-15",
+        age: 26,
+        heightCm: 172,
+        weightKg: 68,
+        activityLevel: "MODERATELY_ACTIVE",
+        goalType: "LOSE_WEIGHT",
+        targetWeightKg: 63,
+        weeklyRateKg: 0.5,
+        bmi: 23.0,
+        bmiCategory: "NORMAL",
+        bmiCategoryVi: "Bình thường",
+        bmr: 1610,
+        tdee: 2213,
+        dailyCalorieGoal: 1713,
+        macronutrients: {
+          carbGrams: 214,
+          proteinGrams: 128,
+          fatGrams: 38,
+        },
+        waterLiters: 2.2,
+        waterGoalMl: 2200,
+        rateClamped: false,
+        recalculationRecommended: false,
+        goalAdvice: "Duy trì mức thâm hụt calo nhẹ và bổ sung đủ 128g đạm để duy trì khối lượng cơ bắp trong quá trình giảm mỡ.",
+      };
+      await AsyncStorage.setItem("@kallo/health-profile", JSON.stringify(demoProfile));
+    }
     if (mountedRef.current) {
       setUser(demoUser);
       setStatus("signedIn");

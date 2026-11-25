@@ -28,9 +28,16 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   getHealthProfile,
+  getUserAllergies,
+  getUserChronicConditions,
   recalculateHealthProfile,
   type HealthProfileResponse,
 } from '@/features/health-profile/api';
+import type {
+  UserAllergyResponse,
+  UserChronicConditionResponse,
+} from '@/features/health-profile/types';
+import { HealthProfileCard } from './HomeDashboard/HealthProfileCard';
 import type { MainTabParamList, RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
 import { images } from '@/assets/images';
@@ -124,10 +131,43 @@ export function HomeDashboardScreen({ navigation }: Props) {
     [challenges]
   );
 
+  const [healthProfile, setHealthProfile] = useState<HealthProfileResponse | null>(null);
+  const [userConditions, setUserConditions] = useState<UserChronicConditionResponse[]>([]);
+  const [userAllergies, setUserAllergies] = useState<UserAllergyResponse[]>([]);
+  const [recalculating, setRecalculating] = useState(false);
+
+  const loadHealthProfileData = useCallback(async () => {
+    try {
+      const raw = await AsyncStorage.getItem('@kallo/health-profile');
+      if (raw) {
+        setHealthProfile(JSON.parse(raw));
+      }
+      const fresh = await getHealthProfile().catch(() => null);
+      if (fresh) {
+        setHealthProfile(fresh);
+        await AsyncStorage.setItem('@kallo/health-profile', JSON.stringify(fresh));
+      }
+    } catch {
+      // ignore
+    }
+
+    try {
+      const [conditions, allergies] = await Promise.all([
+        getUserChronicConditions().catch(() => []),
+        getUserAllergies().catch(() => []),
+      ]);
+      setUserConditions(conditions || []);
+      setUserAllergies(allergies || []);
+    } catch {
+      // ignore
+    }
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       void refreshStreak();
-    }, [refreshStreak])
+      void loadHealthProfileData();
+    }, [refreshStreak, loadHealthProfileData])
   );
   const [calendarModalVisible, setCalendarModalVisible] = useState(false);
   const [calorieGoalModalVisible, setCalorieGoalModalVisible] = useState(false);
@@ -147,30 +187,6 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const root = navigation.getParent() as RootNavigation | undefined;
   const { showAlert } = useAlert();
 
-  const [healthProfile, setHealthProfile] = useState<HealthProfileResponse | null>(null);
-  const [recalculating, setRecalculating] = useState(false);
-
-  React.useEffect(() => {
-    let isMounted = true;
-    void (async () => {
-      try {
-        const raw = await AsyncStorage.getItem('@kallo/health-profile');
-        if (raw && isMounted) {
-          setHealthProfile(JSON.parse(raw));
-        }
-        const fresh = await getHealthProfile();
-        if (isMounted && fresh) {
-          setHealthProfile(fresh);
-          await AsyncStorage.setItem('@kallo/health-profile', JSON.stringify(fresh));
-        }
-      } catch {
-        // ignore
-      }
-    })();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   const handleRecalculate = async () => {
     setRecalculating(true);
@@ -240,18 +256,31 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const weekDays = useMemo(() => getWeekDays(selectedDate), [selectedDate]);
   const dateTitle = useMemo(() => formatHeaderDate(selectedDate), [selectedDate]);
 
-  // Calories (lượng calo đốt qua tập luyện không ảnh hưởng vào lượng calo nạp/còn lại)
-  const caloriesGoal = summary.caloriesGoal || 1794;
+  // Calories (Ưu tiên số liệu thực tế từ healthProfile của người dùng)
+  const caloriesGoal = healthProfile?.dailyCalorieGoal
+    ? Math.round(healthProfile.dailyCalorieGoal)
+    : (summary.caloriesGoal || 1794);
   const caloriesConsumed = summary.calories || 0;
   const caloriesRemaining = Math.max(0, caloriesGoal - caloriesConsumed);
   const progress = caloriesGoal > 0 ? caloriesConsumed / caloriesGoal : 0;
   // Vẫn hiện một cung nhỏ khi chưa nạp calo (CircularProgress tự clamp 0–1)
   const ringValue = progress > 0 ? progress : 0.08;
 
-  // Macro goals (fallback khi chưa có dữ liệu)
-  const proteinGoal = summary.proteinGoal || 90;
-  const carbsGoal = summary.carbsGoal || 224;
-  const fatGoal = summary.fatGoal || 60;
+  // Macro goals (Ưu tiên macronutrients tính theo hồ sơ sức khỏe)
+  const proteinGoal = Math.round(
+    healthProfile?.macronutrients?.proteinGrams ?? healthProfile?.proteinGoalG ?? (summary.proteinGoal || 90)
+  );
+  const carbsGoal = Math.round(
+    healthProfile?.macronutrients?.carbGrams ?? healthProfile?.carbsGoalG ?? (summary.carbsGoal || 224)
+  );
+  const fatGoal = Math.round(
+    healthProfile?.macronutrients?.fatGrams ?? healthProfile?.fatGoalG ?? (summary.fatGoal || 60)
+  );
+
+  // Lượng nước mục tiêu
+  const waterGoalMl = Math.round(
+    healthProfile?.waterGoalMl ?? (healthProfile?.waterLiters ? healthProfile.waterLiters * 1000 : 2000)
+  );
 
   // Slide 2: Muối, Đường, Chất xơ
   const saltGoal = 5;
@@ -266,7 +295,8 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const [activeMacroPage, setActiveMacroPage] = useState(0);
   const macroCardWidth = screenWidth - spacing.lg * 2;
 
-  const currentWeight = summary.weightKg || 60;
+  // Cân nặng hiện tại: Ưu tiên cân nặng mới nhất từ Health Profile hoặc nhật ký
+  const currentWeight = healthProfile?.latestLoggedWeightKg ?? healthProfile?.weightKg ?? summary.weightKg ?? 60;
 
   // Chiều rộng biểu đồ = màn hình − padding màn hình − padding card (mỗi bên)
   const weightChartWidth = screenWidth - (spacing.lg + spacing.md) * 2;
@@ -790,7 +820,16 @@ export function HomeDashboardScreen({ navigation }: Props) {
             />
           </View>
 
-          {/* ── 5. Nhật ký gần đây (Recent Diary) ───────────────────────── */}
+          {/* ── 5. Hồ sơ & Chỉ số sức khỏe (Health Profile & Biometrics) ── */}
+          <HealthProfileCard
+            profile={healthProfile}
+            conditions={userConditions}
+            allergies={userAllergies}
+            onPressDetail={() => navigation.navigate('Profile')}
+            onPressSetup={() => navigation.navigate('Profile')}
+          />
+
+          {/* ── 6. Nhật ký gần đây (Recent Diary) ───────────────────────── */}
           <View style={styles.sectionBlock}>
             <AppText variant="headlineSm">Nhật ký gần đây</AppText>
             <Pressable
@@ -900,7 +939,12 @@ export function HomeDashboardScreen({ navigation }: Props) {
               />
               <View style={styles.waterTextGroup}>
                 <AppText variant="labelLg">Uống nước</AppText>
-                <AppText variant="headlineSm">{summary.waterMl || 0} ml</AppText>
+                <AppText variant="headlineSm">
+                  {summary.waterMl || 0}{' '}
+                  <AppText variant="caption" color={colors.textSecondary}>
+                    / {waterGoalMl} ml
+                  </AppText>
+                </AppText>
               </View>
             </View>
 
@@ -957,7 +1001,9 @@ export function HomeDashboardScreen({ navigation }: Props) {
               <View style={styles.weightValuesGroup}>
                 <AppText variant="headlineMd" color={colors.brandSecondary}>{currentWeight} kg</AppText>
                 <AppText variant="bodySm" color={colors.textSecondary} style={styles.weightDateText}>
-                  {formatWeightDate(state.weightLogs.length > 0 ? state.weightLogs[state.weightLogs.length - 1].date : undefined)}
+                  {healthProfile?.targetWeightKg
+                    ? `Mục tiêu: ${healthProfile.targetWeightKg} kg (${healthProfile.goalType === 'LOSE_WEIGHT' ? 'Giảm cân' : healthProfile.goalType === 'GAIN_WEIGHT' ? 'Tăng cân' : 'Duy trì'})`
+                    : formatWeightDate(state.weightLogs.length > 0 ? state.weightLogs[state.weightLogs.length - 1].date : undefined)}
                 </AppText>
               </View>
 

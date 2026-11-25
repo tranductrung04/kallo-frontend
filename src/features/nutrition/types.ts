@@ -1,3 +1,11 @@
+import type {
+  FoodCategory,
+  FoodIngredientItemResponse,
+  FoodSource,
+} from './foodTypes';
+
+export * from './foodTypes';
+
 export type MealSlot = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
 export const MEAL_SLOTS: Array<{ key: MealSlot; label: string }> = [
@@ -21,6 +29,30 @@ export type Food = NutritionValues & {
   allergens: string[];
   barcode?: string;
   isCustom?: boolean;
+  category?: FoodCategory;
+  defaultServingName?: string;
+  imageUrl?: string | null;
+  source?: FoodSource;
+  sugar?: number;
+  fiber?: number;
+  caloriesPer100g?: number;
+  proteinPer100g?: number;
+  carbsPer100g?: number;
+  fatPer100g?: number;
+  sugarPer100g?: number;
+  fiberPer100g?: number;
+  caloriesPerServing?: number;
+  proteinPerServing?: number;
+  carbsPerServing?: number;
+  fatPerServing?: number;
+  sugarPerServing?: number;
+  fiberPerServing?: number;
+  isVerified?: boolean;
+  ownerUserId?: string | null;
+  ingredients?: FoodIngredientItemResponse[];
+  vietfoodClassId?: number | null;
+  suitableMealTypes?: string[];
+  referencePriceVnd?: number | null;
 };
 
 export type FoodLogSource = 'SEARCH' | 'CUSTOM' | 'AI_PHOTO' | 'BARCODE' | 'MEAL_PLAN' | 'VOICE';
@@ -95,6 +127,11 @@ export type NutritionContextValue = {
   addWater: (date: string, amountMl: number) => boolean;
   addWeight: (date: string, weightKg: number) => boolean;
   saveCustomFood: (food: Omit<Food, 'id' | 'isCustom'> & { id?: string }) => string;
+  saveCustomFoodAsync: (payload: import('./foodTypes').CustomFoodRequest, id?: string) => Promise<Food>;
+  deleteCustomFoodAsync: (id: string) => Promise<void>;
+  saveRecipeAsync: (payload: import('./foodTypes').RecipeFoodRequest) => Promise<Food>;
+  cacheFood: (food: Food | Food[]) => void;
+  fetchFoodDetail: (id: string) => Promise<Food | undefined>;
   setSelectedDate: (date: string) => void;
   setWalkthroughSeen: () => void;
 };

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
+  ActivityIndicator,
   ScrollView,
   StatusBar,
   View,
@@ -11,6 +12,8 @@ import { useTheme } from '@/theme';
 import { useNutrition } from '../NutritionProvider';
 import { normalizeSearch, todayKey } from '../utils';
 import type { Food, MealSlot } from '../types';
+import { searchFoodsApi } from '../foodApi';
+import { mapFoodSearchItemToFood } from '../foodTypes';
 import { getDateTitle, getMealSlotForHour } from './FoodDiary';
 import {
   createStyles,
@@ -30,7 +33,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'FoodSearch'>;
 export function FoodSearchScreen({ navigation, route }: Props) {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const { foods, state } = useNutrition();
+  const { foods, state, cacheFood } = useNutrition();
 
   const initialDate = route.params?.date === 'today' || !route.params?.date ? todayKey() : route.params.date;
   const [date, setDate] = useState(initialDate);
@@ -44,6 +47,8 @@ export function FoodSearchScreen({ navigation, route }: Props) {
   const [activeTab, setActiveTab] = useState<SearchTab>('recent');
   const [hourPickerVisible, setHourPickerVisible] = useState(false);
   const [nutritionNoteVisible, setNutritionNoteVisible] = useState(false);
+  const [apiResults, setApiResults] = useState<Food[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   // Debounce search input
   useEffect(() => {
@@ -51,12 +56,54 @@ export function FoodSearchScreen({ navigation, route }: Props) {
     return () => clearTimeout(timer);
   }, [query]);
 
-  // Filter foods based on query
-  const searchResults = useMemo(() => {
+  // Query backend search API on debounced query
+  useEffect(() => {
+    const q = debouncedQuery.trim();
+    if (!q) {
+      setApiResults([]);
+      setIsSearching(false);
+      return;
+    }
+
+    let isCurrent = true;
+    setIsSearching(true);
+
+    searchFoodsApi({ q, page: 0, size: 30 })
+      .then((pageData) => {
+        if (!isCurrent) return;
+        const mapped = (pageData.items ?? []).map(mapFoodSearchItemToFood);
+        setApiResults(mapped);
+        cacheFood(mapped);
+      })
+      .catch(() => {
+        // Fallback gracefully on network error (will use local filtering)
+        if (isCurrent) setApiResults([]);
+      })
+      .finally(() => {
+        if (isCurrent) setIsSearching(false);
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [debouncedQuery, cacheFood]);
+
+  // Fallback local search
+  const localSearchResults = useMemo(() => {
     const term = normalizeSearch(debouncedQuery);
     if (!term) return [];
     return foods.filter((food) => normalizeSearch(food.name).includes(term));
   }, [debouncedQuery, foods]);
+
+  // Combine API results and local results (avoiding duplicates)
+  const searchResults = useMemo(() => {
+    if (apiResults.length > 0) {
+      const apiIds = new Set(apiResults.map((f) => f.id));
+      const remainingLocal = localSearchResults.filter((f) => !apiIds.has(f.id));
+      return [...apiResults, ...remainingLocal];
+    }
+    return localSearchResults;
+  }, [apiResults, localSearchResults]);
 
   // Tab foods when query is empty
   const tabFoods = useMemo(() => {
@@ -73,11 +120,12 @@ export function FoodSearchScreen({ navigation, route }: Props) {
   }, [activeTab, foods, state.recentFoodIds, state.customFoods, state.favoriteFoodIds]);
 
   const openFood = (food: Food) => {
+    cacheFood(food);
     navigation.navigate('FoodDetail', {
       foodId: food.id,
       date,
       meal,
-      source: 'SEARCH',
+      source: food.isCustom ? 'CUSTOM' : 'SEARCH',
     });
   };
 
@@ -137,6 +185,11 @@ export function FoodSearchScreen({ navigation, route }: Props) {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
+        {isSearching && (
+          <View style={{ paddingVertical: 16, alignItems: 'center' }}>
+            <ActivityIndicator size="small" color={theme.colors.primary} />
+          </View>
+        )}
         {currentList.length > 0 ? (
           <View style={styles.resultsList}>
             {currentList.map((food) => (
@@ -147,13 +200,13 @@ export function FoodSearchScreen({ navigation, route }: Props) {
               />
             ))}
           </View>
-        ) : (
+        ) : !isSearching ? (
           <FoodSearchEmptyState
             isSearchActive={isSearchActive}
             activeTab={activeTab}
             onCreateCustom={() => navigation.navigate('CustomFoodForm', { date, meal })}
           />
-        )}
+        ) : null}
       </ScrollView>
 
       {/* ── 6. Hour / Meal Picker Dropdown Modal ────────────────────────────── */}

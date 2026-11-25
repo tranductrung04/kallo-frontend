@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Image,
   Modal,
@@ -27,11 +27,19 @@ import {
 import { images } from '@/assets/images';
 import { useNutrition } from '../NutritionProvider';
 import { useTheme } from '@/theme';
+import {
+  FOOD_CATEGORY_LABELS,
+  type FoodCategory,
+  type IngredientResponse,
+  type RecipeFoodRequest,
+} from '../foodTypes';
+import { createCustomIngredientApi, getIngredientsApi } from '../foodApi';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CreateRecipe'>;
 
 type IngredientItem = {
   id: string;
+  ingredientId?: string;
   name: string;
   grams: number;
   calories: number;
@@ -50,13 +58,15 @@ export function CreateRecipeScreen({ navigation, route }: Props) {
   const isDark = theme.scheme === 'dark';
   const { colors } = theme;
   const insets = useSafeAreaInsets();
-  const { foods, saveCustomFood } = useNutrition();
+  const { foods, saveCustomFood, saveRecipeAsync } = useNutrition();
   const { showAlert } = useAlert();
 
   const [recipeName, setRecipeName] = useState('');
+  const [category, setCategory] = useState<FoodCategory>('STAPLE');
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [servings, setServings] = useState(1);
   const [showNutritionDetails, setShowNutritionDetails] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   // Ingredients list
   const [ingredients, setIngredients] = useState<IngredientItem[]>([]);
@@ -65,6 +75,8 @@ export function CreateRecipeScreen({ navigation, route }: Props) {
 
   // Add ingredient modal state
   const [addIngredientVisible, setAddIngredientVisible] = useState(false);
+  const [serverIngredients, setServerIngredients] = useState<IngredientResponse[]>([]);
+  const [selectedIngredientId, setSelectedIngredientId] = useState<string | null>(null);
   const [ingName, setIngName] = useState('');
   const [ingGrams, setIngGrams] = useState('100');
   const [ingCalories, setIngCalories] = useState('150');
@@ -72,6 +84,13 @@ export function CreateRecipeScreen({ navigation, route }: Props) {
   const [ingCarbs, setIngCarbs] = useState('20');
   const [ingFat, setIngFat] = useState('5');
   const [selectedPresetFoodId, setSelectedPresetFoodId] = useState<string | null>(null);
+
+  // Load ingredients from backend on mount
+  useEffect(() => {
+    getIngredientsApi()
+      .then((data) => setServerIngredients(data))
+      .catch(() => undefined);
+  }, []);
 
   // Dynamic theme shortcuts
   const primaryBrand = colors.brandPrimary || '#9E64F7';
@@ -131,7 +150,7 @@ export function CreateRecipeScreen({ navigation, route }: Props) {
   }, [totals, servings]);
 
   // Handle adding an ingredient
-  const handleConfirmAddIngredient = () => {
+  const handleConfirmAddIngredient = async () => {
     if (!ingName.trim()) {
       showAlert({ title: 'Thiếu thông tin', message: 'Vui lòng nhập tên nguyên liệu.', variant: 'warning' });
       return;
@@ -142,8 +161,36 @@ export function CreateRecipeScreen({ navigation, route }: Props) {
     const c = parseFloat(ingCarbs) || 0;
     const f = parseFloat(ingFat) || 0;
 
+    let targetIngredientId = selectedIngredientId;
+
+    // If no existing backend ingredient selected, try to find or create one via custom ingredient API
+    if (!targetIngredientId) {
+      const match = serverIngredients.find(
+        (si) => si.name.toLowerCase() === ingName.trim().toLowerCase()
+      );
+      if (match) {
+        targetIngredientId = match.id;
+      } else {
+        try {
+          const ratio100 = grams > 0 ? 100 / grams : 1;
+          const created = await createCustomIngredientApi({
+            name: ingName.trim(),
+            caloriesPer100g: Math.min(950, Math.round(cal * ratio100 * 10) / 10),
+            proteinPer100g: Math.round(p * ratio100 * 10) / 10,
+            carbsPer100g: Math.round(c * ratio100 * 10) / 10,
+            fatPer100g: Math.round(f * ratio100 * 10) / 10,
+          });
+          targetIngredientId = created.id;
+          setServerIngredients((prev) => [...prev, created]);
+        } catch {
+          // If creation fails, proceed with local ingredient
+        }
+      }
+    }
+
     const newItem: IngredientItem = {
       id: `ing-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      ingredientId: targetIngredientId ?? undefined,
       name: ingName.trim(),
       grams,
       calories: Math.round(cal),
@@ -163,12 +210,28 @@ export function CreateRecipeScreen({ navigation, route }: Props) {
     setIngCarbs('20');
     setIngFat('5');
     setSelectedPresetFoodId(null);
+    setSelectedIngredientId(null);
   };
 
   const handleSelectPresetFood = (foodId: string) => {
+    // Check in server ingredients first
+    const ing = serverIngredients.find((item) => item.id === foodId);
+    if (ing) {
+      setSelectedIngredientId(ing.id);
+      setSelectedPresetFoodId(ing.id);
+      setIngName(ing.name);
+      setIngGrams('100');
+      setIngCalories(String(ing.caloriesPer100g));
+      setIngProtein(String(ing.proteinPer100g));
+      setIngCarbs(String(ing.carbsPer100g));
+      setIngFat(String(ing.fatPer100g));
+      return;
+    }
+
     const f = foods.find((item) => item.id === foodId);
     if (!f) return;
     setSelectedPresetFoodId(f.id);
+    setSelectedIngredientId(null);
     setIngName(f.name);
     const g = 100;
     setIngGrams(String(g));
@@ -204,23 +267,58 @@ export function CreateRecipeScreen({ navigation, route }: Props) {
   };
 
   // Save recipe
-  const handleSaveRecipe = () => {
+  const handleSaveRecipe = async () => {
     if (!recipeName.trim()) {
       showAlert({ title: 'Chưa nhập tên món', message: 'Vui lòng nhập tên món ăn cho công thức.', variant: 'warning' });
       return;
     }
+    if (ingredients.length === 0) {
+      showAlert({ title: 'Chưa có nguyên liệu', message: 'Vui lòng thêm ít nhất một nguyên liệu.', variant: 'warning' });
+      return;
+    }
 
+    setSaving(true);
     const servingGrams = totals.totalGrams > 0 ? Math.round(totals.totalGrams / servings) : 100;
 
-    const newFoodId = saveCustomFood({
-      name: recipeName.trim(),
-      servingGrams,
-      calories: perServing.calories,
-      protein: perServing.protein,
-      carbs: perServing.carbs,
-      fat: perServing.fat,
-      allergens: [],
-    });
+    let newFoodId: string | undefined;
+
+    // Check if all ingredients have a backend ingredient UUID
+    const canUseRecipeApi = ingredients.every((ing) => !!ing.ingredientId);
+
+    if (canUseRecipeApi) {
+      try {
+        const recipePayload: RecipeFoodRequest = {
+          name: recipeName.trim(),
+          category,
+          defaultServingName: `1 phần (${servingGrams}g)`,
+          items: ingredients.map((ing) => ({
+            ingredientId: ing.ingredientId!,
+            quantityGrams: ing.grams,
+          })),
+          suitableMealTypes: ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'],
+          imageUrl: imageUri || null,
+        };
+        const saved = await saveRecipeAsync(recipePayload);
+        newFoodId = saved.id;
+      } catch {
+        // Fallback to local save on error
+      }
+    }
+
+    if (!newFoodId) {
+      newFoodId = saveCustomFood({
+        name: recipeName.trim(),
+        servingGrams,
+        calories: perServing.calories,
+        protein: perServing.protein,
+        carbs: perServing.carbs,
+        fat: perServing.fat,
+        allergens: [],
+        category,
+      });
+    }
+
+    setSaving(false);
 
     showAlert({
       title: 'Thành công',
@@ -232,7 +330,7 @@ export function CreateRecipeScreen({ navigation, route }: Props) {
           variant: 'primary',
           onPress: () => {
             navigation.replace('FoodDetail', {
-              foodId: newFoodId,
+              foodId: newFoodId!,
               date: route.params.date,
               meal: route.params.meal,
               source: 'CUSTOM',
@@ -361,6 +459,53 @@ export function CreateRecipeScreen({ navigation, route }: Props) {
               { backgroundColor: isDark ? '#262038' : '#E4E0F0' },
             ]}
           />
+
+          {/* Category Selector */}
+          <View style={{ marginTop: 12, marginBottom: 8, gap: 6 }}>
+            <Text
+              style={[
+                styles.foodNameLabel,
+                { color: isDark ? '#FFFFFF' : colors.textPrimary },
+              ]}
+            >
+              Nhóm món ăn
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 8, paddingVertical: 4 }}
+            >
+              {(Object.keys(FOOD_CATEGORY_LABELS) as FoodCategory[]).map((cat) => {
+                const isSelected = category === cat;
+                return (
+                  <TouchableOpacity
+                    key={cat}
+                    onPress={() => setCategory(cat)}
+                    style={{
+                      paddingHorizontal: 12,
+                      paddingVertical: 6,
+                      borderRadius: 16,
+                      borderWidth: 1,
+                      borderColor: isSelected ? primaryBrand : isDark ? '#3E3452' : '#E8E5EF',
+                      backgroundColor: isSelected
+                        ? isDark ? '#3D256A' : '#F3EEFD'
+                        : isDark ? '#231B32' : '#F9F8FC',
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        fontWeight: isSelected ? '600' : '400',
+                        color: isSelected ? primaryBrand : isDark ? '#D1CADF' : '#575269',
+                      }}
+                    >
+                      {FOOD_CATEGORY_LABELS[cat]}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
 
           {/* ── 4. Giá trị dinh dưỡng (Nutritional Values) ────────────── */}
           <Text
@@ -841,14 +986,14 @@ export function CreateRecipeScreen({ navigation, route }: Props) {
                 { color: isDark ? '#9C95B3' : colors.textSecondary },
               ]}
             >
-              Gợi ý nhanh từ danh mục:
+              Gợi ý nhanh từ nguyên liệu hệ thống:
             </Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.presetScroll}
             >
-              {foods.slice(0, 8).map((f) => {
+              {(serverIngredients.length > 0 ? serverIngredients : foods).slice(0, 12).map((f) => {
                 const isSelected = selectedPresetFoodId === f.id;
                 return (
                   <TouchableOpacity

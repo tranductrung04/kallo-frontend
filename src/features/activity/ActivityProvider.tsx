@@ -5,6 +5,7 @@ import { randomUUID } from 'expo-crypto';
 import { api } from '@/services/api/client';
 import { todayKey } from '@/features/nutrition/utils';
 import { toast } from '@/components/common';
+import { useAuth } from '@/features/auth/AuthProvider';
 import { findActivityMeta, mapBackendCodeToActivityType } from './catalog';
 import {
   aggregateDailyActivity,
@@ -113,6 +114,7 @@ function toWeightLogItem(res: WeightLogResponse): WeightLogItem {
 const ActivityContext = createContext<ActivityContextValue | null>(null);
 
 export function ActivityProvider({ children }: React.PropsWithChildren) {
+  const { status } = useAuth();
   const [state, setState] = useState<ActivityState>(initialState);
   const [ready, setReady] = useState(false);
 
@@ -217,10 +219,10 @@ export function ActivityProvider({ children }: React.PropsWithChildren) {
   }, []);
 
   useEffect(() => {
-    if (ready) {
+    if (ready && status === 'signedIn') {
       void syncWithServer();
     }
-  }, [ready, syncWithServer]);
+  }, [ready, status, syncWithServer]);
 
   // ── Refresh Activities ─────────────────────────────────────────
   const refreshActivities = useCallback(async () => {

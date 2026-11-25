@@ -23,6 +23,7 @@ export type AppCardProps = React.PropsWithChildren<{
   testID?: string;
   padding?: number;
   accessibilityLabel?: string;
+  accessibilityRole?: PressableProps['accessibilityRole'];
   /** Level 1 = surfaceMid (primary containers); Level 2 = surfaceHigh (nested wells) */
   level?: CardLevel;
 }>;
@@ -33,6 +34,7 @@ export function AppCard({
   style,
   padding,
   accessibilityLabel,
+  accessibilityRole,
   testID,
   level = 1,
 }: AppCardProps) {
@@ -41,7 +43,7 @@ export function AppCard({
   const bg = level === 1 ? theme.colors.surfaceMid : theme.colors.surfaceHigh;
   const shadow = level === 1 ? theme.shadows.level1 : {};
 
-  const cardStyle: StyleProp<ViewStyle> = [
+  const baseCardStyle: StyleProp<ViewStyle> = [
     styles.base,
     shadow,
     {
@@ -57,10 +59,10 @@ export function AppCard({
       <Pressable
         testID={testID}
         onPress={onPress}
-        accessibilityRole="button"
+        accessibilityRole={accessibilityRole}
         accessibilityLabel={accessibilityLabel}
         accessibilityState={{ disabled: false }}
-        style={({ pressed }) => [cardStyle, pressed && styles.pressed]}
+        style={({ pressed }) => [baseCardStyle, pressed && styles.pressed]}
       >
         {children}
       </Pressable>
@@ -68,7 +70,7 @@ export function AppCard({
   }
 
   return (
-    <View testID={testID} style={cardStyle}>
+    <View testID={testID} style={baseCardStyle}>
       {children}
     </View>
   );
