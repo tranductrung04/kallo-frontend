@@ -113,7 +113,8 @@ const requiredFiles = [
   'src/features/gamification/utils.ts',
   'src/features/gamification/GamificationProvider.tsx',
   'src/features/gamification/screens/StreakDetailModal.tsx',
-  'src/features/gamification/screens/BadgesChallengesScreen.tsx',
+  'src/features/gamification/screens/BadgesScreen.tsx',
+  'src/features/gamification/screens/ChallengesScreen.tsx',
   'src/features/gamification/screens/FriendsLeaderboardScreen.tsx',
   'src/features/gamification/index.ts',
 ];
