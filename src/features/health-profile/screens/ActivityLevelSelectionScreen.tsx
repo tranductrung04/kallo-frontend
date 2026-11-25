@@ -180,8 +180,8 @@ export function ActivityLevelSelectionScreen({
               ? '#C084FC'
               : theme.colors.brandPrimary
             : isDark
-            ? '#8E87AA'
-            : theme.colors.textSecondary;
+              ? '#8E87AA'
+              : theme.colors.textSecondary;
 
           return (
             <AnimatedCard
@@ -190,7 +190,7 @@ export function ActivityLevelSelectionScreen({
               onPress={() => handleSelect(item.key)}
               style={styles.activityCard}
               selectedBorderColor={theme.colors.brandPrimary}
-              selectedBgColor={isDark ? '#231742' : theme.colors.brandSoftTint}
+              selectedBgColor={'transparent'}
               unselectedBorderColor={isDark ? '#2E2352' : theme.colors.surfaceBorder}
               unselectedBgColor={isDark ? '#1A1433' : theme.colors.surfaceMid}
               activeScale={0.97}
@@ -201,17 +201,6 @@ export function ActivityLevelSelectionScreen({
                 <View
                   style={[
                     styles.iconWrap,
-                    isSelected
-                      ? {
-                          backgroundColor: isDark
-                            ? 'rgba(167, 139, 250, 0.22)'
-                            : '#EDE5FF',
-                        }
-                      : {
-                          backgroundColor: isDark
-                            ? 'rgba(255, 255, 255, 0.05)'
-                            : '#F1EFF9',
-                        },
                   ]}
                 >
                   {item.renderIcon(iconColor)}
@@ -226,8 +215,8 @@ export function ActivityLevelSelectionScreen({
                             ? '#E9D5FF'
                             : theme.colors.brandPrimary
                           : isDark
-                          ? '#FFFFFF'
-                          : theme.colors.textPrimary,
+                            ? '#FFFFFF'
+                            : theme.colors.textPrimary,
                       },
                     ]}
                   >

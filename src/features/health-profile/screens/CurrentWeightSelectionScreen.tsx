@@ -3,11 +3,13 @@ import {
   Dimensions,
   FlatList,
   Image,
+  Keyboard,
   Modal,
   NativeScrollEvent,
   NativeSyntheticEvent,
   SafeAreaView,
   StyleSheet,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -20,9 +22,9 @@ import { useHealthProfileDraft } from '../hooks/useHealthProfileDraft';
 import { calculateBmi, bmiCategory } from '../utils/calculations';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const MIN_WEIGHT = 20;
+const MIN_WEIGHT = 10;
 const MAX_WEIGHT = 300;
-const DEFAULT_WEIGHT = 53.0;
+const DEFAULT_WEIGHT = 50.0;
 const STEP_WIDTH = 8;
 const TOTAL_STEPS = Math.round((MAX_WEIGHT - MIN_WEIGHT) * 10) + 1;
 
@@ -53,8 +55,12 @@ export function CurrentWeightSelectionScreen({
   }, [draft.weight]);
 
   const [weight, setWeight] = useState<number>(initialVal);
+  const [isEditingWeight, setIsEditingWeight] = useState(false);
+  const [weightInput, setWeightInput] = useState(initialVal.toFixed(1));
+  const [isAllSelected, setIsAllSelected] = useState(false);
   const [showReferenceModal, setShowReferenceModal] = useState(false);
   const flatListRef = useRef<FlatList>(null);
+  const inputRef = useRef<TextInput>(null);
   const paddingHorizontal = (SCREEN_WIDTH - STEP_WIDTH) / 2;
 
   // Height for BMI calculation (from draft, fallback to 175 cm as in screenshot)
@@ -73,35 +79,35 @@ export function CurrentWeightSelectionScreen({
   const bmiMeta = useMemo(() => {
     if (bmiVal < 18.5) {
       return {
-        badgeBg: '#2563EB',
-        badgeColor: '#FFFFFF',
-        valueColor: '#3B82F6',
+        badgeBg: theme.colors.macroCarbsStrong,
+        badgeColor: theme.colors.onBrand,
+        valueColor: theme.colors.macroCarbs,
         advice: 'Bạn đang thiếu cân đấy, cơ thể có thể bị suy nhược, mất cơ và rối loạn nội tiết. Hãy tăng cường dinh dưỡng nhé!',
       };
     }
     if (bmiVal < 23) {
       return {
-        badgeBg: '#16A34A',
-        badgeColor: '#FFFFFF',
-        valueColor: '#22C55E',
+        badgeBg: theme.colors.quickScanner,
+        badgeColor: theme.colors.onBrand,
+        valueColor: theme.colors.macroFiber,
         advice: 'Chỉ số BMI của bạn rất lý tưởng! Hãy duy trì chế độ dinh dưỡng cân bằng và tập luyện đều đặn để giữ vững phong độ nhé!',
       };
     }
     if (bmiVal < 25) {
       return {
-        badgeBg: '#F59E0B',
-        badgeColor: '#FFFFFF',
-        valueColor: '#FBBF24',
+        badgeBg: theme.colors.vipStreak,
+        badgeColor: theme.colors.onBrand,
+        valueColor: theme.colors.trackerWeight,
         advice: 'Bạn đang ở mức thừa cân nhẹ. Điều chỉnh nhẹ lượng calo nạp vào và tăng cường vận động sẽ giúp bạn về vóc dáng lý tưởng!',
       };
     }
     return {
-      badgeBg: '#EF4444',
-      badgeColor: '#FFFFFF',
-      valueColor: '#FF6B6B',
+      badgeBg: theme.colors.statusDanger,
+      badgeColor: theme.colors.onError,
+      valueColor: theme.colors.macroProtein,
       advice: 'Chỉ số BMI ở mức cảnh báo béo phì. Cần thiết lập chế độ thâm hụt calo khoa học và kiên trì vận động để bảo vệ sức khỏe tim mạch nhé!',
     };
-  }, [bmiVal]);
+  }, [bmiVal, theme.colors]);
 
   const initialIndex = Math.round((initialVal - MIN_WEIGHT) * 10);
 
@@ -114,11 +120,66 @@ export function CurrentWeightSelectionScreen({
     }
   };
 
+  const scrollToWeight = (newWeight: number) => {
+    const rounded = parseFloat(newWeight.toFixed(1));
+    const clamped = Math.max(MIN_WEIGHT, Math.min(MAX_WEIGHT, rounded));
+    setIsEditingWeight(false);
+    Keyboard.dismiss();
+    setWeight(clamped);
+    const targetIndex = Math.round((clamped - MIN_WEIGHT) * 10);
+    flatListRef.current?.scrollToOffset({
+      offset: targetIndex * STEP_WIDTH,
+      animated: true,
+    });
+  };
+
+  const sanitizeWeightInput = (text: string) => {
+    const normalized = text.replace(/,/g, '.').replace(/[^0-9.]/g, '');
+    const dotIndex = normalized.indexOf('.');
+    if (dotIndex === -1) return normalized.slice(0, 3);
+    const intPart = normalized.slice(0, dotIndex).slice(0, 3);
+    const decPart = normalized.slice(dotIndex + 1).replace(/\./g, '').slice(0, 1);
+    return `${intPart}.${decPart}`;
+  };
+
+  const startEditingWeight = () => {
+    setWeightInput(weight.toFixed(1));
+    setIsAllSelected(true);
+    setIsEditingWeight(true);
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+    });
+  };
+
+  const commitWeightInput = () => {
+    const parsed = parseFloat(weightInput);
+    const nextWeight = !isNaN(parsed)
+      ? Math.max(MIN_WEIGHT, Math.min(MAX_WEIGHT, parseFloat(parsed.toFixed(1))))
+      : weight;
+    scrollToWeight(nextWeight);
+  };
+
   const handleNext = () => {
-    updateDraft('weight', weight.toFixed(1));
+    let finalWeight = weight;
+    if (isEditingWeight) {
+      const parsed = parseFloat(weightInput);
+      if (!isNaN(parsed)) {
+        finalWeight = Math.max(
+          MIN_WEIGHT,
+          Math.min(MAX_WEIGHT, parseFloat(parsed.toFixed(1)))
+        );
+      }
+      setIsEditingWeight(false);
+      setWeight(finalWeight);
+      Keyboard.dismiss();
+    }
+    updateDraft('weight', finalWeight.toFixed(1));
+    if (draft.goal === 'maintain') {
+      updateDraft('targetWeight', finalWeight.toFixed(1));
+    }
 
     if (onNext) {
-      onNext(weight);
+      onNext(finalWeight);
     } else if (navigation?.navigate) {
       navigation.navigate('GoalSelection');
     }
@@ -229,18 +290,64 @@ export function CurrentWeightSelectionScreen({
 
       {/* ── Weight Value Readout ───────────────────────────────── */}
       <View style={styles.valueContainer}>
-        <AppText
-          style={[
-            styles.weightValue,
-            { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
-          ]}
-        >
-          {weight.toFixed(1)}
-        </AppText>
+        {isEditingWeight ? (
+          <TextInput
+            ref={inputRef}
+            value={weightInput}
+            onChangeText={(text) => {
+              setWeightInput(sanitizeWeightInput(text));
+              setIsAllSelected(false);
+            }}
+            onSelectionChange={(e) => {
+              const { start, end } = e.nativeEvent.selection;
+              setIsAllSelected(
+                weightInput.length > 0 && start === 0 && end === weightInput.length
+              );
+            }}
+            onBlur={commitWeightInput}
+            onSubmitEditing={commitWeightInput}
+            keyboardType="decimal-pad"
+            returnKeyType="done"
+            maxLength={5}
+            selectTextOnFocus
+            autoFocus
+            selectionColor={theme.colors.brandPrimary}
+            accessibilityLabel="Nhập cân nặng theo kg"
+            style={[
+              styles.weightValue,
+              styles.weightInput,
+              {
+                color: isAllSelected
+                  ? '#FFFFFF'
+                  : isDark
+                    ? '#FFFFFF'
+                    : theme.colors.textPrimary,
+                borderBottomColor: theme.colors.brandPrimary,
+              },
+            ]}
+          />
+        ) : (
+          <TouchableOpacity
+            onPress={startEditingWeight}
+            activeOpacity={0.7}
+            hitSlop={{ top: 8, bottom: 8, left: 12, right: 12 }}
+            accessibilityRole="button"
+            accessibilityLabel={`Cân nặng hiện tại ${weight.toFixed(1)} kg, nhấn để chỉnh sửa`}
+          >
+            <AppText
+              style={[
+                styles.weightValue,
+                { color: isDark ? theme.colors.onBrand : theme.colors.textPrimary },
+              ]}
+            >
+              {weight.toFixed(1)}
+            </AppText>
+          </TouchableOpacity>
+        )}
         <AppText
           style={[
             styles.weightUnit,
-            { color: isDark ? '#9D6CFA' : theme.colors.brandPrimary },
+            { color: theme.colors.textPrimary },
           ]}
         >
           kg
@@ -274,18 +381,20 @@ export function CurrentWeightSelectionScreen({
             offset: STEP_WIDTH * index,
             index,
           })}
-          contentContainerStyle={{ paddingHorizontal }}
+          contentContainerStyle={{ paddingHorizontal, paddingTop: 10 }}
           renderItem={({ index }) => {
             const isWhole = index % 10 === 0;
             const isHalf = index % 5 === 0;
+            const labelVal = MIN_WEIGHT + Math.round(index / 10);
 
             return (
               <View style={styles.tickWrapper}>
-                <View
-                  style={[
-                    styles.tick,
-                    isWhole
-                      ? [
+                <View style={styles.tickTrack}>
+                  <View
+                    style={[
+                      styles.tick,
+                      isWhole
+                        ? [
                           styles.tickTen,
                           {
                             backgroundColor: isDark
@@ -293,25 +402,41 @@ export function CurrentWeightSelectionScreen({
                               : theme.colors.brandPrimary,
                           },
                         ]
-                      : isHalf
-                      ? [
-                          styles.tickFive,
-                          {
-                            backgroundColor: isDark
-                              ? '#776F9F'
-                              : '#A6A1B8',
-                          },
-                        ]
-                      : [
-                          styles.tickOne,
-                          {
-                            backgroundColor: isDark
-                              ? '#372F5B'
-                              : '#D1CBDD',
-                          },
-                        ],
-                  ]}
-                />
+                        : isHalf
+                          ? [
+                            styles.tickFive,
+                            {
+                              backgroundColor: isDark
+                                ? '#776F9F'
+                                : '#A6A1B8',
+                            },
+                          ]
+                          : [
+                            styles.tickOne,
+                            {
+                              backgroundColor: isDark
+                                ? '#372F5B'
+                                : '#D1CBDD',
+                            },
+                          ],
+                    ]}
+                  />
+                </View>
+                {isWhole ? (
+                  <AppText
+                    style={[
+                      styles.tickLabel,
+                      {
+                        color: isDark
+                          ? '#AEA6CC'
+                          : theme.colors.textSecondary,
+                      },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {labelVal}
+                  </AppText>
+                ) : null}
               </View>
             );
           }}
@@ -535,6 +660,12 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     lineHeight: 62,
   },
+  weightInput: {
+    minWidth: 132,
+    textAlign: 'center',
+    borderBottomWidth: 2,
+    paddingVertical: 0,
+  },
   weightUnit: {
     fontSize: 20,
     fontWeight: '600',
@@ -548,11 +679,11 @@ const styles = StyleSheet.create({
   },
   centerCursor: {
     position: 'absolute',
-    top: 10,
+    top: 4,
     left: '50%',
     transform: [{ translateX: -1.5 }],
     width: 3,
-    height: 85,
+    height: 62,
     backgroundColor: '#9D6CFA',
     borderRadius: 1.5,
     zIndex: 10,
@@ -565,26 +696,39 @@ const styles = StyleSheet.create({
   tickWrapper: {
     width: STEP_WIDTH,
     alignItems: 'center',
-    justifyContent: 'center',
-    height: 100,
+    justifyContent: 'flex-start',
+    height: 90,
+  },
+  tickTrack: {
+    height: 50,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
   },
   tick: {
     borderRadius: 1,
   },
   tickTen: {
     width: 2,
-    height: 50,
+    height: 46,
     backgroundColor: '#C5BFE3',
   },
   tickFive: {
     width: 2,
-    height: 34,
+    height: 32,
     backgroundColor: '#776F9F',
   },
   tickOne: {
     width: 1.5,
     height: 20,
     backgroundColor: '#372F5B',
+  },
+  tickLabel: {
+    marginTop: 6,
+    width: 36,
+    textAlign: 'center',
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#AEA6CC',
   },
   bmiCardWrap: {
     paddingHorizontal: 20,

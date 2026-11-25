@@ -2,11 +2,13 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Dimensions,
   Image,
+  Keyboard,
   NativeScrollEvent,
   NativeSyntheticEvent,
   SafeAreaView,
   ScrollView,
   StyleSheet,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -18,7 +20,7 @@ import { useTheme } from '@/theme';
 import { useHealthProfileDraft } from '../hooks/useHealthProfileDraft';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const MIN_HEIGHT = 100;
+const MIN_HEIGHT = 50;
 const MAX_HEIGHT = 250;
 const DEFAULT_HEIGHT = 160;
 const STEP_WIDTH = 12;
@@ -50,7 +52,11 @@ export function HeightSelectionScreen({
   }, [draft.height]);
 
   const [height, setHeight] = useState<number>(initialVal);
+  const [isEditingHeight, setIsEditingHeight] = useState(false);
+  const [heightInput, setHeightInput] = useState(String(initialVal));
+  const [isAllSelected, setIsAllSelected] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
+  const inputRef = useRef<TextInput>(null);
   const hasInitialized = useRef(false);
 
   const paddingHorizontal = (SCREEN_WIDTH - STEP_WIDTH) / 2;
@@ -74,11 +80,49 @@ export function HeightSelectionScreen({
     }
   };
 
+  const scrollToHeight = (newHeight: number) => {
+    const clamped = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, newHeight));
+    setIsEditingHeight(false);
+    Keyboard.dismiss();
+    setHeight(clamped);
+    scrollRef.current?.scrollTo({
+      x: (clamped - MIN_HEIGHT) * STEP_WIDTH,
+      animated: true,
+    });
+  };
+
+  const startEditingHeight = () => {
+    setHeightInput(String(height));
+    setIsAllSelected(true);
+    setIsEditingHeight(true);
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+    });
+  };
+
+  const commitHeightInput = () => {
+    const parsed = parseInt(heightInput, 10);
+    const nextHeight = !isNaN(parsed)
+      ? Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, parsed))
+      : height;
+    scrollToHeight(nextHeight);
+  };
+
   const handleNext = () => {
-    updateDraft('height', String(height));
+    let finalHeight = height;
+    if (isEditingHeight) {
+      const parsed = parseInt(heightInput, 10);
+      if (!isNaN(parsed)) {
+        finalHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, parsed));
+      }
+      setIsEditingHeight(false);
+      setHeight(finalHeight);
+      Keyboard.dismiss();
+    }
+    updateDraft('height', String(finalHeight));
 
     if (onNext) {
-      onNext(height);
+      onNext(finalHeight);
     } else if (navigation?.navigate) {
       navigation.navigate('CurrentWeightSelection');
     }
@@ -192,18 +236,65 @@ export function HeightSelectionScreen({
 
       {/* ── Height Value Display ───────────────────────────────── */}
       <View style={styles.valueContainer}>
-        <AppText
-          style={[
-            styles.heightValue,
-            { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
-          ]}
-        >
-          {height}
-        </AppText>
+        {isEditingHeight ? (
+          <TextInput
+            ref={inputRef}
+            value={heightInput}
+            onChangeText={(text) => {
+              const digits = text.replace(/[^0-9]/g, '');
+              setHeightInput(digits);
+              setIsAllSelected(false);
+            }}
+            onSelectionChange={(e) => {
+              const { start, end } = e.nativeEvent.selection;
+              setIsAllSelected(
+                heightInput.length > 0 && start === 0 && end === heightInput.length
+              );
+            }}
+            onBlur={commitHeightInput}
+            onSubmitEditing={commitHeightInput}
+            keyboardType="number-pad"
+            returnKeyType="done"
+            maxLength={3}
+            selectTextOnFocus
+            autoFocus
+            selectionColor={theme.colors.brandPrimary}
+            accessibilityLabel="Nhập chiều cao theo cm"
+            style={[
+              styles.heightValue,
+              styles.heightInput,
+              {
+                color: isAllSelected
+                  ? '#FFFFFF'
+                  : isDark
+                    ? theme.colors.onBrand
+                    : theme.colors.textPrimary,
+                borderBottomColor: theme.colors.brandPrimary,
+              },
+            ]}
+          />
+        ) : (
+          <TouchableOpacity
+            onPress={startEditingHeight}
+            activeOpacity={0.7}
+            hitSlop={{ top: 8, bottom: 8, left: 12, right: 12 }}
+            accessibilityRole="button"
+            accessibilityLabel={`Chiều cao hiện tại ${height} cm, nhấn để chỉnh sửa`}
+          >
+            <AppText
+              style={[
+                styles.heightValue,
+                { color: isDark ? theme.colors.onBrand : theme.colors.textPrimary },
+              ]}
+            >
+              {height}
+            </AppText>
+          </TouchableOpacity>
+        )}
         <AppText
           style={[
             styles.heightUnit,
-            { color: isDark ? '#9D6CFA' : theme.colors.brandPrimary },
+            { color: isDark ? theme.colors.onBrand : theme.colors.textPrimary },
           ]}
         >
           cm
@@ -237,11 +328,12 @@ export function HeightSelectionScreen({
 
             return (
               <View key={val} style={styles.tickWrapper}>
-                <View
-                  style={[
-                    styles.tick,
-                    isTen
-                      ? [
+                <View style={styles.tickTrack}>
+                  <View
+                    style={[
+                      styles.tick,
+                      isTen
+                        ? [
                           styles.tickTen,
                           {
                             backgroundColor: isDark
@@ -249,25 +341,41 @@ export function HeightSelectionScreen({
                               : theme.colors.brandPrimary,
                           },
                         ]
-                      : isFive
-                      ? [
-                          styles.tickFive,
-                          {
-                            backgroundColor: isDark
-                              ? '#776F9F'
-                              : '#A6A1B8',
-                          },
-                        ]
-                      : [
-                          styles.tickOne,
-                          {
-                            backgroundColor: isDark
-                              ? '#372F5B'
-                              : '#D1CBDD',
-                          },
-                        ],
-                  ]}
-                />
+                        : isFive
+                          ? [
+                            styles.tickFive,
+                            {
+                              backgroundColor: isDark
+                                ? '#776F9F'
+                                : '#A6A1B8',
+                            },
+                          ]
+                          : [
+                            styles.tickOne,
+                            {
+                              backgroundColor: isDark
+                                ? '#372F5B'
+                                : '#D1CBDD',
+                            },
+                          ],
+                    ]}
+                  />
+                </View>
+                {isTen ? (
+                  <AppText
+                    style={[
+                      styles.tickLabel,
+                      {
+                        color: isDark
+                          ? '#AEA6CC'
+                          : theme.colors.textSecondary,
+                      },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {val}
+                  </AppText>
+                ) : null}
               </View>
             );
           })}
@@ -389,6 +497,12 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     lineHeight: 64,
   },
+  heightInput: {
+    minWidth: 112,
+    textAlign: 'center',
+    borderBottomWidth: 2,
+    paddingVertical: 0,
+  },
   heightUnit: {
     fontSize: 20,
     fontWeight: '600',
@@ -403,11 +517,11 @@ const styles = StyleSheet.create({
   },
   centerCursor: {
     position: 'absolute',
-    top: 12,
+    top: 4,
     left: '50%',
     transform: [{ translateX: -1.5 }],
     width: 3,
-    height: 85,
+    height: 62,
     backgroundColor: '#9D6CFA',
     borderRadius: 1.5,
     zIndex: 10,
@@ -418,32 +532,46 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   rulerScrollContent: {
-    alignItems: 'center',
+    alignItems: 'flex-start',
     height: 100,
+    paddingTop: 10,
   },
   tickWrapper: {
     width: STEP_WIDTH,
     alignItems: 'center',
-    justifyContent: 'center',
-    height: 100,
+    justifyContent: 'flex-start',
+    height: 90,
+  },
+  tickTrack: {
+    height: 50,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
   },
   tick: {
     borderRadius: 1,
   },
   tickTen: {
     width: 2,
-    height: 50,
+    height: 46,
     backgroundColor: '#C5BFE3',
   },
   tickFive: {
     width: 2,
-    height: 34,
+    height: 32,
     backgroundColor: '#776F9F',
   },
   tickOne: {
     width: 1.5,
-    height: 22,
+    height: 20,
     backgroundColor: '#372F5B',
+  },
+  tickLabel: {
+    marginTop: 6,
+    width: 36,
+    textAlign: 'center',
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#AEA6CC',
   },
   bottomArea: {
     marginTop: 'auto',

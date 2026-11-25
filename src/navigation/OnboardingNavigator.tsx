@@ -5,7 +5,6 @@ import { useTheme } from '@/theme';
 import { OnboardingScreen } from '@/features/profile/screens/OnboardingScreen';
 import {
   KalloWelcomeScreen,
-  NicknameScreen,
   GenderSelectionScreen,
   AgeSelectionScreen,
   HeightSelectionScreen,
@@ -43,11 +42,6 @@ export function OnboardingNavigator() {
       <Stack.Screen
         name="HealthProfileWizard"
         component={HealthProfileWizardScreen}
-        options={{ animation: 'slide_from_right' }}
-      />
-      <Stack.Screen
-        name="Nickname"
-        component={NicknameScreen}
         options={{ animation: 'slide_from_right' }}
       />
       <Stack.Screen

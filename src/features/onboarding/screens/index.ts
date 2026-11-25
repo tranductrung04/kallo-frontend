@@ -6,7 +6,6 @@ export {
 export * from './OnboardingFlowScreen';
 export {
   KalloWelcomeScreen,
-  NicknameScreen,
   GenderSelectionScreen,
   AgeSelectionScreen,
   HeightSelectionScreen,
