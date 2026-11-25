@@ -78,18 +78,34 @@ export function GoalSelectionScreen({
 
   const handleNext = () => {
     const finalGoal = isUnderage ? 'maintain' : selectedGoal;
+    const currentWeightNum = parseFloat(draft.weight);
+    const validCurrentWeight =
+      !isNaN(currentWeightNum) && currentWeightNum > 0 ? currentWeightNum : 53;
+    const currentTargetNum = parseFloat(draft.targetWeight);
+    const hasValidTarget = !isNaN(currentTargetNum) && currentTargetNum >= 20 && currentTargetNum <= 300;
+
     updateDraft('goal', finalGoal);
     updateDraft('macros', defaultMacroPercentages(finalGoal));
     if (finalGoal === 'maintain') {
+      updateDraft('targetWeight', validCurrentWeight.toFixed(1));
       updateDraft('weeklyRate', '0');
-    } else if (!draft.weeklyRate || draft.weeklyRate === '0') {
-      updateDraft('weeklyRate', '0.5');
+    } else {
+      if (finalGoal === 'lose' && (!hasValidTarget || currentTargetNum >= validCurrentWeight)) {
+        updateDraft('targetWeight', Math.max(20, validCurrentWeight - 5).toFixed(1));
+      } else if (finalGoal === 'gain' && (!hasValidTarget || currentTargetNum <= validCurrentWeight)) {
+        updateDraft('targetWeight', Math.min(300, validCurrentWeight + 5).toFixed(1));
+      }
+      if (!draft.weeklyRate || draft.weeklyRate === '0') {
+        updateDraft('weeklyRate', '0.5');
+      }
     }
 
     if (onNext) {
       onNext(finalGoal);
     } else if (navigation?.navigate) {
-      navigation.navigate('TargetWeightSelection');
+      navigation.navigate(
+        finalGoal === 'maintain' ? 'ActivityLevelSelection' : 'TargetWeightSelection'
+      );
     }
   };
 
@@ -182,8 +198,8 @@ export function GoalSelectionScreen({
               ? '#C084FC'
               : theme.colors.brandPrimary
             : isDark
-            ? '#8E87AA'
-            : theme.colors.textSecondary;
+              ? '#8E87AA'
+              : theme.colors.textSecondary;
 
           return (
             <AnimatedCard
@@ -196,7 +212,7 @@ export function GoalSelectionScreen({
               }}
               style={[styles.goalCard, isDisabled && { opacity: 0.45 }]}
               selectedBorderColor={theme.colors.brandPrimary}
-              selectedBgColor={isDark ? '#231742' : theme.colors.brandSoftTint}
+              selectedBgColor={isDark ? '#231742' : 'transparent'}
               unselectedBorderColor={isDark ? '#2E2352' : theme.colors.surfaceBorder}
               unselectedBgColor={isDark ? '#1A1433' : theme.colors.surfaceMid}
               activeScale={isDisabled ? 1 : 0.965}
@@ -209,15 +225,11 @@ export function GoalSelectionScreen({
                     styles.iconWrap,
                     isSelected
                       ? {
-                          backgroundColor: isDark
-                            ? 'rgba(167, 139, 250, 0.18)'
-                            : '#EDE5FF',
-                        }
+                        backgroundColor: 'transparent',
+                      }
                       : {
-                          backgroundColor: isDark
-                            ? 'rgba(255, 255, 255, 0.05)'
-                            : '#F1EFF9',
-                        },
+                        backgroundColor: 'transparent',
+                      },
                   ]}
                 >
                   {item.renderIcon(iconColor)}
@@ -232,8 +244,8 @@ export function GoalSelectionScreen({
                             ? '#E9D5FF'
                             : theme.colors.brandPrimary
                           : isDark
-                          ? '#FFFFFF'
-                          : theme.colors.textPrimary,
+                            ? '#FFFFFF'
+                            : theme.colors.textPrimary,
                       },
                     ]}
                   >

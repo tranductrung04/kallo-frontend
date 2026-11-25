@@ -12,7 +12,8 @@ import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChevronLeftIcon, MoonIcon, SunIcon } from '@/components/icons';
 import { useTheme } from '@/theme';
-import { NicknameScreen } from './NicknameScreen';
+import { useHealthProfileDraft } from '../hooks/useHealthProfileDraft';
+import type { GoalType } from '../types';
 import { GenderSelectionScreen } from './GenderSelectionScreen';
 import { AgeSelectionScreen } from './AgeSelectionScreen';
 import { HeightSelectionScreen } from './HeightSelectionScreen';
@@ -25,17 +26,16 @@ import { HealthConditionsSelectionScreen } from './HealthConditionsSelectionScre
 import { ProfileSummaryScreen } from './ProfileSummaryScreen';
 
 const STEP_PERCENTAGES = [
-  10,  // 0: Nickname
-  18,  // 1: Gender
-  28,  // 2: Age
-  40,  // 3: Height
-  52,  // 4: Current Weight
-  64,  // 5: Goal
-  74,  // 6: Target Weight
-  84,  // 7: Activity Level
-  92,  // 8: Diet & Allergies
-  96,  // 9: Health Conditions
-  100, // 10: Profile Summary
+  10,  // 0: Gender
+  20,  // 1: Age
+  32,  // 2: Height
+  44,  // 3: Current Weight
+  56,  // 4: Goal
+  68,  // 5: Target Weight
+  80,  // 6: Activity Level
+  90,  // 7: Diet & Allergies
+  96,  // 8: Health Conditions
+  100, // 9: Profile Summary
 ];
 
 interface HealthProfileWizardScreenProps {
@@ -50,6 +50,7 @@ export function HealthProfileWizardScreen({
   const insets = useSafeAreaInsets();
   const theme = useTheme();
   const isDark = theme.scheme === 'dark';
+  const { draft } = useHealthProfileDraft();
   const initial = route?.params?.initialStep ?? 0;
   const [currentStep, setCurrentStep] = useState(initial);
 
@@ -95,18 +96,30 @@ export function HealthProfileWizardScreen({
     [progressAnim, stepSlideAnim, stepFadeAnim]
   );
 
-  const handleNext = useCallback(() => {
-    if (currentStep < 10) {
-      animateToStep(currentStep + 1, 'forward');
-    } else {
-      // Completed Summary -> Navigate to Calculating Plan
-      if (navigation?.navigate) {
-        navigation.navigate('CalculatingPlan');
+  const handleNext = useCallback(
+    (nextGoal?: GoalType) => {
+      if (currentStep === 4) {
+        const effectiveGoal = nextGoal ?? draft.goal;
+        animateToStep(effectiveGoal === 'maintain' ? 6 : 5, 'forward');
+        return;
       }
-    }
-  }, [currentStep, animateToStep, navigation]);
+      if (currentStep < 9) {
+        animateToStep(currentStep + 1, 'forward');
+      } else {
+        // Completed Summary -> Navigate to Calculating Plan
+        if (navigation?.navigate) {
+          navigation.navigate('CalculatingPlan');
+        }
+      }
+    },
+    [currentStep, draft.goal, animateToStep, navigation]
+  );
 
   const handleBack = useCallback(() => {
+    if (currentStep === 6 && draft.goal === 'maintain') {
+      animateToStep(4, 'backward');
+      return;
+    }
     if (currentStep > 0) {
       animateToStep(currentStep - 1, 'backward');
     } else {
@@ -114,105 +127,96 @@ export function HealthProfileWizardScreen({
         navigation.goBack();
       }
     }
-  }, [currentStep, animateToStep, navigation]);
+  }, [currentStep, draft.goal, animateToStep, navigation]);
 
   const renderActiveStep = () => {
     switch (currentStep) {
       case 0:
         return (
-          <NicknameScreen
+          <GenderSelectionScreen
             navigation={navigation}
-            onNext={handleNext}
+            onNext={() => handleNext()}
             onBack={handleBack}
             hideHeader
           />
         );
       case 1:
         return (
-          <GenderSelectionScreen
+          <AgeSelectionScreen
             navigation={navigation}
-            onNext={handleNext}
+            onNext={() => handleNext()}
             onBack={handleBack}
             hideHeader
           />
         );
       case 2:
         return (
-          <AgeSelectionScreen
+          <HeightSelectionScreen
             navigation={navigation}
-            onNext={handleNext}
+            onNext={() => handleNext()}
             onBack={handleBack}
             hideHeader
           />
         );
       case 3:
         return (
-          <HeightSelectionScreen
+          <CurrentWeightSelectionScreen
             navigation={navigation}
-            onNext={handleNext}
+            onNext={() => handleNext()}
             onBack={handleBack}
             hideHeader
           />
         );
       case 4:
         return (
-          <CurrentWeightSelectionScreen
+          <GoalSelectionScreen
             navigation={navigation}
-            onNext={handleNext}
+            onNext={(goal) => handleNext(goal)}
             onBack={handleBack}
             hideHeader
           />
         );
       case 5:
         return (
-          <GoalSelectionScreen
+          <TargetWeightSelectionScreen
             navigation={navigation}
-            onNext={handleNext}
+            onNext={() => handleNext()}
             onBack={handleBack}
             hideHeader
           />
         );
       case 6:
         return (
-          <TargetWeightSelectionScreen
+          <ActivityLevelSelectionScreen
             navigation={navigation}
-            onNext={handleNext}
+            onNext={() => handleNext()}
             onBack={handleBack}
             hideHeader
           />
         );
       case 7:
         return (
-          <ActivityLevelSelectionScreen
+          <DietAndAllergiesSelectionScreen
             navigation={navigation}
-            onNext={handleNext}
+            onNext={() => handleNext()}
             onBack={handleBack}
             hideHeader
           />
         );
       case 8:
         return (
-          <DietAndAllergiesSelectionScreen
+          <HealthConditionsSelectionScreen
             navigation={navigation}
-            onNext={handleNext}
+            onNext={() => handleNext()}
             onBack={handleBack}
             hideHeader
           />
         );
       case 9:
         return (
-          <HealthConditionsSelectionScreen
-            navigation={navigation}
-            onNext={handleNext}
-            onBack={handleBack}
-            hideHeader
-          />
-        );
-      case 10:
-        return (
           <ProfileSummaryScreen
             navigation={navigation}
-            onNext={handleNext}
+            onNext={() => handleNext()}
             onBack={handleBack}
             hideHeader
           />

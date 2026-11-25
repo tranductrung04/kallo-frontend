@@ -7,10 +7,9 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Circle, Line, Path } from 'react-native-svg';
 import { images } from '@/assets/images';
 import { AppText } from '@/components/common';
-import { ChevronLeftIcon } from '@/components/icons';
+import { ChevronLeftIcon, FemaleIcon, MaleIcon } from '@/components/icons';
 import { useTheme } from '@/theme';
 import { AnimatedCard } from '../components';
 import { useHealthProfileDraft } from '../hooks/useHealthProfileDraft';
@@ -61,16 +60,16 @@ export function GenderSelectionScreen({
       ? '#FFFFFF'
       : theme.colors.brandPrimary
     : isDark
-    ? '#A09CAE'
-    : theme.colors.textSecondary;
+      ? '#A09CAE'
+      : theme.colors.textSecondary;
 
   const maleColor = isMale
     ? isDark
       ? '#FFFFFF'
       : theme.colors.brandPrimary
     : isDark
-    ? '#A09CAE'
-    : theme.colors.textSecondary;
+      ? '#A09CAE'
+      : theme.colors.textSecondary;
 
   const content = (
     <View style={styles.contentWrap}>
@@ -125,7 +124,7 @@ export function GenderSelectionScreen({
             containerStyle={styles.cardContainer}
             style={styles.genderCard}
             selectedBorderColor={theme.colors.brandPrimary}
-            selectedBgColor={isDark ? '#260F53' : theme.colors.brandSoftTint}
+            selectedBgColor={'transparent'}
             unselectedBorderColor={isDark ? '#2D2A3F' : theme.colors.surfaceBorder}
             unselectedBgColor={isDark ? '#2D2A3F' : theme.colors.surfaceMid}
             activeScale={0.96}
@@ -133,34 +132,7 @@ export function GenderSelectionScreen({
             accessibilityRole="radio"
           >
             <View style={styles.cardContent}>
-              {/* SVG Female Icon ♀ */}
-              <Svg width={30} height={30} viewBox="0 0 24 24" fill="none">
-                <Circle
-                  cx="12"
-                  cy="9.5"
-                  r="5.5"
-                  stroke={femaleColor}
-                  strokeWidth="2.2"
-                />
-                <Line
-                  x1="12"
-                  y1="15"
-                  x2="12"
-                  y2="21.5"
-                  stroke={femaleColor}
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                />
-                <Line
-                  x1="8.5"
-                  y1="18.2"
-                  x2="15.5"
-                  y2="18.2"
-                  stroke={femaleColor}
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                />
-              </Svg>
+              <FemaleIcon size={30} color={femaleColor} strokeWidth={2.2} />
 
               <AppText
                 style={[
@@ -181,7 +153,7 @@ export function GenderSelectionScreen({
             containerStyle={styles.cardContainer}
             style={styles.genderCard}
             selectedBorderColor={theme.colors.brandPrimary}
-            selectedBgColor={isDark ? '#260F53' : theme.colors.brandSoftTint}
+            selectedBgColor={'transparent'}
             unselectedBorderColor={isDark ? '#2D2A3F' : theme.colors.surfaceBorder}
             unselectedBgColor={isDark ? '#2D2A3F' : theme.colors.surfaceMid}
             activeScale={0.96}
@@ -189,32 +161,7 @@ export function GenderSelectionScreen({
             accessibilityRole="radio"
           >
             <View style={styles.cardContent}>
-              {/* SVG Male Icon ♂ */}
-              <Svg width={30} height={30} viewBox="0 0 24 24" fill="none">
-                <Circle
-                  cx="10"
-                  cy="14"
-                  r="5.5"
-                  stroke={maleColor}
-                  strokeWidth="2.2"
-                />
-                <Line
-                  x1="14"
-                  y1="10"
-                  x2="20"
-                  y2="4"
-                  stroke={maleColor}
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                />
-                <Path
-                  d="M15 4h5v5"
-                  stroke={maleColor}
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </Svg>
+              <MaleIcon size={30} color={maleColor} strokeWidth={2.2} />
 
               <AppText
                 style={[
@@ -248,7 +195,7 @@ export function GenderSelectionScreen({
           <AppText style={styles.buttonText}>Tiếp tục</AppText>
         </TouchableOpacity>
       </View>
-    </View>
+    </View >
   );
 
   if (hideHeader) {
@@ -281,7 +228,7 @@ export function GenderSelectionScreen({
         </TouchableOpacity>
       </View>
 
-      {/* ── Progress Bar (~20%) ────────────────────────────────── */}
+      {/* ── Progress Bar (~10%) ────────────────────────────────── */}
       <View
         style={[
           styles.progressTrack,
@@ -295,7 +242,7 @@ export function GenderSelectionScreen({
             styles.progressFill,
             {
               backgroundColor: theme.colors.brandPrimary,
-              width: '20%',
+              width: '10%',
             },
           ]}
         />
@@ -431,7 +378,6 @@ const styles = StyleSheet.create({
     color: '#A09CAE',
   },
   genderLabelSelected: {
-    color: '#FFFFFF',
     fontWeight: '700',
   },
   bottomArea: {

@@ -35,6 +35,7 @@ import {
   GlassWater,
   Globe,
   Heart,
+  Hourglass,
   House,
   ImagePlus,
   Info,
@@ -42,6 +43,7 @@ import {
   Lock,
   LogOut,
   Mail,
+  Mars,
   Medal,
   Menu,
   MessageSquare,
@@ -82,6 +84,7 @@ import {
   UserPlus,
   Users,
   Utensils,
+  Venus,
   Waves,
   Weight,
   Wheat,
@@ -307,5 +310,8 @@ export const ArrowRightIcon = fromLucide(ArrowRight, { defaultSize: 18 });
 export const CheckCheckIcon = fromLucide(CheckCheck, { defaultSize: 22 });
 export const MoreVerticalIcon = fromLucide(MoreVertical, { defaultSize: 20 });
 export const UserMinusIcon = fromLucide(UserMinus, { defaultSize: 18 });
+export const FemaleIcon = fromLucide(Venus, { defaultSize: 30, strokeWidth: 2.2 });
+export const MaleIcon = fromLucide(Mars, { defaultSize: 30, strokeWidth: 2.2 });
+export const HourglassIcon = fromLucide(Hourglass, { defaultSize: 32, strokeWidth: 2 });
 
 

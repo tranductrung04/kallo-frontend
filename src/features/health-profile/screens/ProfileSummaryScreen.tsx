@@ -54,13 +54,14 @@ export function ProfileSummaryScreen({
 
   const heightCm = useMemo(() => {
     const parsed = parseFloat(draft.height);
-    return !isNaN(parsed) && parsed > 0 ? parsed : 175;
+    return !isNaN(parsed) && parsed > 0 ? parsed : 160;
   }, [draft.height]);
 
   const targetWeight = useMemo(() => {
+    if (draft.goal === 'maintain') return currentWeight;
     const parsed = parseFloat(draft.targetWeight);
-    return !isNaN(parsed) && parsed > 0 ? parsed : 61;
-  }, [draft.targetWeight]);
+    return !isNaN(parsed) && parsed > 0 ? parsed : currentWeight;
+  }, [draft.goal, draft.targetWeight, currentWeight]);
 
   // Current BMI
   const bmiVal = useMemo(() => {
@@ -73,35 +74,35 @@ export function ProfileSummaryScreen({
   const bmiMeta = useMemo(() => {
     if (bmiVal < 18.5) {
       return {
-        badgeBg: '#2563EB',
-        badgeColor: '#FFFFFF',
-        valueColor: '#3B82F6',
+        badgeBg: theme.colors.macroCarbsStrong,
+        badgeColor: theme.colors.onBrand,
+        valueColor: theme.colors.macroCarbs,
         advice: 'Bạn đang thiếu cân đấy, cơ thể có thể bị suy nhược, mất cơ và rối loạn nội tiết. Hãy tăng cường dinh dưỡng nhé!',
       };
     }
     if (bmiVal < 23) {
       return {
-        badgeBg: '#16A34A',
-        badgeColor: '#FFFFFF',
-        valueColor: '#22C55E',
+        badgeBg: theme.colors.quickScanner,
+        badgeColor: theme.colors.onBrand,
+        valueColor: theme.colors.macroFiber,
         advice: 'Bạn đang ở mức cân nặng hợp lý. Hãy duy trì thói quen lành mạnh để bảo vệ sức khỏe lâu dài.',
       };
     }
     if (bmiVal < 25) {
       return {
-        badgeBg: '#F59E0B',
-        badgeColor: '#FFFFFF',
-        valueColor: '#FBBF24',
+        badgeBg: theme.colors.vipStreak,
+        badgeColor: theme.colors.onBrand,
+        valueColor: theme.colors.trackerWeight,
         advice: 'Bạn đang ở mức thừa cân nhẹ. Kallo sẽ đồng hành giúp bạn lấy lại vóc dáng săn chắc nhất.',
       };
     }
     return {
-      badgeBg: '#EF4444',
-      badgeColor: '#FFFFFF',
-      valueColor: '#FF6B6B',
+      badgeBg: theme.colors.statusDanger,
+      badgeColor: theme.colors.onError,
+      valueColor: theme.colors.macroProtein,
       advice: 'Chỉ số BMI đang ở mức cảnh báo. Chúng mình sẽ xây dựng thực đơn thâm hụt an toàn và bền vững cho bạn.',
     };
-  }, [bmiVal]);
+  }, [bmiVal, theme.colors]);
 
   // Calculate indicator percentage on the BMI bar (range ~12 to 35)
   const markerPercent = useMemo(() => {
@@ -130,8 +131,8 @@ export function ProfileSummaryScreen({
   const activityLabel = useMemo(() => {
     if (draft.activity === 'sedentary') return 'Không tập luyện, ít vận động';
     if (draft.activity === 'light') return 'Vận động nhẹ nhàng';
-    if (draft.activity === 'moderate') return 'Chăm chỉ luyện tập';
-    return 'Vận động cường độ cao';
+    if (draft.activity === 'moderate') return 'Vận động vừa phải';
+    return 'Vận động nhiều / Cường độ cao';
   }, [draft.activity]);
 
   const dietPrefLabel = useMemo(() => {
@@ -149,11 +150,11 @@ export function ProfileSummaryScreen({
   const conditionLabels = useMemo(() => {
     const map: Record<string, string> = {
       none: 'Không có bệnh lý nền',
-      gerd: 'Đau dạ dày / Trào ngược',
-      diabetes: 'Đái tháo đường',
+      gerd: 'Đau dạ dày, Trào ngược (GERD)',
+      diabetes: 'Đái tháo đường / Tiền tiểu đường',
       hypertension: 'Huyết áp cao',
       hyperlipidemia: 'Mỡ máu cao',
-      gout: 'Bệnh Gút',
+      gout: 'Bệnh Gút (Gout)',
       fatty_liver: 'Gan nhiễm mỡ',
     };
     const list = draft.healthConditions || [];
@@ -283,7 +284,7 @@ export function ProfileSummaryScreen({
                 <AppText
                   style={[
                     styles.metricValue,
-                    { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+                    { color: isDark ? theme.colors.onBrand : theme.colors.textPrimary },
                   ]}
                 >
                   {goalLabel}
@@ -309,10 +310,10 @@ export function ProfileSummaryScreen({
                 <AppText
                   style={[
                     styles.metricValue,
-                    { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+                    { color: isDark ? theme.colors.onBrand : theme.colors.textPrimary },
                   ]}
                 >
-                  {Math.round(targetWeight)} kg
+                  {Number(targetWeight.toFixed(1))} kg
                 </AppText>
               </View>
 
@@ -335,7 +336,7 @@ export function ProfileSummaryScreen({
                 <AppText
                   style={[
                     styles.metricValue,
-                    { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+                    { color: isDark ? theme.colors.onBrand : theme.colors.textPrimary },
                   ]}
                 >
                   {activityLabel}
@@ -354,7 +355,7 @@ export function ProfileSummaryScreen({
             </View>
           </View>
 
-          {/* Detailed Info Expansion (Nickname, Height/Weight, Diet, Allergies, Health) */}
+          {/* Detailed Info Expansion (Height/Weight, Diet, Allergies, Health) */}
           <View
             style={[
               styles.detailsDivider,
@@ -384,11 +385,10 @@ export function ProfileSummaryScreen({
               <AppText
                 style={[
                   styles.detailVal,
-                  { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+                  { color: isDark ? theme.colors.onBrand : theme.colors.textPrimary },
                 ]}
               >
-                {draft.nickname ? `${draft.nickname} • ` : ''}
-                {draft.gender === 'female' ? 'Nữ' : 'Nam'} ({draft.age ? `${draft.age} tuổi • ` : ''}{draft.height} cm, {draft.weight} kg)
+                {draft.gender === 'female' ? 'Nữ' : 'Nam'} ({draft.age ? `${draft.age} tuổi • ` : ''}{Math.round(heightCm)} cm, {Number(currentWeight.toFixed(1))} kg)
               </AppText>
             </View>
 
@@ -410,7 +410,7 @@ export function ProfileSummaryScreen({
               <AppText
                 style={[
                   styles.detailVal,
-                  { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+                  { color: isDark ? theme.colors.onBrand : theme.colors.textPrimary },
                 ]}
               >
                 {dietPrefLabel}
@@ -435,7 +435,7 @@ export function ProfileSummaryScreen({
               <AppText
                 style={[
                   styles.detailVal,
-                  { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+                  { color: isDark ? theme.colors.onBrand : theme.colors.textPrimary },
                 ]}
               >
                 {draft.allergies.length > 0
@@ -462,7 +462,7 @@ export function ProfileSummaryScreen({
               <AppText
                 style={[
                   styles.detailVal,
-                  { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+                  { color: isDark ? theme.colors.onBrand : theme.colors.textPrimary },
                 ]}
               >
                 {conditionLabels}
@@ -564,7 +564,7 @@ export function ProfileSummaryScreen({
             <AppText
               style={[
                 styles.bmiTitle,
-                { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+                { color: isDark ? theme.colors.onBrand : theme.colors.textPrimary },
               ]}
             >
               BMI của bạn:{' '}

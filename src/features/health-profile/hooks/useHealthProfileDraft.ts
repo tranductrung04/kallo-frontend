@@ -34,6 +34,70 @@ import {
 
 export const HEALTH_PROFILE_DRAFT_KEY = "@kallo/onboarding-draft";
 
+type DraftListener = (draft: HealthProfileDraft, loaded: boolean) => void;
+
+type DraftStore = {
+  draft: HealthProfileDraft;
+  loaded: boolean;
+  loadPromise?: Promise<void>;
+  listeners: Set<DraftListener>;
+};
+
+const draftStores = new Map<string, DraftStore>();
+
+function getDraftStore(key: string): DraftStore {
+  let store = draftStores.get(key);
+  if (!store) {
+    store = {
+      draft: initialHealthProfileDraft,
+      loaded: false,
+      listeners: new Set(),
+    };
+    draftStores.set(key, store);
+  }
+  return store;
+}
+
+function notifyDraftStore(key: string, store: DraftStore) {
+  store.listeners.forEach((listener) => listener(store.draft, store.loaded));
+}
+
+function ensureDraftLoaded(key: string) {
+  const store = getDraftStore(key);
+  if (store.loaded || store.loadPromise) return;
+  store.loadPromise = AsyncStorage.getItem(key)
+    .then((value) => {
+      if (!value) return;
+      try {
+        const parsed = JSON.parse(value);
+        store.draft = {
+          ...initialHealthProfileDraft,
+          ...parsed,
+          age:
+            parsed.age && isValidAge(Number(parsed.age))
+              ? String(parsed.age)
+              : "25",
+          height:
+            parsed.height && isValidHeight(Number(parsed.height))
+              ? String(parsed.height)
+              : initialHealthProfileDraft.height,
+          weight:
+            parsed.weight && isValidWeight(Number(parsed.weight))
+              ? String(parsed.weight)
+              : initialHealthProfileDraft.weight,
+        };
+      } catch {
+        store.draft = initialHealthProfileDraft;
+      }
+    })
+    .catch(() => undefined)
+    .finally(() => {
+      store.loaded = true;
+      store.loadPromise = undefined;
+      notifyDraftStore(key, store);
+    });
+}
+
 export const initialHealthProfileDraft: HealthProfileDraft = {
   nickname: "",
   dependent: "me",
@@ -56,50 +120,44 @@ export function useHealthProfileDraft(
   draftStorageKey = HEALTH_PROFILE_DRAFT_KEY,
 ) {
   const { completeOnboarding, refreshProfileStatus } = useAuth();
-  const [draft, setDraft] = useState<HealthProfileDraft>(
-    initialHealthProfileDraft,
+  const initialStore = getDraftStore(draftStorageKey);
+  const [draft, setLocalDraft] = useState<HealthProfileDraft>(
+    initialStore.draft,
   );
-  const [loaded, setLoaded] = useState(false);
+  const [loaded, setLocalLoaded] = useState(initialStore.loaded);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string>();
 
   useEffect(() => {
-    void AsyncStorage.getItem(draftStorageKey)
-      .then((value) => {
-        if (!value) return;
-        try {
-          const parsed = JSON.parse(value);
-          setDraft({
-            ...initialHealthProfileDraft,
-            ...parsed,
-            age:
-              parsed.age && isValidAge(Number(parsed.age))
-                ? String(parsed.age)
-                : "25",
-            height:
-              parsed.height && isValidHeight(Number(parsed.height))
-                ? String(parsed.height)
-                : initialHealthProfileDraft.height,
-            weight:
-              parsed.weight && isValidWeight(Number(parsed.weight))
-                ? String(parsed.weight)
-                : initialHealthProfileDraft.weight,
-          });
-        } catch {
-          setDraft(initialHealthProfileDraft);
-        }
-      })
-      .catch(() => undefined)
-      .finally(() => setLoaded(true));
+    const store = getDraftStore(draftStorageKey);
+    const listener: DraftListener = (nextDraft, nextLoaded) => {
+      setLocalDraft(nextDraft);
+      setLocalLoaded(nextLoaded);
+    };
+    store.listeners.add(listener);
+    setLocalDraft(store.draft);
+    setLocalLoaded(store.loaded);
+    ensureDraftLoaded(draftStorageKey);
+    return () => {
+      store.listeners.delete(listener);
+    };
   }, [draftStorageKey]);
 
-  useEffect(() => {
-    if (loaded) {
-      void AsyncStorage.setItem(draftStorageKey, JSON.stringify(draft)).catch(
-        () => undefined,
-      );
-    }
-  }, [draft, loaded, draftStorageKey]);
+  const setDraft = (
+    updater:
+      | HealthProfileDraft
+      | ((current: HealthProfileDraft) => HealthProfileDraft),
+  ) => {
+    const store = getDraftStore(draftStorageKey);
+    const nextDraft =
+      typeof updater === "function" ? updater(store.draft) : updater;
+    store.draft = nextDraft;
+    store.loaded = true;
+    notifyDraftStore(draftStorageKey, store);
+    void AsyncStorage.setItem(draftStorageKey, JSON.stringify(nextDraft)).catch(
+      () => undefined,
+    );
+  };
 
   const parsedAge = parseInt(draft.age, 10);
   const age = !isNaN(parsedAge) && isValidAge(parsedAge) ? parsedAge : 25;

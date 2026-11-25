@@ -301,7 +301,7 @@ export function HealthConditionsSelectionScreen({
               onPress={() => handleToggle(item.key)}
               style={styles.conditionCard}
               selectedBorderColor={theme.colors.brandPrimary}
-              selectedBgColor={isDark ? '#231742' : theme.colors.brandSoftTint}
+              selectedBgColor={'transparent'}
               unselectedBorderColor={isDark ? '#2E2352' : theme.colors.surfaceBorder}
               unselectedBgColor={isDark ? '#1A1433' : theme.colors.surfaceMid}
               activeScale={0.97}

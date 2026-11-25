@@ -12,7 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 import { AppText } from '@/components/common';
-import { CircleCheckIcon, StarIcon } from '@/components/icons';
+import { CircleCheckIcon, HourglassIcon, StarIcon } from '@/components/icons';
 import { useTheme } from '@/theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -198,7 +198,21 @@ export function CalculatingPlanScreen({
       <View style={styles.content}>
         {/* ── Top Mascot / Hourglass Icon ─────────────────────────── */}
         <Animated.View style={[styles.iconWrap, { transform: [{ scale: hourglassScale }] }]}>
-          <AppText style={styles.hourglassEmoji}>⏳</AppText>
+          <View
+            style={[
+              styles.hourglassBadge,
+              {
+                backgroundColor: theme.colors.brandSoftTint,
+                borderColor: isDark ? '#3D3068' : theme.colors.surfaceBorder,
+              },
+            ]}
+          >
+            <HourglassIcon
+              size={34}
+              color={theme.colors.brandPrimary}
+              strokeWidth={2.2}
+            />
+          </View>
         </Animated.View>
 
         {/* ── Heading ────────────────────────────────────────────── */}
@@ -528,8 +542,13 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 8,
   },
-  hourglassEmoji: {
-    fontSize: 44,
+  hourglassBadge: {
+    width: 72,
+    height: 72,
+    borderRadius: 24,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
     fontSize: 22,

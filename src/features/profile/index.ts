@@ -3,7 +3,6 @@ export * from './screens/OnboardingScreen';
 export {
   HealthProfileSetupScreen,
   KalloWelcomeScreen,
-  NicknameScreen,
   GenderSelectionScreen,
   HeightSelectionScreen,
   CurrentWeightSelectionScreen,

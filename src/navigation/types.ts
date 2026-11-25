@@ -21,7 +21,6 @@ export type AuthStackParamList = {
 export type OnboardingStackParamList = {
   KalloWelcome: undefined;
   HealthProfileWizard: { initialStep?: number } | undefined;
-  Nickname: undefined;
   GenderSelection: undefined;
   AgeSelection: undefined;
   HeightSelection: undefined;

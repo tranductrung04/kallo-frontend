@@ -3,10 +3,12 @@ import {
   Dimensions,
   FlatList,
   Image,
+  Keyboard,
   NativeScrollEvent,
   NativeSyntheticEvent,
   SafeAreaView,
   StyleSheet,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -18,7 +20,7 @@ import { useTheme } from '@/theme';
 import { useHealthProfileDraft } from '../hooks/useHealthProfileDraft';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const MIN_AGE = 13;
+const MIN_AGE = 12;
 const MAX_AGE = 100;
 const DEFAULT_AGE = 25;
 const STEP_WIDTH = 20;
@@ -51,7 +53,11 @@ export function AgeSelectionScreen({
   }, [draft.age]);
 
   const [age, setAge] = useState<number>(initialVal);
+  const [isEditingAge, setIsEditingAge] = useState(false);
+  const [ageInput, setAgeInput] = useState(String(initialVal));
+  const [isAllSelected, setIsAllSelected] = useState(false);
   const flatListRef = useRef<FlatList>(null);
+  const inputRef = useRef<TextInput>(null);
   const isUserScrolling = useRef(false);
   const paddingHorizontal = (SCREEN_WIDTH - STEP_WIDTH) / 2;
 
@@ -79,6 +85,8 @@ export function AgeSelectionScreen({
 
   const scrollToAge = (newAge: number) => {
     const clamped = Math.max(MIN_AGE, Math.min(MAX_AGE, newAge));
+    setIsEditingAge(false);
+    Keyboard.dismiss();
     setAge(clamped);
     isUserScrolling.current = false;
     flatListRef.current?.scrollToIndex({
@@ -87,11 +95,38 @@ export function AgeSelectionScreen({
     });
   };
 
+  const startEditingAge = () => {
+    setAgeInput(String(age));
+    setIsAllSelected(true);
+    setIsEditingAge(true);
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+    });
+  };
+
+  const commitAgeInput = () => {
+    const parsed = parseInt(ageInput, 10);
+    const nextAge = !isNaN(parsed)
+      ? Math.max(MIN_AGE, Math.min(MAX_AGE, parsed))
+      : age;
+    scrollToAge(nextAge);
+  };
+
   const handleNext = () => {
-    updateDraft('age', String(age));
+    let finalAge = age;
+    if (isEditingAge) {
+      const parsed = parseInt(ageInput, 10);
+      if (!isNaN(parsed)) {
+        finalAge = Math.max(MIN_AGE, Math.min(MAX_AGE, parsed));
+      }
+      setIsEditingAge(false);
+      setAge(finalAge);
+      Keyboard.dismiss();
+    }
+    updateDraft('age', String(finalAge));
 
     if (onNext) {
-      onNext(age);
+      onNext(finalAge);
     } else if (navigation?.navigate) {
       navigation.navigate('HeightSelection');
     }
@@ -156,18 +191,65 @@ export function AgeSelectionScreen({
       {/* ── Age Value Readout ──────────────────────────────────── */}
       <View style={styles.centerSection}>
         <View style={styles.valueContainer}>
-          <AppText
-            style={[
-              styles.ageValue,
-              { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
-            ]}
-          >
-            {age}
-          </AppText>
+          {isEditingAge ? (
+            <TextInput
+              ref={inputRef}
+              value={ageInput}
+              onChangeText={(text) => {
+                const digits = text.replace(/[^0-9]/g, '');
+                setAgeInput(digits);
+                setIsAllSelected(false);
+              }}
+              onSelectionChange={(e) => {
+                const { start, end } = e.nativeEvent.selection;
+                setIsAllSelected(
+                  ageInput.length > 0 && start === 0 && end === ageInput.length
+                );
+              }}
+              onBlur={commitAgeInput}
+              onSubmitEditing={commitAgeInput}
+              keyboardType="number-pad"
+              returnKeyType="done"
+              maxLength={3}
+              selectTextOnFocus
+              autoFocus
+              selectionColor={theme.colors.brandPrimary}
+              accessibilityLabel="Nhập số tuổi"
+              style={[
+                styles.ageValue,
+                styles.ageInput,
+                {
+                  color: isAllSelected
+                    ? theme.colors.onBrand
+                    : isDark
+                      ? theme.colors.onBrand
+                      : theme.colors.textPrimary,
+                  borderBottomColor: theme.colors.brandPrimary,
+                },
+              ]}
+            />
+          ) : (
+            <TouchableOpacity
+              onPress={startEditingAge}
+              activeOpacity={0.7}
+              hitSlop={{ top: 8, bottom: 8, left: 12, right: 12 }}
+              accessibilityRole="button"
+              accessibilityLabel={`Tuổi hiện tại ${age}, nhấn để chỉnh sửa`}
+            >
+              <AppText
+                style={[
+                  styles.ageValue,
+                  { color: isDark ? theme.colors.onBrand : theme.colors.textPrimary },
+                ]}
+              >
+                {age}
+              </AppText>
+            </TouchableOpacity>
+          )}
           <AppText
             style={[
               styles.ageUnit,
-              { color: isDark ? '#9D6CFA' : theme.colors.brandPrimary },
+              { color: isDark ? theme.colors.onBrand : theme.colors.textPrimary },
             ]}
           >
             tuổi
@@ -179,18 +261,18 @@ export function AgeSelectionScreen({
             styles.birthYearBadge,
             {
               backgroundColor: isDark
-                ? 'rgba(157, 108, 250, 0.15)'
-                : theme.colors.brandSoftTint,
+                ? '#261C48'
+                : theme.colors.surfaceMid,
               borderColor: isDark
-                ? 'rgba(157, 108, 250, 0.3)'
-                : '#D4C7F8',
+                ? '#3D3068'
+                : theme.colors.surfaceBorder,
             },
           ]}
         >
           <AppText
             style={[
               styles.birthYearText,
-              { color: isDark ? '#BCA4FA' : theme.colors.brandPrimary },
+              { color: isDark ? theme.colors.onBrand : theme.colors.textPrimary },
             ]}
           >
             Sinh năm {birthYear}
@@ -221,7 +303,7 @@ export function AgeSelectionScreen({
               <AppText
                 style={[
                   styles.quickBtnText,
-                  { color: isDark ? '#FFFFFF' : theme.colors.textPrimary },
+                  { color: isDark ? theme.colors.onBrand : theme.colors.textPrimary },
                 ]}
               >
                 {delta > 0 ? `+${delta}` : delta}
@@ -275,15 +357,15 @@ export function AgeSelectionScreen({
                       styles.tick,
                       isTen
                         ? [
-                            styles.tickTen,
-                            {
-                              backgroundColor: isDark
-                                ? '#A296C8'
-                                : theme.colors.brandPrimary,
-                            },
-                          ]
+                          styles.tickTen,
+                          {
+                            backgroundColor: isDark
+                              ? '#A296C8'
+                              : theme.colors.brandPrimary,
+                          },
+                        ]
                         : isFive
-                        ? [
+                          ? [
                             styles.tickFive,
                             {
                               backgroundColor: isDark
@@ -291,7 +373,7 @@ export function AgeSelectionScreen({
                                 : '#A6A1B8',
                             },
                           ]
-                        : [
+                          : [
                             styles.tickOne,
                             {
                               backgroundColor: isDark
@@ -503,6 +585,12 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     letterSpacing: -1,
   },
+  ageInput: {
+    minWidth: 96,
+    textAlign: 'center',
+    borderBottomWidth: 2,
+    paddingVertical: 0,
+  },
   ageUnit: {
     fontSize: 22,
     fontWeight: '600',
@@ -510,12 +598,12 @@ const styles = StyleSheet.create({
   },
   birthYearBadge: {
     marginTop: 6,
-    backgroundColor: 'rgba(157, 108, 250, 0.15)',
+    // backgroundColor: 'rgba(157, 108, 250, 0.15)',
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(157, 108, 250, 0.3)',
+    // borderColor: 'rgba(157, 108, 250, 0.3)',
   },
   birthYearText: {
     fontSize: 14,
