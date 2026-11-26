@@ -10,6 +10,8 @@ import React, {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getAccessToken } from "@/services/api/tokenStorage";
 import { registerSessionExpiredHandler } from "@/services/api/client";
+import { clearSessionStorageArtifacts } from "@/services/storage/userStorage";
+import { clearHealthProfileDraftStores } from "@/features/health-profile/hooks/useHealthProfileDraft";
 import {
   APP_DATA_MODE,
   IS_DEMO_MODE,
@@ -241,6 +243,8 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
         }
 
         // In Backend Mode: call real Spring Boot endpoint
+        await clearSessionStorageArtifacts();
+        clearHealthProfileDraftStores();
         const result = await login(email, password);
         const currentUser = await refreshUser();
         if (!mountedRef.current) return;
@@ -307,6 +311,8 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
           return;
         }
 
+        await clearSessionStorageArtifacts();
+        clearHealthProfileDraftStores();
         const result = await loginWithGoogle(idToken);
         const currentUser = await refreshUser();
         if (!mountedRef.current) return;
@@ -385,6 +391,8 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
           if (mountedRef.current) setStatus("needsProfile");
           return;
         }
+        await clearSessionStorageArtifacts();
+        clearHealthProfileDraftStores();
         await verifyEmail(otp);
         if (!mountedRef.current) return;
         const verifiedUser = await refreshUser();
@@ -440,6 +448,39 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
     };
     await AsyncStorage.setItem(LOCAL_SESSION_KEY, "true");
     await AsyncStorage.removeItem("@kallo/pending-onboarding");
+    const cachedProfile = await AsyncStorage.getItem("@kallo/health-profile");
+    if (!cachedProfile) {
+      const demoProfile: HealthProfile = {
+        userId: "demo-user-id",
+        gender: "MALE",
+        dob: "1998-05-15",
+        birthDate: "1998-05-15",
+        age: 26,
+        heightCm: 172,
+        weightKg: 68,
+        activityLevel: "MODERATELY_ACTIVE",
+        goalType: "LOSE_WEIGHT",
+        targetWeightKg: 63,
+        weeklyRateKg: 0.5,
+        bmi: 23.0,
+        bmiCategory: "NORMAL",
+        bmiCategoryVi: "Bình thường",
+        bmr: 1610,
+        tdee: 2213,
+        dailyCalorieGoal: 1713,
+        macronutrients: {
+          carbGrams: 214,
+          proteinGrams: 128,
+          fatGrams: 38,
+        },
+        waterLiters: 2.2,
+        waterGoalMl: 2200,
+        rateClamped: false,
+        recalculationRecommended: false,
+        goalAdvice: "Duy trì mức thâm hụt calo nhẹ và bổ sung đủ 128g đạm để duy trì khối lượng cơ bắp trong quá trình giảm mỡ.",
+      };
+      await AsyncStorage.setItem("@kallo/health-profile", JSON.stringify(demoProfile));
+    }
     if (mountedRef.current) {
       setUser(demoUser);
       setStatus("signedIn");
@@ -448,8 +489,8 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
 
   const signOut = useCallback(async () => {
     await AsyncStorage.removeItem(LOCAL_SESSION_KEY);
-    await AsyncStorage.removeItem("@kallo/health-profile");
-    await AsyncStorage.removeItem("@kallo/pending-onboarding");
+    await clearSessionStorageArtifacts();
+    clearHealthProfileDraftStores();
     if (!IS_DEMO_MODE) {
       await logout();
     }
@@ -461,6 +502,8 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
   }, []);
 
   const handleSessionExpired = useCallback(() => {
+    void clearSessionStorageArtifacts();
+    clearHealthProfileDraftStores();
     if (!mountedRef.current) return;
     setUser(null);
     setError("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");

@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
 import type { Food, FoodLog, MealSlot, NutritionSummary } from '../../types';
+import { FoodThumbnail } from '../../components/FoodThumbnail';
 import { formatNumber, todayKey } from '../../utils';
 import { useTheme } from '@/theme';
 import {
@@ -479,6 +480,8 @@ export function TimelineHourRow({
         <View style={styles.foodListContainer}>
           {logs.map((log) => {
             const nutrition = getLogNutrition(log, foods);
+            const food = foods.find((f) => f.id === log.foodId);
+            const thumbnailUri = log.imageUri || food?.imageUrl;
             return (
               <TouchableOpacity
                 key={log.id}
@@ -486,6 +489,14 @@ export function TimelineHourRow({
                 onPress={() => onPressLog(log)}
                 style={styles.foodItemCard}
               >
+                <FoodThumbnail
+                  uri={thumbnailUri}
+                  size={40}
+                  borderRadius={10}
+                  accessibilityLabel={log.foodName}
+                  style={styles.foodItemThumb}
+                />
+
                 <View style={styles.foodItemMain}>
                   <Text style={styles.foodItemName} numberOfLines={1}>
                     {log.foodName}
@@ -493,6 +504,17 @@ export function TimelineHourRow({
                   <Text style={styles.foodItemSubtitle}>
                     {log.grams}g • {formatNumber(Math.round(nutrition.calories))} kcal
                   </Text>
+                  {log.hasAllergyWarning ? (
+                    <Text
+                      style={{ fontSize: 11, color: c.danger, marginTop: 2 }}
+                      numberOfLines={1}
+                    >
+                      ⚠️ Dị ứng
+                      {log.allergicIngredients?.length
+                        ? `: ${log.allergicIngredients.map((a) => a.name).join(', ')}`
+                        : ''}
+                    </Text>
+                  ) : null}
                 </View>
 
                 <View style={styles.foodItemMacros}>

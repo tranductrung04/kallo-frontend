@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Image,
   KeyboardAvoidingView,
@@ -18,6 +18,8 @@ import { useTheme } from '@/theme';
 import { AnimatedCard, AnimatedRadio } from '../components';
 import { useHealthProfileDraft } from '../hooks/useHealthProfileDraft';
 import { COMMON_ALLERGIES, STANDARD_ALLERGENS } from '../types';
+import { getIngredientsApi } from '@/features/nutrition/foodApi';
+import type { IngredientResponse } from '@/features/nutrition/foodTypes';
 
 interface DietAndAllergiesSelectionScreenProps {
   navigation?: any;
@@ -62,6 +64,17 @@ export function DietAndAllergiesSelectionScreen({
     draft.dietaryPreference || 'standard'
   );
   const [customInput, setCustomInput] = useState('');
+  const [backendAllergens, setBackendAllergens] = useState<IngredientResponse[]>([]);
+
+  useEffect(() => {
+    getIngredientsApi({ allergenOnly: true })
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setBackendAllergens(data);
+        }
+      })
+      .catch(() => undefined);
+  }, []);
 
   const handleSelectDiet = (key: string) => {
     setSelectedDiet(key);
@@ -84,13 +97,16 @@ export function DietAndAllergiesSelectionScreen({
   const handleNext = () => {
     // Map selected allergies to standard backend ingredient IDs
     const ingredientIds: string[] = [];
+    const allergenList = backendAllergens.length > 0 ? backendAllergens : STANDARD_ALLERGENS;
     draft.allergies.forEach((name) => {
-      const found = STANDARD_ALLERGENS.find(
-        (a) =>
-          a.nameVi.toLowerCase().includes(name.toLowerCase()) ||
-          name.toLowerCase().includes(a.nameVi.toLowerCase()) ||
+      const found = allergenList.find((a) => {
+        const nameVi = 'nameVi' in a ? (a as { nameVi: string }).nameVi : a.name;
+        return (
+          nameVi.toLowerCase().includes(name.toLowerCase()) ||
+          name.toLowerCase().includes(nameVi.toLowerCase()) ||
           a.name.toLowerCase().includes(name.toLowerCase())
-      );
+        );
+      });
       if (found && !ingredientIds.includes(found.id)) {
         ingredientIds.push(found.id);
       }

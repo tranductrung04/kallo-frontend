@@ -24,8 +24,11 @@ import {
   GalleryAddIcon,
   ScannerSparkleFlashIcon,
 } from '@/components/icons';
+import { getApiErrorCode } from '@/services/api/apiUtils';
 import { useTheme } from '@/theme';
-import { getFoodByBarcode, type BarcodeFoodResponse } from '../api';
+import { useNutrition } from '../NutritionProvider';
+import { getFoodByBarcodeApi } from '../foodApi';
+import { mapFoodResponseToFood } from '../foodTypes';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'BarcodeScanner'>;
@@ -38,6 +41,7 @@ export function BarcodeScannerScreen({ navigation, route }: Props) {
   const primaryBrand = colors.brandPrimary;
   const secondaryBrand = isDark ? '#B488FC' : colors.brandSecondary;
   const { showAlert } = useAlert();
+  const { cacheFood } = useNutrition();
 
   const [permission, requestPermission] = useCameraPermissions();
   const [flash, setFlash] = useState<'off' | 'on'>('off');
@@ -75,19 +79,18 @@ export function BarcodeScannerScreen({ navigation, route }: Props) {
 
   const handleBarcodeScanned = async ({ data }: BarcodeScanningResult) => {
     const code = data.trim().replace(/\s/g, '');
-    if (scannedRef.current || busy || !/^\d{6,16}$/.test(code)) return;
+    if (scannedRef.current || busy || !/^[0-9-]{3,64}$/.test(code)) return;
 
     scannedRef.current = true;
     setBusy(true);
 
     try {
-      const response = await getFoodByBarcode(code);
-      const body: BarcodeFoodResponse = response.data;
-      const food = 'id' in body ? body : body.data;
-
-      if (food) {
+      const foodResponse = await getFoodByBarcodeApi(code);
+      if (foodResponse?.id) {
+        const mappedFood = mapFoodResponseToFood(foodResponse);
+        cacheFood(mappedFood);
         navigation.replace('FoodDetail', {
-          foodId: food.id,
+          foodId: mappedFood.id,
           date: route.params.date,
           meal: route.params.meal,
           source: 'BARCODE',
@@ -96,46 +99,53 @@ export function BarcodeScannerScreen({ navigation, route }: Props) {
         navigation.replace('CustomFoodForm', {
           date: route.params.date,
           meal: route.params.meal,
-          barcode: code,
         });
       }
-    } catch (requestError) {
-      const status = (requestError as { response?: { status?: number } }).response
-        ?.status;
-      if (status === 404) {
-        navigation.replace('CustomFoodForm', {
-          date: route.params.date,
-          meal: route.params.meal,
-          barcode: code,
-        });
-      } else {
+    } catch (err) {
+      const codeErr = getApiErrorCode(err);
+      if (codeErr === 'INVALID_BARCODE') {
         showAlert({
-          title: 'Không tìm thấy',
-          message:
-            'Không thể tìm thấy thông tin sản phẩm với mã vạch này. Bạn có muốn tạo món ăn mới?',
+          title: 'Mã vạch không hợp lệ',
+          message: 'Định dạng mã vạch chưa đúng (chỉ gồm chữ số hoặc dấu gạch nối, 3–64 ký tự).',
           variant: 'warning',
           buttons: [
             {
-              text: 'Thử lại',
-              variant: 'secondary',
+              text: 'Quét lại',
+              variant: 'primary',
               onPress: () => {
                 scannedRef.current = false;
               },
             },
-            {
-              text: 'Tạo món mới',
-              variant: 'primary',
-              onPress: () => {
-                navigation.replace('CustomFoodForm', {
-                  date: route.params.date,
-                  meal: route.params.meal,
-                  barcode: code,
-                });
-              },
-            },
           ],
         });
+        return;
       }
+
+      showAlert({
+        title: 'Không tìm thấy sản phẩm',
+        message:
+          'Không tìm thấy sản phẩm trong hệ thống hoặc Open Food Facts. Bạn có muốn tự nhập món ăn thủ công không?',
+        variant: 'warning',
+        buttons: [
+          {
+            text: 'Thử lại',
+            variant: 'secondary',
+            onPress: () => {
+              scannedRef.current = false;
+            },
+          },
+          {
+            text: 'Nhập thủ công',
+            variant: 'primary',
+            onPress: () => {
+              navigation.replace('CustomFoodForm', {
+                date: route.params.date,
+                meal: route.params.meal,
+              });
+            },
+          },
+        ],
+      });
     } finally {
       setBusy(false);
     }

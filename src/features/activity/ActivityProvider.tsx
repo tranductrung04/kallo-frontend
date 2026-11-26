@@ -1,10 +1,12 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { randomUUID } from 'expo-crypto';
 import { api } from '@/services/api/client';
+import { getUserScopedStorageKey } from '@/services/storage/userStorage';
 import { todayKey } from '@/features/nutrition/utils';
 import { toast } from '@/components/common';
+import { useAuth } from '@/features/auth/AuthProvider';
 import { findActivityMeta, mapBackendCodeToActivityType } from './catalog';
 import {
   aggregateDailyActivity,
@@ -45,7 +47,7 @@ import type {
   WeightLogItem,
 } from './types';
 
-const STORAGE_KEY = '@kallo/activity-v1';
+const STORAGE_KEY_PREFIX = '@kallo/activity-v1';
 
 const initialState: ActivityState = {
   activityLogs: [],
@@ -113,36 +115,62 @@ function toWeightLogItem(res: WeightLogResponse): WeightLogItem {
 const ActivityContext = createContext<ActivityContextValue | null>(null);
 
 export function ActivityProvider({ children }: React.PropsWithChildren) {
+  const { status, user } = useAuth();
+  const activeUserId = status === 'signedIn' ? (user?.id ?? null) : null;
+  const storageKey = getUserScopedStorageKey(STORAGE_KEY_PREFIX, activeUserId);
   const [state, setState] = useState<ActivityState>(initialState);
   const [ready, setReady] = useState(false);
+  const loadedKeyRef = useRef<string | null>(null);
 
   // ── Load cached local state ───────────────────────────────────
   useEffect(() => {
-    void AsyncStorage.getItem(STORAGE_KEY)
+    let active = true;
+    loadedKeyRef.current = null;
+    setReady(false);
+    setState(initialState);
+
+    if (!storageKey) {
+      return () => {
+        active = false;
+      };
+    }
+
+    void AsyncStorage.getItem(storageKey)
       .then((val) => {
-        if (!val) return;
-        try {
-          const parsed = JSON.parse(val);
-          setState((prev) => ({
-            ...initialState,
-            ...parsed,
-            syncStatus: { ...initialState.syncStatus, ...parsed?.syncStatus },
-            lastSyncedAt: { ...initialState.lastSyncedAt, ...parsed?.lastSyncedAt },
-          }));
-        } catch {
-          // ignore corrupted local state
+        if (!active) return;
+        if (val) {
+          try {
+            const parsed = JSON.parse(val);
+            setState({
+              ...initialState,
+              ...parsed,
+              syncStatus: { ...initialState.syncStatus, ...parsed?.syncStatus },
+              lastSyncedAt: { ...initialState.lastSyncedAt, ...parsed?.lastSyncedAt },
+            });
+          } catch {
+            // ignore corrupted local state
+          }
         }
+        loadedKeyRef.current = storageKey;
+        setReady(true);
       })
-      .catch(() => undefined)
-      .finally(() => setReady(true));
-  }, []);
+      .catch(() => {
+        if (!active) return;
+        loadedKeyRef.current = storageKey;
+        setReady(true);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [storageKey]);
 
   // ── Persist local state whenever it changes ──────────────────
   useEffect(() => {
-    if (ready) {
-      void AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state)).catch(() => undefined);
+    if (ready && storageKey && loadedKeyRef.current === storageKey) {
+      void AsyncStorage.setItem(storageKey, JSON.stringify(state)).catch(() => undefined);
     }
-  }, [ready, state]);
+  }, [ready, storageKey, state]);
 
   // ── Sync with backend on initial load ─────────────────────────
   const syncWithServer = useCallback(async () => {
@@ -217,10 +245,10 @@ export function ActivityProvider({ children }: React.PropsWithChildren) {
   }, []);
 
   useEffect(() => {
-    if (ready) {
+    if (ready && status === 'signedIn') {
       void syncWithServer();
     }
-  }, [ready, syncWithServer]);
+  }, [ready, status, syncWithServer]);
 
   // ── Refresh Activities ─────────────────────────────────────────
   const refreshActivities = useCallback(async () => {

@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import {
+  ActivityIndicator,
   Modal,
   SafeAreaView,
   ScrollView,
@@ -13,6 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import { AppButton, AppCard, AppText, useAlert } from '@/components/common';
 import { CheckIcon, CloseXIcon } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
+import { getApiErrorMessage, isUuid } from '@/services/api/apiUtils';
 import { useTheme, type ThemeContextValue } from '@/theme';
 import type { MealPlanItem } from '../types';
 import { useMealPlan } from '../MealPlanProvider';
@@ -24,11 +26,22 @@ export function MealPlanDetailScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<NavigationProp>();
-  const { currentPlan, swapItem, savePlan, applyPlanToDiary } = useMealPlan();
+  const {
+    currentPlan,
+    swapItem,
+    swapItemAsync,
+    savePlan,
+    savePlanAsync,
+    applyPlanToDiary,
+    applyPlanToDiaryAsync,
+  } = useMealPlan();
   const { showAlert } = useAlert();
 
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [swappingItem, setSwappingItem] = useState<MealPlanItem | null>(null);
+  const [swappingItemId, setSwappingItemId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [applying, setApplying] = useState(false);
 
   if (!currentPlan) {
     return (
@@ -51,34 +64,100 @@ export function MealPlanDetailScreen() {
   const activeDay = currentPlan.days[selectedDayIndex] || currentPlan.days[0];
   const targetCal = currentPlan.goal.targetCalories;
   const caloDiff = Math.abs(activeDay.totalCalories - targetCal);
-  const isWithinTolerance = caloDiff <= targetCal * 0.05;
+  const isWithinTolerance =
+    activeDay.calorieDifferencePct !== undefined
+      ? Math.abs(activeDay.calorieDifferencePct) <= 5
+      : caloDiff <= targetCal * 0.05;
+  const isServerPlan = Boolean(currentPlan.isServerPlan && isUuid(currentPlan.id));
+  const isApplied = currentPlan.apiStatus === 'APPLIED';
+  const isSavedOrApplied =
+    currentPlan.apiStatus === 'SAVED' || currentPlan.apiStatus === 'APPLIED';
 
-  const handleApplyToDiary = () => {
-    const count = applyPlanToDiary(selectedDayIndex);
-    showAlert({
-      title: 'Áp dụng thành công!',
-      message: `Đã thêm ${count} món ăn của ${activeDay.dayLabel} vào Nhật ký dinh dưỡng hôm nay.`,
-      variant: 'success',
-      buttons: [
-        {
-          text: 'Về Nhật ký xem',
-          variant: 'primary',
-          onPress: () => {
-            (navigation.getParent() as any)?.navigate('Diary');
+  const handleApplyToDiary = async () => {
+    if (applying) return;
+    setApplying(true);
+    try {
+      const count = applyPlanToDiaryAsync
+        ? await applyPlanToDiaryAsync(selectedDayIndex)
+        : applyPlanToDiary(selectedDayIndex);
+      showAlert({
+        title: 'Áp dụng thành công!',
+        message: `Đã thêm ${count} món ăn của ${activeDay.dayLabel} vào Nhật ký dinh dưỡng.`,
+        variant: 'success',
+        buttons: [
+          {
+            text: 'Về Nhật ký xem',
+            variant: 'primary',
+            onPress: () => {
+              (navigation.getParent() as any)?.navigate('Diary');
+            },
           },
-        },
-        { text: 'Ở lại đây', variant: 'secondary' },
-      ],
-    });
+          { text: 'Ở lại đây', variant: 'secondary' },
+        ],
+      });
+    } catch (err) {
+      showAlert({
+        title: 'Không thể áp dụng thực đơn',
+        message: getApiErrorMessage(err),
+        variant: 'warning',
+      });
+    } finally {
+      setApplying(false);
+    }
   };
 
-  const handleSave = () => {
-    savePlan(currentPlan);
-    showAlert({
-      title: 'Đã lưu',
-      message: 'Thực đơn đã được lưu vào danh sách của bạn.',
-      variant: 'success',
-    });
+  const handleSave = async () => {
+    if (saving) return;
+    setSaving(true);
+    try {
+      if (savePlanAsync) {
+        await savePlanAsync(currentPlan);
+      } else {
+        savePlan(currentPlan);
+      }
+      showAlert({
+        title: 'Đã lưu',
+        message: 'Thực đơn đã được lưu vào danh sách của bạn.',
+        variant: 'success',
+      });
+    } catch (err) {
+      showAlert({
+        title: 'Không thể lưu',
+        message: getApiErrorMessage(err),
+        variant: 'error',
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSwapPress = async (item: MealPlanItem) => {
+    if (isServerPlan && isUuid(item.id)) {
+      if (isApplied) {
+        showAlert({
+          title: 'Thực đơn đã áp dụng',
+          message: 'Không thể đổi món sau khi thực đơn đã được áp dụng vào nhật ký.',
+          variant: 'warning',
+        });
+        return;
+      }
+      if (swappingItemId) return;
+      setSwappingItemId(item.id);
+      try {
+        await swapItemAsync?.(selectedDayIndex, item.id);
+      } catch (err) {
+        showAlert({
+          title: 'Không thể đổi món',
+          message: getApiErrorMessage(err),
+          variant: 'warning',
+        });
+      } finally {
+        setSwappingItemId(null);
+      }
+      return;
+    }
+
+    setSwappingItem(item);
   };
 
   const swapCandidates = swappingItem
@@ -132,6 +211,39 @@ export function MealPlanDetailScreen() {
               </TouchableOpacity>
             ))}
           </ScrollView>
+        )}
+
+        {/* ── Medical Warning & Preference Match Banner (plan.yaml) ──── */}
+        {(currentPlan.medicalWarning || currentPlan.preferenceMatchScore !== undefined) && (
+          <AppCard
+            style={{
+              borderWidth: 1,
+              borderColor: currentPlan.medicalWarning
+                ? theme.colors.warning
+                : theme.colors.surfaceBorder,
+              gap: 6,
+            }}
+          >
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+              <AppText variant="labelMd" color={theme.colors.brandPrimary}>
+                {currentPlan.apiStatus === 'APPLIED'
+                  ? '● Đã áp dụng vào nhật ký'
+                  : currentPlan.apiStatus === 'SAVED'
+                  ? '● Đã lưu'
+                  : '● Bản nháp'}
+              </AppText>
+              {currentPlan.preferenceMatchScore !== undefined && (
+                <AppText variant="caption" color={theme.colors.textSecondary}>
+                  Phù hợp sở thích: {Math.round(currentPlan.preferenceMatchScore * 100)}%
+                </AppText>
+              )}
+            </View>
+            {currentPlan.medicalWarning ? (
+              <AppText variant="caption" color={theme.colors.warning}>
+                ⚠️ {currentPlan.medicalWarning}
+              </AppText>
+            ) : null}
+          </AppCard>
         )}
 
         {/* ── Daily Summary Card ─────────────────────────────────────── */}
@@ -226,17 +338,26 @@ export function MealPlanDetailScreen() {
                   style={[
                     styles.swapBtn,
                     {
-                      borderColor: theme.colors.brandPrimary,
-                      backgroundColor: theme.colors.brandSoftTint,
+                      borderColor: isApplied ? theme.colors.surfaceBorder : theme.colors.brandPrimary,
+                      backgroundColor: isApplied ? theme.colors.surfaceHigh : theme.colors.brandSoftTint,
+                      opacity: swappingItemId === item.id || isApplied ? 0.6 : 1,
                     },
                   ]}
-                  onPress={() => setSwappingItem(item)}
+                  disabled={swappingItemId === item.id}
+                  onPress={() => void handleSwapPress(item)}
                   accessibilityRole="button"
                   accessibilityLabel={`Đổi món cho ${item.name}`}
                 >
-                  <AppText variant="caption" color={theme.colors.brandPrimary}>
-                    ⇄ Đổi món
-                  </AppText>
+                  {swappingItemId === item.id ? (
+                    <ActivityIndicator size="small" color={theme.colors.brandPrimary} />
+                  ) : (
+                    <AppText
+                      variant="caption"
+                      color={isApplied ? theme.colors.textSecondary : theme.colors.brandPrimary}
+                    >
+                      ⇄ Đổi món
+                    </AppText>
+                  )}
                 </TouchableOpacity>
               </View>
 
@@ -266,16 +387,21 @@ export function MealPlanDetailScreen() {
         {/* ── Action Buttons ─────────────────────────────────────────── */}
         <View style={styles.actionSection}>
           <AppButton
-            label="Áp dụng vào Nhật ký ngày (Ghi hàng loạt)"
+            label={isApplied ? 'Đã áp dụng vào Nhật ký' : 'Áp dụng vào Nhật ký ngày (Ghi hàng loạt)'}
             variant="primary"
-            onPress={handleApplyToDiary}
+            disabled={isApplied}
+            loading={applying}
+            onPress={() => void handleApplyToDiary()}
             accessibilityLabel="Áp dụng 4 món vào nhật ký dinh dưỡng"
           />
-          <AppButton
-            label="Lưu thực đơn này"
-            variant="secondary"
-            onPress={handleSave}
-          />
+          {!isSavedOrApplied && (
+            <AppButton
+              label="Lưu thực đơn này"
+              variant="secondary"
+              loading={saving}
+              onPress={() => void handleSave()}
+            />
+          )}
         </View>
       </ScrollView>
 

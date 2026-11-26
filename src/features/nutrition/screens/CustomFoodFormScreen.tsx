@@ -26,6 +26,11 @@ import {
 import { images } from '@/assets/images';
 import { useNutrition } from '../NutritionProvider';
 import { useTheme } from '@/theme';
+import {
+  FOOD_CATEGORY_LABELS,
+  type CustomFoodRequest,
+  type FoodCategory,
+} from '../foodTypes';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CustomFoodForm'>;
 
@@ -38,7 +43,7 @@ export function CustomFoodFormScreen({ navigation, route }: Props) {
   const isDark = theme.scheme === 'dark';
   const { colors } = theme;
   const insets = useSafeAreaInsets();
-  const { findFood, saveCustomFood, addFoodLog } = useNutrition();
+  const { findFood, saveCustomFood, saveCustomFoodAsync, addFoodLog } = useNutrition();
   const { showAlert } = useAlert();
 
   const existing = route.params.foodId ? findFood(route.params.foodId) : undefined;
@@ -48,7 +53,9 @@ export function CustomFoodFormScreen({ navigation, route }: Props) {
 
   // ── Step 1 State ────────────────────────────────────────────────────────
   const [name, setName] = useState(existing?.name ?? '');
-  const [imageUri, setImageUri] = useState<string | null>(null);
+  const [category, setCategory] = useState<FoodCategory>(existing?.category ?? 'OTHER');
+  const [imageUri, setImageUri] = useState<string | null>(existing?.imageUrl ?? null);
+  const [saving, setSaving] = useState(false);
 
   // ── Step 2 State ────────────────────────────────────────────────────────
   // Giá trị dinh dưỡng được tính cho
@@ -87,9 +94,6 @@ export function CustomFoodFormScreen({ navigation, route }: Props) {
   const [potassium, setPotassium] = useState('');
   const [calcium, setCalcium] = useState('');
   const [iron, setIron] = useState('');
-  const [barcode, setBarcode] = useState(
-    route.params.barcode ?? existing?.barcode ?? '',
-  );
 
   // Unit Modals
   const [servingUnitModalVisible, setServingUnitModalVisible] = useState(false);
@@ -190,56 +194,132 @@ export function CustomFoodFormScreen({ navigation, route }: Props) {
   };
 
   // ── Action: Lưu thực phẩm (Chỉ lưu vào món tự tạo) ─────────────────────
-  const handleSaveOnly = () => {
+  const handleSaveOnly = async () => {
     const parsed = validateAndGetValues();
-    if (!parsed) return;
+    if (!parsed || saving) return;
 
     setError('');
-    saveCustomFood({
-      id: existing?.id,
-      name: name.trim(),
-      servingGrams: parsed.servingGrams,
-      calories: parsed.calories,
-      protein: parsed.protein,
-      carbs: parsed.carbs,
-      fat: parsed.fat,
-      allergens: [],
-      barcode: barcode.trim() || undefined,
-    });
+    setSaving(true);
 
-    showAlert({
-      title: 'Thành công',
-      message: 'Đã lưu thực phẩm của bạn.',
-      variant: 'success',
-      buttons: [{ text: 'OK', variant: 'primary', onPress: () => navigation.goBack() }],
-    });
+    const sGrams = parsed.servingGrams;
+    const ratio100 = sGrams > 0 ? 100 / sGrams : 1;
+    const caloriesPer100g = Math.round(parsed.calories * ratio100 * 10) / 10;
+    const proteinPer100g = Math.round(parsed.protein * ratio100 * 10) / 10;
+    const carbsPer100g = Math.round(parsed.carbs * ratio100 * 10) / 10;
+    const fatPer100g = Math.round(parsed.fat * ratio100 * 10) / 10;
+    const sugarPer100g = Math.round((Number(sugar) || 0) * ratio100 * 10) / 10;
+    const fiberPer100g = Math.round((Number(fiber) || 0) * ratio100 * 10) / 10;
+
+    const payload: CustomFoodRequest = {
+      name: name.trim(),
+      category,
+      defaultServingName: servingUnit === 'phần' ? '1 phần' : `${sGrams}${servingUnit}`,
+      defaultServingGrams: sGrams,
+      caloriesPer100g,
+      proteinPer100g,
+      carbsPer100g,
+      fatPer100g,
+      sugarPer100g,
+      fiberPer100g,
+      suitableMealTypes: ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'],
+      imageUrl: imageUri || null,
+    };
+
+    try {
+      await saveCustomFoodAsync(payload, existing?.id);
+      showAlert({
+        title: 'Thành công',
+        message: 'Đã lưu thực phẩm của bạn.',
+        variant: 'success',
+        buttons: [{ text: 'OK', variant: 'primary', onPress: () => navigation.goBack() }],
+      });
+    } catch {
+      saveCustomFood({
+        id: existing?.id,
+        name: name.trim(),
+        servingGrams: parsed.servingGrams,
+        calories: parsed.calories,
+        protein: parsed.protein,
+        carbs: parsed.carbs,
+        fat: parsed.fat,
+        allergens: [],
+        category,
+        imageUrl: imageUri || undefined,
+      });
+      showAlert({
+        title: 'Đã lưu',
+        message: 'Đã lưu thực phẩm vào bộ nhớ máy.',
+        variant: 'info',
+        buttons: [{ text: 'OK', variant: 'primary', onPress: () => navigation.goBack() }],
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   // ── Action: Lưu và ghi (Lưu & thêm vào nhật ký bữa ăn ngay) ────────────
-  const handleSaveAndLog = () => {
+  const handleSaveAndLog = async () => {
     const parsed = validateAndGetValues();
-    if (!parsed) return;
+    if (!parsed || saving) return;
 
     setError('');
-    const foodId = saveCustomFood({
-      id: existing?.id,
+    setSaving(true);
+
+    const sGrams = parsed.servingGrams;
+    const ratio100 = sGrams > 0 ? 100 / sGrams : 1;
+    const caloriesPer100g = Math.round(parsed.calories * ratio100 * 10) / 10;
+    const proteinPer100g = Math.round(parsed.protein * ratio100 * 10) / 10;
+    const carbsPer100g = Math.round(parsed.carbs * ratio100 * 10) / 10;
+    const fatPer100g = Math.round(parsed.fat * ratio100 * 10) / 10;
+    const sugarPer100g = Math.round((Number(sugar) || 0) * ratio100 * 10) / 10;
+    const fiberPer100g = Math.round((Number(fiber) || 0) * ratio100 * 10) / 10;
+
+    const payload: CustomFoodRequest = {
       name: name.trim(),
-      servingGrams: parsed.servingGrams,
-      calories: parsed.calories,
-      protein: parsed.protein,
-      carbs: parsed.carbs,
-      fat: parsed.fat,
-      allergens: [],
-      barcode: barcode.trim() || undefined,
-    });
+      category,
+      defaultServingName: servingUnit === 'phần' ? '1 phần' : `${sGrams}${servingUnit}`,
+      defaultServingGrams: sGrams,
+      caloriesPer100g,
+      proteinPer100g,
+      carbsPer100g,
+      fatPer100g,
+      sugarPer100g,
+      fiberPer100g,
+      suitableMealTypes: ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'],
+      imageUrl: imageUri || null,
+    };
+
+    let savedFoodId = existing?.id;
+    let savedImageUri = imageUri || undefined;
+    try {
+      const saved = await saveCustomFoodAsync(payload, existing?.id);
+      savedFoodId = saved.id;
+      savedImageUri = saved.imageUrl ?? savedImageUri;
+    } catch {
+      savedFoodId = saveCustomFood({
+        id: existing?.id,
+        name: name.trim(),
+        servingGrams: parsed.servingGrams,
+        calories: parsed.calories,
+        protein: parsed.protein,
+        carbs: parsed.carbs,
+        fat: parsed.fat,
+        allergens: [],
+        category,
+        imageUrl: imageUri || undefined,
+      });
+    } finally {
+      setSaving(false);
+    }
 
     addFoodLog({
-      foodId,
+      foodId: savedFoodId!,
       foodName: name.trim(),
       grams: parsed.servingGrams,
       date: route.params.date,
       meal: route.params.meal,
       source: 'CUSTOM',
+      imageUri: savedImageUri,
       nutritionSnapshot: {
         calories: parsed.calories,
         protein: parsed.protein,
@@ -347,7 +427,11 @@ export function CustomFoodFormScreen({ navigation, route }: Props) {
               </Text>
 
               <View style={styles.imageSection}>
-                <View
+                <TouchableOpacity
+                  onPress={pickImage}
+                  activeOpacity={0.8}
+                  accessibilityRole="button"
+                  accessibilityLabel="Chọn ảnh thực phẩm"
                   style={[
                     styles.imageBox,
                     {
@@ -368,18 +452,33 @@ export function CustomFoodFormScreen({ navigation, route }: Props) {
                       resizeMode="contain"
                     />
                   )}
-                </View>
-
-                <TouchableOpacity
-                  style={styles.uploadBtn}
-                  onPress={pickImage}
-                  activeOpacity={0.7}
-                  accessibilityLabel="Tải ảnh mới"
-                >
-                  <Text style={[styles.uploadBtnText, { color: primaryBrand }]}>
-                    + Tải ảnh mới
-                  </Text>
                 </TouchableOpacity>
+
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+                  <TouchableOpacity
+                    style={styles.uploadBtn}
+                    onPress={pickImage}
+                    activeOpacity={0.7}
+                    accessibilityLabel={imageUri ? 'Đổi ảnh' : 'Tải ảnh mới'}
+                  >
+                    <Text style={[styles.uploadBtnText, { color: primaryBrand }]}>
+                      {imageUri ? 'Đổi ảnh' : '+ Tải ảnh mới'}
+                    </Text>
+                  </TouchableOpacity>
+
+                  {imageUri && (
+                    <TouchableOpacity
+                      style={styles.uploadBtn}
+                      onPress={() => setImageUri(null)}
+                      activeOpacity={0.7}
+                      accessibilityLabel="Xóa ảnh"
+                    >
+                      <Text style={[styles.uploadBtnText, { color: colors.statusDanger }]}>
+                        Xóa ảnh
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
               </View>
 
               {/* Mục: Thông tin thực phẩm */}
@@ -429,6 +528,53 @@ export function CustomFoodFormScreen({ navigation, route }: Props) {
                   { backgroundColor: primaryBrand },
                 ]}
               />
+
+              {/* Nhóm phân loại thực phẩm */}
+              <View style={{ marginTop: 24, gap: 8 }}>
+                <Text
+                  style={[
+                    styles.fieldLabel,
+                    { color: isDark ? '#FFFFFF' : colors.textPrimary },
+                  ]}
+                >
+                  Nhóm món ăn
+                </Text>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ gap: 8, paddingVertical: 4 }}
+                >
+                  {(Object.keys(FOOD_CATEGORY_LABELS) as FoodCategory[]).map((cat) => {
+                    const isSelected = category === cat;
+                    return (
+                      <TouchableOpacity
+                        key={cat}
+                        onPress={() => setCategory(cat)}
+                        style={{
+                          paddingHorizontal: 14,
+                          paddingVertical: 8,
+                          borderRadius: 20,
+                          borderWidth: 1,
+                          borderColor: isSelected ? primaryBrand : isDark ? '#3E3452' : '#E8E5EF',
+                          backgroundColor: isSelected
+                            ? isDark ? '#3D256A' : '#F3EEFD'
+                            : isDark ? '#231B32' : '#F9F8FC',
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: 13,
+                            fontWeight: isSelected ? '600' : '400',
+                            color: isSelected ? primaryBrand : isDark ? '#D1CADF' : '#575269',
+                          }}
+                        >
+                          {FOOD_CATEGORY_LABELS[cat]}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              </View>
 
               {error ? (
                 <Text style={styles.errorText} accessibilityLiveRegion="polite">
@@ -1073,43 +1219,6 @@ export function CustomFoodFormScreen({ navigation, route }: Props) {
                       ]}
                     >
                       mg
-                    </Text>
-                    <View
-                      style={[
-                        styles.rowBottomBorder,
-                        { backgroundColor: isDark ? '#231D36' : '#E4E0F0' },
-                      ]}
-                    />
-                  </View>
-
-                  {/* Mã vạch */}
-                  <View style={styles.standardNutrientRow}>
-                    <Text
-                      style={[
-                        styles.fieldLabel,
-                        { color: isDark ? '#FFFFFF' : colors.textPrimary },
-                      ]}
-                    >
-                      Mã vạch (Barcode)
-                    </Text>
-                    <TextInput
-                      value={barcode}
-                      onChangeText={setBarcode}
-                      keyboardType="number-pad"
-                      placeholder="893..."
-                      placeholderTextColor={colors.textSecondary}
-                      style={[
-                        styles.nutrientValueInput,
-                        { color: isDark ? '#FFFFFF' : colors.textPrimary },
-                      ]}
-                    />
-                    <Text
-                      style={[
-                        styles.unitLabelBold,
-                        { color: isDark ? '#FFFFFF' : colors.textPrimary },
-                      ]}
-                    >
-                      code
                     </Text>
                     <View
                       style={[

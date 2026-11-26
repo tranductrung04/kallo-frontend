@@ -351,6 +351,58 @@ export function createStyles(theme: ThemeContextValue, screenWidth: number) {
       paddingVertical: s.xl,
       gap: s.sm,
     },
+    recentDiarySeeAllBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 2,
+      paddingVertical: 4,
+      paddingLeft: 8,
+    },
+    recentDiaryCard: {
+      overflow: 'hidden',
+      marginTop: s.xs,
+    },
+    recentDiaryRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: s.md,
+      paddingVertical: 12,
+      gap: s.sm + 4,
+    },
+    recentDiaryRowBorder: {
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: c.surfaceBorder,
+    },
+    recentDiaryThumb: {
+      width: 42,
+      height: 42,
+      borderRadius: 12,
+      backgroundColor: c.surfaceHigh,
+    },
+    recentDiaryIconBox: {
+      width: 42,
+      height: 42,
+      borderRadius: 12,
+      backgroundColor: c.brandSoftTint,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    recentDiaryInfo: {
+      flex: 1,
+      gap: 2,
+    },
+    recentDiaryRight: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    recentDiaryFooterBtn: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 12,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: c.surfaceBorder,
+    },
 
     // 6. Workout Grid (AppCard + style)
     activityGridCard: {

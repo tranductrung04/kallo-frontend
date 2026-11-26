@@ -1,5 +1,7 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '@/features/auth/AuthProvider';
+import { getUserScopedStorageKey } from '@/services/storage/userStorage';
 import type {
   OfflineSyncContextValue,
   SyncItemType,
@@ -11,37 +13,67 @@ import {
   pushSyncBatch,
 } from './syncManager';
 
-const STORAGE_KEY = '@kallo/offline-sync-queue-v1';
+const STORAGE_KEY_PREFIX = '@kallo/offline-sync-queue-v1';
 
 const OfflineSyncContext = createContext<OfflineSyncContextValue | null>(null);
 
 export function OfflineSyncProvider({ children }: React.PropsWithChildren) {
+  const { status, user } = useAuth();
+  const activeUserId = status === 'signedIn' ? (user?.id ?? null) : null;
+  const storageKey = getUserScopedStorageKey(STORAGE_KEY_PREFIX, activeUserId);
   const [isOnline, setIsOnline] = useState<boolean>(true);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [queue, setQueue] = useState<SyncQueueItem[]>([]);
   const [lastSyncedAt, setLastSyncedAt] = useState<string | undefined>(undefined);
+  const loadedKeyRef = useRef<string | null>(null);
 
   // Restore queue from local storage
   useEffect(() => {
-    void AsyncStorage.getItem(STORAGE_KEY).then((data) => {
-      if (!data) return;
-      try {
-        const parsed = JSON.parse(data);
-        if (Array.isArray(parsed.queue)) setQueue(deduplicateQueue(parsed.queue));
-        if (parsed.lastSyncedAt) setLastSyncedAt(parsed.lastSyncedAt);
-      } catch {
-        /* Ignore parse error */
-      }
-    });
-  }, []);
+    let active = true;
+    loadedKeyRef.current = null;
+    setQueue([]);
+    setLastSyncedAt(undefined);
+
+    if (!storageKey) {
+      return () => {
+        active = false;
+      };
+    }
+
+    void AsyncStorage.getItem(storageKey)
+      .then((data) => {
+        if (!active) return;
+        if (data) {
+          try {
+            const parsed = JSON.parse(data);
+            if (Array.isArray(parsed.queue)) setQueue(deduplicateQueue(parsed.queue));
+            if (parsed.lastSyncedAt) setLastSyncedAt(parsed.lastSyncedAt);
+          } catch {
+            /* Ignore parse error */
+          }
+        }
+        loadedKeyRef.current = storageKey;
+      })
+      .catch(() => {
+        if (active) {
+          loadedKeyRef.current = storageKey;
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [storageKey]);
 
   // Persist queue
   useEffect(() => {
-    void AsyncStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ queue, lastSyncedAt })
-    ).catch(() => undefined);
-  }, [queue, lastSyncedAt]);
+    if (storageKey && loadedKeyRef.current === storageKey) {
+      void AsyncStorage.setItem(
+        storageKey,
+        JSON.stringify({ queue, lastSyncedAt })
+      ).catch(() => undefined);
+    }
+  }, [storageKey, queue, lastSyncedAt]);
 
   const enqueueItem = useCallback(
     <T,>(type: SyncItemType, payload: T, clientUuid?: string): string => {
@@ -99,10 +131,10 @@ export function OfflineSyncProvider({ children }: React.PropsWithChildren) {
 
   // Auto sync when coming back online
   useEffect(() => {
-    if (isOnline && queue.some((i) => i.status === 'PENDING')) {
+    if (status === 'signedIn' && isOnline && queue.some((i) => i.status === 'PENDING')) {
       void syncNow();
     }
-  }, [isOnline, queue, syncNow]);
+  }, [status, isOnline, queue, syncNow]);
 
   const toggleOnlineStatus = useCallback(() => {
     setIsOnline((prev) => !prev);

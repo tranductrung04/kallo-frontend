@@ -1,10 +1,10 @@
+import { randomUUID } from 'expo-crypto';
 import { api } from '@/services/api/client';
+import { getApiErrorCode, getApiErrorStatus } from '@/services/api/apiUtils';
 import type { SyncQueueItem } from './types';
 
-export function generateClientUuid(prefix = 'kallo'): string {
-  const time = Date.now().toString(36);
-  const rand = Math.random().toString(36).substring(2, 10);
-  return `${prefix}-${time}-${rand}`;
+export function generateClientUuid(_prefix = 'kallo'): string {
+  return randomUUID();
 }
 
 export function deduplicateQueue(queue: SyncQueueItem[]): SyncQueueItem[] {
@@ -21,6 +21,14 @@ export function deduplicateQueue(queue: SyncQueueItem[]): SyncQueueItem[] {
   return result;
 }
 
+function isTerminalConflictOrBadPayload(error: unknown): boolean {
+  const status = getApiErrorStatus(error);
+  const code = getApiErrorCode(error);
+  if (status === 409 && code === 'RECORD_DELETED') return true;
+  if (status === 400 || status === 404 || status === 403) return true;
+  return false;
+}
+
 export async function pushSyncBatch(
   items: SyncQueueItem[]
 ): Promise<{ successUuids: string[]; failedUuids: string[] }> {
@@ -31,25 +39,62 @@ export async function pushSyncBatch(
 
   const successUuids: string[] = [];
   const failedUuids: string[] = [];
+  const otherItems: SyncQueueItem[] = [];
 
-  try {
-    // Attempt real API push if available, fallback gracefully
-    await api.post('/sync/push', {
-      batch: pendingItems.map((item) => ({
-        clientUuid: item.clientUuid,
-        type: item.type,
-        payload: item.payload,
-        clientTimestamp: item.timestamp,
-      })),
-    }).catch(() => undefined);
-
-    // In both online API and offline mock modes, successful synchronization marks items as SYNCED
-    for (const item of pendingItems) {
-      successUuids.push(item.clientUuid);
+  for (const item of pendingItems) {
+    if (item.type === 'FOOD_LOG') {
+      try {
+        await api.post('/food-logs', {
+          ...(item.payload as Record<string, unknown>),
+          clientUuid: (item.payload as { clientUuid?: string })?.clientUuid ?? item.clientUuid,
+        });
+        successUuids.push(item.clientUuid);
+      } catch (err) {
+        if (isTerminalConflictOrBadPayload(err)) {
+          successUuids.push(item.clientUuid);
+        } else {
+          failedUuids.push(item.clientUuid);
+        }
+      }
+    } else if (item.type === 'WATER_LOG') {
+      try {
+        await api.post('/water-logs', {
+          ...(item.payload as Record<string, unknown>),
+          clientUuid: (item.payload as { clientUuid?: string })?.clientUuid ?? item.clientUuid,
+        });
+        successUuids.push(item.clientUuid);
+      } catch (err) {
+        if (isTerminalConflictOrBadPayload(err)) {
+          successUuids.push(item.clientUuid);
+        } else {
+          failedUuids.push(item.clientUuid);
+        }
+      }
+    } else {
+      otherItems.push(item);
     }
-  } catch {
-    for (const item of pendingItems) {
-      failedUuids.push(item.clientUuid);
+  }
+
+  if (otherItems.length > 0) {
+    try {
+      await api
+        .post('/sync/push', {
+          batch: otherItems.map((item) => ({
+            clientUuid: item.clientUuid,
+            type: item.type,
+            payload: item.payload,
+            clientTimestamp: item.timestamp,
+          })),
+        })
+        .catch(() => undefined);
+
+      for (const item of otherItems) {
+        successUuids.push(item.clientUuid);
+      }
+    } catch {
+      for (const item of otherItems) {
+        failedUuids.push(item.clientUuid);
+      }
     }
   }
 

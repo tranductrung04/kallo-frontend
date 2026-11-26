@@ -1,2 +1,4 @@
 export { NutritionProvider, useNutrition } from './NutritionProvider';
-export type { Food, FoodLog, MealSlot, NutritionSummary } from './types';
+export * from './types';
+export * from './foodTypes';
+export * from './foodApi';

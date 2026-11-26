@@ -1,13 +1,16 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ScrollView,
   StatusBar,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
+import { useAuth } from '@/features/auth/AuthProvider';
+import { getDailySummaryRangeApi } from '@/features/nutrition/api';
+import type { DailySummaryResponse } from '@/features/nutrition/types';
 import { useNutrition } from '@/features/nutrition/NutritionProvider';
 import { offsetDate, scaleNutrition, todayKey } from '@/features/nutrition/utils';
 import { useActivity } from '@/features/activity/ActivityProvider';
@@ -17,6 +20,7 @@ import {
   calculateMacroReport,
   calculateWeightTrendAndForecast,
   getPeriodDates,
+  mergeServerSummariesIntoPeriodSummary,
 } from '../utils';
 import {
   DayCalorieSection,
@@ -37,7 +41,8 @@ export function ReportOverviewScreen() {
   const route = useRoute<ScreenRouteProp>();
   const { theme, styles } = useReportStyles();
 
-  const { state: nutritionState, foods, getSummary, getLogs } = useNutrition();
+  const { status } = useAuth();
+  const { state: nutritionState, foods, getSummary, getLogs, refreshDateData } = useNutrition();
   const { state: activityState } = useActivity();
 
   // Route parameters
@@ -50,6 +55,19 @@ export function ReportOverviewScreen() {
   const [contribMetric, setContribMetric] = useState<'protein' | 'carbs' | 'fat'>(
     initialMetric === 'carbs' || initialMetric === 'fat' ? initialMetric : 'protein'
   );
+  const [serverWeekSummaries, setServerWeekSummaries] = useState<DailySummaryResponse[]>([]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (status !== 'signedIn') return;
+      void refreshDateData?.(selectedDate);
+    }, [status, refreshDateData, selectedDate])
+  );
+
+  useEffect(() => {
+    if (status !== 'signedIn') return;
+    void refreshDateData?.(selectedDate);
+  }, [status, selectedDate, refreshDateData]);
 
   // Daily Data
   const summary = useMemo(() => getSummary(selectedDate), [getSummary, selectedDate]);
@@ -97,20 +115,27 @@ export function ReportOverviewScreen() {
 
   // Weekly calculations
   const weekDatesList = useMemo(() => getPeriodDates('week', selectedDate), [selectedDate]);
-  const weekSummary = useMemo(
-    () =>
-      aggregatePeriodSummary(
-        'week',
-        weekDatesList,
-        nutritionState.foodLogs,
-        activityState.activityLogs,
-        activityState.syncLogs,
-        nutritionState.waterLogs,
-        nutritionState.weightLogs,
-        foods,
-        nutritionState.goals
-      ),
-    [
+  const weekFrom = weekDatesList[0];
+  const weekTo = weekDatesList[weekDatesList.length - 1];
+
+  useEffect(() => {
+    if (status !== 'signedIn' || !weekFrom || !weekTo) return;
+    let active = true;
+    void getDailySummaryRangeApi(weekFrom, weekTo)
+      .then((list) => {
+        if (active && Array.isArray(list)) {
+          setServerWeekSummaries(list);
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [status, weekFrom, weekTo]);
+
+  const weekSummary = useMemo(() => {
+    const localSummary = aggregatePeriodSummary(
+      'week',
       weekDatesList,
       nutritionState.foodLogs,
       activityState.activityLogs,
@@ -118,9 +143,20 @@ export function ReportOverviewScreen() {
       nutritionState.waterLogs,
       nutritionState.weightLogs,
       foods,
-      nutritionState.goals,
-    ]
-  );
+      nutritionState.goals
+    );
+    return mergeServerSummariesIntoPeriodSummary(localSummary, serverWeekSummaries);
+  }, [
+    weekDatesList,
+    nutritionState.foodLogs,
+    activityState.activityLogs,
+    activityState.syncLogs,
+    nutritionState.waterLogs,
+    nutritionState.weightLogs,
+    foods,
+    nutritionState.goals,
+    serverWeekSummaries,
+  ]);
 
   const weekMacroData = useMemo(
     () => calculateMacroReport(weekSummary.days, nutritionState.goals),
@@ -179,8 +215,8 @@ export function ReportOverviewScreen() {
   const sugarGoal = 49;
   const fiberGoal = 24;
   const saltCurrent = (summary as any).salt ?? (summary as any).sodium ?? 0;
-  const sugarCurrent = (summary as any).sugar ?? 0;
-  const fiberCurrent = (summary as any).fiber ?? 0;
+  const sugarCurrent = summary.sugar ?? 0;
+  const fiberCurrent = summary.fiber ?? 0;
 
   // Handlers
   const handlePrevDay = () => {

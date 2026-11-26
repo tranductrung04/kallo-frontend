@@ -28,9 +28,16 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   getHealthProfile,
+  getUserAllergies,
+  getUserChronicConditions,
   recalculateHealthProfile,
   type HealthProfileResponse,
 } from '@/features/health-profile/api';
+import type {
+  UserAllergyResponse,
+  UserChronicConditionResponse,
+} from '@/features/health-profile/types';
+import { HealthProfileCard } from './HomeDashboard/HealthProfileCard';
 import type { MainTabParamList, RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
 import { images } from '@/assets/images';
@@ -70,7 +77,7 @@ import {
   TrophyIcon,
   UsersIcon,
 } from '@/components/icons';
-import { ActivityGrid, MacroColumn, WeightChart } from './HomeDashboard/HomeWidgets';
+import { ActivityGrid, MacroColumn, RecentDiaryCard, WeightChart } from './HomeDashboard/HomeWidgets';
 
 type Props = BottomTabScreenProps<MainTabParamList, 'Home'>;
 type RootNavigation = NativeStackNavigationProp<RootStackParamList>;
@@ -84,7 +91,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const styles = useMemo(() => createStyles(theme, screenWidth), [theme, screenWidth]);
   const insets = useSafeAreaInsets();
 
-  const { state, getSummary, addWater, setSelectedDate } = useNutrition();
+  const { state, foods, getSummary, getLogs, addWater, setSelectedDate, refreshDateData } = useNutrition();
   const {
     getTotalCaloriesBurnedForDate,
     getTotalStepsForDate,
@@ -124,10 +131,52 @@ export function HomeDashboardScreen({ navigation }: Props) {
     [challenges]
   );
 
+  const [healthProfile, setHealthProfile] = useState<HealthProfileResponse | null>(null);
+  const [userConditions, setUserConditions] = useState<UserChronicConditionResponse[]>([]);
+  const [userAllergies, setUserAllergies] = useState<UserAllergyResponse[]>([]);
+  const [recalculating, setRecalculating] = useState(false);
+
+  const lastProfileFetchRef = useRef<number>(0);
+
+  const loadHealthProfileData = useCallback(async () => {
+    if (Date.now() - lastProfileFetchRef.current < 5000) {
+      return;
+    }
+    lastProfileFetchRef.current = Date.now();
+    try {
+      const raw = await AsyncStorage.getItem('@kallo/health-profile');
+      if (raw) {
+        setHealthProfile(JSON.parse(raw));
+      }
+      const fresh = await getHealthProfile().catch(() => null);
+      if (fresh) {
+        setHealthProfile(fresh);
+        await AsyncStorage.setItem('@kallo/health-profile', JSON.stringify(fresh));
+      }
+    } catch {
+      // ignore
+    }
+
+    try {
+      const [conditions, allergies] = await Promise.all([
+        getUserChronicConditions().catch(() => []),
+        getUserAllergies().catch(() => []),
+      ]);
+      setUserConditions(conditions || []);
+      setUserAllergies(allergies || []);
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const selectedDate = state.selectedDate || todayKey();
+
   useFocusEffect(
     useCallback(() => {
       void refreshStreak();
-    }, [refreshStreak])
+      void loadHealthProfileData();
+      void refreshDateData?.(selectedDate);
+    }, [refreshStreak, loadHealthProfileData, refreshDateData, selectedDate])
   );
   const [calendarModalVisible, setCalendarModalVisible] = useState(false);
   const [calorieGoalModalVisible, setCalorieGoalModalVisible] = useState(false);
@@ -139,7 +188,6 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const [saltModalVisible, setSaltModalVisible] = useState(false);
   const [sugarModalVisible, setSugarModalVisible] = useState(false);
   const [fiberModalVisible, setFiberModalVisible] = useState(false);
-  const selectedDate = state.selectedDate || todayKey();
   const isToday = selectedDate === todayKey();
   const caloriesBurned = getTotalCaloriesBurnedForDate(selectedDate);
   const todaySteps = getTotalStepsForDate(selectedDate);
@@ -147,30 +195,6 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const root = navigation.getParent() as RootNavigation | undefined;
   const { showAlert } = useAlert();
 
-  const [healthProfile, setHealthProfile] = useState<HealthProfileResponse | null>(null);
-  const [recalculating, setRecalculating] = useState(false);
-
-  React.useEffect(() => {
-    let isMounted = true;
-    void (async () => {
-      try {
-        const raw = await AsyncStorage.getItem('@kallo/health-profile');
-        if (raw && isMounted) {
-          setHealthProfile(JSON.parse(raw));
-        }
-        const fresh = await getHealthProfile();
-        if (isMounted && fresh) {
-          setHealthProfile(fresh);
-          await AsyncStorage.setItem('@kallo/health-profile', JSON.stringify(fresh));
-        }
-      } catch {
-        // ignore
-      }
-    })();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   const handleRecalculate = async () => {
     setRecalculating(true);
@@ -240,33 +264,66 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const weekDays = useMemo(() => getWeekDays(selectedDate), [selectedDate]);
   const dateTitle = useMemo(() => formatHeaderDate(selectedDate), [selectedDate]);
 
-  // Calories (lượng calo đốt qua tập luyện không ảnh hưởng vào lượng calo nạp/còn lại)
-  const caloriesGoal = summary.caloriesGoal || 1794;
+  // Calories (Ưu tiên số liệu thực tế từ healthProfile của người dùng)
+  const caloriesGoal = healthProfile?.dailyCalorieGoal
+    ? Math.round(healthProfile.dailyCalorieGoal)
+    : (summary.caloriesGoal || 1794);
   const caloriesConsumed = summary.calories || 0;
-  const caloriesRemaining = Math.max(0, caloriesGoal - caloriesConsumed);
+  const roundedConsumed = Math.round(caloriesConsumed);
+  const isCaloriesExceeded = caloriesGoal > 0 && roundedConsumed > caloriesGoal;
+  const caloriesExceeded = Math.max(0, roundedConsumed - caloriesGoal);
+  const caloriesRemaining = Math.max(0, caloriesGoal - roundedConsumed);
   const progress = caloriesGoal > 0 ? caloriesConsumed / caloriesGoal : 0;
-  // Vẫn hiện một cung nhỏ khi chưa nạp calo (CircularProgress tự clamp 0–1)
-  const ringValue = progress > 0 ? progress : 0.08;
+  // Khi chưa nạp calo (progress === 0), để 0 để vòng tròn trống hoàn toàn
+  const ringValue = progress;
 
-  // Macro goals (fallback khi chưa có dữ liệu)
-  const proteinGoal = summary.proteinGoal || 90;
-  const carbsGoal = summary.carbsGoal || 224;
-  const fatGoal = summary.fatGoal || 60;
+  const recentLogs = useMemo(() => {
+    const dayLogs = getLogs(selectedDate);
+    return [...dayLogs]
+      .map((log, idx) => ({ log, idx }))
+      .sort((a, b) => {
+        const timeA = a.log.time ?? '';
+        const timeB = b.log.time ?? '';
+        if (timeA !== timeB) return timeB.localeCompare(timeA);
+        const updA = a.log.updatedAt ?? '';
+        const updB = b.log.updatedAt ?? '';
+        if (updA !== updB) return updB.localeCompare(updA);
+        return b.idx - a.idx;
+      })
+      .map((item) => item.log);
+  }, [getLogs, selectedDate]);
+
+  // Macro goals (Ưu tiên macronutrients tính theo hồ sơ sức khỏe)
+  const proteinGoal = Math.round(
+    healthProfile?.macronutrients?.proteinGrams ?? healthProfile?.proteinGoalG ?? (summary.proteinGoal || 90)
+  );
+  const carbsGoal = Math.round(
+    healthProfile?.macronutrients?.carbGrams ?? healthProfile?.carbsGoalG ?? (summary.carbsGoal || 224)
+  );
+  const fatGoal = Math.round(
+    healthProfile?.macronutrients?.fatGrams ?? healthProfile?.fatGoalG ?? (summary.fatGoal || 60)
+  );
+
+  // Lượng nước mục tiêu
+  const waterGoalMl = Math.round(
+    healthProfile?.waterGoalMl ?? (healthProfile?.waterLiters ? healthProfile.waterLiters * 1000 : 2000)
+  );
 
   // Slide 2: Muối, Đường, Chất xơ
   const saltGoal = 5;
   const sugarGoal = 49;
   const fiberGoal = 24;
   const saltCurrent = (summary as any).salt ?? (summary as any).sodium ?? 0;
-  const sugarCurrent = (summary as any).sugar ?? 0;
-  const fiberCurrent = (summary as any).fiber ?? 0;
+  const sugarCurrent = summary.sugar ?? 0;
+  const fiberCurrent = summary.fiber ?? 0;
 
   // Macro horizontal scroll state
   const macroScrollRef = useRef<ScrollView>(null);
   const [activeMacroPage, setActiveMacroPage] = useState(0);
   const macroCardWidth = screenWidth - spacing.lg * 2;
 
-  const currentWeight = summary.weightKg || 60;
+  // Cân nặng hiện tại: Ưu tiên cân nặng mới nhất từ Health Profile hoặc nhật ký
+  const currentWeight = healthProfile?.latestLoggedWeightKg ?? healthProfile?.weightKg ?? summary.weightKg ?? 60;
 
   // Chiều rộng biểu đồ = màn hình − padding màn hình − padding card (mỗi bên)
   const weightChartWidth = screenWidth - (spacing.lg + spacing.md) * 2;
@@ -613,8 +670,15 @@ export function HomeDashboardScreen({ navigation }: Props) {
                 value={ringValue}
                 size={190}
                 strokeWidth={10}
-                centerText={formatNumber(caloriesRemaining)}
-                label="Calo còn lại"
+                color={isCaloriesExceeded ? colors.statusDanger : colors.brandPrimary}
+                centerText={
+                  isCaloriesExceeded
+                    ? formatNumber(caloriesExceeded)
+                    : formatNumber(caloriesRemaining)
+                }
+                centerTextColor={isCaloriesExceeded ? colors.statusDanger : undefined}
+                label={isCaloriesExceeded ? 'Calo đã vượt' : 'Calo còn lại'}
+                labelColor={isCaloriesExceeded ? colors.statusDanger : undefined}
               />
             </View>
 
@@ -643,12 +707,23 @@ export function HomeDashboardScreen({ navigation }: Props) {
                 style={({ pressed }) => [styles.calorieStatCol, pressed && styles.pressedOpacity]}
                 onPress={() => setCalorieIntakeModalVisible(true)}
               >
-                <AppText variant="headlineMd" style={styles.statColNumber}>
+                <AppText
+                  variant="headlineMd"
+                  color={isCaloriesExceeded ? colors.statusDanger : colors.textPrimary}
+                  style={styles.statColNumber}
+                >
                   {formatNumber(caloriesConsumed)}
                 </AppText>
                 <View style={styles.statColLabelRow}>
-                  <CutleryIcon size={16} color={colors.brandSecondary} />
-                  <AppText variant="bodyMd" color={colors.textSecondary} style={styles.statColLabel}>
+                  <CutleryIcon
+                    size={16}
+                    color={isCaloriesExceeded ? colors.statusDanger : colors.brandSecondary}
+                  />
+                  <AppText
+                    variant="bodyMd"
+                    color={isCaloriesExceeded ? colors.statusDanger : colors.textSecondary}
+                    style={styles.statColLabel}
+                  >
                     Đã nạp
                   </AppText>
                 </View>
@@ -790,22 +865,88 @@ export function HomeDashboardScreen({ navigation }: Props) {
             />
           </View>
 
-          {/* ── 5. Nhật ký gần đây (Recent Diary) ───────────────────────── */}
-          <View style={styles.sectionBlock}>
-            <AppText variant="headlineSm">Nhật ký gần đây</AppText>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Mở nhật ký"
-              onPress={() => navigation.navigate('Diary')}
-              style={styles.emptyDiaryCard}
+          {/* ── 4b. Cảnh báo vượt ngưỡng dinh dưỡng từ DailySummary ────── */}
+          {(summary.sugarExceeded || summary.proteinExceeded) && (
+            <AppCard
+              style={{
+                marginTop: 12,
+                padding: 12,
+                borderWidth: 1,
+                borderColor: colors.warning,
+                backgroundColor: colors.surfaceMid,
+              }}
             >
-              <BowlFoodPlusIcon
-                size={40}
-                color={colors.textSecondary}
-                cutoutColor={colors.canvasBase}
+              <AppText variant="labelMd" color={colors.warning}>
+                Lưu ý dinh dưỡng hôm nay
+              </AppText>
+              <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
+                {summary.sugarExceeded && summary.proteinExceeded
+                  ? 'Lượng đường và chất đạm nạp vào đã vượt ngưỡng khuyến nghị trong ngày.'
+                  : summary.sugarExceeded
+                  ? 'Lượng đường nạp vào hôm nay đã vượt ngưỡng khuyến nghị.'
+                  : 'Lượng chất đạm nạp vào hôm nay đã vượt ngưỡng khuyến nghị.'}
+              </AppText>
+            </AppCard>
+          )}
+
+          {/* ── 5. Hồ sơ & Chỉ số sức khỏe (Health Profile & Biometrics) ── */}
+          <HealthProfileCard
+            profile={healthProfile}
+            conditions={userConditions}
+            allergies={userAllergies}
+            onPressDetail={() => navigation.navigate('Profile')}
+            onPressSetup={() => navigation.navigate('Profile')}
+          />
+
+          {/* ── 6. Nhật ký gần đây (Recent Diary) ───────────────────────── */}
+          <View style={styles.sectionBlock}>
+            <View style={styles.sectionHeaderRow}>
+              <AppText variant="headlineSm">Nhật ký gần đây</AppText>
+              {recentLogs.length > 0 && (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Xem tất cả nhật ký"
+                  onPress={() => navigation.navigate('Diary')}
+                  style={({ pressed }) => [styles.recentDiarySeeAllBtn, pressed && styles.pressedOpacity]}
+                >
+                  <AppText variant="labelMd" color={colors.brandPrimary}>
+                    Xem tất cả
+                  </AppText>
+                  <ChevronRightIcon size={16} color={colors.brandPrimary} />
+                </Pressable>
+              )}
+            </View>
+            {recentLogs.length > 0 ? (
+              <RecentDiaryCard
+                styles={styles}
+                logs={recentLogs}
+                foods={foods}
+                onPressLog={(log) =>
+                  root?.navigate('FoodDetail', {
+                    foodId: log.foodId,
+                    date: selectedDate,
+                    meal: log.meal,
+                    logId: log.id,
+                    source: log.source,
+                  })
+                }
+                onPressSeeAll={() => navigation.navigate('Diary')}
               />
-              <AppText variant="bodyMd" color={colors.textSecondary}>Chưa có dữ liệu</AppText>
-            </Pressable>
+            ) : (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Mở nhật ký"
+                onPress={() => navigation.navigate('Diary')}
+                style={styles.emptyDiaryCard}
+              >
+                <BowlFoodPlusIcon
+                  size={40}
+                  color={colors.textSecondary}
+                  cutoutColor={colors.canvasBase}
+                />
+                <AppText variant="bodyMd" color={colors.textSecondary}>Chưa có dữ liệu</AppText>
+              </Pressable>
+            )}
           </View>
 
           {/* ── 6. Hoạt động tập luyện (Workout Grid) ───────────────────── */}
@@ -900,7 +1041,12 @@ export function HomeDashboardScreen({ navigation }: Props) {
               />
               <View style={styles.waterTextGroup}>
                 <AppText variant="labelLg">Uống nước</AppText>
-                <AppText variant="headlineSm">{summary.waterMl || 0} ml</AppText>
+                <AppText variant="headlineSm">
+                  {summary.waterMl || 0}{' '}
+                  <AppText variant="caption" color={colors.textSecondary}>
+                    / {waterGoalMl} ml
+                  </AppText>
+                </AppText>
               </View>
             </View>
 
@@ -957,7 +1103,9 @@ export function HomeDashboardScreen({ navigation }: Props) {
               <View style={styles.weightValuesGroup}>
                 <AppText variant="headlineMd" color={colors.brandSecondary}>{currentWeight} kg</AppText>
                 <AppText variant="bodySm" color={colors.textSecondary} style={styles.weightDateText}>
-                  {formatWeightDate(state.weightLogs.length > 0 ? state.weightLogs[state.weightLogs.length - 1].date : undefined)}
+                  {healthProfile?.targetWeightKg
+                    ? `Mục tiêu: ${healthProfile.targetWeightKg} kg (${healthProfile.goalType === 'LOSE_WEIGHT' ? 'Giảm cân' : healthProfile.goalType === 'GAIN_WEIGHT' ? 'Tăng cân' : 'Duy trì'})`
+                    : formatWeightDate(state.weightLogs.length > 0 ? state.weightLogs[state.weightLogs.length - 1].date : undefined)}
                 </AppText>
               </View>
 

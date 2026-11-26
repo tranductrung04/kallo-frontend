@@ -45,6 +45,16 @@ type DraftStore = {
 
 const draftStores = new Map<string, DraftStore>();
 
+export function clearHealthProfileDraftStores() {
+  draftStores.forEach((store) => {
+    store.draft = initialHealthProfileDraft;
+    store.loaded = false;
+    store.loadPromise = undefined;
+    store.listeners.forEach((listener) => listener(store.draft, store.loaded));
+  });
+  draftStores.clear();
+}
+
 function getDraftStore(key: string): DraftStore {
   let store = draftStores.get(key);
   if (!store) {

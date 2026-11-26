@@ -1,4 +1,5 @@
 export { CalorieSummaryCard } from './CalorieSummaryCard';
+export { FoodThumbnail, resolveFoodImageUri } from './FoodThumbnail';
 export { WaterTrackerCard } from './WaterTrackerCard';
 export { WeightTrackerCard } from './WeightTrackerCard';
 export { WeekCalendar } from './WeekCalendar';
