@@ -46,7 +46,8 @@ import {
   Mars,
   Medal,
   Menu,
-  MessageSquare,
+  MessageCircle,
+  MessagesCircle,
   Mic,
   Minus,
   Moon,
@@ -286,7 +287,9 @@ export const BellIcon = fromLucide(Bell, { defaultSize: 20 });
 export const GlobeIcon = fromLucide(Globe, { defaultSize: 20 });
 export const LightbulbIcon = fromLucide(Lightbulb, { defaultSize: 20 });
 export const LogOutIcon = fromLucide(LogOut, { defaultSize: 20 });
-export const MessageSquareIcon = fromLucide(MessageSquare, { defaultSize: 20 });
+export const MessageCircleIcon = fromLucide(MessageCircle, { defaultSize: 20 });
+export const MessagesCircleIcon = fromLucide(MessagesCircle, { defaultSize: 20 });
+export const MessageSquareIcon = MessageCircleIcon;
 export const PenLineIcon = fromLucide(PenLine, { defaultSize: 20 });
 export const RefreshCwIcon = fromLucide(RefreshCw, { defaultSize: 20 });
 export const SendIcon = fromLucide(Send, { defaultSize: 20 });
