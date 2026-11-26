@@ -5,6 +5,7 @@ import { IS_DEMO_MODE } from '@/features/auth/localAccount';
 import { NutritionContext } from '@/features/nutrition/NutritionProvider';
 import { todayKey } from '@/features/nutrition/utils';
 import { getAccessToken } from '@/services/api/tokenStorage';
+import { getUserScopedStorageKey } from '@/services/storage/userStorage';
 import { getStreak, getStreakApiErrorMessage } from './api';
 import type {
   Badge,
@@ -29,7 +30,17 @@ import {
   MOCK_SEARCH_USERS,
 } from './utils';
 
-const STORAGE_KEY = IS_DEMO_MODE ? '@kallo/gamification-demo-v1' : '@kallo/gamification-prod-v1';
+const STORAGE_KEY_PREFIX = IS_DEMO_MODE ? '@kallo/gamification-demo-v1' : '@kallo/gamification-prod-v1';
+
+const createInitialStreak = (): StreakInfo => (IS_DEMO_MODE ? DEMO_STREAK : INITIAL_STREAK);
+const createInitialBadges = (): Badge[] =>
+  IS_DEMO_MODE
+    ? INITIAL_BADGES
+    : INITIAL_BADGES.map((b) => ({ ...b, isUnlocked: false, unlockedAt: undefined }));
+const createInitialChallenges = (): Challenge[] =>
+  IS_DEMO_MODE
+    ? INITIAL_CHALLENGES
+    : INITIAL_CHALLENGES.map((c) => ({ ...c, isJoined: false, isCompleted: false, currentProgress: 0 }));
 
 const DEMO_STREAK: StreakInfo = {
   currentStreak: 7,
@@ -91,22 +102,17 @@ const GamificationContext = createContext<GamificationContextValue | null>(null)
 export function GamificationProvider({ children }: React.PropsWithChildren) {
   const auth = useContext(AuthContext);
   const nutrition = useContext(NutritionContext);
-  const [streak, setStreak] = useState<StreakInfo>(IS_DEMO_MODE ? DEMO_STREAK : INITIAL_STREAK);
+  const activeUserId = auth?.status === 'signedIn' ? (auth.user?.id ?? null) : null;
+  const storageKey = getUserScopedStorageKey(STORAGE_KEY_PREFIX, activeUserId);
+  const [streak, setStreak] = useState<StreakInfo>(createInitialStreak);
 
   const [isStreakLoading, setIsStreakLoading] = useState(false);
   const [streakError, setStreakError] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
+  const loadedKeyRef = useRef<string | null>(null);
 
-  const [badges, setBadges] = useState<Badge[]>(
-    IS_DEMO_MODE
-      ? INITIAL_BADGES
-      : INITIAL_BADGES.map((b) => ({ ...b, isUnlocked: false, unlockedAt: undefined }))
-  );
-  const [challenges, setChallenges] = useState<Challenge[]>(
-    IS_DEMO_MODE
-      ? INITIAL_CHALLENGES
-      : INITIAL_CHALLENGES.map((c) => ({ ...c, isJoined: false, isCompleted: false, currentProgress: 0 }))
-  );
+  const [badges, setBadges] = useState<Badge[]>(createInitialBadges);
+  const [challenges, setChallenges] = useState<Challenge[]>(createInitialChallenges);
   const [friends, setFriends] = useState<Friend[]>(IS_DEMO_MODE ? INITIAL_FRIENDS : []);
   const [gameSettings, setGameSettings] = useState<GameSettings>(INITIAL_GAME_SETTINGS);
   const [incomingRequests, setIncomingRequests] = useState<FriendRequest[]>(
@@ -210,49 +216,82 @@ export function GamificationProvider({ children }: React.PropsWithChildren) {
 
   // Restore cache
   useEffect(() => {
-    void AsyncStorage.getItem(STORAGE_KEY).then((data) => {
-      if (!data) {
+    let active = true;
+    loadedKeyRef.current = null;
+    setIsReady(false);
+    setStreak(createInitialStreak());
+    setStreakError(null);
+    setBadges(createInitialBadges());
+    setChallenges(createInitialChallenges());
+    setFriends(IS_DEMO_MODE ? INITIAL_FRIENDS : []);
+    setGameSettings(INITIAL_GAME_SETTINGS);
+    setIncomingRequests(IS_DEMO_MODE ? INITIAL_INCOMING_REQUESTS : []);
+    setOutgoingRequests(IS_DEMO_MODE ? INITIAL_OUTGOING_REQUESTS : []);
+    setActiveToast(null);
+    lastStreakFetchRef.current = 0;
+    inFlightStreakRef.current = null;
+
+    if (!storageKey) {
+      return () => {
+        active = false;
+      };
+    }
+
+    void AsyncStorage.getItem(storageKey)
+      .then((data) => {
+        if (!active) return;
+        if (data) {
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.streak) setStreak(parsed.streak);
+            if (Array.isArray(parsed.badges)) setBadges(parsed.badges);
+            if (Array.isArray(parsed.challenges)) setChallenges(parsed.challenges);
+            if (Array.isArray(parsed.friends)) setFriends(parsed.friends);
+            if (parsed.gameSettings) setGameSettings(parsed.gameSettings);
+            if (Array.isArray(parsed.incomingRequests)) setIncomingRequests(parsed.incomingRequests);
+            if (Array.isArray(parsed.outgoingRequests)) setOutgoingRequests(parsed.outgoingRequests);
+          } catch {
+            /* Ignore invalid cache */
+          }
+        }
+        loadedKeyRef.current = storageKey;
         setIsReady(true);
-        return;
-      }
-      try {
-        const parsed = JSON.parse(data);
-        if (parsed.streak) setStreak(parsed.streak);
-        if (Array.isArray(parsed.badges)) setBadges(parsed.badges);
-        if (Array.isArray(parsed.challenges)) setChallenges(parsed.challenges);
-        if (Array.isArray(parsed.friends)) setFriends(parsed.friends);
-        if (parsed.gameSettings) setGameSettings(parsed.gameSettings);
-        if (Array.isArray(parsed.incomingRequests)) setIncomingRequests(parsed.incomingRequests);
-        if (Array.isArray(parsed.outgoingRequests)) setOutgoingRequests(parsed.outgoingRequests);
-      } catch {
-        /* Ignore invalid cache */
-      }
-      setIsReady(true);
-    });
-  }, []);
+      })
+      .catch(() => {
+        if (!active) return;
+        loadedKeyRef.current = storageKey;
+        setIsReady(true);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [storageKey]);
 
   // Fetch streak once cache is ready and user is signed in
   useEffect(() => {
     if (isReady && (!auth || auth.status === 'signedIn')) {
       void refreshStreak();
     }
-  }, [isReady, auth?.status, refreshStreak]);
+  }, [isReady, auth?.status, activeUserId, refreshStreak]);
 
   // Save changes
   useEffect(() => {
-    void AsyncStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({
-        streak,
-        badges,
-        challenges,
-        friends,
-        gameSettings,
-        incomingRequests,
-        outgoingRequests,
-      })
-    ).catch(() => undefined);
-  }, [streak, badges, challenges, friends, gameSettings, incomingRequests, outgoingRequests]);
+    if (isReady && storageKey && loadedKeyRef.current === storageKey) {
+      void AsyncStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          streak,
+          badges,
+          challenges,
+          friends,
+          gameSettings,
+          incomingRequests,
+          outgoingRequests,
+        })
+      ).catch(() => undefined);
+    }
+  }, [isReady, storageKey, streak, badges, challenges, friends, gameSettings, incomingRequests, outgoingRequests]);
 
   const dismissToast = useCallback(() => {
     setActiveToast(null);

@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getApiErrorStatus, isUuid } from '@/services/api/apiUtils';
+import { getUserScopedStorageKey } from '@/services/storage/userStorage';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useNutrition } from '@/features/nutrition/NutritionProvider';
 import { todayKey } from '@/features/nutrition/utils';
@@ -29,12 +30,14 @@ import {
   VIETNAMESE_RECIPES,
 } from './utils';
 
-const STORAGE_KEY = '@kallo/meal-plans-v1';
+const STORAGE_KEY_PREFIX = '@kallo/meal-plans-v1';
 
 const MealPlanContext = createContext<MealPlanContextValue | null>(null);
 
 export function MealPlanProvider({ children }: React.PropsWithChildren) {
-  const { status } = useAuth();
+  const { status, user } = useAuth();
+  const activeUserId = status === 'signedIn' ? (user?.id ?? null) : null;
+  const storageKey = getUserScopedStorageKey(STORAGE_KEY_PREFIX, activeUserId);
   const {
     addMultipleFoodLogs,
     addFoodLog,
@@ -46,31 +49,65 @@ export function MealPlanProvider({ children }: React.PropsWithChildren) {
   const [savedPlanSummaries, setSavedPlanSummaries] = useState<MealPlanSummaryResponse[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLoadingPlans, setIsLoadingPlans] = useState(false);
+  const loadedKeyRef = useRef<string | null>(null);
+  const savedPlanSummariesRef = useRef<MealPlanSummaryResponse[]>(savedPlanSummaries);
+  savedPlanSummariesRef.current = savedPlanSummaries;
+  const lastPlansFetchRef = useRef<number>(0);
 
   // Restore saved meal plans from local cache
   useEffect(() => {
-    void AsyncStorage.getItem(STORAGE_KEY).then((data) => {
-      if (!data) return;
-      try {
-        const parsed = JSON.parse(data);
-        if (parsed.currentPlan) setCurrentPlan(parsed.currentPlan);
-        if (Array.isArray(parsed.savedPlans)) setSavedPlans(parsed.savedPlans);
-        if (Array.isArray(parsed.savedPlanSummaries)) {
-          setSavedPlanSummaries(parsed.savedPlanSummaries);
+    let active = true;
+    loadedKeyRef.current = null;
+    setCurrentPlan(null);
+    setSavedPlans([]);
+    setSavedPlanSummaries([]);
+    setIsGenerating(false);
+    setIsLoadingPlans(false);
+    lastPlansFetchRef.current = 0;
+
+    if (!storageKey) {
+      return () => {
+        active = false;
+      };
+    }
+
+    void AsyncStorage.getItem(storageKey)
+      .then((data) => {
+        if (!active) return;
+        if (data) {
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.currentPlan) setCurrentPlan(parsed.currentPlan);
+            if (Array.isArray(parsed.savedPlans)) setSavedPlans(parsed.savedPlans);
+            if (Array.isArray(parsed.savedPlanSummaries)) {
+              setSavedPlanSummaries(parsed.savedPlanSummaries);
+            }
+          } catch {
+            /* Ignore invalid cache */
+          }
         }
-      } catch {
-        /* Ignore invalid cache */
-      }
-    });
-  }, []);
+        loadedKeyRef.current = storageKey;
+      })
+      .catch(() => {
+        if (active) {
+          loadedKeyRef.current = storageKey;
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [storageKey]);
 
   // Persist local cache
   useEffect(() => {
-    void AsyncStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ currentPlan, savedPlans, savedPlanSummaries })
-    ).catch(() => undefined);
-  }, [currentPlan, savedPlans, savedPlanSummaries]);
+    if (storageKey && loadedKeyRef.current === storageKey) {
+      void AsyncStorage.setItem(
+        storageKey,
+        JSON.stringify({ currentPlan, savedPlans, savedPlanSummaries })
+      ).catch(() => undefined);
+    }
+  }, [storageKey, currentPlan, savedPlans, savedPlanSummaries]);
 
   const upsertSummary = useCallback((summary: MealPlanSummaryResponse) => {
     setSavedPlanSummaries((prev) => [
@@ -78,10 +115,6 @@ export function MealPlanProvider({ children }: React.PropsWithChildren) {
       ...prev.filter((item) => item.id !== summary.id),
     ]);
   }, []);
-
-  const savedPlanSummariesRef = useRef<MealPlanSummaryResponse[]>(savedPlanSummaries);
-  savedPlanSummariesRef.current = savedPlanSummaries;
-  const lastPlansFetchRef = useRef<number>(0);
 
   const refreshPlans = useCallback(async (): Promise<MealPlanSummaryResponse[]> => {
     if (status !== 'signedIn') return savedPlanSummariesRef.current;
@@ -103,10 +136,10 @@ export function MealPlanProvider({ children }: React.PropsWithChildren) {
   }, [status]);
 
   useEffect(() => {
-    if (status === 'signedIn') {
+    if (status === 'signedIn' && activeUserId) {
       void refreshPlans();
     }
-  }, [status]);
+  }, [status, activeUserId, refreshPlans]);
 
   const loadPlanDetail = useCallback(
     async (planId: string): Promise<MealPlan | null> => {

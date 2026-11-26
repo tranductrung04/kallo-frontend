@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useR
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { randomUUID } from 'expo-crypto';
 import { getApiErrorStatus, isUuid } from '@/services/api/apiUtils';
+import { getUserScopedStorageKey } from '@/services/storage/userStorage';
 import { useOfflineSync } from '@/services/offline';
 import { createWeightLog, getWeightLogs } from '@/features/activity/api';
 import { useAuth } from '@/features/auth/AuthProvider';
@@ -49,8 +50,8 @@ import { starterFoods } from './catalog';
 import { latestWeight, summarizeLogs, todayKey } from './utils';
 import type { AddFoodLogInput, Food, FoodLog, MealSlot, NutritionContextValue, NutritionState, WaterLog } from './types';
 
-const STORAGE_KEY = '@kallo/nutrition-v1';
-const initialState: NutritionState = {
+const STORAGE_KEY_PREFIX = '@kallo/nutrition-v1';
+const createInitialState = (): NutritionState => ({
   foodLogs: [],
   waterLogs: [],
   weightLogs: [],
@@ -60,7 +61,7 @@ const initialState: NutritionState = {
   selectedDate: todayKey(),
   walkthroughSeen: false,
   goals: { calories: 2000, protein: 150, carbs: 225, fat: 56, waterMl: 2000, targetWeightKg: 60 },
-};
+});
 
 function id(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -86,9 +87,11 @@ function isTransientNetworkError(error: unknown): boolean {
 export const NutritionContext = createContext<NutritionContextValue | null>(null);
 
 export function NutritionProvider({ children }: React.PropsWithChildren) {
-  const { status } = useAuth();
+  const { status, user } = useAuth();
   const { enqueueItem } = useOfflineSync();
-  const [state, setState] = useState<NutritionState>(initialState);
+  const activeUserId = status === 'signedIn' ? (user?.id ?? null) : null;
+  const storageKey = getUserScopedStorageKey(STORAGE_KEY_PREFIX, activeUserId);
+  const [state, setState] = useState<NutritionState>(createInitialState);
   const [ready, setReady] = useState(false);
   const [serverFoods, setServerFoods] = useState<Food[]>([]);
   const [recentServerFoods, setRecentServerFoods] = useState<Food[]>([]);
@@ -109,14 +112,32 @@ export function NutritionProvider({ children }: React.PropsWithChildren) {
   const lastDateFetchRef = useRef<Record<string, number>>({});
   const inFlightDateRef = useRef<Record<string, Promise<void> | undefined>>({});
   const lastRecentFetchRef = useRef<number>(0);
+  const loadedKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
-    void AsyncStorage.getItem(STORAGE_KEY)
+    let active = true;
+    loadedKeyRef.current = null;
+    setReady(false);
+    setState(createInitialState());
+    setServerFoods([]);
+    setRecentServerFoods([]);
+    setDailySummaries({});
+    lastDateFetchRef.current = {};
+    inFlightDateRef.current = {};
+    lastRecentFetchRef.current = 0;
+
+    if (!storageKey) {
+      return () => {
+        active = false;
+      };
+    }
+
+    void AsyncStorage.getItem(storageKey)
       .then(async (value) => {
-        let baseState = initialState;
+        let baseState = createInitialState();
         if (value) {
           try {
-            baseState = { ...initialState, ...JSON.parse(value) };
+            baseState = { ...createInitialState(), ...JSON.parse(value) };
           } catch {
             /* Ignore invalid local cache. */
           }
@@ -125,32 +146,44 @@ export function NutritionProvider({ children }: React.PropsWithChildren) {
           const profileRaw = await AsyncStorage.getItem('@kallo/health-profile');
           if (profileRaw) {
             const p = JSON.parse(profileRaw);
-            baseState = {
-              ...baseState,
-              goals: {
-                calories: p.dailyCalorieGoal || p.dailyCalories || baseState.goals.calories,
-                protein: p.proteinGoalG || p.proteinGoalGrams || baseState.goals.protein,
-                carbs: p.carbsGoalG || p.carbsGoalGrams || baseState.goals.carbs,
-                fat: p.fatGoalG || p.fatGoalGrams || baseState.goals.fat,
-                waterMl: p.waterGoalMl || baseState.goals.waterMl,
-                targetWeightKg: p.targetWeightKg || baseState.goals.targetWeightKg,
-              },
-            };
+            if (!p.userId || p.userId === activeUserId) {
+              baseState = {
+                ...baseState,
+                goals: {
+                  calories: p.dailyCalorieGoal || p.dailyCalories || baseState.goals.calories,
+                  protein: p.proteinGoalG || p.proteinGoalGrams || baseState.goals.protein,
+                  carbs: p.carbsGoalG || p.carbsGoalGrams || baseState.goals.carbs,
+                  fat: p.fatGoalG || p.fatGoalGrams || baseState.goals.fat,
+                  waterMl: p.waterGoalMl || baseState.goals.waterMl,
+                  targetWeightKg: p.targetWeightKg || baseState.goals.targetWeightKg,
+                },
+              };
+            }
           }
         } catch {
           /* Ignore profile parse errors. */
         }
+        if (!active) return;
+        loadedKeyRef.current = storageKey;
         setState(baseState);
+        setReady(true);
       })
-      .catch(() => undefined)
-      .finally(() => setReady(true));
-  }, []);
+      .catch(() => {
+        if (!active) return;
+        loadedKeyRef.current = storageKey;
+        setReady(true);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [storageKey, activeUserId]);
 
   useEffect(() => {
-    if (ready) {
-      void AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state)).catch(() => undefined);
+    if (ready && storageKey && loadedKeyRef.current === storageKey) {
+      void AsyncStorage.setItem(storageKey, JSON.stringify(state)).catch(() => undefined);
     }
-  }, [ready, state]);
+  }, [ready, storageKey, state]);
 
   const cacheFood = useCallback((input: Food | Food[]) => {
     const items = Array.isArray(input) ? input : [input];
@@ -327,7 +360,10 @@ export function NutritionProvider({ children }: React.PropsWithChildren) {
           let p: HealthProfileResponse | null = null;
           const raw = await AsyncStorage.getItem('@kallo/health-profile');
           if (raw) {
-            p = JSON.parse(raw);
+            const parsed = JSON.parse(raw);
+            if (!parsed?.userId || parsed.userId === activeUserId) {
+              p = parsed;
+            }
           }
           const fresh = await getHealthProfile().catch(() => null);
           if (fresh) {
@@ -356,7 +392,7 @@ export function NutritionProvider({ children }: React.PropsWithChildren) {
         }
       })();
     }
-  }, [ready, status]);
+  }, [ready, status, activeUserId]);
 
   useEffect(() => {
     if (ready && status === 'signedIn') {

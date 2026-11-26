@@ -10,6 +10,8 @@ import React, {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getAccessToken } from "@/services/api/tokenStorage";
 import { registerSessionExpiredHandler } from "@/services/api/client";
+import { clearSessionStorageArtifacts } from "@/services/storage/userStorage";
+import { clearHealthProfileDraftStores } from "@/features/health-profile/hooks/useHealthProfileDraft";
 import {
   APP_DATA_MODE,
   IS_DEMO_MODE,
@@ -241,6 +243,8 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
         }
 
         // In Backend Mode: call real Spring Boot endpoint
+        await clearSessionStorageArtifacts();
+        clearHealthProfileDraftStores();
         const result = await login(email, password);
         const currentUser = await refreshUser();
         if (!mountedRef.current) return;
@@ -307,6 +311,8 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
           return;
         }
 
+        await clearSessionStorageArtifacts();
+        clearHealthProfileDraftStores();
         const result = await loginWithGoogle(idToken);
         const currentUser = await refreshUser();
         if (!mountedRef.current) return;
@@ -385,6 +391,8 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
           if (mountedRef.current) setStatus("needsProfile");
           return;
         }
+        await clearSessionStorageArtifacts();
+        clearHealthProfileDraftStores();
         await verifyEmail(otp);
         if (!mountedRef.current) return;
         const verifiedUser = await refreshUser();
@@ -481,8 +489,8 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
 
   const signOut = useCallback(async () => {
     await AsyncStorage.removeItem(LOCAL_SESSION_KEY);
-    await AsyncStorage.removeItem("@kallo/health-profile");
-    await AsyncStorage.removeItem("@kallo/pending-onboarding");
+    await clearSessionStorageArtifacts();
+    clearHealthProfileDraftStores();
     if (!IS_DEMO_MODE) {
       await logout();
     }
@@ -494,6 +502,8 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
   }, []);
 
   const handleSessionExpired = useCallback(() => {
+    void clearSessionStorageArtifacts();
+    clearHealthProfileDraftStores();
     if (!mountedRef.current) return;
     setUser(null);
     setError("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
