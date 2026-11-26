@@ -1,7 +1,8 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -11,10 +12,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { images } from '@/assets/images';
 import { AppText } from '@/components/common';
 import {
   ChevronLeftIcon,
-  MessageSquareIcon,
+  MessageCircleIcon,
+  MessagesCircleIcon,
   RefreshCwIcon,
   SendIcon,
   ThumbsDownIcon,
@@ -38,6 +41,7 @@ import {
 } from '../api';
 import type { ChatApiMessage, ChatMessage, ChatSuggestion } from '../types';
 import { generateAssistantResponse, QUICK_PROMPTS } from '../utils';
+import { useChatAutoScroll } from '../hooks/useChatAutoScroll';
 import { TypingIndicator } from '../components/TypingIndicator';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'NutritionChat'>;
@@ -76,7 +80,20 @@ export function NutritionChatScreen({ route, navigation }: Props) {
   const [isLoading, setIsLoading] = useState(Boolean(conversationId));
   const [error, setError] = useState<string | null>(null);
   const sentInitialPrompt = useRef(false);
-  const flatListRef = useRef<FlatList<ChatMessage>>(null);
+  const messageUpdateKey = useMemo(
+    () =>
+      messages
+        .map(
+          (message) =>
+            `${message.id}:${message.status ?? ''}:${message.isStreaming ? '1' : '0'}:${message.content}:${message.errorText ?? ''}`
+        )
+        .join('|'),
+    [messages]
+  );
+  const { flatListRef, requestScrollToBottom, listScrollProps } = useChatAutoScroll<ChatMessage>({
+    messageKey: messageUpdateKey,
+    isLoading,
+  });
 
   const loadConversation = useCallback(async () => {
     if (!activeConversationId || IS_DEMO_MODE) return;
@@ -113,6 +130,7 @@ export function NutritionChatScreen({ route, navigation }: Props) {
       timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
       status: 'COMPLETED',
     };
+    requestScrollToBottom();
     setMessages((current) => [...current.filter((message) => message.id !== 'welcome'), userMessage]);
     setInputText('');
     setIsSending(true);
@@ -155,7 +173,7 @@ export function NutritionChatScreen({ route, navigation }: Props) {
     } finally {
       setIsSending(false);
     }
-  }, [activeConversationId, inputText, isSending, summary]);
+  }, [activeConversationId, inputText, isSending, requestScrollToBottom, summary]);
 
   useEffect(() => {
     if (initialPrompt && !sentInitialPrompt.current && !isLoading) {
@@ -170,6 +188,7 @@ export function NutritionChatScreen({ route, navigation }: Props) {
     setError(null);
     try {
       const reply = await retryChatMessage(item.id);
+      requestScrollToBottom();
       setMessages((current) => [...current.filter((msg) => msg.id !== item.id), toUiMessage(reply.assistantMessage)]);
     } catch (requestError: unknown) {
       setError(getChatErrorMessage(requestError));
@@ -202,9 +221,21 @@ export function NutritionChatScreen({ route, navigation }: Props) {
         >
           <ChevronLeftIcon size={24} color={theme.colors.textPrimary} />
         </Pressable>
-        <View style={styles.headerCopy}>
-          <AppText variant="headlineSm">Trợ lý Kallo</AppText>
-          <View style={styles.statusLine}><View style={[styles.statusDot, { backgroundColor: theme.colors.quickScanner }]} /><AppText variant="caption" color={theme.colors.textSecondary}>Dinh dưỡng cá nhân</AppText></View>
+        <View style={styles.headerBrand}>
+          <View style={[styles.headerLogoWrap, { backgroundColor: theme.colors.brandPrimary, borderColor: theme.colors.surfaceBorder }]}>
+            <Image
+              source={images.mascotAvatar}
+              style={styles.headerLogo}
+              accessibilityLabel="Trợ lý Kallo AI"
+            />
+          </View>
+          <View style={styles.headerCopy}>
+            <AppText variant="headlineSm">Trợ lý Kallo AI</AppText>
+            <View style={styles.statusLine}>
+              <View style={[styles.statusDot, { backgroundColor: theme.colors.quickScanner }]} />
+              <AppText variant="caption" color={theme.colors.textSecondary}>Dinh dưỡng cá nhân</AppText>
+            </View>
+          </View>
         </View>
         <Pressable
           onPress={() => navigation.navigate('ChatHistory')}
@@ -213,7 +244,7 @@ export function NutritionChatScreen({ route, navigation }: Props) {
           accessibilityRole="button"
           accessibilityLabel="Mở lịch sử trò chuyện"
         >
-          <MessageSquareIcon size={22} color={theme.colors.textPrimary} />
+          <MessagesCircleIcon size={22} color={theme.colors.textPrimary} />
         </Pressable>
       </View>
 
@@ -229,7 +260,7 @@ export function NutritionChatScreen({ route, navigation }: Props) {
         data={messages}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.messageList}
-        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+        {...listScrollProps}
         ListFooterComponent={null}
         renderItem={({ item }) => {
           const isUser = item.role === 'user';
@@ -262,7 +293,7 @@ export function NutritionChatScreen({ route, navigation }: Props) {
       />}
 
       <View style={[styles.quickPromptsWrap, { borderTopColor: theme.colors.surfaceBorder }]}>
-        <FlatList horizontal showsHorizontalScrollIndicator={false} data={promptItems} keyExtractor={(item) => item} contentContainerStyle={styles.promptsList} renderItem={({ item }) => <Pressable style={[styles.promptChip, { backgroundColor: theme.colors.surfaceMid, borderColor: theme.colors.surfaceBorder }]} onPress={() => void handleSend(item)} disabled={isSending} accessibilityRole="button" accessibilityLabel={`Gợi ý: ${item}`}><MessageSquareIcon size={14} color={theme.colors.brandPrimary} /><AppText variant="caption" color={theme.colors.textPrimary}>{item}</AppText></Pressable>} />
+        <FlatList horizontal showsHorizontalScrollIndicator={false} data={promptItems} keyExtractor={(item) => item} contentContainerStyle={styles.promptsList} renderItem={({ item }) => <Pressable style={[styles.promptChip, { backgroundColor: theme.colors.surfaceMid, borderColor: theme.colors.surfaceBorder }]} onPress={() => void handleSend(item)} disabled={isSending} accessibilityRole="button" accessibilityLabel={`Gợi ý: ${item}`}><MessageCircleIcon size={14} color={theme.colors.brandPrimary} /><AppText variant="caption" color={theme.colors.textPrimary}>{item}</AppText></Pressable>} />
       </View>
 
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}>
@@ -279,6 +310,9 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   header: { minHeight: 56, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, borderBottomWidth: 1, gap: 8 },
   iconButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 22 },
+  headerBrand: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  headerLogoWrap: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', overflow: 'hidden', borderWidth: 1 },
+  headerLogo: { width: 38, height: 38, borderRadius: 19 },
   headerCopy: { flex: 1, gap: 2 },
   statusLine: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   statusDot: { width: 7, height: 7, borderRadius: 4 },

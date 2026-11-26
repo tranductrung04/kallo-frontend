@@ -3,7 +3,7 @@ import { ActivityIndicator, FlatList, Pressable, StyleSheet, TextInput, View } f
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppText, useAlert } from '@/components/common';
-import { ChevronLeftIcon, CloseXIcon, MessageSquareIcon, PenLineIcon, RefreshCwIcon } from '@/components/icons';
+import { ChevronLeftIcon, CloseXIcon, MessageCircleIcon, PenLineIcon, RefreshCwIcon } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
 import { IS_DEMO_MODE } from '@/features/auth/localAccount';
@@ -86,9 +86,9 @@ export function ChatHistoryScreen({ navigation }: Props) {
       data={items}
       keyExtractor={(item) => item.id}
       contentContainerStyle={items.length ? styles.list : styles.emptyList}
-      ListEmptyComponent={<View style={styles.center}><MessageSquareIcon size={40} color={theme.colors.textDisabled} /><AppText variant="headlineSm">Chưa có cuộc trò chuyện</AppText><AppText variant="bodyMd" color={theme.colors.textSecondary} align="center">Các cuộc trò chuyện với Kallo sẽ xuất hiện ở đây.</AppText></View>}
+      ListEmptyComponent={<View style={styles.center}><MessageCircleIcon size={40} color={theme.colors.textDisabled} /><AppText variant="headlineSm">Chưa có cuộc trò chuyện</AppText><AppText variant="bodyMd" color={theme.colors.textSecondary} align="center">Các cuộc trò chuyện với Kallo sẽ xuất hiện ở đây.</AppText></View>}
       renderItem={({ item }) => <Pressable onPress={() => navigation.navigate('NutritionChat', { conversationId: item.id })} style={({ pressed }) => [styles.row, { backgroundColor: theme.colors.surfaceMid, borderColor: theme.colors.surfaceBorder }, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel={`Mở ${item.title || 'cuộc trò chuyện mới'}`}>
-        <View style={[styles.avatar, { backgroundColor: theme.colors.brandSoftTint }]}><MessageSquareIcon size={20} color={theme.colors.brandPrimary} /></View>
+        <View style={[styles.avatar, { backgroundColor: 'transparent' }]}><MessageCircleIcon size={20} color={theme.colors.brandPrimary} /></View>
         <View style={styles.rowCopy}>
           {editingId === item.id ? <TextInput value={draftTitle} onChangeText={setDraftTitle} onSubmitEditing={() => void saveTitle(item)} autoFocus style={[styles.titleInput, { color: theme.colors.textPrimary, borderColor: theme.colors.brandPrimary }]} maxLength={120} accessibilityLabel="Tên cuộc trò chuyện" /> : <AppText variant="labelLg" numberOfLines={1}>{item.title || 'Cuộc trò chuyện mới'}</AppText>}
           <AppText variant="caption" color={theme.colors.textSecondary}>{item.messageCount} tin nhắn · {item.lastMessageAt ? new Date(item.lastMessageAt).toLocaleDateString('vi-VN') : 'Chưa có tin nhắn'}</AppText>

@@ -43,7 +43,7 @@ import {
   LightningIcon,
   LockClosedIcon,
   LogOutIcon,
-  MessageSquareIcon,
+  MessageCircleIcon,
   MoonIcon,
   PenLineIcon,
   RefreshCwIcon,
