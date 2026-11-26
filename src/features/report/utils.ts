@@ -1,4 +1,4 @@
-import type { Food, FoodLog, NutritionGoals, WeightLog } from '@/features/nutrition/types';
+import type { DailySummaryResponse, Food, FoodLog, NutritionGoals, WeightLog } from '@/features/nutrition/types';
 import { formatNumber, scaleNutrition, todayKey } from '@/features/nutrition/utils';
 import type { ActivityLog, HealthSyncLog } from '@/features/activity/types';
 import { aggregateDailyActivity } from '@/features/activity/utils';
@@ -121,6 +121,48 @@ export function aggregatePeriodSummary(
   return {
     period,
     title: periodTitle,
+    totalCaloriesIn,
+    totalCaloriesBurned,
+    avgCaloriesIn: Math.round(totalCaloriesIn / len),
+    avgCaloriesBurned: Math.round(totalCaloriesBurned / len),
+    avgWaterMl: Math.round(totalWater / len),
+    avgSteps: Math.round(totalSteps / len),
+    days,
+  };
+}
+
+export function mergeServerSummariesIntoPeriodSummary(
+  base: PeriodSummary,
+  serverSummaries: DailySummaryResponse[]
+): PeriodSummary {
+  if (!serverSummaries || serverSummaries.length === 0) return base;
+
+  const byDate = new Map(serverSummaries.map((s) => [s.date, s]));
+  const days = base.days.map((d) => {
+    const s = byDate.get(d.date);
+    if (!s) return d;
+    return {
+      ...d,
+      caloriesIn: s.caloriesConsumed,
+      caloriesBurned: s.caloriesBurned || d.caloriesBurned,
+      caloriesGoal: s.targetCalories ?? d.caloriesGoal,
+      protein: Math.round(s.proteinG),
+      carbs: Math.round(s.carbsG),
+      fat: Math.round(s.fatG),
+      waterMl: s.waterMl,
+      steps: s.steps || d.steps,
+      weightKg: s.weightKg ?? d.weightKg,
+    };
+  });
+
+  const totalCaloriesIn = days.reduce((sum, d) => sum + d.caloriesIn, 0);
+  const totalCaloriesBurned = days.reduce((sum, d) => sum + d.caloriesBurned, 0);
+  const totalWater = days.reduce((sum, d) => sum + d.waterMl, 0);
+  const totalSteps = days.reduce((sum, d) => sum + d.steps, 0);
+  const len = Math.max(1, days.length);
+
+  return {
+    ...base,
     totalCaloriesIn,
     totalCaloriesBurned,
     avgCaloriesIn: Math.round(totalCaloriesIn / len),

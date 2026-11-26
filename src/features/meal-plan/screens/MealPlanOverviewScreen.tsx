@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   Image,
   ScrollView,
@@ -9,11 +9,12 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { images } from '@/assets/images';
 import { AppButton, AppCard, AppText, useAlert } from '@/components/common';
 import { ChevronLeftIcon } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
+import { getApiErrorMessage } from '@/services/api/apiUtils';
 import { useTheme, type ThemeContextValue } from '@/theme';
 import { useMealPlan } from '../MealPlanProvider';
 import { formatVnd } from '../utils';
@@ -39,8 +40,25 @@ export function MealPlanOverviewScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<NavigationProp>();
-  const { currentPlan, savedPlans, clearCurrentPlan, setActivePlan, applyPlanToDiary, deletePlan } = useMealPlan();
+  const {
+    currentPlan,
+    savedPlans,
+    savedPlanSummaries,
+    refreshPlans,
+    loadPlanDetail,
+    clearCurrentPlan,
+    setActivePlan,
+    applyPlanToDiary,
+    applyPlanToDiaryAsync,
+    deletePlan,
+  } = useMealPlan();
   const { showAlert, showConfirm } = useAlert();
+
+  useFocusEffect(
+    useCallback(() => {
+      void refreshPlans?.();
+    }, [refreshPlans])
+  );
 
   // Default to Explore tab with 2400-2600 Cal range selected to match user mockup exactly
   const [activeTab, setActiveTab] = useState<TabKey>('explore');
@@ -81,23 +99,59 @@ export function MealPlanOverviewScreen() {
     navigation.navigate('MealPlanDetail');
   };
 
-  const handleApplyTodayToDiary = () => {
+  const handleApplyTodayToDiary = async () => {
     if (!currentPlan) return;
-    const count = applyPlanToDiary(0);
-    showAlert({
-      title: 'Áp dụng thành công!',
-      message: `Đã thêm ${count} món ăn của hôm nay vào Nhật ký dinh dưỡng.`,
-      variant: 'success',
-      buttons: [
-        {
-          text: 'Về Nhật ký xem',
-          variant: 'primary',
-          onPress: () => {
-            (navigation.getParent() as any)?.navigate('Diary');
+    try {
+      const count = applyPlanToDiaryAsync
+        ? await applyPlanToDiaryAsync(0)
+        : applyPlanToDiary(0);
+      showAlert({
+        title: 'Áp dụng thành công!',
+        message: `Đã thêm ${count} món ăn của hôm nay vào Nhật ký dinh dưỡng.`,
+        variant: 'success',
+        buttons: [
+          {
+            text: 'Về Nhật ký xem',
+            variant: 'primary',
+            onPress: () => {
+              (navigation.getParent() as any)?.navigate('Diary');
+            },
           },
-        },
-        { text: 'Ở lại đây', variant: 'secondary' },
-      ],
+          { text: 'Ở lại đây', variant: 'secondary' },
+        ],
+      });
+    } catch (err) {
+      showAlert({
+        title: 'Không thể áp dụng thực đơn',
+        message: getApiErrorMessage(err),
+        variant: 'warning',
+      });
+    }
+  };
+
+  const handleOpenSummaryPlan = async (planId: string) => {
+    try {
+      if (loadPlanDetail) {
+        await loadPlanDetail(planId);
+      }
+      navigation.navigate('MealPlanDetail');
+    } catch (err) {
+      showAlert({
+        title: 'Không thể tải thực đơn',
+        message: getApiErrorMessage(err),
+        variant: 'error',
+      });
+    }
+  };
+
+  const handleDeletePlanConfirm = (planId: string, title: string) => {
+    showConfirm({
+      title: 'Xóa thực đơn?',
+      message: `Bạn có chắc muốn xóa thực đơn "${title}"?`,
+      confirmText: 'Xóa',
+      cancelText: 'Hủy',
+      destructive: true,
+      onConfirm: () => deletePlan(planId),
     });
   };
 
@@ -396,9 +450,10 @@ export function MealPlanOverviewScreen() {
                     onPress={() => navigation.navigate('MealPlanDetail')}
                   />
                   <AppButton
-                    label="Áp dụng vào Nhật ký hôm nay"
+                    label={currentPlan.apiStatus === 'APPLIED' ? 'Đã áp dụng vào Nhật ký' : 'Áp dụng vào Nhật ký hôm nay'}
                     variant="secondary"
-                    onPress={handleApplyTodayToDiary}
+                    disabled={currentPlan.apiStatus === 'APPLIED'}
+                    onPress={() => void handleApplyTodayToDiary()}
                   />
                   <TouchableOpacity
                     onPress={handleResetCurrentPlan}
@@ -412,34 +467,65 @@ export function MealPlanOverviewScreen() {
                 </View>
               </AppCard>
 
-              {/* ── Saved Plans Section ──────────────────────────────── */}
-              {savedPlans.length > 0 && (
+              {/* ── Server & Saved Plans Section ────────────────────── */}
+              {(savedPlanSummaries?.length || savedPlans.length > 0) && (
                 <>
                   <View style={styles.sectionHeader}>
                     <AppText variant="headlineSm">Thực đơn đã lưu</AppText>
                     <AppText variant="caption" color={theme.colors.textSecondary}>
-                      {savedPlans.length} thực đơn
+                      {(savedPlanSummaries?.length || 0) > 0
+                        ? savedPlanSummaries!.length
+                        : savedPlans.length}{' '}
+                      thực đơn
                     </AppText>
                   </View>
 
-                  {savedPlans.map((plan) => (
-                    <AppCard key={plan.id} style={styles.savedCard}>
-                      <View style={styles.savedCardContent}>
-                        <AppText variant="labelLg">{plan.title}</AppText>
-                        <AppText variant="bodySm" color={theme.colors.textSecondary}>
-                          {plan.goal.targetCalories} kcal • {formatVnd(plan.goal.dailyBudgetVnd)}/ngày
-                        </AppText>
-                      </View>
-                      <AppButton
-                        label="Xem"
-                        variant="secondary"
-                        onPress={() => {
-                          setActivePlan?.(plan);
-                          navigation.navigate('MealPlanDetail');
-                        }}
-                      />
-                    </AppCard>
-                  ))}
+                  {(savedPlanSummaries && savedPlanSummaries.length > 0)
+                    ? savedPlanSummaries.map((plan) => (
+                        <AppCard key={plan.id} style={styles.savedCard}>
+                          <View style={styles.savedCardContent}>
+                            <AppText variant="labelLg">{plan.name}</AppText>
+                            <AppText variant="bodySm" color={theme.colors.textSecondary}>
+                              {plan.targetCalories} kcal • {plan.daysCount} ngày •{' '}
+                              {plan.status === 'APPLIED'
+                                ? 'Đã áp dụng'
+                                : plan.status === 'SAVED'
+                                ? 'Đã lưu'
+                                : 'Bản nháp'}
+                            </AppText>
+                          </View>
+                          <View style={{ flexDirection: 'row', gap: 8 }}>
+                            <AppButton
+                              label="Xem"
+                              variant="secondary"
+                              onPress={() => void handleOpenSummaryPlan(plan.id)}
+                            />
+                            <AppButton
+                              label="Xóa"
+                              variant="ghost"
+                              onPress={() => handleDeletePlanConfirm(plan.id, plan.name)}
+                            />
+                          </View>
+                        </AppCard>
+                      ))
+                    : savedPlans.map((plan) => (
+                        <AppCard key={plan.id} style={styles.savedCard}>
+                          <View style={styles.savedCardContent}>
+                            <AppText variant="labelLg">{plan.title}</AppText>
+                            <AppText variant="bodySm" color={theme.colors.textSecondary}>
+                              {plan.goal.targetCalories} kcal • {formatVnd(plan.goal.dailyBudgetVnd)}/ngày
+                            </AppText>
+                          </View>
+                          <AppButton
+                            label="Xem"
+                            variant="secondary"
+                            onPress={() => {
+                              setActivePlan?.(plan);
+                              navigation.navigate('MealPlanDetail');
+                            }}
+                          />
+                        </AppCard>
+                      ))}
                 </>
               )}
 
@@ -644,33 +730,60 @@ export function MealPlanOverviewScreen() {
             />
           </AppCard>
 
-          {savedPlans.length > 0 ? (
+          {(savedPlanSummaries && savedPlanSummaries.length > 0) || savedPlans.length > 0 ? (
             <>
               <View style={styles.sectionHeader}>
                 <AppText variant="headlineSm">Thực đơn tự tạo đã lưu</AppText>
                 <AppText variant="caption" color={theme.colors.textSecondary}>
-                  {savedPlans.length} thực đơn
+                  {(savedPlanSummaries?.length || 0) > 0
+                    ? savedPlanSummaries!.length
+                    : savedPlans.length}{' '}
+                  thực đơn
                 </AppText>
               </View>
 
-              {savedPlans.map((plan) => (
-                <AppCard key={plan.id} style={styles.savedCard}>
-                  <View style={styles.savedCardContent}>
-                    <AppText variant="labelLg">{plan.title}</AppText>
-                    <AppText variant="bodySm" color={theme.colors.textSecondary}>
-                      {plan.goal.targetCalories} kcal • {formatVnd(plan.goal.dailyBudgetVnd)}/ngày
-                    </AppText>
-                  </View>
-                  <AppButton
-                    label="Xem"
-                    variant="secondary"
-                    onPress={() => {
-                      setActivePlan?.(plan);
-                      navigation.navigate('MealPlanDetail');
-                    }}
-                  />
-                </AppCard>
-              ))}
+              {savedPlanSummaries && savedPlanSummaries.length > 0
+                ? savedPlanSummaries.map((plan) => (
+                    <AppCard key={plan.id} style={styles.savedCard}>
+                      <View style={styles.savedCardContent}>
+                        <AppText variant="labelLg">{plan.name}</AppText>
+                        <AppText variant="bodySm" color={theme.colors.textSecondary}>
+                          {plan.targetCalories} kcal • {plan.daysCount} ngày •{' '}
+                          {formatVnd(plan.maxBudgetVnd ?? plan.estimatedCostVnd)}
+                        </AppText>
+                      </View>
+                      <View style={{ flexDirection: 'row', gap: 8 }}>
+                        <AppButton
+                          label="Xem"
+                          variant="secondary"
+                          onPress={() => void handleOpenSummaryPlan(plan.id)}
+                        />
+                        <AppButton
+                          label="Xóa"
+                          variant="ghost"
+                          onPress={() => handleDeletePlanConfirm(plan.id, plan.name)}
+                        />
+                      </View>
+                    </AppCard>
+                  ))
+                : savedPlans.map((plan) => (
+                    <AppCard key={plan.id} style={styles.savedCard}>
+                      <View style={styles.savedCardContent}>
+                        <AppText variant="labelLg">{plan.title}</AppText>
+                        <AppText variant="bodySm" color={theme.colors.textSecondary}>
+                          {plan.goal.targetCalories} kcal • {formatVnd(plan.goal.dailyBudgetVnd)}/ngày
+                        </AppText>
+                      </View>
+                      <AppButton
+                        label="Xem"
+                        variant="secondary"
+                        onPress={() => {
+                          setActivePlan?.(plan);
+                          navigation.navigate('MealPlanDetail');
+                        }}
+                      />
+                    </AppCard>
+                  ))}
             </>
           ) : (
             <View style={styles.customEmptyContainer}>

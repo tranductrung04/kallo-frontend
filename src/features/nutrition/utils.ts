@@ -39,14 +39,21 @@ export function scaleNutrition(food: Food, grams: number): NutritionValues {
 }
 
 export function summarizeLogs(logs: FoodLog[], foods: Food[], waterMl: number, weightKg: number | undefined, goals: { calories: number; protein: number; carbs: number; fat: number; waterMl: number; targetWeightKg: number }, caloriesBurned = 0): NutritionSummary {
+  let sugar = 0;
+  let fiber = 0;
   const values = logs.reduce<NutritionValues>((total, log) => {
     const food = foods.find((item) => item.id === log.foodId);
     const nutrition = log.nutritionSnapshot ?? (food ? scaleNutrition(food, log.grams) : undefined);
+    const ratio = Math.max(0, log.grams) / 100;
+    sugar += log.sugarG ?? (food?.sugar !== undefined ? food.sugar * ratio : 0);
+    fiber += log.fiberG ?? (food?.fiber !== undefined ? food.fiber * ratio : 0);
     if (!nutrition) return total;
     return { calories: total.calories + nutrition.calories, protein: total.protein + nutrition.protein, carbs: total.carbs + nutrition.carbs, fat: total.fat + nutrition.fat };
   }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
   return {
     ...values,
+    sugar: Math.round(sugar * 10) / 10,
+    fiber: Math.round(fiber * 10) / 10,
     // Lượng calo đốt qua tập luyện không ảnh hưởng vào calo còn lại của mục tiêu ăn uống
     caloriesRemaining: Math.max(0, goals.calories - values.calories),
     waterMl,

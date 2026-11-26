@@ -94,9 +94,6 @@ export function CustomFoodFormScreen({ navigation, route }: Props) {
   const [potassium, setPotassium] = useState('');
   const [calcium, setCalcium] = useState('');
   const [iron, setIron] = useState('');
-  const [barcode, setBarcode] = useState(
-    route.params.barcode ?? existing?.barcode ?? '',
-  );
 
   // Unit Modals
   const [servingUnitModalVisible, setServingUnitModalVisible] = useState(false);
@@ -246,7 +243,6 @@ export function CustomFoodFormScreen({ navigation, route }: Props) {
         carbs: parsed.carbs,
         fat: parsed.fat,
         allergens: [],
-        barcode: barcode.trim() || undefined,
         category,
       });
       showAlert({
@@ -306,7 +302,6 @@ export function CustomFoodFormScreen({ navigation, route }: Props) {
         carbs: parsed.carbs,
         fat: parsed.fat,
         allergens: [],
-        barcode: barcode.trim() || undefined,
         category,
       });
     } finally {
@@ -1200,43 +1195,6 @@ export function CustomFoodFormScreen({ navigation, route }: Props) {
                       ]}
                     >
                       mg
-                    </Text>
-                    <View
-                      style={[
-                        styles.rowBottomBorder,
-                        { backgroundColor: isDark ? '#231D36' : '#E4E0F0' },
-                      ]}
-                    />
-                  </View>
-
-                  {/* Mã vạch */}
-                  <View style={styles.standardNutrientRow}>
-                    <Text
-                      style={[
-                        styles.fieldLabel,
-                        { color: isDark ? '#FFFFFF' : colors.textPrimary },
-                      ]}
-                    >
-                      Mã vạch (Barcode)
-                    </Text>
-                    <TextInput
-                      value={barcode}
-                      onChangeText={setBarcode}
-                      keyboardType="number-pad"
-                      placeholder="893..."
-                      placeholderTextColor={colors.textSecondary}
-                      style={[
-                        styles.nutrientValueInput,
-                        { color: isDark ? '#FFFFFF' : colors.textPrimary },
-                      ]}
-                    />
-                    <Text
-                      style={[
-                        styles.unitLabelBold,
-                        { color: isDark ? '#FFFFFF' : colors.textPrimary },
-                      ]}
-                    >
-                      code
                     </Text>
                     <View
                       style={[

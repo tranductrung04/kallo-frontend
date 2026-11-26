@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -12,11 +12,14 @@ import {
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import { images } from '@/assets/images';
-import { AppButton, AppCard, AppText } from '@/components/common';
+import { AppButton, AppCard, AppSwitch, AppText, useAlert } from '@/components/common';
 import { CloseXIcon, PlusIcon } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
+import { getApiErrorCode, getApiErrorMessage } from '@/services/api/apiUtils';
+import { getUserAllergies } from '@/features/health-profile/api';
 import { useTheme, type ThemeContextValue } from '@/theme';
 import { useNutrition } from '@/features/nutrition/NutritionProvider';
+import { todayKey } from '@/features/nutrition/utils';
 import { useMealPlan } from '../MealPlanProvider';
 import { formatVnd } from '../utils';
 
@@ -38,6 +41,7 @@ export function MealPlanWizardScreen() {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<NavigationProp>();
+  const { showAlert } = useAlert();
   const { state: nutritionState } = useNutrition();
   const { generatePlan, isGenerating } = useMealPlan();
 
@@ -50,6 +54,19 @@ export function MealPlanWizardScreen() {
   );
   const [dailyBudgetVnd, setDailyBudgetVnd] = useState<number>(100000);
   const [excludedAllergens, setExcludedAllergens] = useState<string[]>([]);
+  const [includeCustomFoods, setIncludeCustomFoods] = useState<boolean>(true);
+  const [profileAllergies, setProfileAllergies] = useState<string[]>([]);
+
+  useEffect(() => {
+    void getUserAllergies()
+      .then((list) => {
+        if (Array.isArray(list) && list.length > 0) {
+          const names = list.filter((a) => a.active !== false).map((a) => a.name).filter(Boolean);
+          setProfileAllergies(names);
+        }
+      })
+      .catch(() => undefined);
+  }, []);
 
   const toggleAllergen = (allergen: string) => {
     setExcludedAllergens((prev) =>
@@ -62,17 +79,45 @@ export function MealPlanWizardScreen() {
     const carbsTarget = Math.round((targetCalories * 0.5) / 4);
     const fatTarget = Math.round((targetCalories * 0.25) / 9);
 
-    await generatePlan({
-      durationDays,
-      targetCalories,
-      proteinTarget,
-      carbsTarget,
-      fatTarget,
-      dailyBudgetVnd,
-      excludedAllergens,
-    });
+    try {
+      await generatePlan({
+        durationDays,
+        targetCalories,
+        proteinTarget,
+        carbsTarget,
+        fatTarget,
+        dailyBudgetVnd,
+        excludedAllergens: [...new Set([...profileAllergies, ...excludedAllergens])],
+        planDate: nutritionState.selectedDate || todayKey(),
+        includeCustomFoods,
+      });
 
-    navigation.replace('MealPlanDetail');
+      navigation.replace('MealPlanDetail');
+    } catch (err) {
+      const code = getApiErrorCode(err);
+      if (code === 'PROFILE_NOT_FOUND') {
+        showAlert({
+          title: 'Chưa có hồ sơ sức khỏe',
+          message: 'Vui lòng hoàn tất hồ sơ sức khỏe để AI sinh thực đơn phù hợp thể trạng và bệnh nền của bạn.',
+          variant: 'warning',
+          buttons: [
+            {
+              text: 'Thiết lập hồ sơ',
+              variant: 'primary',
+              onPress: () => navigation.navigate('MainTabs', { screen: 'Profile' }),
+            },
+            { text: 'Đóng', variant: 'secondary' },
+          ],
+        });
+        return;
+      }
+
+      showAlert({
+        title: 'Không thể tạo thực đơn',
+        message: getApiErrorMessage(err, 'Không đủ món ăn phù hợp với ràng buộc hiện tại. Hãy thử điều chỉnh ngân sách hoặc mức calo.'),
+        variant: 'error',
+      });
+    }
   };
 
   return (
@@ -321,6 +366,11 @@ export function MealPlanWizardScreen() {
 
             <AppCard style={styles.card}>
               <AppText variant="headlineSm">Chọn thành phần kiêng kỵ</AppText>
+              {profileAllergies.length > 0 && (
+                <AppText variant="caption" color={theme.colors.brandPrimary}>
+                  Từ hồ sơ sức khỏe (tự động lọc): {profileAllergies.join(', ')}
+                </AppText>
+              )}
               <View style={styles.chipsWrap}>
                 {COMMON_ALLERGENS.map((allergen) => {
                   const isSelected = excludedAllergens.includes(allergen);
@@ -356,6 +406,18 @@ export function MealPlanWizardScreen() {
                     </TouchableOpacity>
                   );
                 })}
+              </View>
+            </AppCard>
+
+            <AppCard style={styles.card}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                <View style={{ flex: 1 }}>
+                  <AppText variant="labelLg">Bao gồm món ăn tự tạo</AppText>
+                  <AppText variant="caption" color={theme.colors.textSecondary}>
+                    Cho phép AI chọn cả các món Custom/Recipe của riêng bạn
+                  </AppText>
+                </View>
+                <AppSwitch value={includeCustomFoods} onValueChange={setIncludeCustomFoods} />
               </View>
             </AppCard>
 

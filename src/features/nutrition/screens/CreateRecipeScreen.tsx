@@ -26,6 +26,7 @@ import {
 } from '@/components/icons';
 import { images } from '@/assets/images';
 import { useNutrition } from '../NutritionProvider';
+import { getApiErrorCode, getApiErrorMessage } from '@/services/api/apiUtils';
 import { useTheme } from '@/theme';
 import {
   FOOD_CATEGORY_LABELS,
@@ -171,19 +172,51 @@ export function CreateRecipeScreen({ navigation, route }: Props) {
       if (match) {
         targetIngredientId = match.id;
       } else {
+        const ratio100 = grams > 0 ? 100 / grams : 1;
+        const caloriesPer100g = Math.round(cal * ratio100 * 10) / 10;
+        const proteinPer100g = Math.round(p * ratio100 * 10) / 10;
+        const carbsPer100g = Math.round(c * ratio100 * 10) / 10;
+        const fatPer100g = Math.round(f * ratio100 * 10) / 10;
+
+        if (caloriesPer100g > 950 || proteinPer100g + carbsPer100g + fatPer100g > 105) {
+          showAlert({
+            title: 'Chỉ số dinh dưỡng vượt ngưỡng',
+            message:
+              'Trên 100g nguyên liệu: Calo tối đa 950 kcal và tổng Đạm + Tinh bột + Béo không vượt quá 105g.',
+            variant: 'warning',
+          });
+          return;
+        }
+
         try {
-          const ratio100 = grams > 0 ? 100 / grams : 1;
           const created = await createCustomIngredientApi({
             name: ingName.trim(),
-            caloriesPer100g: Math.min(950, Math.round(cal * ratio100 * 10) / 10),
-            proteinPer100g: Math.round(p * ratio100 * 10) / 10,
-            carbsPer100g: Math.round(c * ratio100 * 10) / 10,
-            fatPer100g: Math.round(f * ratio100 * 10) / 10,
+            caloriesPer100g,
+            proteinPer100g,
+            carbsPer100g,
+            fatPer100g,
           });
           targetIngredientId = created.id;
           setServerIngredients((prev) => [...prev, created]);
-        } catch {
-          // If creation fails, proceed with local ingredient
+        } catch (err) {
+          const errCode = getApiErrorCode(err);
+          if (errCode === 'TOO_MANY_REQUESTS') {
+            showAlert({
+              title: 'Đã đạt giới hạn trong ngày',
+              message: 'Bạn chỉ có thể tạo tối đa 30 nguyên liệu cá nhân mỗi ngày.',
+              variant: 'warning',
+            });
+            return;
+          }
+          if (errCode === 'VALIDATION_ERROR') {
+            showAlert({
+              title: 'Dữ liệu chưa hợp lệ',
+              message: getApiErrorMessage(err),
+              variant: 'warning',
+            });
+            return;
+          }
+          // If offline/network error, proceed with local ingredient fallback
         }
       }
     }

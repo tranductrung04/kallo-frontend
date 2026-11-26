@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from '@/features/auth/AuthProvider';
 import { IS_DEMO_MODE } from '@/features/auth/localAccount';
@@ -142,47 +142,71 @@ export function GamificationProvider({ children }: React.PropsWithChildren) {
     }
   }, [nutrition?.ready, nutrition?.state.foodLogs]);
 
+  const foodLogsRef = useRef(nutrition?.state.foodLogs);
+  foodLogsRef.current = nutrition?.state.foodLogs;
+  const lastStreakFetchRef = useRef<number>(0);
+  const inFlightStreakRef = useRef<Promise<StreakInfo | null> | null>(null);
+
   const refreshStreak = useCallback(async (): Promise<StreakInfo | null> => {
     if (IS_DEMO_MODE) {
       return null;
     }
-    try {
-      const token = await getAccessToken();
-      if (!token) {
-        return null;
-      }
-      setIsStreakLoading(true);
-      setStreakError(null);
-      const res = await getStreak();
-      let updated: StreakInfo | null = null;
-      setStreak((prev) => {
-        const today = todayKey();
-        const hasMealToday = nutrition?.state.foodLogs.some((log) => log.date === today) ?? false;
-        const isTodayDone = res.todayCompleted || hasMealToday;
-        const current = res.currentStreak > 0 ? res.currentStreak : (hasMealToday ? Math.max(prev.currentStreak, 1) : 0);
-        const longest = Math.max(res.longestStreak, current, prev.longestStreak);
-
-        updated = {
-          ...prev,
-          currentStreak: current,
-          longestStreak: longest,
-          lastCompletedDate: isTodayDone ? today : (res.lastCompletedDate ?? undefined),
-          todayCompleted: isTodayDone,
-          isMaintainedToday: isTodayDone,
-          atRisk: isTodayDone ? false : res.atRisk,
-        };
-        return updated;
-      });
-      return updated;
-    } catch (err) {
-      const msg = getStreakApiErrorMessage(err);
-      setStreakError(msg);
-      console.warn('[GamificationProvider] getStreak failed (offline fallback active):', err);
-      return null;
-    } finally {
-      setIsStreakLoading(false);
+    if (inFlightStreakRef.current) {
+      return inFlightStreakRef.current;
     }
-  }, [nutrition?.state.foodLogs]);
+    if (Date.now() - lastStreakFetchRef.current < 5000) {
+      return null;
+    }
+
+    const promise = (async () => {
+      try {
+        const token = await getAccessToken();
+        if (!token) {
+          return null;
+        }
+        setIsStreakLoading(true);
+        setStreakError(null);
+        const res = await getStreak();
+        let updated: StreakInfo | null = null;
+        setStreak((prev) => {
+          const today = todayKey();
+          const hasMealToday = foodLogsRef.current?.some((log) => log.date === today) ?? false;
+          const isTodayDone = res.todayCompleted || hasMealToday;
+          const current =
+            res.currentStreak > 0
+              ? res.currentStreak
+              : hasMealToday
+              ? Math.max(prev.currentStreak, 1)
+              : 0;
+          const longest = Math.max(res.longestStreak, current, prev.longestStreak);
+
+          updated = {
+            ...prev,
+            currentStreak: current,
+            longestStreak: longest,
+            lastCompletedDate: isTodayDone ? today : (res.lastCompletedDate ?? undefined),
+            todayCompleted: isTodayDone,
+            isMaintainedToday: isTodayDone,
+            atRisk: isTodayDone ? false : res.atRisk,
+          };
+          return updated;
+        });
+        lastStreakFetchRef.current = Date.now();
+        return updated;
+      } catch (err) {
+        const msg = getStreakApiErrorMessage(err);
+        setStreakError(msg);
+        console.warn('[GamificationProvider] getStreak failed (offline fallback active):', err);
+        return null;
+      } finally {
+        setIsStreakLoading(false);
+        inFlightStreakRef.current = null;
+      }
+    })();
+
+    inFlightStreakRef.current = promise;
+    return promise;
+  }, []);
 
   // Restore cache
   useEffect(() => {

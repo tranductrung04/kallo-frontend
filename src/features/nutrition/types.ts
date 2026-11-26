@@ -3,8 +3,14 @@ import type {
   FoodIngredientItemResponse,
   FoodSource,
 } from './foodTypes';
+import type {
+  AllergicIngredientWarning,
+  CopyMealResponse,
+  DailySummaryResponse,
+} from './nutriTypes';
 
 export * from './foodTypes';
+export * from './nutriTypes';
 
 export type MealSlot = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
@@ -55,27 +61,47 @@ export type Food = NutritionValues & {
   referencePriceVnd?: number | null;
 };
 
-export type FoodLogSource = 'SEARCH' | 'CUSTOM' | 'AI_PHOTO' | 'BARCODE' | 'MEAL_PLAN' | 'VOICE';
+export type FoodLogSource = 'SEARCH' | 'CUSTOM' | 'AI_PHOTO' | 'BARCODE' | 'MEAL_PLAN' | 'COPY' | 'VOICE';
 
 export type FoodLog = {
   id: string;
+  clientUuid?: string;
   date: string;
   meal: MealSlot;
   foodId: string;
   foodName: string;
   grams: number;
+  servingName?: string | null;
+  servingQuantity?: number;
   source?: FoodLogSource;
   imageUri?: string;
   aiConfidence?: number;
+  aiPredictedClassId?: number | null;
+  feedbackGiven?: boolean;
   nutritionSnapshot?: NutritionValues;
+  sugarG?: number;
+  fiberG?: number;
+  hasAllergyWarning?: boolean;
+  allergicIngredients?: AllergicIngredientWarning[];
+  updatedAt?: string;
   time?: string;
+  synced?: boolean;
 };
 
 export type AddFoodLogInput = Omit<FoodLog, 'id' | 'foodName'> & {
   foodName?: string;
+  tempImageKey?: string | null;
+  loggedAt?: string;
 };
 
-export type WaterLog = { id: string; date: string; amountMl: number };
+export type WaterLog = {
+  id: string;
+  date: string;
+  amountMl: number;
+  loggedAt?: string;
+  note?: string | null;
+  clientUuid?: string;
+};
 export type WeightLog = { id: string; date: string; weightKg: number };
 
 export type NutritionGoals = {
@@ -110,20 +136,30 @@ export type NutritionSummary = NutritionValues & {
   carbsGoal: number;
   fatGoal: number;
   caloriesBurned: number;
+  sugar?: number;
+  fiber?: number;
+  steps?: number;
+  goalAchieved?: boolean;
+  sugarExceeded?: boolean;
+  proteinExceeded?: boolean;
+  mealsLoggedCount?: number;
 };
 
 export type NutritionContextValue = {
   state: NutritionState;
   ready: boolean;
   foods: Food[];
+  recentServerFoods?: Food[];
+  dailySummaries?: Record<string, DailySummaryResponse>;
   findFood: (id: string) => Food | undefined;
   getSummary: (date: string, caloriesBurned?: number) => NutritionSummary;
   getLogs: (date: string, meal?: MealSlot) => FoodLog[];
   addFoodLog: (input: AddFoodLogInput) => void;
+  addFoodLogAsync?: (input: AddFoodLogInput) => Promise<FoodLog | undefined>;
   addMultipleFoodLogs?: (inputs: AddFoodLogInput[]) => void;
   updateFoodLog: (id: string, changes: Partial<Pick<FoodLog, 'grams' | 'meal'>>) => void;
   deleteFoodLog: (id: string) => void;
-  copyMeal: (sourceDate: string, targetDate: string, meal: MealSlot) => void;
+  copyMeal: (sourceDate: string, targetDate: string, meal: MealSlot) => Promise<CopyMealResponse | void>;
   addWater: (date: string, amountMl: number) => boolean;
   addWeight: (date: string, weightKg: number) => boolean;
   saveCustomFood: (food: Omit<Food, 'id' | 'isCustom'> & { id?: string }) => string;
@@ -132,6 +168,9 @@ export type NutritionContextValue = {
   saveRecipeAsync: (payload: import('./foodTypes').RecipeFoodRequest) => Promise<Food>;
   cacheFood: (food: Food | Food[]) => void;
   fetchFoodDetail: (id: string) => Promise<Food | undefined>;
+  refreshDateData?: (date?: string, force?: boolean) => Promise<void>;
+  refreshRecentFoods?: (limit?: number) => Promise<Food[]>;
+  recalculateSummary?: (date?: string) => Promise<DailySummaryResponse | undefined>;
   setSelectedDate: (date: string) => void;
   setWalkthroughSeen: () => void;
 };

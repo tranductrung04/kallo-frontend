@@ -24,6 +24,7 @@ import {
   GalleryAddIcon,
   ScannerSparkleFlashIcon,
 } from '@/components/icons';
+import { getApiErrorCode } from '@/services/api/apiUtils';
 import { useTheme } from '@/theme';
 import { useNutrition } from '../NutritionProvider';
 import { getFoodByBarcodeApi } from '../foodApi';
@@ -78,7 +79,7 @@ export function BarcodeScannerScreen({ navigation, route }: Props) {
 
   const handleBarcodeScanned = async ({ data }: BarcodeScanningResult) => {
     const code = data.trim().replace(/\s/g, '');
-    if (scannedRef.current || busy || !/^\d{6,16}$/.test(code)) return;
+    if (scannedRef.current || busy || !/^[0-9-]{3,64}$/.test(code)) return;
 
     scannedRef.current = true;
     setBusy(true);
@@ -98,14 +99,32 @@ export function BarcodeScannerScreen({ navigation, route }: Props) {
         navigation.replace('CustomFoodForm', {
           date: route.params.date,
           meal: route.params.meal,
-          barcode: code,
         });
       }
-    } catch {
+    } catch (err) {
+      const codeErr = getApiErrorCode(err);
+      if (codeErr === 'INVALID_BARCODE') {
+        showAlert({
+          title: 'Mã vạch không hợp lệ',
+          message: 'Định dạng mã vạch chưa đúng (chỉ gồm chữ số hoặc dấu gạch nối, 3–64 ký tự).',
+          variant: 'warning',
+          buttons: [
+            {
+              text: 'Quét lại',
+              variant: 'primary',
+              onPress: () => {
+                scannedRef.current = false;
+              },
+            },
+          ],
+        });
+        return;
+      }
+
       showAlert({
         title: 'Không tìm thấy sản phẩm',
         message:
-          'Không tìm thấy thông tin sản phẩm trong hệ thống hoặc Open Food Facts. Bạn có muốn tự tạo món ăn mới với mã vạch này không?',
+          'Không tìm thấy sản phẩm trong hệ thống hoặc Open Food Facts. Bạn có muốn tự nhập món ăn thủ công không?',
         variant: 'warning',
         buttons: [
           {
@@ -116,13 +135,12 @@ export function BarcodeScannerScreen({ navigation, route }: Props) {
             },
           },
           {
-            text: 'Tạo món mới',
+            text: 'Nhập thủ công',
             variant: 'primary',
             onPress: () => {
               navigation.replace('CustomFoodForm', {
                 date: route.params.date,
                 meal: route.params.meal,
-                barcode: code,
               });
             },
           },

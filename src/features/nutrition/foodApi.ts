@@ -1,4 +1,5 @@
 import { api } from '@/services/api/client';
+import { unwrapApiResponse } from '@/services/api/apiUtils';
 import type {
   ApiResponse,
   CustomFoodRequest,
@@ -10,16 +11,7 @@ import type {
   RecipeFoodRequest,
 } from './foodTypes';
 
-/**
- * Helper to unwrap standard ApiResponse<T>
- */
-function unwrap<T>(response: { data: ApiResponse<T> | T }): T {
-  const payload = response.data as ApiResponse<T>;
-  if (payload && typeof payload === 'object' && 'data' in payload) {
-    return payload.data;
-  }
-  return response.data as T;
-}
+const unwrap = unwrapApiResponse;
 
 // =========================================================================
 // FOODS ENDPOINTS

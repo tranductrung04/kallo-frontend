@@ -91,7 +91,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const styles = useMemo(() => createStyles(theme, screenWidth), [theme, screenWidth]);
   const insets = useSafeAreaInsets();
 
-  const { state, getSummary, addWater, setSelectedDate } = useNutrition();
+  const { state, getSummary, addWater, setSelectedDate, refreshDateData } = useNutrition();
   const {
     getTotalCaloriesBurnedForDate,
     getTotalStepsForDate,
@@ -136,7 +136,13 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const [userAllergies, setUserAllergies] = useState<UserAllergyResponse[]>([]);
   const [recalculating, setRecalculating] = useState(false);
 
+  const lastProfileFetchRef = useRef<number>(0);
+
   const loadHealthProfileData = useCallback(async () => {
+    if (Date.now() - lastProfileFetchRef.current < 5000) {
+      return;
+    }
+    lastProfileFetchRef.current = Date.now();
     try {
       const raw = await AsyncStorage.getItem('@kallo/health-profile');
       if (raw) {
@@ -163,11 +169,14 @@ export function HomeDashboardScreen({ navigation }: Props) {
     }
   }, []);
 
+  const selectedDate = state.selectedDate || todayKey();
+
   useFocusEffect(
     useCallback(() => {
       void refreshStreak();
       void loadHealthProfileData();
-    }, [refreshStreak, loadHealthProfileData])
+      void refreshDateData?.(selectedDate);
+    }, [refreshStreak, loadHealthProfileData, refreshDateData, selectedDate])
   );
   const [calendarModalVisible, setCalendarModalVisible] = useState(false);
   const [calorieGoalModalVisible, setCalorieGoalModalVisible] = useState(false);
@@ -179,7 +188,6 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const [saltModalVisible, setSaltModalVisible] = useState(false);
   const [sugarModalVisible, setSugarModalVisible] = useState(false);
   const [fiberModalVisible, setFiberModalVisible] = useState(false);
-  const selectedDate = state.selectedDate || todayKey();
   const isToday = selectedDate === todayKey();
   const caloriesBurned = getTotalCaloriesBurnedForDate(selectedDate);
   const todaySteps = getTotalStepsForDate(selectedDate);
@@ -287,8 +295,8 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const sugarGoal = 49;
   const fiberGoal = 24;
   const saltCurrent = (summary as any).salt ?? (summary as any).sodium ?? 0;
-  const sugarCurrent = (summary as any).sugar ?? 0;
-  const fiberCurrent = (summary as any).fiber ?? 0;
+  const sugarCurrent = summary.sugar ?? 0;
+  const fiberCurrent = summary.fiber ?? 0;
 
   // Macro horizontal scroll state
   const macroScrollRef = useRef<ScrollView>(null);
@@ -819,6 +827,30 @@ export function HomeDashboardScreen({ navigation }: Props) {
               style={activeMacroPage === 1 ? styles.dotActive : styles.dotInactive}
             />
           </View>
+
+          {/* ── 4b. Cảnh báo vượt ngưỡng dinh dưỡng từ DailySummary ────── */}
+          {(summary.sugarExceeded || summary.proteinExceeded) && (
+            <AppCard
+              style={{
+                marginTop: 12,
+                padding: 12,
+                borderWidth: 1,
+                borderColor: colors.warning,
+                backgroundColor: colors.surfaceMid,
+              }}
+            >
+              <AppText variant="labelMd" color={colors.warning}>
+                Lưu ý dinh dưỡng hôm nay
+              </AppText>
+              <AppText variant="caption" color={colors.textSecondary} style={{ marginTop: 2 }}>
+                {summary.sugarExceeded && summary.proteinExceeded
+                  ? 'Lượng đường và chất đạm nạp vào đã vượt ngưỡng khuyến nghị trong ngày.'
+                  : summary.sugarExceeded
+                  ? 'Lượng đường nạp vào hôm nay đã vượt ngưỡng khuyến nghị.'
+                  : 'Lượng chất đạm nạp vào hôm nay đã vượt ngưỡng khuyến nghị.'}
+              </AppText>
+            </AppCard>
+          )}
 
           {/* ── 5. Hồ sơ & Chỉ số sức khỏe (Health Profile & Biometrics) ── */}
           <HealthProfileCard

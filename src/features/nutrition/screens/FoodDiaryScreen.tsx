@@ -1,9 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   ScrollView,
   StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAlert } from '@/components/common';
@@ -45,10 +46,17 @@ export function FoodDiaryScreen({ navigation }: Props) {
     copyMeal,
     addWater,
     addWeight,
+    refreshDateData,
   } = useNutrition();
 
   const date = state.selectedDate || todayKey();
   const isToday = date === todayKey();
+
+  useFocusEffect(
+    useCallback(() => {
+      void refreshDateData?.(date);
+    }, [refreshDateData, date])
+  );
   const summary = getSummary(date);
   const currentLogs = getLogs(date);
 
@@ -252,14 +260,35 @@ export function FoodDiaryScreen({ navigation }: Props) {
           setSelectedHourForAdd(null);
           root?.navigate('CustomFoodForm', { date, meal });
         }}
-        onCopyYesterday={(meal: MealSlot) => {
-          copyMeal(offsetDate(date, -1), date, meal);
+        onCopyYesterday={async (meal: MealSlot) => {
           setSelectedHourForAdd(null);
-          showAlert({
-            title: 'Thành công',
-            message: 'Đã sao chép bữa ăn từ hôm qua.',
-            variant: 'success',
-          });
+          try {
+            const res = await copyMeal(offsetDate(date, -1), date, meal);
+            const skippedCount = res?.skippedFoods?.length ?? 0;
+            const copiedCount = res?.copiedCount;
+            if (copiedCount === 0) {
+              showAlert({
+                title: 'Không có món để sao chép',
+                message: 'Hôm qua không có món ăn nào hợp lệ trong bữa này.',
+                variant: 'info',
+              });
+              return;
+            }
+            showAlert({
+              title: 'Thành công',
+              message:
+                skippedCount > 0
+                  ? `Đã sao chép ${copiedCount ?? ''} món từ hôm qua (bỏ qua ${skippedCount} món đã bị xóa).`
+                  : 'Đã sao chép bữa ăn từ hôm qua.',
+              variant: 'success',
+            });
+          } catch {
+            showAlert({
+              title: 'Không thể sao chép',
+              message: 'Đã xảy ra lỗi khi sao chép bữa ăn. Vui lòng thử lại.',
+              variant: 'error',
+            });
+          }
         }}
       />
 

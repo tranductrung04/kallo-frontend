@@ -493,6 +493,17 @@ export function TimelineHourRow({
                   <Text style={styles.foodItemSubtitle}>
                     {log.grams}g • {formatNumber(Math.round(nutrition.calories))} kcal
                   </Text>
+                  {log.hasAllergyWarning ? (
+                    <Text
+                      style={{ fontSize: 11, color: c.danger, marginTop: 2 }}
+                      numberOfLines={1}
+                    >
+                      ⚠️ Dị ứng
+                      {log.allergicIngredients?.length
+                        ? `: ${log.allergicIngredients.map((a) => a.name).join(', ')}`
+                        : ''}
+                    </Text>
+                  ) : null}
                 </View>
 
                 <View style={styles.foodItemMacros}>
