@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -38,6 +38,7 @@ import {
 } from '../api';
 import type { ChatApiMessage, ChatMessage, ChatSuggestion } from '../types';
 import { generateAssistantResponse, QUICK_PROMPTS } from '../utils';
+import { useChatAutoScroll } from '../hooks/useChatAutoScroll';
 import { TypingIndicator } from '../components/TypingIndicator';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'NutritionChat'>;
@@ -76,7 +77,20 @@ export function NutritionChatScreen({ route, navigation }: Props) {
   const [isLoading, setIsLoading] = useState(Boolean(conversationId));
   const [error, setError] = useState<string | null>(null);
   const sentInitialPrompt = useRef(false);
-  const flatListRef = useRef<FlatList<ChatMessage>>(null);
+  const messageUpdateKey = useMemo(
+    () =>
+      messages
+        .map(
+          (message) =>
+            `${message.id}:${message.status ?? ''}:${message.isStreaming ? '1' : '0'}:${message.content}:${message.errorText ?? ''}`
+        )
+        .join('|'),
+    [messages]
+  );
+  const { flatListRef, requestScrollToBottom, listScrollProps } = useChatAutoScroll<ChatMessage>({
+    messageKey: messageUpdateKey,
+    isLoading,
+  });
 
   const loadConversation = useCallback(async () => {
     if (!activeConversationId || IS_DEMO_MODE) return;
@@ -113,6 +127,7 @@ export function NutritionChatScreen({ route, navigation }: Props) {
       timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
       status: 'COMPLETED',
     };
+    requestScrollToBottom();
     setMessages((current) => [...current.filter((message) => message.id !== 'welcome'), userMessage]);
     setInputText('');
     setIsSending(true);
@@ -155,7 +170,7 @@ export function NutritionChatScreen({ route, navigation }: Props) {
     } finally {
       setIsSending(false);
     }
-  }, [activeConversationId, inputText, isSending, summary]);
+  }, [activeConversationId, inputText, isSending, requestScrollToBottom, summary]);
 
   useEffect(() => {
     if (initialPrompt && !sentInitialPrompt.current && !isLoading) {
@@ -170,6 +185,7 @@ export function NutritionChatScreen({ route, navigation }: Props) {
     setError(null);
     try {
       const reply = await retryChatMessage(item.id);
+      requestScrollToBottom();
       setMessages((current) => [...current.filter((msg) => msg.id !== item.id), toUiMessage(reply.assistantMessage)]);
     } catch (requestError: unknown) {
       setError(getChatErrorMessage(requestError));
@@ -229,7 +245,7 @@ export function NutritionChatScreen({ route, navigation }: Props) {
         data={messages}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.messageList}
-        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+        {...listScrollProps}
         ListFooterComponent={null}
         renderItem={({ item }) => {
           const isUser = item.role === 'user';
