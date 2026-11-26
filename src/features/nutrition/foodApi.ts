@@ -1,5 +1,7 @@
-import { api } from '@/services/api/client';
+import { API_BASE_URL, api, refreshAccessToken } from '@/services/api/client';
+import { getAccessToken } from '@/services/api/tokenStorage';
 import { unwrapApiResponse } from '@/services/api/apiUtils';
+import { buildImageFormData, prepareImageForUpload } from './imageUploadUtils';
 import type {
   ApiResponse,
   CustomFoodRequest,
@@ -106,6 +108,96 @@ export async function updateCustomFoodApi(
  */
 export async function deleteCustomFoodApi(id: string): Promise<void> {
   await api.delete(`/foods/custom/${encodeURIComponent(id)}`);
+}
+
+export type UploadCustomFoodImageResult = {
+  food?: FoodResponse;
+  imageUrl?: string | null;
+};
+
+/**
+ * 6b. Upload ảnh món ăn tùy chỉnh (POST /api/foods/custom/{id}/image)
+ * - Body: FormData với key là "file", định dạng JPEG/PNG, tối đa 2MB.
+ * - Headers: Chỉ gửi Authorization: Bearer <token>, không tự set Content-Type để fetch tự sinh boundary.
+ */
+export async function uploadCustomFoodImageApi(
+  id: string,
+  imageUri: string
+): Promise<UploadCustomFoodImageResult> {
+  const prepared = await prepareImageForUpload(imageUri);
+  const url = `${API_BASE_URL}/foods/custom/${encodeURIComponent(id)}/image`;
+
+  const sendRequest = async (token: string | null) => {
+    const form = await buildImageFormData({
+      imageUri: prepared.uri,
+      fieldName: 'file',
+      filePrefix: 'food',
+      mimeType: prepared.mimeType,
+    });
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    return fetch(url, {
+      method: 'POST',
+      headers,
+      body: form,
+    });
+  };
+
+  let token = await getAccessToken();
+  let response = await sendRequest(token);
+
+  if (response.status === 401) {
+    try {
+      token = await refreshAccessToken();
+      response = await sendRequest(token);
+    } catch {
+      // Giữ nguyên response 401 ban đầu nếu refresh thất bại
+    }
+  }
+
+  const rawText = await response.text().catch(() => '');
+  let parsedJson: unknown = null;
+  if (rawText) {
+    try {
+      parsedJson = JSON.parse(rawText);
+    } catch {
+      parsedJson = null;
+    }
+  }
+
+  if (!response.ok) {
+    const errPayload = parsedJson as { error?: { message?: string }; message?: string } | null;
+    const error = new Error(
+      errPayload?.error?.message || errPayload?.message || `Upload ảnh thất bại (${response.status})`
+    );
+    (error as { response?: { status: number; data: unknown } }).response = {
+      status: response.status,
+      data: parsedJson,
+    };
+    throw error;
+  }
+
+  if (!parsedJson) {
+    return {};
+  }
+
+  const unwrapped = unwrapApiResponse<FoodResponse | { imageUrl?: string | null; url?: string | null } | string>(
+    { data: parsedJson as ApiResponse<FoodResponse> | FoodResponse }
+  );
+
+  if (typeof unwrapped === 'string') {
+    return { imageUrl: unwrapped };
+  }
+  if (unwrapped && typeof unwrapped === 'object' && 'id' in unwrapped && 'name' in unwrapped) {
+    return { food: unwrapped as FoodResponse, imageUrl: (unwrapped as FoodResponse).imageUrl };
+  }
+  if (unwrapped && typeof unwrapped === 'object') {
+    const obj = unwrapped as { imageUrl?: string | null; url?: string | null };
+    return { imageUrl: obj.imageUrl ?? obj.url ?? null };
+  }
+  return {};
 }
 
 // =========================================================================

@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
-import * as ImageManipulator from 'expo-image-manipulator';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppButton, AppCard, AppText, EmptyStateView, LoadingOverlay, useAlert } from '@/components/common';
 import { SquareCheckIcon, SquareIcon } from '@/components/icons';
@@ -10,6 +9,7 @@ import { images } from '@/assets/images';
 import { getApiErrorMessage, isUuid } from '@/services/api/apiUtils';
 import { useNutrition } from '../NutritionProvider';
 import { recognizeFoodV2Api, sendFoodFeedbackApi } from '../api';
+import { prepareImageForUpload } from '../imageUploadUtils';
 import { formatNumber } from '../utils';
 import { MEAL_SLOTS, type MealSlot } from '../types';
 import {
@@ -19,7 +19,6 @@ import {
 } from '../scanTypes';
 import { useTheme } from '@/theme';
 
-const MAX_UPLOAD_BYTES = 2 * 1024 * 1024;
 const clamp = (value: number) => Math.min(1, Math.max(0, Number.isFinite(value) ? value : 0));
 const clampFactor = (value: number) => Math.min(2, Math.max(0.5, value));
 type Props = NativeStackScreenProps<RootStackParamList, 'MealScanResult'>;
@@ -31,27 +30,6 @@ function getItemDisplayName(item: RecognitionItem): string {
 
 function getItemBaseGrams(item: RecognitionItem): number {
   return item.estimatedServingGrams ?? item.defaultServingGrams ?? 100;
-}
-
-async function prepareImageForUpload(
-  uri: string
-): Promise<{ uri: string; mimeType: 'image/jpeg' | 'image/png' }> {
-  const isPng = uri.toLowerCase().endsWith('.png');
-  try {
-    const res = await fetch(uri);
-    const blob = await res.blob();
-    if (blob.size <= MAX_UPLOAD_BYTES) {
-      return { uri, mimeType: isPng ? 'image/png' : 'image/jpeg' };
-    }
-    const compressed = await ImageManipulator.manipulateAsync(
-      uri,
-      [{ resize: { width: 1024 } }],
-      { compress: 0.65, format: ImageManipulator.SaveFormat.JPEG }
-    );
-    return { uri: compressed.uri, mimeType: 'image/jpeg' };
-  } catch {
-    return { uri, mimeType: isPng ? 'image/png' : 'image/jpeg' };
-  }
 }
 
 export function MealScanResultScreen({ navigation, route }: Props) {
@@ -75,6 +53,7 @@ export function MealScanResultScreen({ navigation, route }: Props) {
     let active = true;
     setLoading(true);
     setError(undefined);
+    setImageLoaded(false);
 
     void (async () => {
       try {
@@ -146,8 +125,8 @@ export function MealScanResultScreen({ navigation, route }: Props) {
             servingQuantity: factor,
             source: 'AI_PHOTO' as const,
             imageUri: response?.tempImageUrl ?? route.params.imageUri,
-            tempImageKey: response?.tempImageKey ?? null,
-            aiPredictedClassId: item.classId,
+            tempImageKey: response?.tempImageKey || null,
+            aiPredictedClassId: item.classId ?? null,
             aiConfidence: item.confidence,
             nutritionSnapshot: {
               calories: (item.caloriesPerServing ?? 0) * factor,
@@ -202,9 +181,40 @@ export function MealScanResultScreen({ navigation, route }: Props) {
             style={styles.previewImage}
             resizeMode="contain"
             onLoad={(event) => {
-              const { width, height } = event.nativeEvent.source;
-              setSourceSize({ width, height });
-              setImageLoaded(true);
+              const nativeEvent = event.nativeEvent as
+                | {
+                    source?: { width?: number; height?: number };
+                    target?: { naturalWidth?: number; naturalHeight?: number };
+                  }
+                | undefined;
+              const target = (
+                event as unknown as {
+                  target?: { naturalWidth?: number; naturalHeight?: number };
+                }
+              )?.target;
+              const width =
+                nativeEvent?.source?.width ??
+                nativeEvent?.target?.naturalWidth ??
+                target?.naturalWidth;
+              const height =
+                nativeEvent?.source?.height ??
+                nativeEvent?.target?.naturalHeight ??
+                target?.naturalHeight;
+              if (width && height) {
+                setSourceSize({ width, height });
+                setImageLoaded(true);
+                return;
+              }
+              Image.getSize(
+                route.params.imageUri,
+                (w, h) => {
+                  setSourceSize({ width: w || 1, height: h || 1 });
+                  setImageLoaded(true);
+                },
+                () => {
+                  setImageLoaded(true);
+                }
+              );
             }}
             onLayout={(event) =>
               setImageSize({ width: event.nativeEvent.layout.width, height: event.nativeEvent.layout.height })

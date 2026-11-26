@@ -348,6 +348,7 @@ export function CreateRecipeScreen({ navigation, route }: Props) {
         fat: perServing.fat,
         allergens: [],
         category,
+        imageUrl: imageUri || undefined,
       });
     }
 
@@ -430,7 +431,11 @@ export function CreateRecipeScreen({ navigation, route }: Props) {
           </Text>
 
           <View style={styles.imageSection}>
-            <View
+            <TouchableOpacity
+              onPress={pickImage}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel="Chọn ảnh công thức"
               style={[
                 styles.imageBox,
                 {
@@ -448,18 +453,33 @@ export function CreateRecipeScreen({ navigation, route }: Props) {
                   resizeMode="contain"
                 />
               )}
-            </View>
-
-            <TouchableOpacity
-              style={styles.uploadBtn}
-              onPress={pickImage}
-              activeOpacity={0.7}
-              accessibilityLabel="Tải lên ảnh mới"
-            >
-              <Text style={[styles.uploadBtnText, { color: primaryBrand }]}>
-                + Tải lên ảnh mới
-              </Text>
             </TouchableOpacity>
+
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+              <TouchableOpacity
+                style={styles.uploadBtn}
+                onPress={pickImage}
+                activeOpacity={0.7}
+                accessibilityLabel={imageUri ? 'Đổi ảnh' : 'Tải lên ảnh mới'}
+              >
+                <Text style={[styles.uploadBtnText, { color: primaryBrand }]}>
+                  {imageUri ? 'Đổi ảnh' : '+ Tải lên ảnh mới'}
+                </Text>
+              </TouchableOpacity>
+
+              {imageUri && (
+                <TouchableOpacity
+                  style={styles.uploadBtn}
+                  onPress={() => setImageUri(null)}
+                  activeOpacity={0.7}
+                  accessibilityLabel="Xóa ảnh"
+                >
+                  <Text style={[styles.uploadBtnText, { color: colors.statusDanger }]}>
+                    Xóa ảnh
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
 
           {/* ── 3. Tên món ăn (Food Name Input) ───────────────────────── */}

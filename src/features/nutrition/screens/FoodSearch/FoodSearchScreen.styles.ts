@@ -211,10 +211,13 @@ export function createStyles(theme: ThemeContextValue | { colors: ColorTokens })
     foodRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingHorizontal: 14,
-      paddingVertical: 12,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
       borderRadius: 14,
       backgroundColor: c.surfaceHigh,
+    },
+    foodRowThumb: {
+      marginRight: 12,
     },
     foodRowInfo: {
       flex: 1,

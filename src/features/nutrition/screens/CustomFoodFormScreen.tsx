@@ -244,6 +244,7 @@ export function CustomFoodFormScreen({ navigation, route }: Props) {
         fat: parsed.fat,
         allergens: [],
         category,
+        imageUrl: imageUri || undefined,
       });
       showAlert({
         title: 'Đã lưu',
@@ -289,9 +290,11 @@ export function CustomFoodFormScreen({ navigation, route }: Props) {
     };
 
     let savedFoodId = existing?.id;
+    let savedImageUri = imageUri || undefined;
     try {
       const saved = await saveCustomFoodAsync(payload, existing?.id);
       savedFoodId = saved.id;
+      savedImageUri = saved.imageUrl ?? savedImageUri;
     } catch {
       savedFoodId = saveCustomFood({
         id: existing?.id,
@@ -303,6 +306,7 @@ export function CustomFoodFormScreen({ navigation, route }: Props) {
         fat: parsed.fat,
         allergens: [],
         category,
+        imageUrl: imageUri || undefined,
       });
     } finally {
       setSaving(false);
@@ -315,6 +319,7 @@ export function CustomFoodFormScreen({ navigation, route }: Props) {
       date: route.params.date,
       meal: route.params.meal,
       source: 'CUSTOM',
+      imageUri: savedImageUri,
       nutritionSnapshot: {
         calories: parsed.calories,
         protein: parsed.protein,
@@ -422,7 +427,11 @@ export function CustomFoodFormScreen({ navigation, route }: Props) {
               </Text>
 
               <View style={styles.imageSection}>
-                <View
+                <TouchableOpacity
+                  onPress={pickImage}
+                  activeOpacity={0.8}
+                  accessibilityRole="button"
+                  accessibilityLabel="Chọn ảnh thực phẩm"
                   style={[
                     styles.imageBox,
                     {
@@ -443,18 +452,33 @@ export function CustomFoodFormScreen({ navigation, route }: Props) {
                       resizeMode="contain"
                     />
                   )}
-                </View>
-
-                <TouchableOpacity
-                  style={styles.uploadBtn}
-                  onPress={pickImage}
-                  activeOpacity={0.7}
-                  accessibilityLabel="Tải ảnh mới"
-                >
-                  <Text style={[styles.uploadBtnText, { color: primaryBrand }]}>
-                    + Tải ảnh mới
-                  </Text>
                 </TouchableOpacity>
+
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+                  <TouchableOpacity
+                    style={styles.uploadBtn}
+                    onPress={pickImage}
+                    activeOpacity={0.7}
+                    accessibilityLabel={imageUri ? 'Đổi ảnh' : 'Tải ảnh mới'}
+                  >
+                    <Text style={[styles.uploadBtnText, { color: primaryBrand }]}>
+                      {imageUri ? 'Đổi ảnh' : '+ Tải ảnh mới'}
+                    </Text>
+                  </TouchableOpacity>
+
+                  {imageUri && (
+                    <TouchableOpacity
+                      style={styles.uploadBtn}
+                      onPress={() => setImageUri(null)}
+                      activeOpacity={0.7}
+                      accessibilityLabel="Xóa ảnh"
+                    >
+                      <Text style={[styles.uploadBtnText, { color: colors.statusDanger }]}>
+                        Xóa ảnh
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
               </View>
 
               {/* Mục: Thông tin thực phẩm */}

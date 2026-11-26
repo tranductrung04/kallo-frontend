@@ -18,7 +18,9 @@ export type CircularProgressProps = {
   strokeWidth?: number;
   color?: string;
   label?: string;
+  labelColor?: string;
   centerText?: string;
+  centerTextColor?: string;
   testID?: string;
 };
 
@@ -28,7 +30,9 @@ export function CircularProgress({
   strokeWidth = 14,
   color,
   label,
+  labelColor,
   centerText,
+  centerTextColor,
   testID,
 }: CircularProgressProps) {
   const theme = useTheme();
@@ -57,26 +61,28 @@ export function CircularProgress({
           strokeWidth={strokeWidth}
           fill="none"
         />
-        {/* Progress */}
-        <Circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke={strokeColor}
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeLinecap="round"
-          strokeDasharray={`${circumference} ${circumference}`}
-          strokeDashoffset={circumference * (1 - progress)}
-        />
+        {/* Progress: chỉ vẽ cung tiến độ khi > 0 để tránh chấm tròn strokeLinecap ở mức 0 */}
+        {progress > 0 && (
+          <Circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth}
+            fill="none"
+            strokeLinecap="round"
+            strokeDasharray={`${circumference} ${circumference}`}
+            strokeDashoffset={circumference * (1 - progress)}
+          />
+        )}
       </Svg>
       <View style={styles.center}>
         {/* dataDisplay typography for big calorie numbers */}
         {centerText !== undefined
-          ? <AppText variant="dataDisplay" align="center">{centerText}</AppText>
-          : <AppText variant="headlineMd" align="center">{Math.round(progress * 100)}%</AppText>}
+          ? <AppText variant="dataDisplay" align="center" color={centerTextColor}>{centerText}</AppText>
+          : <AppText variant="headlineMd" align="center" color={centerTextColor}>{Math.round(progress * 100)}%</AppText>}
         {label
-          ? <AppText variant="bodySm" color={theme.colors.textSecondary} align="center">{label}</AppText>
+          ? <AppText variant="bodySm" color={labelColor ?? theme.colors.textSecondary} align="center">{label}</AppText>
           : null}
       </View>
     </View>

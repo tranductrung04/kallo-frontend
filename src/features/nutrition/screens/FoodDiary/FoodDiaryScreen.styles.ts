@@ -185,13 +185,16 @@ export function createStyles(theme: ThemeContextValue | { colors: ColorTokens })
     foodItemCard: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingHorizontal: 14,
+      paddingHorizontal: 12,
       paddingVertical: 10,
       borderRadius: 12,
       backgroundColor: c.surfaceHigh,
       borderLeftWidth: 3,
       borderLeftColor: c.brandPrimary,
       marginLeft: 14,
+    },
+    foodItemThumb: {
+      marginRight: 10,
     },
     foodItemMain: {
       flex: 1,

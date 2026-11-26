@@ -17,6 +17,7 @@ import {
   SearchIcon,
   ViewfinderBarcodeIcon,
 } from '@/components/icons';
+import { FoodThumbnail } from '../../components/FoodThumbnail';
 import type { Food } from '../../types';
 import { useFoodSearchStyles } from './FoodSearchScreen.styles';
 
@@ -289,9 +290,16 @@ export function FoodRowItem({ food, onPress }: FoodRowItemProps) {
       activeOpacity={0.7}
       onPress={onPress}
     >
+      <FoodThumbnail
+        uri={food.imageUrl}
+        size={46}
+        borderRadius={12}
+        accessibilityLabel={food.name}
+        style={styles.foodRowThumb}
+      />
       <View style={styles.foodRowInfo}>
-        <Text style={styles.foodRowName}>{food.name}</Text>
-        <Text style={styles.foodRowSubtitle}>
+        <Text style={styles.foodRowName} numberOfLines={1}>{food.name}</Text>
+        <Text style={styles.foodRowSubtitle} numberOfLines={1}>
           {food.calories} kcal / 100g • P: {food.protein}g • C: {food.carbs}g • F: {food.fat}g
         </Text>
       </View>

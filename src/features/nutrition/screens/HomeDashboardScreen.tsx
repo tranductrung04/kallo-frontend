@@ -77,7 +77,7 @@ import {
   TrophyIcon,
   UsersIcon,
 } from '@/components/icons';
-import { ActivityGrid, MacroColumn, WeightChart } from './HomeDashboard/HomeWidgets';
+import { ActivityGrid, MacroColumn, RecentDiaryCard, WeightChart } from './HomeDashboard/HomeWidgets';
 
 type Props = BottomTabScreenProps<MainTabParamList, 'Home'>;
 type RootNavigation = NativeStackNavigationProp<RootStackParamList>;
@@ -91,7 +91,7 @@ export function HomeDashboardScreen({ navigation }: Props) {
   const styles = useMemo(() => createStyles(theme, screenWidth), [theme, screenWidth]);
   const insets = useSafeAreaInsets();
 
-  const { state, getSummary, addWater, setSelectedDate, refreshDateData } = useNutrition();
+  const { state, foods, getSummary, getLogs, addWater, setSelectedDate, refreshDateData } = useNutrition();
   const {
     getTotalCaloriesBurnedForDate,
     getTotalStepsForDate,
@@ -269,10 +269,29 @@ export function HomeDashboardScreen({ navigation }: Props) {
     ? Math.round(healthProfile.dailyCalorieGoal)
     : (summary.caloriesGoal || 1794);
   const caloriesConsumed = summary.calories || 0;
-  const caloriesRemaining = Math.max(0, caloriesGoal - caloriesConsumed);
+  const roundedConsumed = Math.round(caloriesConsumed);
+  const isCaloriesExceeded = caloriesGoal > 0 && roundedConsumed > caloriesGoal;
+  const caloriesExceeded = Math.max(0, roundedConsumed - caloriesGoal);
+  const caloriesRemaining = Math.max(0, caloriesGoal - roundedConsumed);
   const progress = caloriesGoal > 0 ? caloriesConsumed / caloriesGoal : 0;
-  // Vẫn hiện một cung nhỏ khi chưa nạp calo (CircularProgress tự clamp 0–1)
-  const ringValue = progress > 0 ? progress : 0.08;
+  // Khi chưa nạp calo (progress === 0), để 0 để vòng tròn trống hoàn toàn
+  const ringValue = progress;
+
+  const recentLogs = useMemo(() => {
+    const dayLogs = getLogs(selectedDate);
+    return [...dayLogs]
+      .map((log, idx) => ({ log, idx }))
+      .sort((a, b) => {
+        const timeA = a.log.time ?? '';
+        const timeB = b.log.time ?? '';
+        if (timeA !== timeB) return timeB.localeCompare(timeA);
+        const updA = a.log.updatedAt ?? '';
+        const updB = b.log.updatedAt ?? '';
+        if (updA !== updB) return updB.localeCompare(updA);
+        return b.idx - a.idx;
+      })
+      .map((item) => item.log);
+  }, [getLogs, selectedDate]);
 
   // Macro goals (Ưu tiên macronutrients tính theo hồ sơ sức khỏe)
   const proteinGoal = Math.round(
@@ -651,8 +670,15 @@ export function HomeDashboardScreen({ navigation }: Props) {
                 value={ringValue}
                 size={190}
                 strokeWidth={10}
-                centerText={formatNumber(caloriesRemaining)}
-                label="Calo còn lại"
+                color={isCaloriesExceeded ? colors.statusDanger : colors.brandPrimary}
+                centerText={
+                  isCaloriesExceeded
+                    ? formatNumber(caloriesExceeded)
+                    : formatNumber(caloriesRemaining)
+                }
+                centerTextColor={isCaloriesExceeded ? colors.statusDanger : undefined}
+                label={isCaloriesExceeded ? 'Calo đã vượt' : 'Calo còn lại'}
+                labelColor={isCaloriesExceeded ? colors.statusDanger : undefined}
               />
             </View>
 
@@ -681,12 +707,23 @@ export function HomeDashboardScreen({ navigation }: Props) {
                 style={({ pressed }) => [styles.calorieStatCol, pressed && styles.pressedOpacity]}
                 onPress={() => setCalorieIntakeModalVisible(true)}
               >
-                <AppText variant="headlineMd" style={styles.statColNumber}>
+                <AppText
+                  variant="headlineMd"
+                  color={isCaloriesExceeded ? colors.statusDanger : colors.textPrimary}
+                  style={styles.statColNumber}
+                >
                   {formatNumber(caloriesConsumed)}
                 </AppText>
                 <View style={styles.statColLabelRow}>
-                  <CutleryIcon size={16} color={colors.brandSecondary} />
-                  <AppText variant="bodyMd" color={colors.textSecondary} style={styles.statColLabel}>
+                  <CutleryIcon
+                    size={16}
+                    color={isCaloriesExceeded ? colors.statusDanger : colors.brandSecondary}
+                  />
+                  <AppText
+                    variant="bodyMd"
+                    color={isCaloriesExceeded ? colors.statusDanger : colors.textSecondary}
+                    style={styles.statColLabel}
+                  >
                     Đã nạp
                   </AppText>
                 </View>
@@ -863,20 +900,53 @@ export function HomeDashboardScreen({ navigation }: Props) {
 
           {/* ── 6. Nhật ký gần đây (Recent Diary) ───────────────────────── */}
           <View style={styles.sectionBlock}>
-            <AppText variant="headlineSm">Nhật ký gần đây</AppText>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Mở nhật ký"
-              onPress={() => navigation.navigate('Diary')}
-              style={styles.emptyDiaryCard}
-            >
-              <BowlFoodPlusIcon
-                size={40}
-                color={colors.textSecondary}
-                cutoutColor={colors.canvasBase}
+            <View style={styles.sectionHeaderRow}>
+              <AppText variant="headlineSm">Nhật ký gần đây</AppText>
+              {recentLogs.length > 0 && (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Xem tất cả nhật ký"
+                  onPress={() => navigation.navigate('Diary')}
+                  style={({ pressed }) => [styles.recentDiarySeeAllBtn, pressed && styles.pressedOpacity]}
+                >
+                  <AppText variant="labelMd" color={colors.brandPrimary}>
+                    Xem tất cả
+                  </AppText>
+                  <ChevronRightIcon size={16} color={colors.brandPrimary} />
+                </Pressable>
+              )}
+            </View>
+            {recentLogs.length > 0 ? (
+              <RecentDiaryCard
+                styles={styles}
+                logs={recentLogs}
+                foods={foods}
+                onPressLog={(log) =>
+                  root?.navigate('FoodDetail', {
+                    foodId: log.foodId,
+                    date: selectedDate,
+                    meal: log.meal,
+                    logId: log.id,
+                    source: log.source,
+                  })
+                }
+                onPressSeeAll={() => navigation.navigate('Diary')}
               />
-              <AppText variant="bodyMd" color={colors.textSecondary}>Chưa có dữ liệu</AppText>
-            </Pressable>
+            ) : (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Mở nhật ký"
+                onPress={() => navigation.navigate('Diary')}
+                style={styles.emptyDiaryCard}
+              >
+                <BowlFoodPlusIcon
+                  size={40}
+                  color={colors.textSecondary}
+                  cutoutColor={colors.canvasBase}
+                />
+                <AppText variant="bodyMd" color={colors.textSecondary}>Chưa có dữ liệu</AppText>
+              </Pressable>
+            )}
           </View>
 
           {/* ── 6. Hoạt động tập luyện (Workout Grid) ───────────────────── */}

@@ -1,5 +1,6 @@
 import { api } from '@/services/api/client';
 import { unwrapApiResponse } from '@/services/api/apiUtils';
+import { buildImageFormData } from './imageUploadUtils';
 import type { WeightLog } from './types';
 import type { RecognitionResponse } from './scanTypes';
 import type {
@@ -84,15 +85,14 @@ export async function recognizeFoodV2Api(
   imageUri: string,
   mimeType: 'image/jpeg' | 'image/png' = 'image/jpeg'
 ): Promise<FoodRecognitionResponse> {
-  const form = new FormData();
-  const ext = mimeType === 'image/png' ? 'png' : 'jpg';
-  form.append('image', {
-    uri: imageUri,
-    name: `meal.${ext}`,
-    type: mimeType,
-  } as unknown as Blob);
+  const form = await buildImageFormData({
+    imageUri,
+    fieldName: 'image',
+    filePrefix: 'meal',
+    mimeType,
+  });
   const response = await api.post<ApiResponse<FoodRecognitionResponse>>('/food-logs/recognize', form, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 60000,
   });
   return unwrapApiResponse(response);
 }
@@ -201,10 +201,14 @@ export function getFoodByBarcode(code: string) {
 }
 
 export async function recognizeFood(imageUri: string) {
-  const form = new FormData();
-  form.append('image', { uri: imageUri, name: 'meal.jpg', type: 'image/jpeg' } as unknown as Blob);
+  const form = await buildImageFormData({
+    imageUri,
+    fieldName: 'image',
+    filePrefix: 'meal',
+    mimeType: 'image/jpeg',
+  });
   const response = await api.post<RecognitionResponse>('/food-logs/recognize', form, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 60000,
   });
   return response.data;
 }

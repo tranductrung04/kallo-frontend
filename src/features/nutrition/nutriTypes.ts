@@ -127,7 +127,7 @@ export type NutriBoundingBox = {
 };
 
 export type RecognizedFoodItem = {
-  classId: number;
+  classId: number | null;
   className: string;
   confidence: number;
   bbox: NutriBoundingBox | null;

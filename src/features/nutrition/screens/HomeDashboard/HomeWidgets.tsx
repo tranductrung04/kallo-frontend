@@ -9,10 +9,14 @@ import { Pressable, View } from 'react-native';
 import Svg, { Circle, Line, Text as SvgText } from 'react-native-svg';
 import { AppCard, AppText, ProgressBar } from '@/components/common';
 import { useTheme } from '@/theme';
-import { formatNumber } from '../../utils';
+import { FoodThumbnail } from '../../components/FoodThumbnail';
+import type { Food, FoodLog } from '../../types';
+import { formatNumber, mealLabel } from '../../utils';
+import { getLogNutrition } from '../FoodDiary/diaryUtils';
 import type { HomeDashboardStyles } from './HomeDashboardScreen.styles';
 import {
   BicycleIcon,
+  ChevronRightIcon,
   MoreActivitiesIcon,
   PickleballIcon,
   RunningIcon,
@@ -219,5 +223,98 @@ export function WeightChart({ width, weight }: WeightChartProps) {
         fill={colors.surfaceMid}
       />
     </Svg>
+  );
+}
+
+// ─── RecentDiaryCard ──────────────────────────────────────────────────────────
+
+const MAX_RECENT_DIARY_ITEMS = 4;
+
+type RecentDiaryCardProps = {
+  styles: HomeDashboardStyles;
+  logs: FoodLog[];
+  foods: Food[];
+  onPressLog: (log: FoodLog) => void;
+  onPressSeeAll: () => void;
+};
+
+/** Thẻ hiển thị các món ăn đã ghi gần đây trong ngày trên Dashboard */
+export function RecentDiaryCard({
+  styles,
+  logs,
+  foods,
+  onPressLog,
+  onPressSeeAll,
+}: RecentDiaryCardProps) {
+  const { colors } = useTheme();
+  const visibleLogs = logs.slice(0, MAX_RECENT_DIARY_ITEMS);
+  const remainingCount = logs.length - visibleLogs.length;
+
+  return (
+    <AppCard padding={0} style={styles.recentDiaryCard}>
+      {visibleLogs.map((log, index) => {
+        const nutrition = getLogNutrition(log, foods);
+        const food = foods.find((f) => f.id === log.foodId);
+        const thumbnailUri = log.imageUri || food?.imageUrl;
+        const metaParts = [mealLabel(log.meal)];
+        if (log.time) metaParts.push(log.time);
+        metaParts.push(`${Math.round(log.grams)}g`);
+
+        return (
+          <Pressable
+            key={log.id}
+            accessibilityRole="button"
+            accessibilityLabel={`Xem chi tiết ${log.foodName}`}
+            onPress={() => onPressLog(log)}
+            style={({ pressed }) => [
+              styles.recentDiaryRow,
+              index > 0 && styles.recentDiaryRowBorder,
+              pressed && styles.pressedOpacity,
+            ]}
+          >
+            <FoodThumbnail
+              uri={thumbnailUri}
+              size={44}
+              borderRadius={12}
+              accessibilityLabel={log.foodName}
+            />
+
+            <View style={styles.recentDiaryInfo}>
+              <AppText variant="labelLg" color={colors.textPrimary} numberOfLines={1}>
+                {log.foodName}
+              </AppText>
+              <AppText variant="caption" color={colors.textSecondary} numberOfLines={1}>
+                {metaParts.join(' • ')}
+              </AppText>
+              {log.hasAllergyWarning ? (
+                <AppText variant="caption" color={colors.statusDanger} numberOfLines={1}>
+                  Cảnh báo dị ứng
+                </AppText>
+              ) : null}
+            </View>
+
+            <View style={styles.recentDiaryRight}>
+              <AppText variant="labelLg" color={colors.textPrimary}>
+                {formatNumber(Math.round(nutrition.calories))} kcal
+              </AppText>
+              <ChevronRightIcon size={16} color={colors.textDisabled} />
+            </View>
+          </Pressable>
+        );
+      })}
+
+      {remainingCount > 0 && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Xem thêm ${remainingCount} món trong nhật ký`}
+          onPress={onPressSeeAll}
+          style={({ pressed }) => [styles.recentDiaryFooterBtn, pressed && styles.pressedOpacity]}
+        >
+          <AppText variant="labelMd" color={colors.brandPrimary}>
+            Xem thêm {remainingCount} món trong nhật ký
+          </AppText>
+        </Pressable>
+      )}
+    </AppCard>
   );
 }

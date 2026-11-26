@@ -11,6 +11,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppButton, AppCard, AppInput, AppText, useAlert } from '@/components/common';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
+import { FoodThumbnail } from '../components/FoodThumbnail';
 import { useNutrition } from '../NutritionProvider';
 import { formatNumber, scaleNutrition } from '../utils';
 import { MEAL_SLOTS, type Food, type MealSlot } from '../types';
@@ -142,39 +143,47 @@ export function FoodDetailScreen({ navigation, route }: Props) {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.colors.background }]}>
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Header Title & Badges */}
-        <View style={styles.headerBlock}>
-          <View style={styles.badgeRow}>
-            {sourceLabel && (
-              <View style={[styles.badge, { backgroundColor: `${theme.colors.primary}20` }]}>
-                <AppText variant="caption" color={theme.colors.primary}>
-                  {sourceLabel}
-                </AppText>
-              </View>
-            )}
-            {categoryLabel && (
-              <View style={[styles.badge, { backgroundColor: `${theme.colors.border}` }]}>
-                <AppText variant="caption" color={theme.colors.textMuted}>
-                  {categoryLabel}
-                </AppText>
-              </View>
-            )}
-            {food.isVerified && (
-              <View style={[styles.badge, { backgroundColor: '#10B98120' }]}>
-                <AppText variant="caption" color="#10B981">
-                  ✓ Đã kiểm chứng
-                </AppText>
-              </View>
+        {/* Header Image + Title & Badges */}
+        <View style={styles.heroRow}>
+          <FoodThumbnail
+            uri={existingLog?.imageUri ?? food.imageUrl}
+            size={84}
+            borderRadius={20}
+            accessibilityLabel={food.name}
+          />
+          <View style={styles.headerBlock}>
+            <View style={styles.badgeRow}>
+              {sourceLabel && (
+                <View style={[styles.badge, { backgroundColor: `${theme.colors.primary}20` }]}>
+                  <AppText variant="caption" color={theme.colors.primary}>
+                    {sourceLabel}
+                  </AppText>
+                </View>
+              )}
+              {categoryLabel && (
+                <View style={[styles.badge, { backgroundColor: `${theme.colors.border}` }]}>
+                  <AppText variant="caption" color={theme.colors.textMuted}>
+                    {categoryLabel}
+                  </AppText>
+                </View>
+              )}
+              {food.isVerified && (
+                <View style={[styles.badge, { backgroundColor: '#10B98120' }]}>
+                  <AppText variant="caption" color="#10B981">
+                    ✓ Đã kiểm chứng
+                  </AppText>
+                </View>
+              )}
+            </View>
+            <AppText variant="title">{food.name}</AppText>
+            {food.defaultServingName ? (
+              <AppText color={theme.colors.textMuted}>
+                Khẩu phần mặc định: {food.defaultServingName} ({food.servingGrams}g)
+              </AppText>
+            ) : (
+              <AppText color={theme.colors.textMuted}>Thông tin dinh dưỡng theo khẩu phần</AppText>
             )}
           </View>
-          <AppText variant="title">{food.name}</AppText>
-          {food.defaultServingName ? (
-            <AppText color={theme.colors.textMuted}>
-              Khẩu phần mặc định: {food.defaultServingName} ({food.servingGrams}g)
-            </AppText>
-          ) : (
-            <AppText color={theme.colors.textMuted}>Thông tin dinh dưỡng theo khẩu phần</AppText>
-          )}
         </View>
 
         {/* Allergen Warning */}
@@ -283,6 +292,7 @@ export function FoodDetailScreen({ navigation, route }: Props) {
                 foodId: food.id,
                 grams: finalGrams,
                 source,
+                imageUri: existingLog?.imageUri ?? food.imageUrl ?? undefined,
               });
             }
             navigation.pop(2);
@@ -320,7 +330,8 @@ export function FoodDetailScreen({ navigation, route }: Props) {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   content: { padding: 16, gap: 14, paddingBottom: 32 },
-  headerBlock: { gap: 6 },
+  heroRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  headerBlock: { flex: 1, gap: 6 },
   badgeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 4 },
   badge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
   warning: { gap: 4 },

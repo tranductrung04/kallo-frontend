@@ -75,7 +75,7 @@ api.interceptors.response.use((response) => response, async (error: AxiosError) 
   }
 });
 
-async function refreshAccessToken(): Promise<string> {
+export async function refreshAccessToken(): Promise<string> {
   const refreshToken = await getRefreshToken();
   if (!refreshToken) throw new Error('Missing refresh token');
   const response = await refreshClient.post<any>(REFRESH_PATH, { refreshToken });

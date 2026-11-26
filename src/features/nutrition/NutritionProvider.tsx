@@ -26,7 +26,9 @@ import {
   deleteCustomFoodApi,
   getFoodDetailApi,
   updateCustomFoodApi,
+  uploadCustomFoodImageApi,
 } from './foodApi';
+import { isLocalImageUri } from './imageUploadUtils';
 import {
   flattenDailyFoodLogs,
   mapFoodLogResponseToFoodLog,
@@ -207,6 +209,22 @@ export function NutritionProvider({ children }: React.PropsWithChildren) {
               serverLogs.map((l) => l.clientUuid).filter((v): v is string => Boolean(v))
             );
             setState((current) => {
+              const localImageByKey = new Map<string, string>();
+              for (const existing of current.foodLogs) {
+                if (existing.date === date && existing.imageUri) {
+                  localImageByKey.set(existing.id, existing.imageUri);
+                  if (existing.clientUuid) {
+                    localImageByKey.set(existing.clientUuid, existing.imageUri);
+                  }
+                }
+              }
+              const mergedServerLogs = serverLogs.map((l) => {
+                if (l.imageUri) return l;
+                const fallbackUri =
+                  localImageByKey.get(l.id) ??
+                  (l.clientUuid ? localImageByKey.get(l.clientUuid) : undefined);
+                return fallbackUri ? { ...l, imageUri: fallbackUri } : l;
+              });
               const otherDates = current.foodLogs.filter((l) => l.date !== date);
               const pendingLocal = current.foodLogs.filter(
                 (l) =>
@@ -216,7 +234,7 @@ export function NutritionProvider({ children }: React.PropsWithChildren) {
               );
               return {
                 ...current,
-                foodLogs: [...otherDates, ...serverLogs, ...pendingLocal],
+                foodLogs: [...otherDates, ...mergedServerLogs, ...pendingLocal],
               };
             });
           }
@@ -479,15 +497,17 @@ export function NutritionProvider({ children }: React.PropsWithChildren) {
       try {
         const res = await createFoodLogApi(payload);
         const mapped = mapFoodLogResponseToFoodLog(res);
+        const effectiveMapped: FoodLog =
+          !mapped.imageUri && input.imageUri ? { ...mapped, imageUri: input.imageUri } : mapped;
         setState((current) => ({
           ...current,
           foodLogs: current.foodLogs.map((l) =>
-            l.id === clientUuid || l.clientUuid === clientUuid ? mapped : l
+            l.id === clientUuid || l.clientUuid === clientUuid ? effectiveMapped : l
           ),
         }));
         void refreshSummaryOnly(input.date);
         void refreshRecentFoods(10);
-        return mapped;
+        return effectiveMapped;
       } catch (err) {
         if (isTransientNetworkError(err)) {
           enqueueItem('FOOD_LOG', payload, clientUuid);
@@ -515,6 +535,7 @@ export function NutritionProvider({ children }: React.PropsWithChildren) {
         clientUuid,
         foodName,
         servingQuantity,
+        imageUri: input.imageUri ?? food?.imageUrl ?? undefined,
         synced: false,
       };
 
@@ -556,7 +577,15 @@ export function NutritionProvider({ children }: React.PropsWithChildren) {
         const servingQuantity =
           input.servingQuantity ?? Math.max(0.01, Math.round((input.grams / baseServing) * 100) / 100);
         validEntries.push({
-          log: { ...input, id: clientUuid, clientUuid, foodName, servingQuantity, synced: false },
+          log: {
+            ...input,
+            id: clientUuid,
+            clientUuid,
+            foodName,
+            servingQuantity,
+            imageUri: input.imageUri ?? food?.imageUrl ?? undefined,
+            synced: false,
+          },
           input,
           clientUuid,
           servingQuantity,
@@ -845,6 +874,26 @@ export function NutritionProvider({ children }: React.PropsWithChildren) {
     return true;
   }, []);
 
+  const finalizeCustomFoodWithImage = useCallback(
+    async (res: FoodResponse, originalImageUrl?: string | null): Promise<Food> => {
+      let food = mapFoodResponseToFood(res);
+      if (isLocalImageUri(originalImageUrl)) {
+        try {
+          const uploaded = await uploadCustomFoodImageApi(res.id, originalImageUrl);
+          if (uploaded.food) {
+            food = mapFoodResponseToFood(uploaded.food);
+          } else if (uploaded.imageUrl) {
+            food = { ...food, imageUrl: uploaded.imageUrl };
+          }
+        } catch {
+          // Giữ lại URI ảnh cục bộ nếu upload thất bại để không mất bản ghi vừa tạo
+        }
+      }
+      return !food.imageUrl && originalImageUrl ? { ...food, imageUrl: originalImageUrl } : food;
+    },
+    []
+  );
+
   const saveCustomFood = useCallback((food: Omit<Food, 'id' | 'isCustom'> & { id?: string }) => {
     const foodId = food.id ?? id('custom');
     const fullFood: Food = { ...food, id: foodId, isCustom: true };
@@ -852,6 +901,7 @@ export function NutritionProvider({ children }: React.PropsWithChildren) {
       ...current,
       customFoods: [...current.customFoods.filter((item) => item.id !== foodId), fullFood],
     }));
+    const localImageUri = isLocalImageUri(food.imageUrl) ? food.imageUrl : null;
     const payload: CustomFoodRequest = {
       name: food.name,
       category: food.category ?? 'OTHER',
@@ -864,40 +914,52 @@ export function NutritionProvider({ children }: React.PropsWithChildren) {
       sugarPer100g: food.sugar ?? 0,
       fiberPer100g: food.fiber ?? 0,
       suitableMealTypes: food.suitableMealTypes ?? ['LUNCH', 'DINNER'],
-      imageUrl: food.imageUrl ?? null,
+      imageUrl: localImageUri ? null : (food.imageUrl ?? null),
+    };
+    const handleCreatedOrUpdated = async (res: FoodResponse) => {
+      const mapped = await finalizeCustomFoodWithImage(res, food.imageUrl);
+      cacheFood(mapped);
+      setState((current) => ({
+        ...current,
+        customFoods: current.customFoods.map((item) =>
+          item.id === foodId || item.id === mapped.id ? mapped : item
+        ),
+      }));
     };
     if (isUuid(food.id)) {
-      void updateCustomFoodApi(food.id, payload).catch(() => undefined);
+      void updateCustomFoodApi(food.id, payload)
+        .then(handleCreatedOrUpdated)
+        .catch(() => undefined);
     } else {
       void createCustomFoodApi(payload)
-        .then((created) => {
-          const mapped = mapFoodResponseToFood(created);
-          setState((current) => ({
-            ...current,
-            customFoods: current.customFoods.map((item) => (item.id === foodId ? mapped : item)),
-          }));
-        })
+        .then(handleCreatedOrUpdated)
         .catch(() => undefined);
     }
     return foodId;
-  }, []);
+  }, [cacheFood, finalizeCustomFoodWithImage]);
 
   const saveCustomFoodAsync = useCallback(
     async (payload: CustomFoodRequest, foodId?: string): Promise<Food> => {
-      let res: FoodResponse;
-      if (isUuid(foodId)) {
-        res = await updateCustomFoodApi(foodId, payload);
-      } else {
-        res = await createCustomFoodApi(payload);
-      }
-      const food = mapFoodResponseToFood(res);
+      const requestPayload: CustomFoodRequest = isLocalImageUri(payload.imageUrl)
+        ? { ...payload, imageUrl: null }
+        : payload;
+
+      const res = isUuid(foodId)
+        ? await updateCustomFoodApi(foodId, requestPayload)
+        : await createCustomFoodApi(requestPayload);
+
+      const effectiveFood = await finalizeCustomFoodWithImage(res, payload.imageUrl);
+      cacheFood(effectiveFood);
       setState((current) => ({
         ...current,
-        customFoods: [...current.customFoods.filter((item) => item.id !== (foodId || food.id)), food],
+        customFoods: [
+          ...current.customFoods.filter((item) => item.id !== (foodId || effectiveFood.id)),
+          effectiveFood,
+        ],
       }));
-      return food;
+      return effectiveFood;
     },
-    []
+    [cacheFood, finalizeCustomFoodWithImage]
   );
 
   const deleteCustomFoodAsync = useCallback(async (foodId: string): Promise<void> => {
@@ -912,15 +974,23 @@ export function NutritionProvider({ children }: React.PropsWithChildren) {
     }));
   }, []);
 
-  const saveRecipeAsync = useCallback(async (payload: RecipeFoodRequest): Promise<Food> => {
-    const res = await createRecipeFoodApi(payload);
-    const food = mapFoodResponseToFood(res);
-    setState((current) => ({
-      ...current,
-      customFoods: [...current.customFoods.filter((item) => item.id !== food.id), food],
-    }));
-    return food;
-  }, []);
+  const saveRecipeAsync = useCallback(
+    async (payload: RecipeFoodRequest): Promise<Food> => {
+      const requestPayload: RecipeFoodRequest = isLocalImageUri(payload.imageUrl)
+        ? { ...payload, imageUrl: null }
+        : payload;
+
+      const res = await createRecipeFoodApi(requestPayload);
+      const effectiveFood = await finalizeCustomFoodWithImage(res, payload.imageUrl);
+      cacheFood(effectiveFood);
+      setState((current) => ({
+        ...current,
+        customFoods: [...current.customFoods.filter((item) => item.id !== effectiveFood.id), effectiveFood],
+      }));
+      return effectiveFood;
+    },
+    [cacheFood, finalizeCustomFoodWithImage]
+  );
 
   const value = useMemo<NutritionContextValue>(
     () => ({

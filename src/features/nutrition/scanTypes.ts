@@ -43,8 +43,8 @@ export function normalizeFoodRecognitionResponse(
   };
 
   const items: RecognizedFoodItem[] = (body?.items ?? []).map((item) => {
-    if ('classId' in item) {
-      return item;
+    if ('classId' in item || 'className' in item) {
+      return item as RecognizedFoodItem;
     }
     const legacy = item as LegacyRecognitionItem;
     return {
