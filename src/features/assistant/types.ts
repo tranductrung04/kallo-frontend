@@ -4,6 +4,20 @@ export type MessageRole = 'user' | 'assistant' | 'system';
 export type ChatApiRole = 'USER' | 'ASSISTANT' | 'SYSTEM';
 export type ChatMessageStatus = 'PENDING' | 'COMPLETED' | 'FAILED';
 
+export type SuggestedFood = {
+  foodId?: string | null;
+  name: string;
+  kcal?: number | null;
+};
+
+export type ChatMessageMetadata = {
+  suggestedFoods?: SuggestedFood[];
+  allergenWarning?: boolean;
+  disclaimerAdded?: boolean;
+  intent?: string;
+  [key: string]: unknown;
+};
+
 export type ChatMessage = {
   id: string;
   role: MessageRole;
@@ -13,6 +27,8 @@ export type ChatMessage = {
   feedback?: -1 | 1 | null;
   isStreaming?: boolean;
   clientMessageId?: string;
+  retryContent?: string;
+  metadata?: ChatMessageMetadata | null;
   errorText?: string;
 };
 
@@ -22,11 +38,7 @@ export type ChatApiMessage = {
   content: string | null;
   status?: ChatMessageStatus;
   clientMessageId?: string | null;
-  metadata?: {
-    suggestedFoods?: { name: string; kcal?: number }[];
-    disclaimerAdded?: boolean;
-    [key: string]: unknown;
-  } | null;
+  metadata?: ChatMessageMetadata | null;
   feedback?: -1 | 1 | null;
   createdAt: string;
 };

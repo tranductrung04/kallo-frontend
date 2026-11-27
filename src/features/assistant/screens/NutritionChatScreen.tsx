@@ -16,10 +16,12 @@ import { images } from '@/assets/images';
 import { AppText } from '@/components/common';
 import {
   ChevronLeftIcon,
+  CutleryIcon,
   MessageCircleIcon,
   MessagesCircleIcon,
   RefreshCwIcon,
   SendIcon,
+  ShieldSecurityIcon,
   ThumbsDownIcon,
   ThumbsUpIcon,
   TriangleAlertIcon,
@@ -28,23 +30,31 @@ import type { RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
 import { IS_DEMO_MODE } from '@/features/auth/localAccount';
 import { useNutrition } from '@/features/nutrition/NutritionProvider';
+import type { MealSlot } from '@/features/nutrition/types';
 import { todayKey } from '@/features/nutrition/utils';
 import { randomUUID } from 'expo-crypto';
 import {
   getChatErrorMessage,
   getChatSuggestions,
   getConversationMessages,
-  isRetryableChatError,
   retryChatMessage,
   sendChatFeedback,
   sendChatMessage,
 } from '../api';
-import type { ChatApiMessage, ChatMessage, ChatSuggestion } from '../types';
+import type { ChatApiMessage, ChatMessage, ChatReply, ChatSuggestion } from '../types';
 import { generateAssistantResponse, QUICK_PROMPTS } from '../utils';
 import { useChatAutoScroll } from '../hooks/useChatAutoScroll';
 import { TypingIndicator } from '../components/TypingIndicator';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'NutritionChat'>;
+
+function getDefaultMealSlot(): MealSlot {
+  const hour = new Date().getHours();
+  if (hour < 10) return 'breakfast';
+  if (hour < 14) return 'lunch';
+  if (hour < 17) return 'snack';
+  return 'dinner';
+}
 
 function toUiMessage(message: ChatApiMessage): ChatMessage {
   return {
@@ -55,6 +65,7 @@ function toUiMessage(message: ChatApiMessage): ChatMessage {
     status: message.status,
     feedback: message.feedback,
     clientMessageId: message.clientMessageId ?? undefined,
+    metadata: message.metadata ?? undefined,
   };
 }
 
@@ -74,6 +85,9 @@ export function NutritionChatScreen({ route, navigation }: Props) {
   const initialPrompt = route.params?.initialPrompt;
   const [activeConversationId, setActiveConversationId] = useState(conversationId ?? null);
   const [messages, setMessages] = useState<ChatMessage[]>([welcomeMessage()]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [hasMoreMessages, setHasMoreMessages] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [suggestions, setSuggestions] = useState<ChatSuggestion[]>([]);
   const [inputText, setInputText] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -96,18 +110,42 @@ export function NutritionChatScreen({ route, navigation }: Props) {
   });
 
   const loadConversation = useCallback(async () => {
-    if (!activeConversationId || IS_DEMO_MODE) return;
+    setActiveConversationId(conversationId ?? null);
+    setNextCursor(null);
+    setHasMoreMessages(false);
+    if (!conversationId || IS_DEMO_MODE) return;
     setIsLoading(true);
     setError(null);
     try {
-      const page = await getConversationMessages(activeConversationId);
+      const page = await getConversationMessages(conversationId);
       setMessages(page.items.slice().reverse().map(toUiMessage));
+      setNextCursor(page.nextCursor ?? null);
+      setHasMoreMessages(Boolean(page.hasMore && page.nextCursor));
     } catch {
       setError('Không tải được lịch sử trò chuyện. Kiểm tra kết nối rồi thử lại.');
     } finally {
       setIsLoading(false);
     }
-  }, [activeConversationId]);
+  }, [conversationId]);
+
+  const loadOlderMessages = useCallback(async () => {
+    if (!activeConversationId || !nextCursor || !hasMoreMessages || isLoadingMore || IS_DEMO_MODE) return;
+    setIsLoadingMore(true);
+    try {
+      const page = await getConversationMessages(activeConversationId, { before: nextCursor });
+      const older = page.items.slice().reverse().map(toUiMessage);
+      setMessages((current) => {
+        const seen = new Set(current.map((item) => item.id));
+        return [...older.filter((item) => !seen.has(item.id)), ...current];
+      });
+      setNextCursor(page.nextCursor ?? null);
+      setHasMoreMessages(Boolean(page.hasMore && page.nextCursor));
+    } catch {
+      setError('Không tải thêm được tin nhắn cũ hơn.');
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [activeConversationId, hasMoreMessages, isLoadingMore, nextCursor]);
 
   useEffect(() => {
     void loadConversation();
@@ -116,6 +154,21 @@ export function NutritionChatScreen({ route, navigation }: Props) {
   useEffect(() => {
     if (IS_DEMO_MODE) return;
     void getChatSuggestions().then(setSuggestions).catch(() => undefined);
+  }, []);
+
+  const applyChatReply = useCallback((reply: ChatReply, localUserId: string, localPendingId: string) => {
+    setActiveConversationId(reply.conversationId);
+    const serverUser = toUiMessage(reply.userMessage);
+    const serverAssistant = toUiMessage(reply.assistantMessage);
+    setMessages((current) => {
+      const mapped = current.map((msg) => {
+        if (msg.id === localUserId) return serverUser;
+        if (msg.id === localPendingId) return serverAssistant;
+        return msg;
+      });
+      const hasAssistant = mapped.some((msg) => msg.id === serverAssistant.id);
+      return hasAssistant ? mapped : [...mapped, serverAssistant];
+    });
   }, []);
 
   const handleSend = useCallback(async (textToSend?: string) => {
@@ -129,6 +182,7 @@ export function NutritionChatScreen({ route, navigation }: Props) {
       content,
       timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
       status: 'COMPLETED',
+      clientMessageId,
     };
     requestScrollToBottom();
     setMessages((current) => [...current.filter((message) => message.id !== 'welcome'), userMessage]);
@@ -158,22 +212,23 @@ export function NutritionChatScreen({ route, navigation }: Props) {
       status: 'PENDING',
       isStreaming: true,
       clientMessageId,
+      retryContent: content,
     }]);
     try {
       const reply = await sendChatMessage({ conversationId: activeConversationId, content, clientMessageId });
-      setActiveConversationId(reply.conversationId);
-      setMessages((current) => [
-        ...current.filter((message) => message.id !== pendingId),
-        toUiMessage(reply.assistantMessage),
-      ]);
+      applyChatReply(reply, clientMessageId, pendingId);
     } catch (requestError: unknown) {
       const message = getChatErrorMessage(requestError);
       setError(message);
-      setMessages((current) => current.map((item) => item.id === pendingId ? { ...item, status: 'FAILED', errorText: message } : item));
+      setMessages((current) =>
+        current.map((item) =>
+          item.id === pendingId ? { ...item, status: 'FAILED', isStreaming: false, errorText: message } : item
+        )
+      );
     } finally {
       setIsSending(false);
     }
-  }, [activeConversationId, inputText, isSending, requestScrollToBottom, summary]);
+  }, [activeConversationId, applyChatReply, inputText, isSending, requestScrollToBottom, summary]);
 
   useEffect(() => {
     if (initialPrompt && !sentInitialPrompt.current && !isLoading) {
@@ -186,12 +241,41 @@ export function NutritionChatScreen({ route, navigation }: Props) {
     if (isSending || IS_DEMO_MODE) return;
     setIsSending(true);
     setError(null);
+    setMessages((current) =>
+      current.map((msg) =>
+        msg.id === item.id ? { ...msg, status: 'PENDING', isStreaming: true, errorText: undefined } : msg
+      )
+    );
     try {
-      const reply = await retryChatMessage(item.id);
-      requestScrollToBottom();
-      setMessages((current) => [...current.filter((msg) => msg.id !== item.id), toUiMessage(reply.assistantMessage)]);
+      if (item.id.startsWith('pending-') && item.clientMessageId) {
+        const fallbackContent =
+          item.retryContent ?? messages.find((msg) => msg.id === item.clientMessageId)?.content ?? '';
+        if (!fallbackContent) {
+          throw new Error('Missing retry content');
+        }
+        const reply = await sendChatMessage({
+          conversationId: activeConversationId,
+          content: fallbackContent,
+          clientMessageId: item.clientMessageId,
+        });
+        requestScrollToBottom();
+        applyChatReply(reply, item.clientMessageId, item.id);
+      } else {
+        const reply = await retryChatMessage(item.id);
+        setActiveConversationId(reply.conversationId);
+        requestScrollToBottom();
+        setMessages((current) =>
+          current.map((msg) => (msg.id === item.id ? toUiMessage(reply.assistantMessage) : msg))
+        );
+      }
     } catch (requestError: unknown) {
-      setError(getChatErrorMessage(requestError));
+      const message = getChatErrorMessage(requestError);
+      setError(message);
+      setMessages((current) =>
+        current.map((msg) =>
+          msg.id === item.id ? { ...msg, status: 'FAILED', isStreaming: false, errorText: message } : msg
+        )
+      );
     } finally {
       setIsSending(false);
     }
@@ -261,11 +345,30 @@ export function NutritionChatScreen({ route, navigation }: Props) {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.messageList}
         {...listScrollProps}
+        ListHeaderComponent={
+          hasMoreMessages ? (
+            <Pressable
+              onPress={() => void loadOlderMessages()}
+              disabled={isLoadingMore}
+              style={[styles.loadMoreButton, { borderColor: theme.colors.surfaceBorder, backgroundColor: theme.colors.surfaceMid }]}
+              accessibilityRole="button"
+              accessibilityLabel="Tải tin nhắn cũ hơn"
+            >
+              {isLoadingMore ? (
+                <ActivityIndicator size="small" color={theme.colors.brandPrimary} />
+              ) : (
+                <AppText variant="caption" color={theme.colors.brandPrimary}>Tải tin nhắn cũ hơn</AppText>
+              )}
+            </Pressable>
+          ) : null
+        }
         ListFooterComponent={null}
         renderItem={({ item }) => {
           const isUser = item.role === 'user';
           const failed = item.status === 'FAILED';
           const isPending = !isUser && !failed && (item.status === 'PENDING' || (!item.content && item.isStreaming));
+          const suggestedFoods = !isUser && item.status === 'COMPLETED' ? item.metadata?.suggestedFoods ?? [] : [];
+          const hasAllergenWarning = !isUser && item.status === 'COMPLETED' && Boolean(item.metadata?.allergenWarning);
           return <View style={[styles.messageRow, isUser ? styles.messageRowUser : styles.messageRowAssistant]}>
             <View style={[styles.messageBubble, isUser ? [styles.bubbleUser, { backgroundColor: theme.colors.brandPrimary }] : [styles.bubbleAssistant, { backgroundColor: theme.colors.surfaceMid, borderColor: theme.colors.surfaceBorder }]]}>
               {!isUser ? <AppText variant="labelSm" color={theme.colors.brandPrimary}>KALLO AI</AppText> : null}
@@ -278,9 +381,55 @@ export function NutritionChatScreen({ route, navigation }: Props) {
                 </View>
               ) : (
                 <AppText variant="bodyMd" color={isUser ? theme.colors.onBrand : theme.colors.textPrimary}>
-                  {failed ? (item.errorText ?? 'Tin nhắn chưa nhận được phản hồi.') : item.content}
+                  {failed ? (item.errorText ?? (item.content || 'Tin nhắn chưa nhận được phản hồi.')) : item.content}
                 </AppText>
               )}
+              {hasAllergenWarning ? (
+                <View style={[styles.allergenBadge, { backgroundColor: theme.colors.surfaceHigh, borderColor: theme.colors.surfaceBorder }]}>
+                  <ShieldSecurityIcon size={14} color={theme.colors.statusWarning} />
+                  <AppText variant="caption" color={theme.colors.textSecondary} style={styles.allergenBadgeText}>
+                    Đã kiểm tra và lọc theo hồ sơ dị ứng
+                  </AppText>
+                </View>
+              ) : null}
+              {suggestedFoods.length > 0 ? (
+                <View style={styles.suggestedFoodsWrap}>
+                  {suggestedFoods.map((food, index) => {
+                    const canOpenFood = Boolean(food.foodId);
+                    return (
+                      <Pressable
+                        key={`${food.foodId ?? food.name}-${index}`}
+                        disabled={!canOpenFood}
+                        onPress={() => {
+                          if (food.foodId) {
+                            navigation.navigate('FoodDetail', {
+                              foodId: food.foodId,
+                              date: todayKey(),
+                              meal: getDefaultMealSlot(),
+                            });
+                          }
+                        }}
+                        style={[
+                          styles.foodChip,
+                          {
+                            backgroundColor: theme.colors.surfaceHigh,
+                            borderColor: canOpenFood ? theme.colors.brandPrimary : theme.colors.surfaceBorder,
+                          },
+                        ]}
+                        accessibilityRole={canOpenFood ? 'button' : 'text'}
+                        accessibilityLabel={
+                          food.kcal != null ? `${food.name}, ${food.kcal} kcal` : food.name
+                        }
+                      >
+                        <CutleryIcon size={13} color={theme.colors.brandPrimary} />
+                        <AppText variant="caption" color={theme.colors.textPrimary} style={styles.foodChipText}>
+                          {food.kcal != null ? `${food.name} · ${food.kcal} kcal` : food.name}
+                        </AppText>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              ) : null}
               <AppText variant="caption" color={isUser ? 'rgba(255,255,255,0.75)' : theme.colors.textSecondary} align={isUser ? 'right' : 'left'}>{item.timestamp}</AppText>
               {!isUser && item.status === 'COMPLETED' && item.id !== 'welcome' ? <View style={styles.feedbackRow}>
                 <Pressable onPress={() => void handleFeedback(item.id, 1)} style={styles.feedbackButton} accessibilityRole="button" accessibilityLabel="Câu trả lời hữu ích"><ThumbsUpIcon size={16} color={item.feedback === 1 ? theme.colors.brandPrimary : theme.colors.textSecondary} /></Pressable>
@@ -321,6 +470,7 @@ const styles = StyleSheet.create({
   errorBanner: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginTop: 10, padding: 10, borderRadius: 12, gap: 8 },
   errorText: { flex: 1 },
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10 },
+  loadMoreButton: { alignSelf: 'center', minHeight: 36, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 18, borderWidth: 1, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
   typingContainer: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 2 },
   typingLabel: { fontSize: 13 },
   messageList: { padding: 16, gap: 12, paddingBottom: 20 },
@@ -330,6 +480,11 @@ const styles = StyleSheet.create({
   messageBubble: { maxWidth: '84%', padding: 14, borderRadius: 18, gap: 7 },
   bubbleUser: { borderBottomRightRadius: 4 },
   bubbleAssistant: { borderBottomLeftRadius: 4, borderWidth: 1 },
+  allergenBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, borderWidth: 1 },
+  allergenBadgeText: { flex: 1 },
+  suggestedFoodsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 2 },
+  foodChip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 14, borderWidth: 1 },
+  foodChipText: { flexShrink: 1 },
   feedbackRow: { flexDirection: 'row', gap: 4, marginTop: 2 },
   feedbackButton: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   retryButton: { minHeight: 40, flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', borderWidth: 1, borderRadius: 20, paddingHorizontal: 12, gap: 6 },
