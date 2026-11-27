@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppText, useAlert } from '@/components/common';
-import { ChevronLeftIcon, CloseXIcon, MessageCircleIcon, PenLineIcon, RefreshCwIcon } from '@/components/icons';
+import { CheckIcon, ChevronLeftIcon, CloseXIcon, MessageCircleIcon, PenLineIcon, RefreshCwIcon } from '@/components/icons';
 import type { RootStackParamList } from '@/navigation/types';
 import { useTheme } from '@/theme';
 import { IS_DEMO_MODE } from '@/features/auth/localAccount';
@@ -17,6 +18,9 @@ export function ChatHistoryScreen({ navigation }: Props) {
   const { showConfirm } = useAlert();
   const [items, setItems] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(!IS_DEMO_MODE);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draftTitle, setDraftTitle] = useState('');
@@ -24,9 +28,12 @@ export function ChatHistoryScreen({ navigation }: Props) {
   const load = useCallback(async () => {
     if (IS_DEMO_MODE) return;
     setLoading(true);
+    setError(null);
     try {
-      const page = await getConversations();
-      setItems(page.items);
+      const result = await getConversations(0, 20);
+      setItems(result.items);
+      setPage(result.page);
+      setHasMore(result.page + 1 < result.totalPages);
     } catch {
       setError('Không tải được lịch sử trò chuyện.');
     } finally {
@@ -34,7 +41,30 @@ export function ChatHistoryScreen({ navigation }: Props) {
     }
   }, []);
 
-  useEffect(() => { void load(); }, [load]);
+  const loadMore = useCallback(async () => {
+    if (IS_DEMO_MODE || loading || loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const nextPage = page + 1;
+      const result = await getConversations(nextPage, 20);
+      setItems((current) => {
+        const seen = new Set(current.map((item) => item.id));
+        return [...current, ...result.items.filter((item) => !seen.has(item.id))];
+      });
+      setPage(result.page);
+      setHasMore(result.page + 1 < result.totalPages);
+    } catch {
+      setError('Không tải thêm được lịch sử trò chuyện.');
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [hasMore, loading, loadingMore, page]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void load();
+    }, [load])
+  );
 
   const saveTitle = async (conversation: Conversation) => {
     const title = draftTitle.trim();
@@ -86,6 +116,9 @@ export function ChatHistoryScreen({ navigation }: Props) {
       data={items}
       keyExtractor={(item) => item.id}
       contentContainerStyle={items.length ? styles.list : styles.emptyList}
+      onEndReached={() => void loadMore()}
+      onEndReachedThreshold={0.3}
+      ListFooterComponent={loadingMore ? <ActivityIndicator style={styles.footerLoader} color={theme.colors.brandPrimary} /> : null}
       ListEmptyComponent={<View style={styles.center}><MessageCircleIcon size={40} color={theme.colors.textDisabled} /><AppText variant="headlineSm">Chưa có cuộc trò chuyện</AppText><AppText variant="bodyMd" color={theme.colors.textSecondary} align="center">Các cuộc trò chuyện với Kallo sẽ xuất hiện ở đây.</AppText></View>}
       renderItem={({ item }) => <Pressable onPress={() => navigation.navigate('NutritionChat', { conversationId: item.id })} style={({ pressed }) => [styles.row, { backgroundColor: theme.colors.surfaceMid, borderColor: theme.colors.surfaceBorder }, pressed && styles.pressed]} accessibilityRole="button" accessibilityLabel={`Mở ${item.title || 'cuộc trò chuyện mới'}`}>
         <View style={[styles.avatar, { backgroundColor: 'transparent' }]}><MessageCircleIcon size={20} color={theme.colors.brandPrimary} /></View>
@@ -93,7 +126,7 @@ export function ChatHistoryScreen({ navigation }: Props) {
           {editingId === item.id ? <TextInput value={draftTitle} onChangeText={setDraftTitle} onSubmitEditing={() => void saveTitle(item)} autoFocus style={[styles.titleInput, { color: theme.colors.textPrimary, borderColor: theme.colors.brandPrimary }]} maxLength={120} accessibilityLabel="Tên cuộc trò chuyện" /> : <AppText variant="labelLg" numberOfLines={1}>{item.title || 'Cuộc trò chuyện mới'}</AppText>}
           <AppText variant="caption" color={theme.colors.textSecondary}>{item.messageCount} tin nhắn · {item.lastMessageAt ? new Date(item.lastMessageAt).toLocaleDateString('vi-VN') : 'Chưa có tin nhắn'}</AppText>
         </View>
-        <Pressable onPress={(event) => { event.stopPropagation(); if (editingId === item.id) void saveTitle(item); else { setEditingId(item.id); setDraftTitle(item.title || ''); } }} style={styles.actionButton} accessibilityRole="button" accessibilityLabel={editingId === item.id ? 'Lưu tên' : 'Đổi tên'}>{editingId === item.id ? <CloseXIcon size={18} color={theme.colors.brandPrimary} /> : <PenLineIcon size={18} color={theme.colors.textSecondary} />}</Pressable>
+        <Pressable onPress={(event) => { event.stopPropagation(); if (editingId === item.id) void saveTitle(item); else { setEditingId(item.id); setDraftTitle(item.title || ''); } }} style={styles.actionButton} accessibilityRole="button" accessibilityLabel={editingId === item.id ? 'Lưu tên' : 'Đổi tên'}>{editingId === item.id ? <CheckIcon size={18} color={theme.colors.brandPrimary} /> : <PenLineIcon size={18} color={theme.colors.textSecondary} />}</Pressable>
         <Pressable onPress={(event) => { event.stopPropagation(); remove(item); }} style={styles.actionButton} accessibilityRole="button" accessibilityLabel="Xóa cuộc trò chuyện"><CloseXIcon size={18} color={theme.colors.statusDanger} /></Pressable>
       </Pressable>}
     />}
@@ -114,5 +147,6 @@ const styles = StyleSheet.create({
   rowCopy: { flex: 1, gap: 4 },
   titleInput: { minHeight: 36, borderBottomWidth: 1, paddingVertical: 4 },
   actionButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  footerLoader: { paddingVertical: 12 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10 },
 });
