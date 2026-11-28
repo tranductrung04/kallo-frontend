@@ -28,7 +28,15 @@
       "expo-font",
       "expo-asset",
       "expo-status-bar",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
     ],
     "android": {
       "package": "com.kallo.mobile"
